@@ -6,6 +6,16 @@ import '../constants/api_constants.dart';
 import '../utils/download_helper.dart';
 import '../../models/user_model.dart';
 import '../../models/correspondence_model.dart';
+import 'app_events.dart';
+
+/// استثناء خاص عند انتهاء صلاحية الجلسة أو الرمز غير المصرح
+class UnauthorizedException implements Exception {
+  final String message;
+  UnauthorizedException([this.message = 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا']);
+
+  @override
+  String toString() => message;
+}
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -13,6 +23,7 @@ class ApiService {
   ApiService._internal();
 
   String? _token;
+  int _consecutive401Count = 0;
 
   Future<void> init() async {
     try {
@@ -25,6 +36,7 @@ class ApiService {
 
   Future<void> saveToken(String token) async {
     _token = token;
+    _consecutive401Count = 0;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('access_token', token);
@@ -35,6 +47,7 @@ class ApiService {
 
   Future<void> clearToken() async {
     _token = null;
+    _consecutive401Count = 0;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('access_token');
@@ -57,8 +70,43 @@ class ApiService {
   String? get token => _token;
   String get sseNotificationsUrl => '${ApiConstants.baseUrl}/notifications/stream';
 
+  /// نقطة مركزية لرصد استجابات 401 وإدارة انتهاء الجلسة
+  http.Response _inspectResponse(http.Response response) {
+    if (_token != null && _token!.isNotEmpty) {
+      if (response.statusCode == 401) {
+        _consecutive401Count++;
+        debugPrint('HTTP 401 encountered (consecutive count: $_consecutive401Count)');
+        if (_consecutive401Count >= 2) {
+          debugPrint('Session expired: 2 consecutive 401s detected. Triggering auto-logout.');
+          _consecutive401Count = 0;
+          clearToken();
+          AppEvents().triggerSessionExpired('انتهت الجلسة، يرجى تسجيل الدخول مجددًا');
+        }
+      } else {
+        _consecutive401Count = 0;
+      }
+    }
+    return response;
+  }
+
+  Future<http.Response> _get(Uri uri, {Map<String, String>? headers, Duration timeout = const Duration(seconds: 10)}) async {
+    final response = await http.get(uri, headers: headers ?? _headers).timeout(timeout);
+    return _inspectResponse(response);
+  }
+
+  Future<http.Response> _post(Uri uri, {Map<String, String>? headers, Object? body, Duration timeout = const Duration(seconds: 10)}) async {
+    final response = await http.post(uri, headers: headers ?? _headers, body: body).timeout(timeout);
+    return _inspectResponse(response);
+  }
+
+  Future<http.Response> _patch(Uri uri, {Map<String, String>? headers, Object? body, Duration timeout = const Duration(seconds: 10)}) async {
+    final response = await http.patch(uri, headers: headers ?? _headers, body: body).timeout(timeout);
+    return _inspectResponse(response);
+  }
+
   // --- Auth ---
   Future<Map<String, dynamic>> login(String email, String password) async {
+    _consecutive401Count = 0;
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.login),
@@ -85,18 +133,23 @@ class ApiService {
     }
   }
 
-  Future<User?> getMe() async {
+  Future<User?> getMe({Duration timeout = const Duration(seconds: 10)}) async {
     if (_token == null) return null;
     try {
-      final response = await http.get(Uri.parse(ApiConstants.me), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse(ApiConstants.me), timeout: timeout);
       if (response.statusCode == 200) {
         return User.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      } else {
+        throw Exception('فشل في استرداد بيانات المستخدم (${response.statusCode})');
       }
+    } on UnauthorizedException {
+      rethrow;
     } catch (e) {
       debugPrint('getMe exception: $e');
+      rethrow;
     }
-    return null;
   }
 
   // --- Correspondences ---
@@ -119,7 +172,7 @@ class ApiService {
       if (search != null && search.isNotEmpty) queryParams['q'] = search;
 
       final uri = Uri.parse(ApiConstants.correspondences).replace(queryParameters: queryParams);
-      final response = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 8));
+      final response = await _get(uri, timeout: const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -165,8 +218,7 @@ class ApiService {
 
   Future<Correspondence?> getCorrespondenceById(String id) async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.correspondences}/$id'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.correspondences}/$id'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         return Correspondence.fromJson(jsonDecode(response.body));
       }
@@ -176,11 +228,17 @@ class ApiService {
     return null;
   }
 
-  String _extractErrorMessage(dynamic body, [String fallback = 'حدث خطأ في الخادم']) {
+  String _extractErrorMessage(dynamic body, [String fallback = 'حدث خطأ في الخادم', int? statusCode]) {
+    if (statusCode == 401) {
+      return 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا';
+    }
     if (body == null) return fallback;
     try {
       final decoded = body is String ? jsonDecode(body) : body;
       if (decoded is Map) {
+        if (decoded['statusCode'] == 401 || decoded['message'] == 'Unauthorized') {
+          return 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا';
+        }
         final msg = decoded['message'];
         if (msg is List) {
           return msg.map((m) => m.toString()).join('، ');
@@ -218,16 +276,15 @@ class ApiService {
         payload['body'] = body.trim();
       }
 
-      final response = await http.post(
+      final response = await _post(
         Uri.parse(ApiConstants.incomingCorrespondences),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تسجيل المراسلة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تسجيل المراسلة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('createIncoming exception: $e');
@@ -247,16 +304,15 @@ class ApiService {
         'priority': priority,
       };
 
-      final response = await http.post(
+      final response = await _post(
         Uri.parse(ApiConstants.internalCorrespondences),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الخطاب الداخلي')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الخطاب الداخلي', response.statusCode)};
       }
     } catch (e) {
       debugPrint('createInternal exception: $e');
@@ -282,16 +338,15 @@ class ApiService {
         payload['dueDate'] = dueDate.trim();
       }
 
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.correspondences}/$correspondenceId/referrals'),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إجراء الإحالة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إجراء الإحالة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('referCorrespondence exception: $e');
@@ -318,16 +373,15 @@ class ApiService {
         payload['dueDate'] = dueDate.trim();
       }
 
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.correspondences}/$correspondenceId/tasks'),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إسناد المهمة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إسناد المهمة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('createTask exception: $e');
@@ -345,16 +399,15 @@ class ApiService {
       if (completionNote != null && completionNote.trim().isNotEmpty) {
         payload['completionNote'] = completionNote.trim();
       }
-      final response = await http.patch(
+      final response = await _patch(
         Uri.parse('${ApiConstants.baseUrl}/tasks/$taskId/status'),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المهمة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المهمة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('updateTaskStatus exception: $e');
@@ -364,16 +417,15 @@ class ApiService {
 
   Future<Map<String, dynamic>> updateCorrespondenceStatus(String correspondenceId, String status) async {
     try {
-      final response = await http.patch(
+      final response = await _patch(
         Uri.parse('${ApiConstants.correspondences}/$correspondenceId'),
-        headers: _headers,
         body: jsonEncode({'status': status}),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المراسلة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المراسلة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('updateCorrespondenceStatus exception: $e');
@@ -383,15 +435,14 @@ class ApiService {
 
   Future<Map<String, dynamic>> closeCorrespondence(String id) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.correspondences}/$id/close'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إغلاق المراسلة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إغلاق المراسلة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('closeCorrespondence exception: $e');
@@ -401,15 +452,14 @@ class ApiService {
 
   Future<Map<String, dynamic>> archiveCorrespondence(String id) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.correspondences}/$id/archive'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل أرشفة المراسلة')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل أرشفة المراسلة', response.statusCode)};
       }
     } catch (e) {
       debugPrint('archiveCorrespondence exception: $e');
@@ -420,19 +470,18 @@ class ApiService {
   // --- Replies ---
   Future<Map<String, dynamic>> createReply(String correspondenceId, String content) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies'),
-        headers: _headers,
         body: jsonEncode({
           'correspondenceId': correspondenceId,
           'body': content,
         }),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الرد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الرد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('createReply exception: $e');
@@ -442,18 +491,17 @@ class ApiService {
 
   Future<Map<String, dynamic>> updateReply(String replyId, String content) async {
     try {
-      final response = await http.patch(
+      final response = await _patch(
         Uri.parse('${ApiConstants.baseUrl}/replies/$replyId'),
-        headers: _headers,
         body: jsonEncode({
           'body': content,
         }),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث الرد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث الرد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('updateReply exception: $e');
@@ -475,17 +523,17 @@ class ApiService {
         payload['attachmentIds'] = attachmentIds;
       }
 
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies/direct'),
-        headers: _headers,
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 15));
+        timeout: const Duration(seconds: 15),
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return {'success': true, 'data': data};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('sendDirectReply exception: $e');
@@ -495,15 +543,14 @@ class ApiService {
 
   Future<Map<String, dynamic>> submitReply(String replyId) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/submit'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفع الرد للاعتماد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفع الرد للاعتماد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('submitReply exception: $e');
@@ -513,15 +560,14 @@ class ApiService {
 
   Future<Map<String, dynamic>> approveReply(String replyId) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/approve'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل اعتماد الرد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل اعتماد الرد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('approveReply exception: $e');
@@ -531,16 +577,15 @@ class ApiService {
 
   Future<Map<String, dynamic>> rejectReply(String replyId, String note) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/reject'),
-        headers: _headers,
         body: jsonEncode({'note': note}),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفض الرد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفض الرد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('rejectReply exception: $e');
@@ -550,15 +595,15 @@ class ApiService {
 
   Future<Map<String, dynamic>> sendReply(String replyId) async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/send'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 15));
+        timeout: const Duration(seconds: 15),
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد بالبريد')};
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد بالبريد', response.statusCode)};
       }
     } catch (e) {
       debugPrint('sendReply exception: $e');
@@ -569,8 +614,7 @@ class ApiService {
   // --- System Metadata ---
   Future<List<Department>> getDepartments() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.departments}?limit=100'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.departments}?limit=100'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
@@ -584,8 +628,7 @@ class ApiService {
 
   Future<List<User>> getUsers() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.users}?limit=100'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.users}?limit=100'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
@@ -599,8 +642,7 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> getAuditLogs() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.audit}?limit=100'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.audit}?limit=100'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
@@ -615,10 +657,10 @@ class ApiService {
   // --- Mail Sync ---
   Future<Map<String, dynamic>> syncMail() async {
     try {
-      final response = await http.post(
+      final response = await _post(
         Uri.parse('${ApiConstants.baseUrl}/mail/sync'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 30));
+        timeout: const Duration(seconds: 30),
+      );
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       }
@@ -631,8 +673,7 @@ class ApiService {
   // --- Tasks & Referrals ---
   Future<List<TaskItem>> getMyTasks() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.baseUrl}/tasks/my?limit=100'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/tasks/my?limit=100'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
@@ -646,8 +687,7 @@ class ApiService {
 
   Future<List<ReferralItem>> getMyReferrals() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConstants.referrals}?limit=100'), headers: _headers)
-          .timeout(const Duration(seconds: 5));
+      final response = await _get(Uri.parse('${ApiConstants.referrals}?limit=100'), timeout: const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
@@ -663,10 +703,10 @@ class ApiService {
   Future<List<Map<String, dynamic>>> getMyNotifications({bool unreadOnly = false}) async {
     try {
       final query = unreadOnly ? '?unreadOnly=true&limit=20' : '?limit=20';
-      final response = await http.get(
+      final response = await _get(
         Uri.parse('${ApiConstants.baseUrl}/notifications/my$query'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 5));
+        timeout: const Duration(seconds: 5),
+      );
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -681,10 +721,10 @@ class ApiService {
 
   Future<int> getUnreadNotificationsCount() async {
     try {
-      final response = await http.get(
+      final response = await _get(
         Uri.parse('${ApiConstants.baseUrl}/notifications/unread-count'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 5));
+        timeout: const Duration(seconds: 5),
+      );
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -698,10 +738,10 @@ class ApiService {
 
   Future<bool> markNotificationAsRead(String id) async {
     try {
-      final response = await http.patch(
+      final response = await _patch(
         Uri.parse('${ApiConstants.baseUrl}/notifications/$id/read'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 5));
+        timeout: const Duration(seconds: 5),
+      );
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('markNotificationAsRead exception: $e');
@@ -711,10 +751,10 @@ class ApiService {
 
   Future<bool> markAllNotificationsAsRead() async {
     try {
-      final response = await http.patch(
+      final response = await _patch(
         Uri.parse('${ApiConstants.baseUrl}/notifications/read-all'),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 5));
+        timeout: const Duration(seconds: 5),
+      );
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('markAllNotificationsAsRead exception: $e');
@@ -743,14 +783,14 @@ class ApiService {
       );
 
       final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
-      final response = await http.Response.fromStream(streamedResponse);
+      final response = _inspectResponse(await http.Response.fromStream(streamedResponse));
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         return {
           'success': false,
-          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق'),
+          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق', response.statusCode),
         };
       }
     } catch (e) {
@@ -779,14 +819,14 @@ class ApiService {
       );
 
       final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
-      final response = await http.Response.fromStream(streamedResponse);
+      final response = _inspectResponse(await http.Response.fromStream(streamedResponse));
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         return {
           'success': false,
-          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق'),
+          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق', response.statusCode),
         };
       }
     } catch (e) {
@@ -803,7 +843,7 @@ class ApiService {
         headers['Authorization'] = 'Bearer $_token';
       }
 
-      final response = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
+      final response = await _get(uri, headers: headers, timeout: const Duration(seconds: 30));
       if (response.statusCode == 200) {
         await saveAndDownloadFile(response.bodyBytes, fileName);
         return true;
