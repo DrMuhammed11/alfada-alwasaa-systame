@@ -24,6 +24,11 @@ import { NotificationsService } from '../notifications/notifications.service';
 import type { AuthUser } from '../common/types';
 import { DirectReplyDto } from './dto';
 import { USER_BRIEF, REPLY_INCLUDE, ReplyRow } from './replies.constants';
+import {
+  CorrespondenceAction,
+  assertTransition,
+} from '../workflow/correspondence-state-machine';
+import { canSendReply } from '../security/business-policies';
 
 @Injectable()
 export class RepliesSendService {
@@ -67,27 +72,19 @@ export class RepliesSendService {
             approvedAt: new Date(),
           },
         });
-      } else {
-        throw new BadRequestException('لا يمكن إرسال رد غير معتمد');
+        reply.status = ReplyStatus.APPROVED;
       }
     }
-    if (reply.sentAt) {
-      throw new BadRequestException('تم إرسال هذا الرد مسبقًا');
+
+    const policy = canSendReply(user, reply, reply.correspondence);
+    if (!policy.allowed) {
+      throw new BadRequestException(policy.reason);
     }
     const corr = reply.correspondence;
     const rootCorr = corr.parentId
       ? ((await this.prisma.correspondence.findUnique({ where: { id: corr.parentId } })) ?? corr)
       : corr;
     const rootRefNumber = rootCorr.refNumber;
-
-    if (corr.type !== CorrespondenceType.INCOMING) {
-      throw new BadRequestException('الإرسال متاح للردود على المراسلات الواردة');
-    }
-    if (!corr.senderEmail) {
-      throw new BadRequestException(
-        'لا يوجد بريد إلكتروني للمرسل — حدّث بيانات المراسلة أولًا',
-      );
-    }
 
     const replyAttachments = await this.prisma.attachment.findMany({
       where: { replyId: reply.id },
@@ -179,7 +176,15 @@ export class RepliesSendService {
 
       await tx.correspondence.update({
         where: { id: corr.id },
-        data: { status: CorrespondenceStatus.SENT, sentAt: now },
+        data: {
+          status: corr?.status
+            ? assertTransition(
+                corr.status,
+                CorrespondenceAction.SEND_REPLY,
+              )
+            : CorrespondenceStatus.SENT,
+          sentAt: now,
+        },
       });
       if (reply.taskId) {
         await tx.task.update({

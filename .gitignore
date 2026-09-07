@@ -3,5 +3,6 @@
 
 # ملفات النظام والتسجيل المؤقتة
 *.log
+*.zip
 .DS_Store
 Thumbs.db

@@ -12,6 +12,12 @@ import type { AuthUser, Paginated } from '../common/types';
 import { buildPageMeta } from '../common/types';
 import { CreateReferralDto, MyReferralsQueryDto } from './dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  CorrespondenceAction,
+  assertTransition,
+  getNextStatus,
+} from '../workflow/correspondence-state-machine';
+import { canRefer } from '../security/business-policies';
 
 const USER_BRIEF = { id: true, name: true, email: true } as const;
 
@@ -50,62 +56,15 @@ export class ReferralsService {
       throw new ForbiddenException('ليست لديك صلاحية الاطلاع على هذه المراسلة');
     }
 
-    const referable: CorrespondenceStatus[] = [
-      CorrespondenceStatus.RECEIVED,
-      CorrespondenceStatus.UNDER_REVIEW,
-      CorrespondenceStatus.REFERRED,
-    ];
-    if (!referable.includes(corr.status)) {
-      throw new BadRequestException(
-        `لا يمكن إحالة مراسلة في حالة «${corr.status}»`,
-      );
-    }
+    assertTransition(corr.status, CorrespondenceAction.REFER);
 
     const toUser = await this.prisma.user.findUnique({
       where: { id: dto.toUserId },
     });
-    if (!toUser || !toUser.isActive) {
-      throw new BadRequestException('المستخدم المحال إليه غير متوفر');
-    }
-    if (toUser.id === user.id) {
-      throw new BadRequestException('لا يمكن إحالة المراسلة إلى نفسك');
-    }
 
-    // مصفوفة الصلاحيات المعتمدة للإحالة:
-    //  - المدير العام: يحيل إلى النائب أو مديري الأقسام
-    //  - نائب المدير: يحيل إلى مديري الأقسام
-    //  - مدير القسم: يحيل داخل قسمه فقط (إلى موظفي قسمه)
-    const allowedTargets: Role[] =
-      user.role === Role.GM
-        ? [Role.DEPUTY_GM, Role.DEPT_MANAGER]
-        : user.role === Role.DEPUTY_GM
-          ? [Role.DEPT_MANAGER]
-          : user.role === Role.DEPT_MANAGER
-            ? [Role.EMPLOYEE]
-            : [];
-
-    const roleLabels: Record<Role, string> = {
-      GM: 'المدير العام',
-      DEPUTY_GM: 'نائب المدير العام',
-      DEPT_MANAGER: 'مدير قسم',
-      EMPLOYEE: 'موظف',
-      ADMIN: 'مدير النظام',
-    };
-
-    if (!allowedTargets.includes(toUser.role)) {
-      const allowedNames = allowedTargets.map((r) => roleLabels[r] ?? r).join(' / ');
-      throw new BadRequestException(
-        allowedTargets.length > 0
-          ? `بصفتك (${roleLabels[user.role as Role] ?? user.role})، الإحالة مسموحة فقط إلى: ${allowedNames}`
-          : 'ليس لديك صلاحية إحالة المراسلات',
-      );
-    }
-
-    // لمدير القسم: فحص أن الموظف المحال إليه ينتمي إلى نفس قسمه
-    if (user.role === Role.DEPT_MANAGER) {
-      if (!user.departmentId || toUser.departmentId !== user.departmentId) {
-        throw new BadRequestException('بصفتك مدير قسم يمكنك الإحالة لموظفي قسمك فقط');
-      }
+    const policy = canRefer(user, toUser, corr);
+    if (!policy.allowed) {
+      throw new BadRequestException(policy.reason);
     }
 
     const referral = await this.prisma.$transaction(async (tx) => {
@@ -113,7 +72,7 @@ export class ReferralsService {
         data: {
           correspondenceId,
           fromUserId: user.id,
-          toUserId: toUser.id,
+          toUserId: toUser!.id,
           note: dto.note,
           dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
         },
@@ -122,12 +81,12 @@ export class ReferralsService {
       await tx.correspondence.update({
         where: { id: correspondenceId },
         data: {
-          status: CorrespondenceStatus.REFERRED,
+          status: getNextStatus(corr.status, CorrespondenceAction.REFER) ?? CorrespondenceStatus.REFERRED,
           departmentId:
             user.role === Role.DEPT_MANAGER
               ? corr.departmentId // عند إحالة مدير القسم لا نغير قسم المراسلة (هو قسمه أصلاً)
-              : toUser.role === Role.DEPT_MANAGER && toUser.departmentId
-                ? toUser.departmentId
+              : toUser!.role === Role.DEPT_MANAGER && toUser!.departmentId
+                ? toUser!.departmentId
                 : corr.departmentId,
         },
       });
@@ -138,13 +97,13 @@ export class ReferralsService {
       action: AuditAction.REFER,
       entityType: 'Correspondence',
       entityId: correspondenceId,
-      summary: `أحال ${user.name} المراسلة ${corr.refNumber} إلى ${toUser.name}`,
-      metadata: { toUserId: toUser.id, note: dto.note ?? null },
+      summary: `أحال ${user.name} المراسلة ${corr.refNumber} إلى ${toUser!.name}`,
+      metadata: { toUserId: toUser!.id, note: dto.note ?? null },
     });
 
     // إشعار الجهة المحال إليها فورًا
     await this.notifications.notifyReferralReceived({
-      toUserId: toUser.id,
+      toUserId: toUser!.id,
       actorName: user.name,
       refNumber: corr.refNumber,
       subject: corr.subject,

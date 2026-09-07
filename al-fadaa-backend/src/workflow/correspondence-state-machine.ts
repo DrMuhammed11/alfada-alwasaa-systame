@@ -191,6 +191,9 @@ export function assertTransition(
 ): CorrespondenceStatus {
   const nextStatus = getNextStatus(current, action);
   if (!nextStatus) {
+    if (action === CorrespondenceAction.REFER) {
+      throw new BadRequestException(`لا يمكن إحالة مراسلة في حالة «${current}»`);
+    }
     const actionLabel = CORRESPONDENCE_ACTION_LABELS[action] ?? action;
     throw new BadRequestException(
       `لا يمكن ${actionLabel} على مراسلة في حالة «${current}»`,

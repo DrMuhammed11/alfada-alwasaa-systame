@@ -136,7 +136,7 @@ describe('CorrespondenceStateMachine', () => {
 
       expect(() =>
         assertTransition(CorrespondenceStatus.ARCHIVED, CorrespondenceAction.REFER),
-      ).toThrow('لا يمكن إحالة المراسلة على مراسلة في حالة «ARCHIVED»');
+      ).toThrow('لا يمكن إحالة مراسلة في حالة «ARCHIVED»');
     });
 
     it('يمنع إرسال رد على مراسلة لا تزال قيد الدراسة', () => {

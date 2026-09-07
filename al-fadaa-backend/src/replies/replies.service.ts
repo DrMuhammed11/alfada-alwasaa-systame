@@ -19,6 +19,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
 import { RefNumberService } from '../correspondences/ref-number.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  CorrespondenceAction,
+  assertTransition,
+  getNextStatus,
+} from '../workflow/correspondence-state-machine';
 import type { AuthUser, Paginated } from '../common/types';
 import { buildPageMeta } from '../common/types';
 import {
@@ -76,18 +81,7 @@ export class RepliesService {
     });
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
 
-    const draftable: CorrespondenceStatus[] = [
-      CorrespondenceStatus.RECEIVED,
-      CorrespondenceStatus.REFERRED,
-      CorrespondenceStatus.IN_PROGRESS,
-      CorrespondenceStatus.PENDING_APPROVAL,
-      CorrespondenceStatus.SENT,
-    ];
-    if (!draftable.includes(corr.status)) {
-      throw new BadRequestException(
-        `لا يمكن إعداد رد على مراسلة في حالة «${corr.status}»`,
-      );
-    }
+    assertTransition(corr.status, CorrespondenceAction.START_DRAFT);
 
     let taskId: string | null = dto.taskId ?? null;
     if (taskId) {
@@ -112,10 +106,13 @@ export class RepliesService {
 
     // أول مسودة → المراسلة تدخل مرحلة «جاري إعداد الرد»
     if (corr.status === CorrespondenceStatus.REFERRED) {
-      await this.prisma.correspondence.update({
-        where: { id: corr.id },
-        data: { status: CorrespondenceStatus.IN_PROGRESS },
-      });
+      const nextStatus = getNextStatus(corr.status, CorrespondenceAction.START_DRAFT);
+      if (nextStatus) {
+        await this.prisma.correspondence.update({
+          where: { id: corr.id },
+          data: { status: nextStatus },
+        });
+      }
     }
 
     await this.audit.log({

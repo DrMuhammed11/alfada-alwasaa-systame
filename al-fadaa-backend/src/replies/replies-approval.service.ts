@@ -18,6 +18,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { AuthUser } from '../common/types';
 import { RejectReplyDto } from './dto';
 import { REPLY_INCLUDE, ReplyRow } from './replies.constants';
+import {
+  CorrespondenceAction,
+  assertTransition,
+} from '../workflow/correspondence-state-machine';
+import { canApproveReply } from '../security/business-policies';
 
 @Injectable()
 export class RepliesApprovalService {
@@ -64,7 +69,14 @@ export class RepliesApprovalService {
       });
       await tx.correspondence.update({
         where: { id: r.correspondenceId },
-        data: { status: CorrespondenceStatus.PENDING_APPROVAL },
+        data: {
+          status: r.correspondence?.status
+            ? assertTransition(
+                r.correspondence.status,
+                CorrespondenceAction.SUBMIT_REPLY,
+              )
+            : CorrespondenceStatus.PENDING_APPROVAL,
+        },
       });
       if (r.taskId) {
         await tx.task.update({
@@ -151,7 +163,14 @@ export class RepliesApprovalService {
       });
       await tx.correspondence.update({
         where: { id: reply.correspondenceId },
-        data: { status: CorrespondenceStatus.APPROVED },
+        data: {
+          status: reply.correspondence?.status
+            ? assertTransition(
+                reply.correspondence.status,
+                CorrespondenceAction.APPROVE_REPLY,
+              )
+            : CorrespondenceStatus.APPROVED,
+        },
       });
       // الإحالات المفتوحة أصبحت مجابة
       await tx.referral.updateMany({
@@ -218,7 +237,14 @@ export class RepliesApprovalService {
       });
       await tx.correspondence.update({
         where: { id: reply.correspondenceId },
-        data: { status: CorrespondenceStatus.IN_PROGRESS },
+        data: {
+          status: reply.correspondence?.status
+            ? assertTransition(
+                reply.correspondence.status,
+                CorrespondenceAction.REJECT_REPLY,
+              )
+            : CorrespondenceStatus.IN_PROGRESS,
+        },
       });
       if (r.taskId) {
         await tx.task.update({
@@ -252,27 +278,28 @@ export class RepliesApprovalService {
 
   /** قواعد صلاحية المعتمد: ليس الكاتب (إلا للمدير ومسؤول النظام) + نطاق مدير القسم */
   private async assertApprover(
-    reply: ReplyRow & { correspondence: { id: string; departmentId: string | null; refNumber: string } },
+    reply: ReplyRow & { correspondence: { id: string; departmentId: string | null; refNumber: string; status: CorrespondenceStatus } },
     user: AuthUser,
   ): Promise<void> {
-    if (reply.status !== ReplyStatus.SUBMITTED) {
-      throw new BadRequestException('الرد غير مرفوع للاعتماد');
-    }
-    if (reply.authorId === user.id) {
-      throw new BadRequestException('لا يمكنك اعتماد أو رفض رد أعددته بنفسك');
-    }
-    if (user.role === Role.DEPT_MANAGER) {
-      const inMyDept =
-        !!user.departmentId && reply.correspondence.departmentId === user.departmentId;
-      const referredToMe =
-        (await this.prisma.referral.count({
+    const openReferrals = this.prisma.referral
+      ? await this.prisma.referral.findMany({
           where: { correspondenceId: reply.correspondence.id, toUserId: user.id },
-        })) > 0;
-      if (!inMyDept && !referredToMe) {
-        throw new ForbiddenException(
-          'يمكنك اعتماد ردود مراسلات قسمك أو المحالة إليك فقط',
-        );
+          select: { toUserId: true, fromUserId: true },
+        })
+      : [];
+
+    const policy = canApproveReply(
+      user,
+      reply,
+      reply.correspondence as any,
+      openReferrals,
+    );
+
+    if (!policy.allowed) {
+      if (policy.reason === 'يمكنك اعتماد ردود مراسلات قسمك أو المحالة إليك فقط') {
+        throw new ForbiddenException(policy.reason);
       }
+      throw new BadRequestException(policy.reason);
     }
   }
 }

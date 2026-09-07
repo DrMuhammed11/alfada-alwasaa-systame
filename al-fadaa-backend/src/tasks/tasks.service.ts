@@ -12,6 +12,7 @@ import { buildPageMeta } from '../common/types';
 import { CreateTaskDto, TasksQueryDto, UpdateTaskDto, UpdateTaskStatusDto } from './dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
+import { canAssignTask } from '../security/business-policies';
 
 const USER_BRIEF = { id: true, name: true, email: true } as const;
 
@@ -47,15 +48,13 @@ export class TasksService {
       throw new ForbiddenException('ليست لديك صلاحية الاطلاع على هذه المراسلة');
     }
 
-    if (corr.status === CorrespondenceStatus.CLOSED || corr.status === CorrespondenceStatus.ARCHIVED) {
-      throw new BadRequestException('لا يمكن إنشاء تكليف على مراسلة مغلقة أو مؤرشفة');
-    }
-
     const assignee = await this.prisma.user.findUnique({
       where: { id: dto.assignedToId },
     });
-    if (!assignee || !assignee.isActive) {
-      throw new BadRequestException('الموظف المكلَّف غير متوفر أو غير نشط');
+
+    const policy = canAssignTask(user, assignee, corr);
+    if (!policy.allowed) {
+      throw new BadRequestException(policy.reason);
     }
 
     if (dto.referralId) {
@@ -74,7 +73,7 @@ export class TasksService {
         title: dto.title.trim(),
         description: dto.description,
         assignedById: user.id,
-        assignedToId: assignee.id,
+        assignedToId: assignee!.id,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },
       include: TASK_INCLUDE,
@@ -84,17 +83,17 @@ export class TasksService {
       action: AuditAction.ASSIGN,
       entityType: 'Task',
       entityId: task.id,
-      summary: `تكليف ${assignee.name} بـ«${task.title}» على المراسلة ${corr.refNumber}`,
+      summary: `تكليف ${assignee!.name} بـ«${task.title}» على المراسلة ${corr.refNumber}`,
       metadata: {
         correspondenceId: corr.id,
         correspondenceRef: corr.refNumber,
-        assignee: assignee.email,
+        assignee: assignee!.email,
       },
     });
 
     // إشعار الموظف المكلّف فورًا
     await this.notifications.notifyTaskAssigned({
-      toUserId: assignee.id,
+      toUserId: assignee!.id,
       actorName: user.name,
       taskTitle: task.title,
       refNumber: corr.refNumber,

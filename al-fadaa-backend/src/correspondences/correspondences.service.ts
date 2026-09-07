@@ -24,6 +24,15 @@ import {
 import { RefNumberService } from './ref-number.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import {
+  CorrespondenceAction,
+  assertTransition,
+  getAllowedStatusesForAction,
+} from '../workflow/correspondence-state-machine';
+import {
+  canCloseCorrespondence,
+  canArchiveCorrespondence,
+} from '../security/business-policies';
+import {
   CorrespondenceDetailRow,
   CorrespondenceListRow,
   DETAIL_INCLUDE,
@@ -191,7 +200,7 @@ export class CorrespondencesService {
       dto.status === CorrespondenceStatus.UNDER_REVIEW &&
       corr.status === CorrespondenceStatus.RECEIVED
     ) {
-      data.status = CorrespondenceStatus.UNDER_REVIEW;
+      data.status = assertTransition(corr.status, CorrespondenceAction.REVIEW);
     }
 
     const updated = await this.prisma.correspondence.update({
@@ -215,11 +224,10 @@ export class CorrespondencesService {
     const corr = await this.prisma.correspondence.findUnique({ where: { id } });
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
 
-    const closable: CorrespondenceStatus[] = [
-      CorrespondenceStatus.RECEIVED,
-      CorrespondenceStatus.UNDER_REVIEW,
-      CorrespondenceStatus.SENT,
-    ];
+    const policy = canCloseCorrespondence(user, corr);
+    if (!policy.allowed) throw new BadRequestException(policy.reason);
+
+    const closable = getAllowedStatusesForAction(CorrespondenceAction.CLOSE);
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const res = await tx.correspondence.updateMany({
@@ -256,12 +264,10 @@ export class CorrespondencesService {
     const corr = await this.prisma.correspondence.findUnique({ where: { id } });
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
 
-    const archivable: CorrespondenceStatus[] = [
-      CorrespondenceStatus.RECEIVED,
-      CorrespondenceStatus.UNDER_REVIEW,
-      CorrespondenceStatus.SENT,
-      CorrespondenceStatus.CLOSED,
-    ];
+    const policy = canArchiveCorrespondence(user, corr);
+    if (!policy.allowed) throw new BadRequestException(policy.reason);
+
+    const archivable = getAllowedStatusesForAction(CorrespondenceAction.ARCHIVE);
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const res = await tx.correspondence.updateMany({
