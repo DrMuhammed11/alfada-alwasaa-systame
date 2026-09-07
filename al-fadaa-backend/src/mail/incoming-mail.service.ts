@@ -26,6 +26,14 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger('IncomingMail');
   private pollTimer: NodeJS.Timeout | null = null;
   private isPolling = false;
+  private pollPending = false;
+
+  /** اتصال IMAP IDLE المخصص للاستجابة اللحظية */
+  private idleClient: ImapFlow | null = null;
+  private idleReconnectTimer: NodeJS.Timeout | null = null;
+  private idleKeepAliveTimer: NodeJS.Timeout | null = null;
+  private isIdleConnecting = false;
+  private isDestroyed = false;
 
   /** كاش المستخدم النظامي — يُحمَّل مرة واحدة */
   private systemUserId: string | null = null;
@@ -69,10 +77,13 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     // تحميل المستخدم النظامي
     await this.loadSystemUser();
 
-    const interval = this.config.get<number>('IMAP_POLL_INTERVAL_MS') ?? 30000;
-    this.logger.log(`تم تفعيل محرك سحب البريد الآلي (IMAP Engine) — فحص كل ${interval / 1000} ثانية من ${user}`);
+    // تشغيل محرك IMAP IDLE Push للاستجابة اللحظية في غضون ثانية
+    await this.startIdleListener().catch(() => {});
 
-    // فحص دوري كل 30 ثانية
+    // مؤقت فحص دوري أمان (Watchdog) كل 60 ثانية كضمانة ثانوية في حال انقطاع Socket
+    const interval = this.config.get<number>('IMAP_POLL_INTERVAL_MS') ?? 60000;
+    this.logger.log(`تم تفعيل صمام الأمان الدوري (Watchdog) — فحص احتياطي كل ${interval / 1000} ثانية`);
+
     this.pollTimer = setInterval(() => {
       this.pollEmails().catch(() => {});
     }, interval);
@@ -84,10 +95,119 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
+    this.isDestroyed = true;
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
     }
+    this.cleanupIdleClient();
+  }
+
+  /**
+   * تشغيل اتصال IMAP IDLE Push للاستماع اللحظي للبريد الوارد
+   */
+  async startIdleListener(): Promise<void> {
+    if (this.isDestroyed || this.isIdleConnecting) return;
+    this.isIdleConnecting = true;
+
+    const host = this.config.get<string>('IMAP_HOST');
+    const port = this.config.get<number>('IMAP_PORT') ?? 993;
+    const user = this.config.get<string>('IMAP_USER');
+    const pass = this.config.get<string>('IMAP_PASS');
+
+    if (!host || !user || !pass) {
+      this.isIdleConnecting = false;
+      return;
+    }
+
+    try {
+      this.cleanupIdleClient();
+
+      this.idleClient = new ImapFlow({
+        host,
+        port,
+        secure: true,
+        auth: { user, pass },
+        tls: { rejectUnauthorized: false },
+        logger: false,
+        connectionTimeout: 20000,
+        socketTimeout: 30000,
+      });
+
+      this.idleClient.on('error', (err) => {
+        this.logger.warn(`تنبيه اتصال IMAP IDLE: ${(err as Error).message}`);
+      });
+
+      this.idleClient.on('close', () => {
+        if (!this.isDestroyed) {
+          this.logger.warn('انقطع اتصال IMAP IDLE — ستتم إعادة الاتصال تلقائياً خلال 15 ثانية');
+          this.scheduleIdleReconnect(15000);
+        }
+      });
+
+      // رصد فوري لوصول أي بريد جديد في غضون ثانية
+      this.idleClient.on('exists', (data) => {
+        this.logger.log(
+          `⚡ [IMAP IDLE Push] وصول بريد جديد فورياً (إجمالي الرسائل: ${data.count}) — مزامنة لحظية`,
+        );
+        if (this.isPolling) {
+          this.pollPending = true;
+          return;
+        }
+        this.pollEmails().catch((err) => {
+          this.logger.error(`خطأ أثناء معالجة دفع البريد الفوري: ${(err as Error).message}`);
+        });
+      });
+
+      await this.idleClient.connect();
+      await this.idleClient.mailboxOpen('INBOX', { readOnly: true });
+
+      this.logger.log('✅ تم تفعيل اتصال IMAP IDLE Push بنجاح — الاستجابة اللحظية نشطة');
+
+      // تجديد دوري لـ IDLE كل 15 دقيقة وفق RFC 2177
+      this.idleKeepAliveTimer = setInterval(() => {
+        if (this.idleClient && this.idleClient.usable) {
+          this.idleClient.noop().catch(() => {});
+        }
+      }, 15 * 60 * 1000);
+    } catch (err) {
+      this.logger.warn(
+        `تعذّر بدء اتصال IMAP IDLE Push (${(err as Error).message}) — سيعتمد النظام على الفحص الدوري ويُعاود محاولة IDLE بعد 30 ثانية`,
+      );
+      this.scheduleIdleReconnect(30000);
+    } finally {
+      this.isIdleConnecting = false;
+    }
+  }
+
+  private scheduleIdleReconnect(delayMs = 15000): void {
+    if (this.idleReconnectTimer || this.isDestroyed) return;
+    this.idleReconnectTimer = setTimeout(() => {
+      this.idleReconnectTimer = null;
+      this.startIdleListener().catch(() => {});
+    }, delayMs);
+  }
+
+  private cleanupIdleClient(): void {
+    if (this.idleKeepAliveTimer) {
+      clearInterval(this.idleKeepAliveTimer);
+      this.idleKeepAliveTimer = null;
+    }
+    if (this.idleReconnectTimer) {
+      clearTimeout(this.idleReconnectTimer);
+      this.idleReconnectTimer = null;
+    }
+    if (this.idleClient) {
+      try {
+        this.idleClient.close();
+      } catch {}
+      this.idleClient = null;
+    }
+  }
+
+  /** التحقق من حالة اتصال IDLE (للمراقبة) */
+  get isIdleActive(): boolean {
+    return !!(this.idleClient && this.idleClient.usable);
   }
 
   /** تحميل المستخدم النظامي مع كاش */
@@ -114,7 +234,10 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
    * فحص صندوق الوارد وسحب الرسائل الجديدة باستخدام علامة الماء (أعلى UID معالج)
    */
   async pollEmails(): Promise<void> {
-    if (this.isPolling) return;
+    if (this.isPolling) {
+      this.pollPending = true;
+      return;
+    }
     this.isPolling = true;
 
     const host = this.config.get<string>('IMAP_HOST');
@@ -432,6 +555,10 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
         await client.logout();
       } catch {}
       this.isPolling = false;
+      if (this.pollPending) {
+        this.pollPending = false;
+        this.pollEmails().catch(() => {});
+      }
     }
   }
 
