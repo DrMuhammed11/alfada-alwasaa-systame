@@ -71,10 +71,10 @@ class _DashboardScreenState extends State<DashboardScreen>
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             final isWide = width >= 860;
-            final sidebarWidth = _vm.isSidebarCollapsed ? 68.0 : 240.0;
-            // توازن عرض الأعمدة: توسيع قائمة المحادثات لإنهاء التكدس وتوازن المساحة مع لوحة التفاصيل
+            final sidebarWidth = _vm.isSidebarCollapsed ? 68.0 : 250.0;
+            // توازن هندسي محكم للأعمدة الثلاثية: توزيع مدروس للمساحات يمنع انضغاط القائمة ويوازن الشاشة
             final listWidth = isWide
-                ? (width >= 1400 ? 440.0 : (width >= 1100 ? 400.0 : 360.0))
+                ? (width >= 1600 ? 500.0 : (width >= 1350 ? 460.0 : (width >= 1100 ? 420.0 : 380.0)))
                 : width - sidebarWidth;
 
             return Scaffold(

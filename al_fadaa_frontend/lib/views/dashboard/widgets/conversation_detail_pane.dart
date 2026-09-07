@@ -74,17 +74,50 @@ class ConversationDetailPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (selectedItem == null) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.drafts_outlined, size: 56, color: Color(0xFFCBD5E1)),
-            SizedBox(height: 12),
-            Text(
-              'اختر محادثة من القائمة لاستعراضها والرد عليها',
-              style: TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-          ],
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
+          constraints: const BoxConstraints(maxWidth: 480),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(8),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Icon(Icons.mark_email_read_outlined, size: 32, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'اختر مراسلة لاستعراض تفاصيلها والرد عليها',
+                style: TextStyle(color: Color(0xFF0F172A), fontSize: 15, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'يمكنك إدارة سلسلة المحادثة، مراجعة واعتماد مسودات الردود، تكليف القطاعات، ومتابعة سجل التدقيق الموثق.',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 12, height: 1.5),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
