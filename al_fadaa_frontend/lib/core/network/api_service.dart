@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../utils/download_helper.dart';
@@ -763,6 +764,37 @@ class ApiService {
   }
 
   // --- Attachments ---
+  static MediaType _lookupMediaType(String filename) {
+    final ext = filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
+    switch (ext) {
+      case 'pdf':
+        return MediaType('application', 'pdf');
+      case 'jpg':
+      case 'jpeg':
+        return MediaType('image', 'jpeg');
+      case 'png':
+        return MediaType('image', 'png');
+      case 'gif':
+        return MediaType('image', 'gif');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'doc':
+        return MediaType('application', 'msword');
+      case 'docx':
+        return MediaType('application', 'vnd.openxmlformats-officedocument.wordprocessingml.document');
+      case 'xls':
+        return MediaType('application', 'vnd.ms-excel');
+      case 'xlsx':
+        return MediaType('application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      case 'zip':
+        return MediaType('application', 'zip');
+      case 'txt':
+        return MediaType('text', 'plain');
+      default:
+        return MediaType('application', 'octet-stream');
+    }
+  }
+
   Future<Map<String, dynamic>> uploadCorrespondenceAttachment(
     String correspondenceId,
     Uint8List bytes,
@@ -779,6 +811,7 @@ class ApiService {
           'file',
           bytes,
           filename: filename,
+          contentType: _lookupMediaType(filename),
         ),
       );
 
@@ -815,6 +848,7 @@ class ApiService {
           'file',
           bytes,
           filename: filename,
+          contentType: _lookupMediaType(filename),
         ),
       );
 

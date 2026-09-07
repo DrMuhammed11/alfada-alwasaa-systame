@@ -70,23 +70,29 @@ class ConversationTimeline extends StatelessWidget {
           : 'لا يوجد نص مرفق مع الرسالة',
       'badge': item.type == 'INCOMING' ? 'رسالة العميل (وارد أساسي)' : 'خطاب رسمي أصلي',
       'badgeColor': item.type == 'INCOMING' ? const Color(0xFF0284C7) : const Color(0xFF10B981),
-      'attachments': item.attachments,
+      'attachments': item.attachments.where((a) => a.replyId == null).toList(),
     });
 
     // ب) الرسائل الفرعية التابعة لنفس الموضوع (رسائل بريد تابعة واردة من العميل)
     for (final child in item.children) {
+      // إذا كانت المراسلة الفرعية ناتجة عن رد مرسل، فهي ممثلة بالفعل ضمن replies
+      if (child.sourceReplyId != null) continue;
+
+      final isChildClient = child.type == 'INCOMING';
       messages.add({
         'id': child.id,
         'isRoot': false,
-        'isClient': true,
-        'type': 'CHILD_EMAIL',
-        'senderName': item.senderName ?? 'العميل (رد إضافي)',
-        'senderEmail': item.senderEmail,
+        'isClient': isChildClient,
+        'type': isChildClient ? 'CHILD_EMAIL' : child.type,
+        'senderName': (child.senderName != null && child.senderName!.trim().isNotEmpty)
+            ? child.senderName!
+            : (item.senderName ?? 'العميل (رد إضافي)'),
+        'senderEmail': child.senderEmail ?? item.senderEmail,
         'date': child.createdAt,
         'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : 'لا يوجد نص',
-        'badge': 'رسالة إضافية من العميل',
-        'badgeColor': const Color(0xFF0284C7),
-        'attachments': <AttachmentItem>[],
+        'badge': isChildClient ? 'رسالة إضافية من العميل' : 'رسالة فرعية تابعة',
+        'badgeColor': isChildClient ? const Color(0xFF0284C7) : const Color(0xFF059669),
+        'attachments': child.attachments,
       });
     }
 

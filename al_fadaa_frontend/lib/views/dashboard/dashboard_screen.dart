@@ -502,6 +502,16 @@ class _DashboardScreenState extends State<DashboardScreen>
         );
         if (upRes['success'] == true && upRes['data'] != null && upRes['data']['id'] != null) {
           attachmentIds = [upRes['data']['id'] as String];
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(upRes['message'] ?? 'فشل رفع المرفق، لم يتم إرسال الرد'),
+                backgroundColor: const Color(0xFFDC2626),
+              ),
+            );
+          }
+          return;
         }
       }
 

@@ -337,7 +337,7 @@ export class RepliesSendService {
       for (const att of directAttachments) {
         await tx.attachment.update({
           where: { id: att.id },
-          data: { replyId: reply.id },
+          data: { replyId: reply.id, correspondenceId: null },
         });
         await tx.attachment.create({
           data: {

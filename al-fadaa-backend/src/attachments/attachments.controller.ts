@@ -59,6 +59,24 @@ const UPLOAD_OPTIONS = {
       'application/zip',
       'text/plain',
     ];
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mimeByExt: Record<string, string> = {
+      '.pdf': 'application/pdf',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.doc': 'application/msword',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.xls': 'application/vnd.ms-excel',
+      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.zip': 'application/zip',
+      '.txt': 'text/plain',
+    };
+    if (file.mimetype === 'application/octet-stream' && mimeByExt[ext]) {
+      file.mimetype = mimeByExt[ext];
+    }
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
