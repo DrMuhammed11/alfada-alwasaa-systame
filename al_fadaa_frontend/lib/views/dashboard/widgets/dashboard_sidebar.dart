@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/page_transitions.dart';
 import '../../../models/user_model.dart';
 import '../../admin/audit_screen.dart';
+import '../../admin/executive_reports_screen.dart';
 import '../../correspondences/create_incoming_dialog.dart';
 import '../../correspondences/create_internal_dialog.dart';
 import '../../notifications/notifications_bell.dart';
@@ -17,6 +18,7 @@ class DashboardSidebar extends StatelessWidget {
   final int incomingCount;
   final int internalCount;
   final int outgoingCount;
+  final int myTasksCount;
   final bool isSyncing;
   final AnimationController syncIconController;
   final VoidCallback onToggleCollapse;
@@ -36,6 +38,7 @@ class DashboardSidebar extends StatelessWidget {
     required this.incomingCount,
     required this.internalCount,
     required this.outgoingCount,
+    this.myTasksCount = 0,
     required this.isSyncing,
     required this.syncIconController,
     required this.onToggleCollapse,
@@ -238,6 +241,13 @@ class DashboardSidebar extends StatelessWidget {
                   isSelected: selectedNav == 'OUTGOING',
                   onTap: () => onSelectNav('OUTGOING'),
                 ),
+                _buildTile(
+                  title: 'مهام قطاعي',
+                  icon: Icons.assignment_turned_in_rounded,
+                  count: myTasksCount > 0 ? myTasksCount : null,
+                  isSelected: selectedNav == 'MY_TASKS',
+                  onTap: () => onSelectNav('MY_TASKS'),
+                ),
 
                 if (isAdminOrGM) ...[
                   const SizedBox(height: 12),
@@ -249,6 +259,15 @@ class DashboardSidebar extends StatelessWidget {
                         style: TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
+                  _buildTile(
+                    title: 'التقارير ومؤشرات الأداء',
+                    icon: Icons.analytics_rounded,
+                    isSelected: false,
+                    onTap: () => Navigator.push(
+                      context,
+                      EnterprisePageRoute(page: ExecutiveReportsScreen(currentUser: user)),
+                    ),
+                  ),
                   _buildTile(
                     title: 'سجل التدقيق والأمان',
                     icon: Icons.security_rounded,

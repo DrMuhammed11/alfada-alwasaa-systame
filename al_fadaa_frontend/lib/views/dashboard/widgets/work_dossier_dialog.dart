@@ -408,18 +408,26 @@ class WorkDossierDialog extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (isDone ? const Color(0xFF16A34A) : const Color(0xFFD97706)).withAlpha(20),
+                  color: task.slaBgColor,
                   borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: task.slaColor.withAlpha(80)),
                 ),
-                child: Text(
-                  isDone ? 'تم الإنجاز بنجاح ✅' : 'قيد التنفيذ لدى القطاع',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.bold,
-                    color: isDone ? const Color(0xFF16A34A) : const Color(0xFFD97706),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(task.slaIcon, size: 13, color: task.slaColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      task.slaLabel,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                        color: task.slaColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -24,6 +24,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     with SingleTickerProviderStateMixin {
   // البيانات
   List<Correspondence> _items = [];
+  List<TaskItem> _myTasks = [];
   bool _isLoading = true;
   Correspondence? _selectedItem;
   bool _isLoadingDetail = false;
@@ -70,6 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
     _listScrollController.addListener(_onListScroll);
     _fetchCorrespondences();
+    _fetchMyTasks();
 
     // تحديث موجّه بالأحداث (Event-Driven) فور وصول أي إشعار حي من SSE
     _notificationSubscription = AppEvents().onNotificationReceived.listen((data) {
@@ -86,6 +88,19 @@ class _DashboardScreenState extends State<DashboardScreen>
     _autoRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
       _silentRefresh();
     });
+  }
+
+  Future<void> _fetchMyTasks() async {
+    try {
+      final tasks = await ApiService().getMyTasks();
+      if (mounted) {
+        setState(() {
+          _myTasks = tasks;
+        });
+      }
+    } catch (e) {
+      debugPrint('fetchMyTasks error: $e');
+    }
   }
 
   @override
@@ -118,19 +133,35 @@ class _DashboardScreenState extends State<DashboardScreen>
       _currentPage = 1;
       _hasMorePages = true;
     });
+
+    final isMyTasks = _selectedNav == 'MY_TASKS';
+    final apiType = isMyTasks ? null : _selectedNav;
+    if (isMyTasks && _myTasks.isEmpty) {
+      await _fetchMyTasks();
+    }
+
     try {
       final res = await ApiService().getCorrespondencesPaginated(
-        type: _selectedNav,
+        type: apiType,
         status: _selectedStatus,
         search: _searchController.text.trim(),
         page: 1,
-        limit: 20,
+        limit: isMyTasks ? 100 : 20,
       );
       if (mounted) {
-        final List<Correspondence> data = res['data'] as List<Correspondence>;
+        List<Correspondence> data = res['data'] as List<Correspondence>;
+        if (isMyTasks) {
+          final taskCorrIds = _myTasks
+              .map((t) => t.correspondenceId)
+              .whereType<String>()
+              .toSet();
+          data = data.where((item) =>
+              taskCorrIds.contains(item.id) ||
+              item.tasks.any((t) => t.assignedTo?.id == widget.user.id)).toList();
+        }
         final Map<String, dynamic> meta = res['meta'] as Map<String, dynamic>;
-        final total = meta['total'] as int? ?? data.length;
-        final totalPages = meta['totalPages'] as int? ?? 1;
+        final total = isMyTasks ? data.length : (meta['total'] as int? ?? data.length);
+        final totalPages = isMyTasks ? 1 : (meta['totalPages'] as int? ?? 1);
 
         setState(() {
           _items = data;
@@ -159,6 +190,9 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Future<void> _loadMoreCorrespondences() async {
     if (_isLoading || _isLoadingMore || !_hasMorePages) return;
+    final isMyTasks = _selectedNav == 'MY_TASKS';
+    if (isMyTasks) return;
+
     setState(() => _isLoadingMore = true);
 
     try {
@@ -221,17 +255,21 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Future<void> _silentRefresh() async {
     try {
+      _fetchMyTasks();
+      final isMyTasks = _selectedNav == 'MY_TASKS';
+      final apiType = isMyTasks ? null : _selectedNav;
+
       List<Correspondence> refreshedItems = [];
       int total = _totalItems;
       int totalPages = 1;
 
-      if (_currentPage <= 1) {
+      if (_currentPage <= 1 || isMyTasks) {
         final res = await ApiService().getCorrespondencesPaginated(
-          type: _selectedNav,
+          type: apiType,
           status: _selectedStatus,
           search: _searchController.text.trim(),
           page: 1,
-          limit: 20,
+          limit: isMyTasks ? 100 : 20,
         );
         refreshedItems = res['data'] as List<Correspondence>;
         final meta = res['meta'] as Map<String, dynamic>;
@@ -240,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       } else if (_currentPage * 20 <= 100) {
         // جلب العناصر حتى الصفحة الحالية بدفعة واحدة لتجنب أي انحراف (Pagination Drift)
         final res = await ApiService().getCorrespondencesPaginated(
-          type: _selectedNav,
+          type: apiType,
           status: _selectedStatus,
           search: _searchController.text.trim(),
           page: 1,
@@ -255,7 +293,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         final futures = <Future<Map<String, dynamic>>>[];
         for (int p = 1; p <= _currentPage; p++) {
           futures.add(ApiService().getCorrespondencesPaginated(
-            type: _selectedNav,
+            type: apiType,
             status: _selectedStatus,
             search: _searchController.text.trim(),
             page: p,
@@ -269,6 +307,18 @@ class _DashboardScreenState extends State<DashboardScreen>
         final lastMeta = results.first['meta'] as Map<String, dynamic>;
         total = lastMeta['total'] as int? ?? refreshedItems.length;
         totalPages = lastMeta['totalPages'] as int? ?? 1;
+      }
+
+      if (isMyTasks) {
+        final taskCorrIds = _myTasks
+            .map((t) => t.correspondenceId)
+            .whereType<String>()
+            .toSet();
+        refreshedItems = refreshedItems.where((item) =>
+            taskCorrIds.contains(item.id) ||
+            item.tasks.any((t) => t.assignedTo?.id == widget.user.id)).toList();
+        total = refreshedItems.length;
+        totalPages = 1;
       }
 
       if (mounted && refreshedItems.isNotEmpty) {
@@ -739,6 +789,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   incomingCount: _items.where((i) => i.type == 'INCOMING').length,
                   internalCount: _items.where((i) => i.type == 'INTERNAL').length,
                   outgoingCount: _items.where((i) => i.type == 'OUTGOING').length,
+                  myTasksCount: _myTasks.where((t) => !t.isDone).length,
                   isSyncing: _isSyncing,
                   syncIconController: _syncIconController,
                   onToggleCollapse: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
@@ -747,7 +798,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     _fetchCorrespondences();
                   },
                   onOpenCorrespondence: _openCorrespondenceById,
-                  onRefresh: _fetchCorrespondences,
+                  onRefresh: () {
+                    _fetchMyTasks();
+                    _fetchCorrespondences();
+                  },
                   onSyncMail: _syncMail,
                   onLogout: _logout,
                 ),

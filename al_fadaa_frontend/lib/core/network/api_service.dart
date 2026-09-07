@@ -686,6 +686,20 @@ class ApiService {
     return [];
   }
 
+  Future<List<TaskItem>> getAllTasks() async {
+    try {
+      final response = await _get(Uri.parse('${ApiConstants.tasks}?limit=100'), timeout: const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
+        return list.map((j) => TaskItem.fromJson(j)).toList();
+      }
+    } catch (e) {
+      debugPrint('getAllTasks exception: $e');
+    }
+    return [];
+  }
+
   Future<List<ReferralItem>> getMyReferrals() async {
     try {
       final response = await _get(Uri.parse('${ApiConstants.referrals}?limit=100'), timeout: const Duration(seconds: 5));

@@ -2,11 +2,17 @@ class Department {
   final String id;
   final String name;
   final String code;
+  final String? managerName;
+  final int usersCount;
+  final int correspondencesCount;
 
   Department({
     required this.id,
     required this.name,
     required this.code,
+    this.managerName,
+    this.usersCount = 0,
+    this.correspondencesCount = 0,
   });
 
   factory Department.fromJson(Map<String, dynamic> json) {
@@ -14,6 +20,9 @@ class Department {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       code: json['code'] ?? '',
+      managerName: json['manager']?['name'],
+      usersCount: json['_count']?['users'] ?? 0,
+      correspondencesCount: json['_count']?['correspondences'] ?? 0,
     );
   }
 
@@ -22,6 +31,9 @@ class Department {
       'id': id,
       'name': name,
       'code': code,
+      'managerName': managerName,
+      'usersCount': usersCount,
+      'correspondencesCount': correspondencesCount,
     };
   }
 }

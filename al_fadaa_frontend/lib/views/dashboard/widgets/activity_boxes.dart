@@ -267,25 +267,51 @@ class TasksBox extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           ...tasks.map((t) => Container(
-                margin: const EdgeInsets.only(bottom: 6),
+                margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: t.isDone ? const Color(0xFFF8FAFC) : t.slaBgColor,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: t.isDone ? const Color(0xFFE2E8F0) : t.slaColor.withAlpha(60)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.task_alt_rounded, size: 15, color: Color(0xFFD97706)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(t.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          Text('المكلف: ${t.assignedTo?.fullName ?? "-"} · الحالة: ${t.status}', style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B))),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        Icon(t.slaIcon, size: 16, color: t.slaColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            t.title,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: t.slaBgColor,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: t.slaColor.withAlpha(80)),
+                          ),
+                          child: Text(
+                            t.slaLabel,
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: t.slaColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: Text(
+                            'المكلف: ${t.assignedTo?.fullName ?? "-"} · الحالة: ${t.isDone ? "منجزة" : (t.status == "IN_PROGRESS" ? "قيد التنفيذ" : "معلقة")}',
+                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

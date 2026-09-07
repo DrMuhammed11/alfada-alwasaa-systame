@@ -243,7 +243,10 @@ class ConversationHeader extends StatelessWidget {
               onPressed: () async {
                 final res = await showDialog<bool>(
                   context: context,
-                  builder: (_) => CompleteTaskDialog(task: activeTasks.first),
+                  builder: (_) => CompleteTaskDialog(
+                    task: activeTasks.first,
+                    correspondenceId: item.id,
+                  ),
                 );
                 if (res == true) onRefresh();
               },
