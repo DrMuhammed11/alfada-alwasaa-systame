@@ -1,4 +1,4 @@
-﻿import 'user_model.dart';
+import 'user_model.dart';
 import 'referral_model.dart';
 import 'task_model.dart';
 import 'attachment_model.dart';
@@ -16,20 +16,16 @@ class Correspondence {
   final String type; // INCOMING, OUTGOING, INTERNAL
   final String status; // RECEIVED, UNDER_REVIEW, REFERRED, IN_PROGRESS, PENDING_APPROVAL, APPROVED, SENT, CLOSED, ARCHIVED
   final String priority; // LOW, NORMAL, HIGH, URGENT
-  final String confidentiality; // NORMAL, CONFIDENTIAL, TOP_SECRET
   final String? channel;
   final String? body;
-  final String? content;
   final String? senderName;
   final String? senderEmail;
   final String? senderPhone;
-  final String? senderEntity;
-  final String? referenceNumber;
   final DateTime createdAt;
   final DateTime? receivedAt;
   final DateTime? sentAt;
   final Department? department;
-  final User? creator;
+  final User? createdBy;
   final String? parentId;
   final Correspondence? parent;
   final String? messageId;
@@ -49,20 +45,16 @@ class Correspondence {
     required this.type,
     required this.status,
     required this.priority,
-    required this.confidentiality,
     this.channel,
     this.body,
-    this.content,
     this.senderName,
     this.senderEmail,
     this.senderPhone,
-    this.senderEntity,
-    this.referenceNumber,
     required this.createdAt,
     this.receivedAt,
     this.sentAt,
     this.department,
-    this.creator,
+    this.createdBy,
     this.parentId,
     this.parent,
     this.messageId,
@@ -77,35 +69,23 @@ class Correspondence {
   });
 
   factory Correspondence.fromJson(Map<String, dynamic> json) {
-    final ref = json['refNumber'] ?? json['serialNumber'] ?? '';
-    final rawBody = json['body'] ?? json['content'];
-    final sName = json['senderName'] ?? json['senderEntity'];
-    final sEmail = json['senderEmail'];
-    final sPhone = json['senderPhone'];
-
     return Correspondence(
       id: json['id'] ?? '',
-      serialNumber: ref,
+      serialNumber: json['refNumber'] ?? '',
       subject: json['subject'] ?? 'بدون عنوان',
       type: json['type'] ?? 'INCOMING',
       status: json['status'] ?? 'RECEIVED',
       priority: json['priority'] ?? 'NORMAL',
-      confidentiality: json['confidentiality'] ?? 'NORMAL',
       channel: json['channel'] ?? 'EMAIL',
-      body: rawBody,
-      content: rawBody,
-      senderName: sName,
-      senderEmail: sEmail,
-      senderPhone: sPhone,
-      senderEntity: sName ?? sEmail ?? 'جهة خارجية',
-      referenceNumber: ref,
+      body: json['body'],
+      senderName: json['senderName'],
+      senderEmail: json['senderEmail'],
+      senderPhone: json['senderPhone'],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       receivedAt: json['receivedAt'] != null ? DateTime.parse(json['receivedAt']) : null,
       sentAt: json['sentAt'] != null ? DateTime.parse(json['sentAt']) : null,
       department: json['department'] != null ? Department.fromJson(json['department']) : null,
-      creator: json['createdBy'] != null
-          ? User.fromJson(json['createdBy'])
-          : (json['creator'] != null ? User.fromJson(json['creator']) : null),
+      createdBy: json['createdBy'] != null ? User.fromJson(json['createdBy']) : null,
       parentId: json['parentId'],
       parent: json['parent'] != null ? Correspondence.fromJson(json['parent']) : null,
       messageId: json['messageId'],

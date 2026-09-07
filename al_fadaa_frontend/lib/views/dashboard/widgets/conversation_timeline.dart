@@ -67,7 +67,7 @@ class ConversationTimeline extends StatelessWidget {
       'date': item.receivedAt ?? item.createdAt,
       'body': (item.body != null && item.body!.trim().isNotEmpty)
           ? item.body!
-          : (item.content ?? 'لا يوجد نص مرفق مع الرسالة'),
+          : 'لا يوجد نص مرفق مع الرسالة',
       'badge': item.type == 'INCOMING' ? 'رسالة العميل (وارد أساسي)' : 'خطاب رسمي أصلي',
       'badgeColor': item.type == 'INCOMING' ? const Color(0xFF0284C7) : const Color(0xFF10B981),
       'attachments': item.attachments,
@@ -83,7 +83,7 @@ class ConversationTimeline extends StatelessWidget {
         'senderName': item.senderName ?? 'العميل (رد إضافي)',
         'senderEmail': item.senderEmail,
         'date': child.createdAt,
-        'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : (child.content ?? 'لا يوجد نص'),
+        'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : 'لا يوجد نص',
         'badge': 'رسالة إضافية من العميل',
         'badgeColor': const Color(0xFF0284C7),
         'attachments': <AttachmentItem>[],
@@ -129,7 +129,7 @@ class ConversationTimeline extends StatelessWidget {
           'senderName': reply.author?.fullName ?? 'فريق شركة الفضاء الواسع',
           'senderEmail': reply.author?.email,
           'date': reply.createdAt,
-          'body': reply.content,
+          'body': reply.body,
           'replyStatus': reply.status,
           'isApproved': reply.isApproved,
           'replyItem': reply,

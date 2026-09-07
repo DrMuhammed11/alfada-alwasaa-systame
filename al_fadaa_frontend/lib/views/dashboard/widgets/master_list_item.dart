@@ -21,9 +21,7 @@ class MasterListItemTile extends StatelessWidget {
     final totalMessages = 1 + item.childrenCount + item.repliesCount;
     final snippet = (item.body != null && item.body!.trim().isNotEmpty)
         ? item.body!.trim().replaceAll('\n', ' ')
-        : (item.content != null && item.content!.trim().isNotEmpty
-            ? item.content!.trim().replaceAll('\n', ' ')
-            : 'مراسلة واردة عبر البريد الإلكتروني');
+        : 'مراسلة واردة عبر البريد الإلكتروني';
 
     final senderDisplayName = (item.senderName != null && item.senderName!.trim().isNotEmpty)
         ? item.senderName!.trim()

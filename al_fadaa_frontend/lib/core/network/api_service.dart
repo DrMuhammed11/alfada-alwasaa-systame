@@ -116,7 +116,7 @@ class ApiService {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final token = data['accessToken'] ?? data['access_token'];
+        final token = data['accessToken'];
         if (token != null) {
           await saveToken(token);
         }

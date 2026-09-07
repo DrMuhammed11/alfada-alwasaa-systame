@@ -1,4 +1,4 @@
-﻿import 'user_model.dart';
+import 'user_model.dart';
 
 class AttachmentItem {
   final String id;
@@ -33,7 +33,7 @@ class AttachmentItem {
   factory AttachmentItem.fromJson(Map<String, dynamic> json) {
     return AttachmentItem(
       id: json['id'] ?? '',
-      fileName: json['fileName'] ?? json['filename'] ?? 'مرفق',
+      fileName: json['fileName'] ?? 'مرفق',
       storedName: json['storedName'],
       mimeType: json['mimeType'],
       size: json['size'] is int ? json['size'] : int.tryParse('${json['size']}') ?? 0,

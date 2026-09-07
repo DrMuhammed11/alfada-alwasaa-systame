@@ -1,13 +1,12 @@
-﻿import 'user_model.dart';
+import 'user_model.dart';
 import 'attachment_model.dart';
 
 class ReplyItem {
   final String id;
   final String? authorId;
-  final String content;
+  final String body;
   final String status; // DRAFT, SUBMITTED, APPROVED, REJECTED, SENT
   final bool isApproved;
-  final String? rejectionReason;
   final String? reviewNote;
   final DateTime createdAt;
   final User? author;
@@ -19,10 +18,9 @@ class ReplyItem {
   ReplyItem({
     required this.id,
     this.authorId,
-    required this.content,
+    required this.body,
     required this.status,
     required this.isApproved,
-    this.rejectionReason,
     this.reviewNote,
     required this.createdAt,
     this.author,
@@ -33,17 +31,15 @@ class ReplyItem {
   });
 
   factory ReplyItem.fromJson(Map<String, dynamic> json) {
-    final rNote = json['reviewNote'] ?? json['rejectionReason'] ?? json['rejectionNote'];
     return ReplyItem(
       id: json['id'] ?? '',
-      authorId: json['authorId'] ?? json['author']?['id'] ?? json['createdById'] ?? json['createdBy']?['id'],
-      content: json['body'] ?? json['content'] ?? '',
+      authorId: json['authorId'] ?? json['author']?['id'],
+      body: json['body'] ?? '',
       status: json['status'] ?? 'DRAFT',
-      isApproved: json['status'] == 'APPROVED' || json['isApproved'] == true,
-      rejectionReason: rNote,
-      reviewNote: rNote,
+      isApproved: json['status'] == 'APPROVED',
+      reviewNote: json['reviewNote'],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      author: json['author'] != null ? User.fromJson(json['author']) : (json['createdBy'] != null ? User.fromJson(json['createdBy']) : null),
+      author: json['author'] != null ? User.fromJson(json['author']) : null,
       reviewedBy: json['reviewedBy'] != null ? User.fromJson(json['reviewedBy']) : null,
       approvedBy: json['approvedBy'] != null ? User.fromJson(json['approvedBy']) : null,
       sourceReplyId: json['sourceReplyId'],
@@ -56,10 +52,10 @@ class ReplyItem {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'content': content,
+      'body': body,
       'status': status,
       'isApproved': isApproved,
-      'rejectionReason': rejectionReason,
+      'reviewNote': reviewNote,
       'createdAt': createdAt.toIso8601String(),
     };
   }

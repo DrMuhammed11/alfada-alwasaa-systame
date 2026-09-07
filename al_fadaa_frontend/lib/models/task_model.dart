@@ -30,7 +30,7 @@ class TaskItem {
       dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       doneAt: json['doneAt'] != null ? DateTime.parse(json['doneAt']) : null,
-      assignedTo: json['assignedTo'] != null ? User.fromJson(json['assignedTo']) : (json['assignee'] != null ? User.fromJson(json['assignee']) : null),
+      assignedTo: json['assignedTo'] != null ? User.fromJson(json['assignedTo']) : null,
     );
   }
 

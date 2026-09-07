@@ -764,7 +764,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     onEditDraft: (reply) {
                       setState(() {
                         _editingReplyId = reply.id;
-                        _quickReplyController.text = reply.content;
+                        _quickReplyController.text = reply.body;
                       });
                     },
                     onSubmitReply: _submitReply,
