@@ -127,10 +127,10 @@ class MasterListPane extends StatelessWidget {
           ),
           const Divider(height: 1),
 
-          // قائمة المعاملات مع التمرير اللانهائي
+          // قائمة المعاملات مع التمرير اللانهائي ومؤثر الهيكل العظمي (Skeleton)
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+                ? _buildSkeletonList()
                 : items.isEmpty
                     ? const Center(
                         child: Text(
@@ -170,6 +170,45 @@ class MasterListPane extends StatelessWidget {
                       ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonList() {
+    return ListView.separated(
+      itemCount: 6,
+      separatorBuilder: (_, __) => const Divider(height: 1, indent: 14, endIndent: 14),
+      itemBuilder: (_, __) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(color: Color(0xFFF1F5F9), shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(width: 100, height: 12, decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(4))),
+                      const Spacer(),
+                      Container(width: 40, height: 10, decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(3))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(width: 180, height: 11, decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(4))),
+                  const SizedBox(height: 6),
+                  Container(width: 120, height: 9, decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(3))),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

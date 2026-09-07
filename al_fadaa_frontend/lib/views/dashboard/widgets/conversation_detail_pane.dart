@@ -110,7 +110,7 @@ class ConversationDetailPane extends StatelessWidget {
             onShowDossier: onShowDossier,
           ),
 
-          // المحتوى التفصيلي: المحادثة مباشرة تأخذ كامل المساحة!
+          // المحتوى التفصيلي: متوازن ومريح للقراءة دون تشتت أو اتساع مفرط
           Expanded(
             child: isLoadingDetail
                 ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
@@ -118,10 +118,13 @@ class ConversationDetailPane extends StatelessWidget {
                     controller: detailScrollController,
                     thumbVisibility: true,
                     trackVisibility: true,
-                    child: ListView(
-                      controller: detailScrollController,
-                      padding: const EdgeInsets.all(20),
-                      children: [
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1040),
+                        child: ListView(
+                          controller: detailScrollController,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                          children: [
                         // بطاقة تفاصيل المعاملة (تظهر فقط عند الضغط على زر المعلومات حتى لا تضيق على المحادثات)
                         if (showExtraDetails) ...[
                           Container(
@@ -198,6 +201,8 @@ class ConversationDetailPane extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+              ),
           ),
         ],
       ),

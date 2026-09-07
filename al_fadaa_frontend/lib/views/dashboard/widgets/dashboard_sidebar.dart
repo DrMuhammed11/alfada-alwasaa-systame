@@ -5,6 +5,7 @@ import '../../../core/utils/page_transitions.dart';
 import '../../../models/user_model.dart';
 import '../../admin/audit_screen.dart';
 import '../../admin/executive_reports_screen.dart';
+import '../../admin/organization_management_screen.dart';
 import '../../correspondences/create_incoming_dialog.dart';
 import '../../correspondences/create_internal_dialog.dart';
 import '../../notifications/notifications_bell.dart';
@@ -266,6 +267,15 @@ class DashboardSidebar extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       EnterprisePageRoute(page: ExecutiveReportsScreen(currentUser: user)),
+                    ),
+                  ),
+                  _buildTile(
+                    title: 'الموظفون والقطاعات والصلاحيات',
+                    icon: Icons.manage_accounts_rounded,
+                    isSelected: false,
+                    onTap: () => Navigator.push(
+                      context,
+                      EnterprisePageRoute(page: OrganizationManagementScreen(currentUser: user)),
                     ),
                   ),
                   _buildTile(

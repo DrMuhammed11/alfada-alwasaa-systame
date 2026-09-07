@@ -1,157 +1,49 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../constants/api_constants.dart';
-import '../utils/download_helper.dart';
-import '../../models/user_model.dart';
 import '../../models/correspondence_model.dart';
-import 'app_events.dart';
+import '../../models/user_model.dart';
+import 'api/auth_api.dart';
+import 'api/correspondences_api.dart';
+import 'api/departments_api.dart';
+import 'api/notifications_api.dart';
+import 'api/referrals_api.dart';
+import 'api/replies_api.dart';
+import 'api/system_api.dart';
+import 'api/tasks_api.dart';
+import 'api/users_api.dart';
+import 'session_manager.dart';
 
-/// استثناء خاص عند انتهاء صلاحية الجلسة أو الرمز غير المصرح
-class UnauthorizedException implements Exception {
-  final String message;
-  UnauthorizedException([this.message = 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا']);
+export 'session_manager.dart' show UnauthorizedException;
 
-  @override
-  String toString() => message;
-}
-
+/// واجهة موحدة (Facade) تجمع كافة خدمات واستدعاءات الشبكة مع الحفاظ على التوافق الخلفي التام
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
 
-  String? _token;
-  int _consecutive401Count = 0;
+  final SessionManager _session = SessionManager();
+  final AuthApi _auth = AuthApi();
+  final CorrespondencesApi _correspondences = CorrespondencesApi();
+  final RepliesApi _replies = RepliesApi();
+  final TasksApi _tasks = TasksApi();
+  final ReferralsApi _referrals = ReferralsApi();
+  final NotificationsApi _notifications = NotificationsApi();
+  final SystemApi _system = SystemApi();
+  final UsersApi _users = UsersApi();
+  final DepartmentsApi _departments = DepartmentsApi();
 
-  Future<void> init() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      _token = prefs.getString('access_token');
-    } catch (e) {
-      debugPrint('Error initializing SharedPreferences: $e');
-    }
-  }
-
-  Future<void> saveToken(String token) async {
-    _token = token;
-    _consecutive401Count = 0;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', token);
-    } catch (e) {
-      debugPrint('Error saving token: $e');
-    }
-  }
-
-  Future<void> clearToken() async {
-    _token = null;
-    _consecutive401Count = 0;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('access_token');
-    } catch (e) {
-      debugPrint('Error clearing token: $e');
-    }
-  }
-
-  Map<String, String> get _headers {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    if (_token != null && _token!.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $_token';
-    }
-    return headers;
-  }
-
-  String? get token => _token;
-  String get sseNotificationsUrl => '${ApiConstants.baseUrl}/notifications/stream';
-
-  /// نقطة مركزية لرصد استجابات 401 وإدارة انتهاء الجلسة
-  http.Response _inspectResponse(http.Response response) {
-    if (_token != null && _token!.isNotEmpty) {
-      if (response.statusCode == 401) {
-        _consecutive401Count++;
-        debugPrint('HTTP 401 encountered (consecutive count: $_consecutive401Count)');
-        if (_consecutive401Count >= 2) {
-          debugPrint('Session expired: 2 consecutive 401s detected. Triggering auto-logout.');
-          _consecutive401Count = 0;
-          clearToken();
-          AppEvents().triggerSessionExpired('انتهت الجلسة، يرجى تسجيل الدخول مجددًا');
-        }
-      } else {
-        _consecutive401Count = 0;
-      }
-    }
-    return response;
-  }
-
-  Future<http.Response> _get(Uri uri, {Map<String, String>? headers, Duration timeout = const Duration(seconds: 10)}) async {
-    final response = await http.get(uri, headers: headers ?? _headers).timeout(timeout);
-    return _inspectResponse(response);
-  }
-
-  Future<http.Response> _post(Uri uri, {Map<String, String>? headers, Object? body, Duration timeout = const Duration(seconds: 10)}) async {
-    final response = await http.post(uri, headers: headers ?? _headers, body: body).timeout(timeout);
-    return _inspectResponse(response);
-  }
-
-  Future<http.Response> _patch(Uri uri, {Map<String, String>? headers, Object? body, Duration timeout = const Duration(seconds: 10)}) async {
-    final response = await http.patch(uri, headers: headers ?? _headers, body: body).timeout(timeout);
-    return _inspectResponse(response);
-  }
+  // --- Session ---
+  Future<void> init() => _session.init();
+  Future<void> saveToken(String token) => _session.saveToken(token);
+  Future<void> clearToken() => _session.clearToken();
+  String? get token => _session.token;
+  String get sseNotificationsUrl => _notifications.sseNotificationsUrl;
 
   // --- Auth ---
-  Future<Map<String, dynamic>> login(String email, String password) async {
-    _consecutive401Count = 0;
-    try {
-      final response = await http.post(
-        Uri.parse(ApiConstants.login),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 5));
+  Future<Map<String, dynamic>> login(String email, String password) =>
+      _auth.login(email, password);
 
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final token = data['accessToken'];
-        if (token != null) {
-          await saveToken(token);
-        }
-        return {'success': true, 'user': User.fromJson(data['user'])};
-      } else {
-        return {'success': false, 'message': data['message'] ?? 'فشل تسجيل الدخول'};
-      }
-    } catch (e) {
-      debugPrint('Login exception: $e');
-      return {
-        'success': false,
-        'message': 'تعذر الاتصال بالخادم (تأكد من تشغيل backend على منفذ 3000)',
-      };
-    }
-  }
-
-  Future<User?> getMe({Duration timeout = const Duration(seconds: 10)}) async {
-    if (_token == null) return null;
-    try {
-      final response = await _get(Uri.parse(ApiConstants.me), timeout: timeout);
-      if (response.statusCode == 200) {
-        return User.fromJson(jsonDecode(response.body));
-      } else if (response.statusCode == 401) {
-        throw UnauthorizedException();
-      } else {
-        throw Exception('فشل في استرداد بيانات المستخدم (${response.statusCode})');
-      }
-    } on UnauthorizedException {
-      rethrow;
-    } catch (e) {
-      debugPrint('getMe exception: $e');
-      rethrow;
-    }
-  }
+  Future<User?> getMe({Duration timeout = const Duration(seconds: 10)}) =>
+      _auth.getMe(timeout: timeout);
 
   // --- Correspondences ---
   Future<Map<String, dynamic>> getCorrespondencesPaginated({
@@ -161,42 +53,15 @@ class ApiService {
     String? search,
     int page = 1,
     int limit = 20,
-  }) async {
-    try {
-      final queryParams = <String, String>{
-        'page': page.toString(),
-        'limit': limit.toString(),
-      };
-      if (type != null && type.isNotEmpty && type != 'ALL') queryParams['type'] = type;
-      if (status != null && status.isNotEmpty && status != 'ALL') queryParams['status'] = status;
-      if (priority != null && priority.isNotEmpty && priority != 'ALL') queryParams['priority'] = priority;
-      if (search != null && search.isNotEmpty) queryParams['q'] = search;
-
-      final uri = Uri.parse(ApiConstants.correspondences).replace(queryParameters: queryParams);
-      final response = await _get(uri, timeout: const Duration(seconds: 8));
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = body['data'] ?? (body is List ? body : []);
-        final items = list.map((json) => Correspondence.fromJson(json)).toList();
-        final meta = body['meta'] is Map<String, dynamic>
-            ? body['meta'] as Map<String, dynamic>
-            : {
-                'page': page,
-                'limit': limit,
-                'total': items.length,
-                'totalPages': 1,
-              };
-        return {'data': items, 'meta': meta};
-      }
-    } catch (e) {
-      debugPrint('getCorrespondencesPaginated exception: $e');
-    }
-    return {
-      'data': <Correspondence>[],
-      'meta': {'page': page, 'limit': limit, 'total': 0, 'totalPages': 0}
-    };
-  }
+  }) =>
+      _correspondences.getCorrespondencesPaginated(
+        type: type,
+        status: status,
+        priority: priority,
+        search: search,
+        page: page,
+        limit: limit,
+      );
 
   Future<List<Correspondence>> getCorrespondences({
     String? type,
@@ -205,53 +70,18 @@ class ApiService {
     String? search,
     int page = 1,
     int limit = 20,
-  }) async {
-    final result = await getCorrespondencesPaginated(
-      type: type,
-      status: status,
-      priority: priority,
-      search: search,
-      page: page,
-      limit: limit,
-    );
-    return result['data'] as List<Correspondence>;
-  }
+  }) =>
+      _correspondences.getCorrespondences(
+        type: type,
+        status: status,
+        priority: priority,
+        search: search,
+        page: page,
+        limit: limit,
+      );
 
-  Future<Correspondence?> getCorrespondenceById(String id) async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.correspondences}/$id'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        return Correspondence.fromJson(jsonDecode(response.body));
-      }
-    } catch (e) {
-      debugPrint('getCorrespondenceById exception: $e');
-    }
-    return null;
-  }
-
-  String _extractErrorMessage(dynamic body, [String fallback = 'حدث خطأ في الخادم', int? statusCode]) {
-    if (statusCode == 401) {
-      return 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا';
-    }
-    if (body == null) return fallback;
-    try {
-      final decoded = body is String ? jsonDecode(body) : body;
-      if (decoded is Map) {
-        if (decoded['statusCode'] == 401 || decoded['message'] == 'Unauthorized') {
-          return 'انتهت الجلسة، يرجى تسجيل الدخول مجددًا';
-        }
-        final msg = decoded['message'];
-        if (msg is List) {
-          return msg.map((m) => m.toString()).join('، ');
-        } else if (msg is String && msg.trim().isNotEmpty) {
-          return msg.trim();
-        }
-        final err = decoded['error'];
-        if (err is String && err.trim().isNotEmpty) return err.trim();
-      }
-    } catch (_) {}
-    return fallback;
-  }
+  Future<Correspondence?> getCorrespondenceById(String id) =>
+      _correspondences.getCorrespondenceById(id);
 
   Future<Map<String, dynamic>> createIncoming({
     required String subject,
@@ -260,100 +90,39 @@ class ApiService {
     String? senderPhone,
     String? body,
     String priority = 'NORMAL',
-  }) async {
-    try {
-      final payload = <String, dynamic>{
-        'subject': subject,
-        'senderName': senderName,
-        'priority': priority,
-      };
-      if (senderEmail != null && senderEmail.trim().isNotEmpty) {
-        payload['senderEmail'] = senderEmail.trim();
-      }
-      if (senderPhone != null && senderPhone.trim().isNotEmpty) {
-        payload['senderPhone'] = senderPhone.trim();
-      }
-      if (body != null && body.trim().isNotEmpty) {
-        payload['body'] = body.trim();
-      }
-
-      final response = await _post(
-        Uri.parse(ApiConstants.incomingCorrespondences),
-        body: jsonEncode(payload),
+  }) =>
+      _correspondences.createIncoming(
+        subject: subject,
+        senderName: senderName,
+        senderEmail: senderEmail,
+        senderPhone: senderPhone,
+        body: body,
+        priority: priority,
       );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تسجيل المراسلة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('createIncoming exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
 
   Future<Map<String, dynamic>> createInternal({
     required String subject,
     required String body,
     String priority = 'NORMAL',
-  }) async {
-    try {
-      final payload = <String, dynamic>{
-        'subject': subject,
-        'body': body,
-        'priority': priority,
-      };
-
-      final response = await _post(
-        Uri.parse(ApiConstants.internalCorrespondences),
-        body: jsonEncode(payload),
+  }) =>
+      _correspondences.createInternal(
+        subject: subject,
+        body: body,
+        priority: priority,
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الخطاب الداخلي', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('createInternal exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  // --- Workflow Actions ---
   Future<Map<String, dynamic>> referCorrespondence(
     String correspondenceId, {
     required String toUserId,
     String? note,
     String? dueDate,
-  }) async {
-    try {
-      final payload = <String, dynamic>{
-        'toUserId': toUserId,
-      };
-      if (note != null && note.trim().isNotEmpty) {
-        payload['note'] = note.trim();
-      }
-      if (dueDate != null && dueDate.trim().isNotEmpty) {
-        payload['dueDate'] = dueDate.trim();
-      }
-
-      final response = await _post(
-        Uri.parse('${ApiConstants.correspondences}/$correspondenceId/referrals'),
-        body: jsonEncode(payload),
+  }) =>
+      _correspondences.referCorrespondence(
+        correspondenceId,
+        toUserId: toUserId,
+        note: note,
+        dueDate: dueDate,
       );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إجراء الإحالة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('referCorrespondence exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
 
   Future<Map<String, dynamic>> createTask(
     String correspondenceId, {
@@ -361,670 +130,211 @@ class ApiService {
     String? description,
     required String assignedToId,
     String? dueDate,
-  }) async {
-    try {
-      final payload = <String, dynamic>{
-        'title': title,
-        'assignedToId': assignedToId,
-      };
-      if (description != null && description.trim().isNotEmpty) {
-        payload['description'] = description.trim();
-      }
-      if (dueDate != null && dueDate.trim().isNotEmpty) {
-        payload['dueDate'] = dueDate.trim();
-      }
-
-      final response = await _post(
-        Uri.parse('${ApiConstants.correspondences}/$correspondenceId/tasks'),
-        body: jsonEncode(payload),
+  }) =>
+      _correspondences.createTask(
+        correspondenceId,
+        title: title,
+        description: description,
+        assignedToId: assignedToId,
+        dueDate: dueDate,
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إسناد المهمة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('createTask exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<Map<String, dynamic>> updateCorrespondenceStatus(String correspondenceId, String status) =>
+      _correspondences.updateCorrespondenceStatus(correspondenceId, status);
 
-  Future<Map<String, dynamic>> updateTaskStatus(
-    String taskId,
-    String status, {
-    String? completionNote,
-  }) async {
-    try {
-      final payload = <String, dynamic>{'status': status};
-      if (completionNote != null && completionNote.trim().isNotEmpty) {
-        payload['completionNote'] = completionNote.trim();
-      }
-      final response = await _patch(
-        Uri.parse('${ApiConstants.baseUrl}/tasks/$taskId/status'),
-        body: jsonEncode(payload),
-      );
+  Future<Map<String, dynamic>> closeCorrespondence(String id) =>
+      _correspondences.closeCorrespondence(id);
 
-      if (response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المهمة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('updateTaskStatus exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  Future<Map<String, dynamic>> updateCorrespondenceStatus(String correspondenceId, String status) async {
-    try {
-      final response = await _patch(
-        Uri.parse('${ApiConstants.correspondences}/$correspondenceId'),
-        body: jsonEncode({'status': status}),
-      );
-
-      if (response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث حالة المراسلة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('updateCorrespondenceStatus exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  Future<Map<String, dynamic>> closeCorrespondence(String id) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.correspondences}/$id/close'),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إغلاق المراسلة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('closeCorrespondence exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  Future<Map<String, dynamic>> archiveCorrespondence(String id) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.correspondences}/$id/archive'),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل أرشفة المراسلة', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('archiveCorrespondence exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<Map<String, dynamic>> archiveCorrespondence(String id) =>
+      _correspondences.archiveCorrespondence(id);
 
   // --- Replies ---
-  Future<Map<String, dynamic>> createReply(String correspondenceId, String content) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies'),
-        body: jsonEncode({
-          'correspondenceId': correspondenceId,
-          'body': content,
-        }),
-      );
+  Future<Map<String, dynamic>> createReply(String correspondenceId, String content) =>
+      _replies.createReply(correspondenceId, content);
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء الرد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('createReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  Future<Map<String, dynamic>> updateReply(String replyId, String content) async {
-    try {
-      final response = await _patch(
-        Uri.parse('${ApiConstants.baseUrl}/replies/$replyId'),
-        body: jsonEncode({
-          'body': content,
-        }),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل تحديث الرد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('updateReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<Map<String, dynamic>> updateReply(String replyId, String content) =>
+      _replies.updateReply(replyId, content);
 
   Future<Map<String, dynamic>> sendDirectReply(
     String correspondenceId,
     String body, [
     List<String>? attachmentIds,
-  ]) async {
-    try {
-      final payload = <String, dynamic>{
-        'correspondenceId': correspondenceId,
-        'body': body,
-      };
-      if (attachmentIds != null && attachmentIds.isNotEmpty) {
-        payload['attachmentIds'] = attachmentIds;
-      }
+  ]) =>
+      _replies.sendDirectReply(correspondenceId, body, attachmentIds);
 
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies/direct'),
-        body: jsonEncode(payload),
-        timeout: const Duration(seconds: 15),
-      );
+  Future<Map<String, dynamic>> submitReply(String replyId) =>
+      _replies.submitReply(replyId);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return {'success': true, 'data': data};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('sendDirectReply exception: $e');
-      return {'success': false, 'message': 'حدث خطأ أثناء إرسال الرد للعميل'};
-    }
-  }
+  Future<Map<String, dynamic>> approveReply(String replyId) =>
+      _replies.approveReply(replyId);
 
-  Future<Map<String, dynamic>> submitReply(String replyId) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/submit'),
-      );
+  Future<Map<String, dynamic>> rejectReply(String replyId, String note) =>
+      _replies.rejectReply(replyId, note);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفع الرد للاعتماد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('submitReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<Map<String, dynamic>> sendReply(String replyId) =>
+      _replies.sendReply(replyId);
 
-  Future<Map<String, dynamic>> approveReply(String replyId) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/approve'),
-      );
+  Future<List<ReplyVersionItem>> getReplyVersions(String replyId) =>
+      _replies.getReplyVersions(replyId);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل اعتماد الرد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('approveReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<DiffResult?> getReplyDiff(String replyId, {int? v1, int? v2}) =>
+      _replies.getReplyDiff(replyId, v1: v1, v2: v2);
 
-  Future<Map<String, dynamic>> rejectReply(String replyId, String note) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/reject'),
-        body: jsonEncode({'note': note}),
-      );
+  // --- Tasks & Referrals ---
+  Future<List<TaskItem>> getMyTasks() => _tasks.getMyTasks();
+  Future<List<TaskItem>> getAllTasks() => _tasks.getAllTasks();
+  Future<Map<String, dynamic>> updateTaskStatus(
+    String taskId,
+    String status, {
+    String? completionNote,
+  }) =>
+      _tasks.updateTaskStatus(taskId, status, completionNote: completionNote);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل رفض الرد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('rejectReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<List<ReferralItem>> getMyReferrals() => _referrals.getMyReferrals();
 
-  Future<Map<String, dynamic>> sendReply(String replyId) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/send'),
-        timeout: const Duration(seconds: 15),
-      );
+  // --- Notifications ---
+  Future<List<Map<String, dynamic>>> getMyNotifications({bool unreadOnly = false}) =>
+      _notifications.getMyNotifications(unreadOnly: unreadOnly);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إرسال الرد بالبريد', response.statusCode)};
-      }
-    } catch (e) {
-      debugPrint('sendReply exception: $e');
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
+  Future<int> getUnreadNotificationsCount() =>
+      _notifications.getUnreadNotificationsCount();
 
-  // --- Reply Versioning & Diff ---
-  Future<List<ReplyVersionItem>> getReplyVersions(String replyId) async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/versions'));
-      if (response.statusCode == 200) {
-        final List list = jsonDecode(response.body);
-        return list.map((item) => ReplyVersionItem.fromJson(item)).toList();
-      }
-      return [];
-    } catch (e) {
-      debugPrint('getReplyVersions error: $e');
-      return [];
-    }
-  }
+  Future<bool> markNotificationAsRead(String id) =>
+      _notifications.markNotificationAsRead(id);
 
-  Future<DiffResult?> getReplyDiff(String replyId, {int? v1, int? v2}) async {
-    try {
-      final queryParams = <String, String>{};
-      if (v1 != null) queryParams['v1'] = v1.toString();
-      if (v2 != null) queryParams['v2'] = v2.toString();
-      final uri = Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/diff').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
-      final response = await _get(uri);
-      if (response.statusCode == 200) {
-        return DiffResult.fromJson(jsonDecode(response.body));
-      }
-      return null;
-    } catch (e) {
-      debugPrint('getReplyDiff error: $e');
-      return null;
-    }
-  }
+  Future<bool> markAllNotificationsAsRead() =>
+      _notifications.markAllNotificationsAsRead();
 
-  // --- Delegation ---
-  Future<List<Map<String, dynamic>>> getMyDelegations() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/delegations/my'));
-      if (response.statusCode == 200) {
-        final List list = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(list);
-      }
-      return [];
-    } catch (e) {
-      debugPrint('getMyDelegations error: $e');
-      return [];
-    }
-  }
+  // --- System & Delegations ---
+  Future<List<Department>> getDepartments() => _system.getDepartments();
+  Future<List<User>> getUsers() => _system.getUsers();
+  Future<List<Map<String, dynamic>>> getAuditLogs() => _system.getAuditLogs();
+  Future<Map<String, dynamic>> syncMail() => _system.syncMail();
+
+  Future<List<Map<String, dynamic>>> getMyDelegations() =>
+      _system.getMyDelegations();
 
   Future<Map<String, dynamic>> createDelegation({
     required String delegateId,
     required DateTime startDate,
     required DateTime endDate,
     String? note,
-  }) async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/delegations'),
-        body: jsonEncode({
-          'delegateId': delegateId,
-          'startDate': startDate.toIso8601String(),
-          'endDate': endDate.toIso8601String(),
-          if (note != null && note.isNotEmpty) 'note': note,
-        }),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء التفويض', response.statusCode)};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  Future<Map<String, dynamic>> terminateDelegation(String delegationId) async {
-    try {
-      final response = await _patch(
-        Uri.parse('${ApiConstants.baseUrl}/delegations/$delegationId/terminate'),
-      );
-      if (response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنهاء التفويض', response.statusCode)};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
-    }
-  }
-
-  // --- System Metadata ---
-  Future<List<Department>> getDepartments() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.departments}?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return list.map((j) => Department.fromJson(j)).toList();
-      }
-    } catch (e) {
-      debugPrint('getDepartments exception: $e');
-    }
-    return [];
-  }
-
-  Future<List<User>> getUsers() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.users}?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return list.map((j) => User.fromJson(j)).toList();
-      }
-    } catch (e) {
-      debugPrint('getUsers exception: $e');
-    }
-    return [];
-  }
-
-  Future<List<Map<String, dynamic>>> getAuditLogs() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.audit}?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return List<Map<String, dynamic>>.from(list);
-      }
-    } catch (e) {
-      debugPrint('getAuditLogs exception: $e');
-    }
-    return [];
-  }
-
-  // --- Mail Sync ---
-  Future<Map<String, dynamic>> syncMail() async {
-    try {
-      final response = await _post(
-        Uri.parse('${ApiConstants.baseUrl}/mail/sync'),
-        timeout: const Duration(seconds: 30),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      }
-    } catch (e) {
-      debugPrint('syncMail exception: $e');
-    }
-    return {'success': false, 'newCount': 0, 'message': 'فشل الاتصال بالخادم'};
-  }
-
-  // --- Tasks & Referrals ---
-  Future<List<TaskItem>> getMyTasks() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/tasks/my?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return list.map((j) => TaskItem.fromJson(j)).toList();
-      }
-    } catch (e) {
-      debugPrint('getMyTasks exception: $e');
-    }
-    return [];
-  }
-
-  Future<List<TaskItem>> getAllTasks() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.tasks}?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return list.map((j) => TaskItem.fromJson(j)).toList();
-      }
-    } catch (e) {
-      debugPrint('getAllTasks exception: $e');
-    }
-    return [];
-  }
-
-  Future<List<ReferralItem>> getMyReferrals() async {
-    try {
-      final response = await _get(Uri.parse('${ApiConstants.referrals}?limit=100'), timeout: const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = (body is Map && body.containsKey('data')) ? body['data'] : (body is List ? body : []);
-        return list.map((j) => ReferralItem.fromJson(j)).toList();
-      }
-    } catch (e) {
-      debugPrint('getMyReferrals exception: $e');
-    }
-    return [];
-  }
-
-  // --- Notifications ---
-  Future<List<Map<String, dynamic>>> getMyNotifications({bool unreadOnly = false}) async {
-    try {
-      final query = unreadOnly ? '?unreadOnly=true&limit=20' : '?limit=20';
-      final response = await _get(
-        Uri.parse('${ApiConstants.baseUrl}/notifications/my$query'),
-        timeout: const Duration(seconds: 5),
+  }) =>
+      _system.createDelegation(
+        delegateId: delegateId,
+        startDate: startDate,
+        endDate: endDate,
+        note: note,
       );
 
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final List list = body['data'] ?? (body is List ? body : []);
-        return List<Map<String, dynamic>>.from(list);
-      }
-    } catch (e) {
-      debugPrint('getMyNotifications exception: $e');
-    }
-    return [];
-  }
-
-  Future<int> getUnreadNotificationsCount() async {
-    try {
-      final response = await _get(
-        Uri.parse('${ApiConstants.baseUrl}/notifications/unread-count'),
-        timeout: const Duration(seconds: 5),
-      );
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        return body['count'] ?? 0;
-      }
-    } catch (e) {
-      debugPrint('getUnreadNotificationsCount exception: $e');
-    }
-    return 0;
-  }
-
-  Future<bool> markNotificationAsRead(String id) async {
-    try {
-      final response = await _patch(
-        Uri.parse('${ApiConstants.baseUrl}/notifications/$id/read'),
-        timeout: const Duration(seconds: 5),
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('markNotificationAsRead exception: $e');
-      return false;
-    }
-  }
-
-  Future<bool> markAllNotificationsAsRead() async {
-    try {
-      final response = await _patch(
-        Uri.parse('${ApiConstants.baseUrl}/notifications/read-all'),
-        timeout: const Duration(seconds: 5),
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('markAllNotificationsAsRead exception: $e');
-      return false;
-    }
-  }
+  Future<Map<String, dynamic>> terminateDelegation(String delegationId) =>
+      _system.terminateDelegation(delegationId);
 
   // --- Attachments ---
-  static MediaType _lookupMediaType(String filename) {
-    final ext = filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
-    switch (ext) {
-      case 'pdf':
-        return MediaType('application', 'pdf');
-      case 'jpg':
-      case 'jpeg':
-        return MediaType('image', 'jpeg');
-      case 'png':
-        return MediaType('image', 'png');
-      case 'gif':
-        return MediaType('image', 'gif');
-      case 'webp':
-        return MediaType('image', 'webp');
-      case 'doc':
-        return MediaType('application', 'msword');
-      case 'docx':
-        return MediaType('application', 'vnd.openxmlformats-officedocument.wordprocessingml.document');
-      case 'xls':
-        return MediaType('application', 'vnd.ms-excel');
-      case 'xlsx':
-        return MediaType('application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      case 'zip':
-        return MediaType('application', 'zip');
-      case 'txt':
-        return MediaType('text', 'plain');
-      default:
-        return MediaType('application', 'octet-stream');
-    }
-  }
-
   Future<Map<String, dynamic>> uploadCorrespondenceAttachment(
     String correspondenceId,
     Uint8List bytes,
     String filename,
-  ) async {
-    try {
-      final uri = Uri.parse('${ApiConstants.correspondences}/$correspondenceId/attachments');
-      final request = http.MultipartRequest('POST', uri);
-      if (_token != null && _token!.isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer $_token';
-      }
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          bytes,
-          filename: filename,
-          contentType: _lookupMediaType(filename),
-        ),
-      );
-
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
-      final response = _inspectResponse(await http.Response.fromStream(streamedResponse));
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {
-          'success': false,
-          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق', response.statusCode),
-        };
-      }
-    } catch (e) {
-      debugPrint('uploadCorrespondenceAttachment exception: $e');
-      return {'success': false, 'message': 'تعذر رفع المرفق'};
-    }
-  }
+  ) =>
+      _system.uploadCorrespondenceAttachment(correspondenceId, bytes, filename);
 
   Future<Map<String, dynamic>> uploadReplyAttachment(
     String replyId,
     Uint8List bytes,
     String filename,
-  ) async {
-    try {
-      final uri = Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/attachments');
-      final request = http.MultipartRequest('POST', uri);
-      if (_token != null && _token!.isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer $_token';
-      }
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          bytes,
-          filename: filename,
-          contentType: _lookupMediaType(filename),
-        ),
+  ) =>
+      _system.uploadReplyAttachment(replyId, bytes, filename);
+
+  Future<Uint8List?> getAttachmentBytes(String attachmentId) =>
+      _system.getAttachmentBytes(attachmentId);
+
+  Future<bool> viewAttachment(String attachmentId, String fileName, [String? mimeType]) =>
+      _system.viewAttachment(attachmentId, fileName, mimeType);
+
+  Future<bool> downloadAttachment(String attachmentId, String fileName) =>
+      _system.downloadAttachment(attachmentId, fileName);
+
+  // --- Users & Permissions ---
+  Future<Map<String, dynamic>> getUsersPaginated({
+    String? role,
+    String? departmentId,
+    bool? isActive,
+    int page = 1,
+    int limit = 50,
+  }) =>
+      _users.getUsersPaginated(
+        role: role,
+        departmentId: departmentId,
+        isActive: isActive,
+        page: page,
+        limit: limit,
       );
 
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
-      final response = _inspectResponse(await http.Response.fromStream(streamedResponse));
+  Future<Map<String, dynamic>> createUser({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    String? departmentId,
+    String? jobTitle,
+    String? employeeNumber,
+    String? phone,
+  }) =>
+      _users.createUser(
+        name: name,
+        email: email,
+        password: password,
+        role: role,
+        departmentId: departmentId,
+        jobTitle: jobTitle,
+        employeeNumber: employeeNumber,
+        phone: phone,
+      );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': jsonDecode(response.body)};
-      } else {
-        return {
-          'success': false,
-          'message': _extractErrorMessage(response.body, 'فشل رفع المرفق', response.statusCode),
-        };
-      }
-    } catch (e) {
-      debugPrint('uploadReplyAttachment exception: $e');
-      return {'success': false, 'message': 'تعذر رفع المرفق'};
-    }
-  }
+  Future<Map<String, dynamic>> updateUser(
+    String id, {
+    String? name,
+    String? email,
+    String? password,
+    String? role,
+    String? departmentId,
+    String? jobTitle,
+    String? employeeNumber,
+    String? phone,
+    bool? isActive,
+  }) =>
+      _users.updateUser(
+        id,
+        name: name,
+        email: email,
+        password: password,
+        role: role,
+        departmentId: departmentId,
+        jobTitle: jobTitle,
+        employeeNumber: employeeNumber,
+        phone: phone,
+        isActive: isActive,
+      );
 
-  final Map<String, Uint8List> _attachmentBytesCache = {};
+  Future<Map<String, dynamic>> deactivateUser(String id) =>
+      _users.deactivateUser(id);
 
-  Future<Uint8List?> getAttachmentBytes(String attachmentId) async {
-    if (_attachmentBytesCache.containsKey(attachmentId)) {
-      return _attachmentBytesCache[attachmentId];
-    }
-    try {
-      final uri = Uri.parse('${ApiConstants.baseUrl}/attachments/$attachmentId/download');
-      final headers = <String, String>{};
-      if (_token != null && _token!.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $_token';
-      }
+  // --- Departments / Sectors ---
+  Future<Map<String, dynamic>> createDepartment({
+    required String name,
+    required String code,
+    String? managerId,
+  }) =>
+      _departments.createDepartment(name: name, code: code, managerId: managerId);
 
-      final response = await _get(uri, headers: headers, timeout: const Duration(seconds: 30));
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
-        _attachmentBytesCache[attachmentId] = bytes;
-        return bytes;
-      }
-    } catch (e) {
-      debugPrint('getAttachmentBytes exception: $e');
-    }
-    return null;
-  }
+  Future<Map<String, dynamic>> updateDepartment(
+    String id, {
+    String? name,
+    String? code,
+    String? managerId,
+  }) =>
+      _departments.updateDepartment(id, name: name, code: code, managerId: managerId);
 
-  Future<bool> viewAttachment(String attachmentId, String fileName, [String? mimeType]) async {
-    try {
-      final bytes = await getAttachmentBytes(attachmentId);
-      if (bytes != null && bytes.isNotEmpty) {
-        await openFileInViewer(bytes, fileName, mimeType);
-        return true;
-      }
-    } catch (e) {
-      debugPrint('viewAttachment exception: $e');
-    }
-    return false;
-  }
-
-  Future<bool> downloadAttachment(String attachmentId, String fileName) async {
-    try {
-      final uri = Uri.parse('${ApiConstants.baseUrl}/attachments/$attachmentId/download');
-      final headers = <String, String>{};
-      if (_token != null && _token!.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $_token';
-      }
-
-      final response = await _get(uri, headers: headers, timeout: const Duration(seconds: 30));
-      if (response.statusCode == 200) {
-        await saveAndDownloadFile(response.bodyBytes, fileName);
-        return true;
-      }
-    } catch (e) {
-      debugPrint('downloadAttachment exception: $e');
-    }
-    return false;
-  }
+  Future<Map<String, dynamic>> deleteDepartment(String id) =>
+      _departments.deleteDepartment(id);
 }
