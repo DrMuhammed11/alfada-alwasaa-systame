@@ -65,6 +65,20 @@ class ApiConstants {
     }
   }
 
+  // Referral Status Arabic Labels
+  static String getReferralStatusLabel(String status) {
+    switch (status.toUpperCase()) {
+      case 'OPEN':
+        return 'قيد المعالجة';
+      case 'ANSWERED':
+        return 'تم الرد عليها';
+      case 'CLOSED':
+        return 'مغلقة';
+      default:
+        return status;
+    }
+  }
+
   // Status Arabic Labels
   static String getStatusLabel(String status) {
     switch (status.toUpperCase()) {

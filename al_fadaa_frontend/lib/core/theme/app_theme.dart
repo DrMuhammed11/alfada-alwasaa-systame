@@ -159,4 +159,18 @@ class AppTheme {
         return textMuted;
     }
   }
+
+  // Referral status color helper
+  static Color getReferralStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'OPEN':
+        return const Color(0xFF7C3AED);
+      case 'ANSWERED':
+        return const Color(0xFF0284C7);
+      case 'CLOSED':
+        return textMuted;
+      default:
+        return textMuted;
+    }
+  }
 }

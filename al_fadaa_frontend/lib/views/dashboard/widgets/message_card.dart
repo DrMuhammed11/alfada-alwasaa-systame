@@ -53,7 +53,11 @@ class MessageCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              title.contains('✅') ? Icons.check_circle_rounded : Icons.assignment_rounded,
+              title.contains('✅')
+                  ? Icons.check_circle_rounded
+                  : (title.contains('↪️')
+                      ? Icons.swap_horiz_rounded
+                      : Icons.assignment_rounded),
               color: eventColor,
               size: 20,
             ),

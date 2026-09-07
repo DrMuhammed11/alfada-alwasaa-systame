@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../models/correspondence_model.dart';
 import 'email_composer.dart';
 import 'message_card.dart';
@@ -172,6 +173,23 @@ class ConversationTimeline extends StatelessWidget {
           'eventColor': const Color(0xFF059669),
         });
       }
+    }
+
+    // هـ) أحداث الإحالات الإدارية والتوجيه
+    for (final ref in item.referrals) {
+      messages.add({
+        'id': 'referral_${ref.id}',
+        'isRoot': false,
+        'isClient': false,
+        'isSystemEvent': true,
+        'type': 'REFERRAL_EVENT',
+        'senderName': 'النظام',
+        'date': ref.createdAt,
+        'title': '↪️ إحالة وتوجيه إلى: «${ref.toUser?.fullName ?? 'المسؤول المختص'}»',
+        'subtitle': 'الحالة: ${ApiConstants.getReferralStatusLabel(ref.status)}${ref.dueDate != null ? ' | الموعد النهائي: ${ref.dueDate!.year}/${ref.dueDate!.month}/${ref.dueDate!.day}' : ''}',
+        'description': ref.note,
+        'eventColor': const Color(0xFF7C3AED),
+      });
     }
 
     // فرز الرسائل ترتيباً زمنياً تصاعدياً (من الأقدم إلى الأحدث مثل واتساب وبريد Gmail)
