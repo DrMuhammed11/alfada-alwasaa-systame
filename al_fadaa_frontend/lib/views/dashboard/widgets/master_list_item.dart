@@ -35,7 +35,7 @@ class MasterListItemTile extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFEFF6FF) : Colors.transparent,
           border: Border(
@@ -48,29 +48,29 @@ class MasterListItemTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // أفاتار الشخص مثل واتساب
+            // أفاتار الشخص
             CircleAvatar(
-              radius: 19,
+              radius: 20,
               backgroundColor: isSelected
                   ? AppTheme.accent
-                  : const Color(0xFF0F172A).withAlpha(18),
+                  : const Color(0xFF0F172A).withAlpha(16),
               child: Text(
                 initial,
                 style: TextStyle(
                   color: isSelected ? Colors.white : const Color(0xFF0F172A),
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: 13.5,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
 
             // البيانات: اسم الشخص أولاً، ثم العنوان والمقتطف
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // السطر 1: اسم الشخص + رقم الطلبية + التوقيت
+                  // السطر 1: اسم الشخص بارزاً + رقم المعاملة + التوقيت
                   Row(
                     children: [
                       Expanded(
@@ -79,10 +79,10 @@ class MasterListItemTile extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 senderDisplayName,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
-                                  color: const Color(0xFF0F172A),
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -90,29 +90,29 @@ class MasterListItemTile extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0F172A).withAlpha(10),
+                                color: const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(3),
-                                border: Border.all(color: const Color(0xFF0F172A).withAlpha(25), width: 0.7),
+                                border: Border.all(color: const Color(0xFFE2E8F0), width: 0.8),
                               ),
                               child: Text(
                                 item.serialNumber,
                                 style: const TextStyle(
                                   fontSize: 9.5,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF334155),
+                                  color: Color(0xFF475569),
                                 ),
                               ),
                             ),
                             if (item.isOverdue) ...[
                               const SizedBox(width: 4),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFEF2F2),
                                   borderRadius: BorderRadius.circular(3),
-                                  border: Border.all(color: const Color(0xFFFCA5A5), width: 0.7),
+                                  border: Border.all(color: const Color(0xFFFCA5A5), width: 0.8),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -137,35 +137,35 @@ class MasterListItemTile extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         _formatDate(item.createdAt),
-                        style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                        style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
 
-                  // السطر 2: العنوان (الموضوع)
+                  // السطر 2: العنوان (الموضوع) بخط متوسط ومقروء
                   Text(
                     item.subject,
                     style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                       color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF334155),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
 
-                  // السطر 3: مقتطف المحادثة + شارة الحالة + عدد الرسائل
+                  // السطر 3: مقتطف المحادثة + شارة الحالة الهادئة + عدد الرسائل
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           snippet,
                           style: const TextStyle(
-                            fontSize: 10.5,
+                            fontSize: 11,
                             color: Color(0xFF64748B),
-                            height: 1.2,
+                            height: 1.25,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -176,7 +176,7 @@ class MasterListItemTile extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0284C7).withAlpha(18),
+                            color: const Color(0xFF0284C7).withAlpha(16),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -191,15 +191,15 @@ class MasterListItemTile extends StatelessWidget {
                       ],
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: statusColor.withAlpha(15),
+                          color: statusColor.withAlpha(14),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: statusColor.withAlpha(40)),
+                          border: Border.all(color: statusColor.withAlpha(45), width: 0.8),
                         ),
                         child: Text(
                           ApiConstants.getStatusLabel(item.status),
-                          style: TextStyle(color: statusColor, fontSize: 8.5, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: statusColor, fontSize: 9, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],

@@ -136,58 +136,85 @@ class DraftActionBar extends StatelessWidget {
             children: [
               const Spacer(),
 
-          // للمؤلف: تعديل المسودة
-          if (isAuthor && (replyItem.status == 'DRAFT' || replyItem.status == 'REJECTED'))
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFFD97706)),
-              onPressed: () => onEditDraft(replyItem),
-              icon: const Icon(Icons.edit_note_rounded, size: 15),
-              label: const Text('تعديل المسودة', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
+              // للمؤلف: تعديل المسودة (إجراء ثانوي)
+              if (isAuthor && (replyItem.status == 'DRAFT' || replyItem.status == 'REJECTED')) ...[
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF334155),
+                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                  onPressed: () => onEditDraft(replyItem),
+                  icon: const Icon(Icons.edit_note_rounded, size: 15, color: Color(0xFF475569)),
+                  label: const Text('تعديل المسودة', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
+              ],
 
-          // للمؤلف: رفع للاعتماد
-          if (isAuthor && replyItem.status == 'DRAFT')
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFF2563EB)),
-              onPressed: () => onSubmitReply(replyItem.id),
-              icon: const Icon(Icons.upload_rounded, size: 15),
-              label: const Text('رفع للاعتماد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
+              // للمؤلف: رفع للاعتماد (إجراء رئيسي)
+              if (isAuthor && replyItem.status == 'DRAFT') ...[
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  ),
+                  onPressed: () => onSubmitReply(replyItem.id),
+                  icon: const Icon(Icons.upload_rounded, size: 15),
+                  label: const Text('رفع للاعتماد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
+              ],
 
-          // للمشرفين والمعتمدين: اعتماد الرد أو رفضه (سواء كان مرفوعاً أو مسودة)
-          if ((replyItem.status == 'SUBMITTED' || replyItem.status == 'DRAFT') && canApprove) ...[
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFF059669)),
-              onPressed: () => onApproveReply(replyItem.id),
-              icon: const Icon(Icons.check_circle_outline_rounded, size: 15),
-              label: const Text('اعتماد الرد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(width: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFFDC2626)),
-              onPressed: () => onRejectReply(replyItem.id),
-              icon: const Icon(Icons.cancel_outlined, size: 15),
-              label: const Text('رفض الرد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
-          ],
+              // للمشرفين والمعتمدين: اعتماد الرد أو رفضه
+              if ((replyItem.status == 'SUBMITTED' || replyItem.status == 'DRAFT') && canApprove) ...[
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFDC2626),
+                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                  onPressed: () => onRejectReply(replyItem.id),
+                  icon: const Icon(Icons.cancel_outlined, size: 15),
+                  label: const Text('رفض الرد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  ),
+                  onPressed: () => onApproveReply(replyItem.id),
+                  icon: const Icon(Icons.check_circle_outline_rounded, size: 15),
+                  label: const Text('اعتماد الرد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
+              ],
 
-          // للإدارة العليا ومسؤول النظام: إرسال نهائي للعميل بالبريد
-          if ((replyItem.status == 'APPROVED' || replyItem.status == 'SUBMITTED' || replyItem.status == 'DRAFT') &&
-              (role == 'GM' || role == 'DEPUTY_GM' || role == 'ADMIN'))
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF059669),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              ),
-              onPressed: () => onSendReply(replyItem.id),
-              icon: const Icon(Icons.send_rounded, size: 14),
-              label: const Text('إرسال نهائي للعميل بالبريد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
-        ],
-      ),
+              // للإدارة العليا ومسؤول النظام: إرسال نهائي للعميل بالبريد
+              if ((replyItem.status == 'APPROVED' || replyItem.status == 'SUBMITTED' || replyItem.status == 'DRAFT') &&
+                  (role == 'GM' || role == 'DEPUTY_GM' || role == 'ADMIN'))
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF059669),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  ),
+                  onPressed: () => onSendReply(replyItem.id),
+                  icon: const Icon(Icons.send_rounded, size: 14),
+                  label: const Text('إرسال نهائي للعميل بالبريد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+            ],
+          ),
     ],
   ),
 );

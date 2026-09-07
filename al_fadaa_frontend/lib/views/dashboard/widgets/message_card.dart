@@ -43,8 +43,8 @@ class MessageCard extends StatelessWidget {
       final DateTime date = msg['date'] as DateTime;
 
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: eventColor.withAlpha(12),
           borderRadius: BorderRadius.circular(8),
@@ -82,7 +82,7 @@ class MessageCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       description.trim(),
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155), height: 1.3),
+                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155), height: 1.35),
                     ),
                   ],
                 ],
@@ -112,7 +112,7 @@ class MessageCard extends StatelessWidget {
     final canApprove = role == 'GM' || role == 'DEPUTY_GM' || role == 'DEPT_MANAGER' || role == 'ADMIN';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isDraft
             ? const Color(0xFFFFFBEB)
@@ -139,7 +139,7 @@ class MessageCard extends StatelessWidget {
         children: [
           // رأس الرسالة (Sender Bar)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isDraft
                   ? const Color(0xFFFEF3C7).withAlpha(60)
@@ -158,7 +158,7 @@ class MessageCard extends StatelessWidget {
               children: [
                 // أفاتار المرسل
                 CircleAvatar(
-                  radius: 15,
+                  radius: 17,
                   backgroundColor: isClient
                       ? const Color(0xFF0284C7).withAlpha(25)
                       : (isDraft ? const Color(0xFFD97706).withAlpha(25) : const Color(0xFF059669).withAlpha(25)),
@@ -300,18 +300,8 @@ class MessageCard extends StatelessWidget {
             ),
           ),
 
-          // نص الرسالة الفعلي
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SelectableText(
-              body,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF1E293B),
-                height: 1.6,
-              ),
-            ),
-          ),
+          // نص الرسالة الفعلي المنظم مع كشف رسائل إعادة التوجيه
+          _ForwardedEmailBlock(body: body),
 
           // قائمة المرفقات
           if (attachments.isNotEmpty)
@@ -352,3 +342,256 @@ class MessageCard extends StatelessWidget {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
+
+/// مكوّن منظم لعرض نص الرسالة وكشف وتنسيق ترويسات البريد الموجه (Forwarded Emails)
+class _ForwardedEmailBlock extends StatefulWidget {
+  final String body;
+
+  const _ForwardedEmailBlock({required this.body});
+
+  @override
+  State<_ForwardedEmailBlock> createState() => _ForwardedEmailBlockState();
+}
+
+class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
+  bool _showDetails = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final parsed = _parseBody(widget.body);
+
+    if (!parsed.hasForwarded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: SelectableText(
+          widget.body,
+          style: const TextStyle(
+            fontSize: 13.5,
+            color: Color(0xFF1E293B),
+            height: 1.65,
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // نص تمهيدي يسبق الرسالة الموجهة إن وُجد
+          if (parsed.introText != null && parsed.introText!.trim().isNotEmpty) ...[
+            SelectableText(
+              parsed.introText!.trim(),
+              style: const TextStyle(
+                fontSize: 13.5,
+                color: Color(0xFF1E293B),
+                height: 1.65,
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // بطاقة الرسالة الموجهة المرتبة
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // رأس بطاقة التوجيه
+                InkWell(
+                  onTap: () => setState(() => _showDetails = !_showDetails),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.forward_to_inbox_rounded, size: 16, color: Color(0xFF2563EB)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'رسالة بريد إلكتروني موجهة: ${parsed.subject ?? "بدون موضوع"}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (parsed.from != null && parsed.from!.isNotEmpty)
+                                Text(
+                                  'من: ${parsed.from}${parsed.date != null ? " | ${parsed.date}" : ""}',
+                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          _showDetails ? 'إخفاء التفاصيل' : 'عرض التفاصيل',
+                          style: const TextStyle(fontSize: 10.5, color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          _showDetails ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                          size: 16,
+                          color: const Color(0xFF2563EB),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // تفاصيل الترويسة الفنية القابلة للطي
+                if (_showDetails) ...[
+                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    color: const Color(0xFFF1F5F9).withAlpha(120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (parsed.from != null) _buildDetailRow('المرسل (From):', parsed.from!),
+                        if (parsed.to != null) _buildDetailRow('إلى (To):', parsed.to!),
+                        if (parsed.date != null) _buildDetailRow('التاريخ (Date):', parsed.date!),
+                        if (parsed.subject != null) _buildDetailRow('الموضوع (Subject):', parsed.subject!),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // نص الرسالة الأصلي المنظف
+          SelectableText(
+            parsed.cleanBody,
+            style: const TextStyle(
+              fontSize: 13.5,
+              color: Color(0xFF1E293B),
+              height: 1.65,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+            ),
+          ),
+          Expanded(
+            child: SelectableText(
+              value,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _ParsedMessage _parseBody(String text) {
+    final lines = text.split('\n');
+    int markerIndex = -1;
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.contains('Forwarded message') ||
+          line.contains('الرسالة الموجهة') ||
+          line.contains('الرسالة المعاد توجيهها') ||
+          line.contains('Begin forwarded message:')) {
+        markerIndex = i;
+        break;
+      }
+    }
+
+    if (markerIndex == -1) {
+      return _ParsedMessage(hasForwarded: false, cleanBody: text);
+    }
+
+    final intro = lines.sublist(0, markerIndex).join('\n').trim();
+    String? from;
+    String? date;
+    String? subject;
+    String? to;
+    int endHeaderIndex = markerIndex + 1;
+
+    for (int i = markerIndex + 1; i < lines.length && i < markerIndex + 14; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty && (from != null || date != null || subject != null)) {
+        endHeaderIndex = i + 1;
+        break;
+      }
+
+      final lower = line.toLowerCase();
+      if (lower.startsWith('from:') || line.startsWith('من:')) {
+        from = line.replaceFirst(RegExp(r'^(from:|من:)\s*', caseSensitive: false), '').trim();
+        endHeaderIndex = i + 1;
+      } else if (lower.startsWith('date:') || line.startsWith('التاريخ:')) {
+        date = line.replaceFirst(RegExp(r'^(date:|التاريخ:)\s*', caseSensitive: false), '').trim();
+        endHeaderIndex = i + 1;
+      } else if (lower.startsWith('subject:') || line.startsWith('الموضوع:')) {
+        subject = line.replaceFirst(RegExp(r'^(subject:|الموضوع:)\s*', caseSensitive: false), '').trim();
+        endHeaderIndex = i + 1;
+      } else if (lower.startsWith('to:') || line.startsWith('إلى:')) {
+        to = line.replaceFirst(RegExp(r'^(to:|إلى:)\s*', caseSensitive: false), '').trim();
+        endHeaderIndex = i + 1;
+      }
+    }
+
+    final clean = lines.sublist(endHeaderIndex).join('\n').trim();
+
+    return _ParsedMessage(
+      hasForwarded: true,
+      introText: intro.isNotEmpty ? intro : null,
+      from: from,
+      date: date,
+      subject: subject,
+      to: to,
+      cleanBody: clean.isNotEmpty ? clean : text,
+    );
+  }
+}
+
+class _ParsedMessage {
+  final bool hasForwarded;
+  final String? introText;
+  final String? from;
+  final String? date;
+  final String? subject;
+  final String? to;
+  final String cleanBody;
+
+  _ParsedMessage({
+    required this.hasForwarded,
+    this.introText,
+    this.from,
+    this.date,
+    this.subject,
+    this.to,
+    required this.cleanBody,
+  });
+}
+
