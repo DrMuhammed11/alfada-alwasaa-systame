@@ -4,3 +4,6 @@ import 'download_helper_stub.dart'
 
 Future<void> saveAndDownloadFile(List<int> bytes, String fileName) =>
     saveAndDownloadFileImpl(bytes, fileName);
+
+Future<void> openFileInViewer(List<int> bytes, String fileName, [String? mimeType]) =>
+    openFileInViewerImpl(bytes, fileName, mimeType);

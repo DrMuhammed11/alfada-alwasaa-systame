@@ -869,6 +869,44 @@ class ApiService {
     }
   }
 
+  final Map<String, Uint8List> _attachmentBytesCache = {};
+
+  Future<Uint8List?> getAttachmentBytes(String attachmentId) async {
+    if (_attachmentBytesCache.containsKey(attachmentId)) {
+      return _attachmentBytesCache[attachmentId];
+    }
+    try {
+      final uri = Uri.parse('${ApiConstants.baseUrl}/attachments/$attachmentId/download');
+      final headers = <String, String>{};
+      if (_token != null && _token!.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $_token';
+      }
+
+      final response = await _get(uri, headers: headers, timeout: const Duration(seconds: 30));
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        _attachmentBytesCache[attachmentId] = bytes;
+        return bytes;
+      }
+    } catch (e) {
+      debugPrint('getAttachmentBytes exception: $e');
+    }
+    return null;
+  }
+
+  Future<bool> viewAttachment(String attachmentId, String fileName, [String? mimeType]) async {
+    try {
+      final bytes = await getAttachmentBytes(attachmentId);
+      if (bytes != null && bytes.isNotEmpty) {
+        await openFileInViewer(bytes, fileName, mimeType);
+        return true;
+      }
+    } catch (e) {
+      debugPrint('viewAttachment exception: $e');
+    }
+    return false;
+  }
+
   Future<bool> downloadAttachment(String attachmentId, String fileName) async {
     try {
       final uri = Uri.parse('${ApiConstants.baseUrl}/attachments/$attachmentId/download');

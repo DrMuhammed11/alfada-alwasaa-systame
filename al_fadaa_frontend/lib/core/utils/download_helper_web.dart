@@ -13,3 +13,12 @@ Future<void> saveAndDownloadFileImpl(List<int> bytes, String fileName) async {
   html.document.body?.children.remove(anchor);
   html.Url.revokeObjectUrl(url);
 }
+
+Future<void> openFileInViewerImpl(List<int> bytes, String fileName, [String? mimeType]) async {
+  final mime = mimeType ?? (fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+  final blob = html.Blob([bytes], mime);
+  final url = html.Url.createObjectUrlFromBlob(blob);
+  html.window.open(url, '_blank');
+  // Revoke object URL after delay so browser has time to load it in the new tab
+  Future.delayed(const Duration(minutes: 5), () => html.Url.revokeObjectUrl(url));
+}
