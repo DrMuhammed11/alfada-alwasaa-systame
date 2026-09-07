@@ -166,9 +166,10 @@ class _CreateIncomingDialogState extends State<CreateIncomingDialog> {
                           value: _priority,
                           decoration: const InputDecoration(labelText: 'درجة الأهمية'),
                           items: const [
-                            DropdownMenuItem(value: 'NORMAL', child: Text('عادي')),
-                            DropdownMenuItem(value: 'HIGH', child: Text('مرتفع')),
-                            DropdownMenuItem(value: 'URGENT', child: Text('عاجل جداً')),
+                            DropdownMenuItem(value: 'LOW', child: Text('عادي')),
+                            DropdownMenuItem(value: 'NORMAL', child: Text('مهم')),
+                            DropdownMenuItem(value: 'HIGH', child: Text('عاجل')),
+                            DropdownMenuItem(value: 'URGENT', child: Text('عاجل جدًا')),
                           ],
                           onChanged: (v) => setState(() => _priority = v!),
                         ),

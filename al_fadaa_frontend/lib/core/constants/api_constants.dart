@@ -53,13 +53,13 @@ class ApiConstants {
   static String getPriorityLabel(String priority) {
     switch (priority.toUpperCase()) {
       case 'URGENT':
-        return 'عاجل جداً';
+        return 'عاجل جدًا';
       case 'HIGH':
-        return 'مرتفع';
+        return 'عاجل';
       case 'NORMAL':
-        return 'عادي';
+        return 'مهم';
       case 'LOW':
-        return 'منخفض';
+        return 'عادي';
       default:
         return priority;
     }
