@@ -257,6 +257,8 @@ export class CorrespondencesService {
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
 
     const archivable: CorrespondenceStatus[] = [
+      CorrespondenceStatus.RECEIVED,
+      CorrespondenceStatus.UNDER_REVIEW,
       CorrespondenceStatus.SENT,
       CorrespondenceStatus.CLOSED,
     ];

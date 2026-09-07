@@ -75,6 +75,11 @@ export class RepliesSendService {
       throw new BadRequestException('تم إرسال هذا الرد مسبقًا');
     }
     const corr = reply.correspondence;
+    const rootCorr = corr.parentId
+      ? ((await this.prisma.correspondence.findUnique({ where: { id: corr.parentId } })) ?? corr)
+      : corr;
+    const rootRefNumber = rootCorr.refNumber;
+
     if (corr.type !== CorrespondenceType.INCOMING) {
       throw new BadRequestException('الإرسال متاح للردود على المراسلات الواردة');
     }
@@ -87,6 +92,12 @@ export class RepliesSendService {
     const replyAttachments = await this.prisma.attachment.findMany({
       where: { replyId: reply.id },
     });
+
+    const cleanSubject = rootCorr.subject
+      .replace(/^(?:رد|Re):\s*/i, '')
+      .replace(/^\[(?:INC|OUT|INT)-\d{4}-\S+\]\s*/i, '')
+      .trim();
+    const mailSubject = `رد: [${rootRefNumber}] ${cleanSubject}`;
 
     const now = new Date();
     let outRefNumber = '';
@@ -137,7 +148,7 @@ export class RepliesSendService {
         data: {
           refNumber: outRefNumber,
           type: CorrespondenceType.OUTGOING,
-          subject: `رد: ${corr.subject}`,
+          subject: mailSubject,
           body: reply.body,
           priority: corr.priority ?? Priority.NORMAL,
           status: CorrespondenceStatus.SENT,
@@ -194,9 +205,9 @@ export class RepliesSendService {
     const uploadDir = process.env.UPLOAD_DIR || './uploads';
     await this.mail.sendReply({
       to: corr.senderEmail,
-      subject: `رد: ${corr.subject}`,
+      subject: mailSubject,
       body: reply.body,
-      refNumber: outRefNumber,
+      refNumber: rootRefNumber,
       messageId: outMessageId,
       inReplyTo: corr.messageId ?? undefined,
       references: corr.messageId ?? undefined,
@@ -214,7 +225,7 @@ export class RepliesSendService {
     await this.notifications.notifyReplySent({
       recipientIds: sentRecipients,
       outRefNumber,
-      inRefNumber: corr.refNumber,
+      inRefNumber: rootRefNumber,
       toEmail: corr.senderEmail ?? '',
       correspondenceId: corr.id,
     });
@@ -235,6 +246,12 @@ export class RepliesSendService {
       where: { id: dto.correspondenceId },
     });
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
+
+    const rootCorr = corr.parentId
+      ? ((await this.prisma.correspondence.findUnique({ where: { id: corr.parentId } })) ?? corr)
+      : corr;
+    const rootRefNumber = rootCorr.refNumber;
+
     if (corr.type !== CorrespondenceType.INCOMING) {
       throw new BadRequestException('الرد المباشر متاح للمراسلات الواردة فقط');
     }
@@ -260,9 +277,11 @@ export class RepliesSendService {
     const mailDomain = mailFrom.includes('@') ? mailFrom.split('@')[1] : 'alfadaalwasaa.com';
     const outMessageId = `<${outRefNumber.toLowerCase()}.${Date.now()}@${mailDomain}>`;
 
-    const mailSubject = corr.subject.startsWith('رد:') || corr.subject.startsWith('Re:')
-      ? corr.subject
-      : `رد: [${corr.refNumber}] ${corr.subject}`;
+    const cleanSubject = rootCorr.subject
+      .replace(/^(?:رد|Re):\s*/i, '')
+      .replace(/^\[(?:INC|OUT|INT)-\d{4}-\S+\]\s*/i, '')
+      .trim();
+    const mailSubject = `رد: [${rootRefNumber}] ${cleanSubject}`;
 
     const directAttachments = (dto.attachmentIds && dto.attachmentIds.length > 0)
       ? await this.prisma.attachment.findMany({
@@ -399,7 +418,7 @@ export class RepliesSendService {
       to: corr.senderEmail,
       subject: mailSubject,
       body: dto.body,
-      refNumber: outRefNumber,
+      refNumber: rootRefNumber,
       messageId: outMessageId,
       inReplyTo: corr.messageId ?? undefined,
       references: corr.messageId ?? undefined,
@@ -413,7 +432,7 @@ export class RepliesSendService {
     await this.notifications.notifyReplySent({
       recipientIds: [user.id],
       outRefNumber,
-      inRefNumber: corr.refNumber,
+      inRefNumber: rootRefNumber,
       toEmail: corr.senderEmail,
       correspondenceId: corr.id,
     });

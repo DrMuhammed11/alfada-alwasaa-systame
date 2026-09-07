@@ -247,7 +247,21 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
 
             // 3. الربط أو بدء جذر جديد:
             if (threadRoot) {
-              const childRefNumber = await this.refNumbers.generate('INC');
+              const childCount = await this.prisma.correspondence.count({
+                where: { parentId: threadRoot.id },
+              });
+              let seq = childCount + 1;
+              let childRefNumber = `${threadRoot.refNumber}#${seq}`;
+              while (
+                await this.prisma.correspondence.findUnique({
+                  where: { refNumber: childRefNumber },
+                  select: { id: true },
+                })
+              ) {
+                seq++;
+                childRefNumber = `${threadRoot.refNumber}#${seq}`;
+              }
+
               const childCorr = await this.prisma.correspondence.create({
                 data: {
                   refNumber: childRefNumber,
