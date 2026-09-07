@@ -5,11 +5,12 @@ import { RepliesController } from './replies.controller';
 import { RepliesService } from './replies.service';
 import { RepliesApprovalService } from './replies-approval.service';
 import { RepliesSendService } from './replies-send.service';
+import { RepliesVersioningService } from './replies-versioning.service';
 
 @Module({
   imports: [CorrespondencesModule, MailModule],
   controllers: [RepliesController],
-  providers: [RepliesService, RepliesApprovalService, RepliesSendService],
-  exports: [RepliesService, RepliesApprovalService, RepliesSendService],
+  providers: [RepliesService, RepliesApprovalService, RepliesSendService, RepliesVersioningService],
+  exports: [RepliesService, RepliesApprovalService, RepliesSendService, RepliesVersioningService],
 })
 export class RepliesModule {}

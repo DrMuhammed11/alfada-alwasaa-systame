@@ -1,0 +1,127 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import type { AuthUser } from '../common/types';
+
+export interface DiffLine {
+  type: 'added' | 'removed' | 'unchanged';
+  line: string;
+}
+
+export function computeLineDiff(textA: string, textB: string): DiffLine[] {
+  const linesA = textA ? textA.split(/\r?\n/) : [];
+  const linesB = textB ? textB.split(/\r?\n/) : [];
+  const m = linesA.length;
+  const n = linesB.length;
+
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (linesA[i] === linesB[j]) {
+        dp[i + 1][j + 1] = dp[i][j] + 1;
+      } else {
+        dp[i + 1][j + 1] = Math.max(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+  }
+
+  const result: DiffLine[] = [];
+  let i = m;
+  let j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && linesA[i - 1] === linesB[j - 1]) {
+      result.unshift({ type: 'unchanged', line: linesA[i - 1] });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      result.unshift({ type: 'added', line: linesB[j - 1] });
+      j--;
+    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+      result.unshift({ type: 'removed', line: linesA[i - 1] });
+      i--;
+    }
+  }
+  return result;
+}
+
+@Injectable()
+export class RepliesVersioningService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /** إنشاء أو حفظ نسخة جديدة غير قابلة للتعديل */
+  async saveSnapshot(
+    replyId: string,
+    version: number,
+    body: string,
+    authorId: string,
+    attachmentsSnapshot?: any,
+  ) {
+    const existing = await this.prisma.replyVersion.findUnique({
+      where: { replyId_version: { replyId, version } },
+    });
+    if (existing) return existing;
+
+    return this.prisma.replyVersion.create({
+      data: {
+        replyId,
+        version,
+        body,
+        authorId,
+        attachmentsSnapshot: attachmentsSnapshot ?? [],
+      },
+      include: {
+        author: { select: { id: true, name: true, role: true, email: true } },
+      },
+    });
+  }
+
+  /** استعراض كافة الإصدارات التاريخية للرد مرتبة تصاعديًا */
+  async getVersions(replyId: string, _user: AuthUser) {
+    const reply = await this.prisma.reply.findUnique({ where: { id: replyId } });
+    if (!reply) throw new NotFoundException('الرد غير موجود');
+
+    return this.prisma.replyVersion.findMany({
+      where: { replyId },
+      include: {
+        author: { select: { id: true, name: true, role: true, email: true } },
+      },
+      orderBy: { version: 'asc' },
+    });
+  }
+
+  /**
+   * حساب الفرق السطري بين آخر نسخة مرفوضة والنسخة الحالية (أو نسختين محددتين)
+   */
+  async getDiff(replyId: string, fromVersion?: number, toVersion?: number) {
+    const versions = await this.prisma.replyVersion.findMany({
+      where: { replyId },
+      orderBy: { version: 'asc' },
+    });
+
+    if (versions.length === 0) {
+      return { diff: [], fromVersion: null, toVersion: null };
+    }
+
+    let baseVer = versions[0];
+    let targetVer = versions[versions.length - 1];
+
+    if (fromVersion !== undefined) {
+      baseVer = versions.find((v) => v.version === fromVersion) ?? baseVer;
+    } else if (versions.length > 1) {
+      // افتراضيًا: النسخة قبل الأخيرة (المرفوضة أو السابقة)
+      baseVer = versions[versions.length - 2];
+    }
+
+    if (toVersion !== undefined) {
+      targetVer = versions.find((v) => v.version === toVersion) ?? targetVer;
+    }
+
+    const diff = computeLineDiff(baseVer.body, targetVer.body);
+    return {
+      diff,
+      fromVersion: baseVer.version,
+      toVersion: targetVer.version,
+      baseCreatedAt: baseVer.createdAt,
+      targetCreatedAt: targetVer.createdAt,
+    };
+  }
+}

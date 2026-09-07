@@ -612,6 +612,94 @@ class ApiService {
     }
   }
 
+  // --- Reply Versioning & Diff ---
+  Future<List<ReplyVersionItem>> getReplyVersions(String replyId) async {
+    try {
+      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/versions'));
+      if (response.statusCode == 200) {
+        final List list = jsonDecode(response.body);
+        return list.map((item) => ReplyVersionItem.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getReplyVersions error: $e');
+      return [];
+    }
+  }
+
+  Future<DiffResult?> getReplyDiff(String replyId, {int? v1, int? v2}) async {
+    try {
+      final queryParams = <String, String>{};
+      if (v1 != null) queryParams['v1'] = v1.toString();
+      if (v2 != null) queryParams['v2'] = v2.toString();
+      final uri = Uri.parse('${ApiConstants.baseUrl}/replies/$replyId/diff').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+      final response = await _get(uri);
+      if (response.statusCode == 200) {
+        return DiffResult.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      debugPrint('getReplyDiff error: $e');
+      return null;
+    }
+  }
+
+  // --- Delegation ---
+  Future<List<Map<String, dynamic>>> getMyDelegations() async {
+    try {
+      final response = await _get(Uri.parse('${ApiConstants.baseUrl}/delegations/my'));
+      if (response.statusCode == 200) {
+        final List list = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(list);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getMyDelegations error: $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> createDelegation({
+    required String delegateId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? note,
+  }) async {
+    try {
+      final response = await _post(
+        Uri.parse('${ApiConstants.baseUrl}/delegations'),
+        body: jsonEncode({
+          'delegateId': delegateId,
+          'startDate': startDate.toIso8601String(),
+          'endDate': endDate.toIso8601String(),
+          if (note != null && note.isNotEmpty) 'note': note,
+        }),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنشاء التفويض', response.statusCode)};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
+    }
+  }
+
+  Future<Map<String, dynamic>> terminateDelegation(String delegationId) async {
+    try {
+      final response = await _patch(
+        Uri.parse('${ApiConstants.baseUrl}/delegations/$delegationId/terminate'),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      } else {
+        return {'success': false, 'message': _extractErrorMessage(response.body, 'فشل إنهاء التفويض', response.statusCode)};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
+    }
+  }
+
   // --- System Metadata ---
   Future<List<Department>> getDepartments() async {
     try {

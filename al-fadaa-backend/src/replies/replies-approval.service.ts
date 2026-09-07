@@ -6,9 +6,11 @@ import {
   Optional,
 } from '@nestjs/common';
 import {
+  ApprovalStepStatus,
   AuditAction,
   CorrespondenceStatus,
   NotificationType,
+  Priority,
   ReferralStatus,
   ReplyStatus,
   Role,
@@ -29,6 +31,7 @@ import { canApproveReply } from '../security/business-policies';
 import { OutboxService } from '../outbox/outbox.service';
 import { OutboxProcessor } from '../outbox/outbox.processor';
 import { OutboxEventType } from '../outbox/outbox.types';
+import { RepliesVersioningService } from './replies-versioning.service';
 
 @Injectable()
 export class RepliesApprovalService {
@@ -38,13 +41,20 @@ export class RepliesApprovalService {
     private readonly notifications: NotificationsService,
     @Optional() private readonly outbox?: OutboxService,
     @Optional() private readonly outboxProcessor?: OutboxProcessor,
+    @Optional() private readonly versioning?: RepliesVersioningService,
   ) {}
 
-  /** رفع المسودة للاعتماد — صاحبها فقط */
+  /**
+   * رفع المسودة للاعتماد — صاحبها فقط
+   * ينشئ خطوات المسار المتتابعة وفق الأولوية، ويشعر صاحب المستوى الأول فقط
+   */
   async submit(id: string, user: AuthUser): Promise<ReplyRow> {
     const reply = await this.prisma.reply.findUnique({
       where: { id },
-      include: REPLY_INCLUDE,
+      include: {
+        ...REPLY_INCLUDE,
+        correspondence: true,
+      },
     });
     if (!reply) throw new NotFoundException('الرد غير موجود');
 
@@ -56,30 +66,48 @@ export class RepliesApprovalService {
     }
 
     const now = new Date();
-    // حساب مستحقي الاعتماد مسبقاً لحفظهم في الـ Outbox داخل نفس المعاملة
-    const approvalRecipients = new Set<string>();
-    if (reply.taskId) {
-      const taskRow = await this.prisma.task.findUnique({
-        where: { id: reply.taskId },
-        select: { assignedById: true },
-      });
-      if (taskRow && taskRow.assignedById !== reply.authorId) {
-        approvalRecipients.add(taskRow.assignedById);
-      }
-    }
-    const openReferrals = this.prisma.referral
-      ? await this.prisma.referral.findMany({
-          where: { correspondenceId: reply.correspondenceId, status: ReferralStatus.OPEN },
-          select: { fromUserId: true },
-        })
-      : [];
-    for (const referral of openReferrals) {
-      if (referral.fromUserId !== reply.authorId) {
-        approvalRecipients.add(referral.fromUserId);
-      }
-    }
+    const priority = reply.correspondence.priority ?? Priority.NORMAL;
+
+    // 1. تحديد خطوات المسار بناءً على الإعدادات أو الافتراضي
+    const workflowSteps = await this.getWorkflowStepsForPriority(priority);
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      // حذف أي خطوات اعتماد سابقة إن وُجدت (مثلاً من محاولة سابقة رُفضت)
+      if (tx.approvalStep) {
+        await tx.approvalStep.deleteMany({
+          where: { replyId: id },
+        });
+
+        // إنشاء خطوات المستويات المتتابعة
+        for (const ws of workflowSteps) {
+          await tx.approvalStep.create({
+            data: {
+              replyId: id,
+              level: ws.level,
+              requiredRole: ws.requiredRole,
+              status: ApprovalStepStatus.PENDING,
+            },
+          });
+        }
+      }
+
+      // حفظ نسخة غير قابلة للتعديل عند الرفع إن لم تكن محفوظة
+      if (tx.replyVersion) {
+        const existingVer = await tx.replyVersion.findUnique({
+          where: { replyId_version: { replyId: id, version: reply.version } },
+        });
+        if (!existingVer) {
+          await tx.replyVersion.create({
+            data: {
+              replyId: id,
+              version: reply.version,
+              body: reply.body,
+              authorId: reply.authorId,
+            },
+          });
+        }
+      }
+
       const res = await tx.reply.updateMany({
         where: {
           id,
@@ -124,6 +152,10 @@ export class RepliesApprovalService {
         });
       }
 
+      // حساب مستلمي المستوى الأول فقط
+      const level1Role = workflowSteps[0]?.requiredRole ?? Role.DEPT_MANAGER;
+      const level1Recipients = await this.getLevelApproverIds(level1Role, reply);
+
       if (this.outbox) {
         await this.outbox.emit(tx, {
           type: OutboxEventType.REPLY_SUBMITTED,
@@ -132,14 +164,19 @@ export class RepliesApprovalService {
               action: AuditAction.SUBMIT,
               entityType: 'Reply',
               entityId: id,
-              summary: `رفع مسودة الرد للاعتماد على المراسلة ${reply.correspondence.refNumber}`,
-              metadata: { correspondenceId: reply.correspondenceId },
+              summary: `رفع مسودة الرد للاعتماد (المستوى 1 من ${workflowSteps.length}) على المراسلة ${reply.correspondence.refNumber}`,
+              metadata: {
+                correspondenceId: reply.correspondenceId,
+                version: reply.version,
+                level: 1,
+                totalLevels: workflowSteps.length,
+              },
               userId: user.id,
             },
             notification: {
               type: NotificationType.REPLY_SUBMITTED,
-              recipientIds: [...approvalRecipients],
-              title: `مسودة رد مرفوعة للاعتماد على ${reply.correspondence.refNumber}`,
+              recipientIds: level1Recipients,
+              title: `مسودة رد مرفوعة للاعتماد (المستوى 1) على ${reply.correspondence.refNumber}`,
               body: `رفع «${reply.author.name}» مسودة رد للاعتماد على المراسلة ${reply.correspondence.refNumber}`,
               link: `/correspondences/${reply.correspondenceId}`,
               entityType: 'Reply',
@@ -149,8 +186,11 @@ export class RepliesApprovalService {
         });
       }
 
-      return r;
+      return { reply: r, level1Recipients };
     });
+
+    const level1Role = workflowSteps[0]?.requiredRole ?? Role.DEPT_MANAGER;
+    const level1Recipients = updated.level1Recipients;
 
     if (this.outboxProcessor) {
       this.outboxProcessor.trigger();
@@ -159,108 +199,221 @@ export class RepliesApprovalService {
         action: AuditAction.SUBMIT,
         entityType: 'Reply',
         entityId: id,
-        summary: `رفع مسودة الرد للاعتماد على المراسلة ${reply.correspondence.refNumber}`,
-        metadata: { correspondenceId: reply.correspondenceId },
+        summary: `رفع مسودة الرد للاعتماد (المستوى 1 من ${workflowSteps.length}) على المراسلة ${reply.correspondence.refNumber}`,
+        metadata: {
+          correspondenceId: reply.correspondenceId,
+          version: reply.version,
+          level: 1,
+          totalLevels: workflowSteps.length,
+        },
       });
 
       await this.notifications.notifyReplySubmitted({
-        recipientIds: [...approvalRecipients],
+        recipientIds: level1Recipients,
         authorName: reply.author.name,
         refNumber: reply.correspondence.refNumber,
         subject: reply.correspondence.subject,
         correspondenceId: reply.correspondenceId,
-        replyId: updated.id,
+        replyId: updated.reply.id,
       });
     }
 
-    return updated;
+    return updated.reply;
   }
 
-  /** اعتماد الرد — لا يجوز اعتماد رد صاغه المعتمد بنفسه */
+  /**
+   * اعتماد الرد — يمر تتابعيًا:
+   * عند اعتماد مستوى يُنشَّط التالي، ويصبح الرد APPROVED بعد آخر مستوى فقط
+   */
   async approve(id: string, user: AuthUser): Promise<ReplyRow> {
     const reply = await this.prisma.reply.findUnique({
       where: { id },
       include: { ...REPLY_INCLUDE, correspondence: true },
     });
     if (!reply) throw new NotFoundException('الرد غير موجود');
-    await this.assertApprover(reply, user);
 
-    const now = new Date();
-    const updated = await this.prisma.$transaction(async (tx) => {
-      const res = await tx.reply.updateMany({
-        where: {
-          id,
-          ...(reply.version !== undefined ? { version: reply.version } : {}),
-          status: ReplyStatus.SUBMITTED,
-        },
-        data: {
-          status: ReplyStatus.APPROVED,
-          approvedById: user.id,
-          approvedAt: now,
-          ...(reply.version !== undefined ? { version: { increment: 1 } } : {}),
-        },
-      });
-      if (res.count === 0) {
-        const current = await tx.reply.findUnique({
-          where: { id },
-          select: { status: true },
-        });
-        if (!current) throw new NotFoundException('الرد غير موجود');
-        throw new BadRequestException(
-          `تم تغيير حالة الرد للتو من قِبل مستخدم آخر (الحالة الحالية: «${current.status}»)`,
-        );
+    // جلب خطوات الاعتماد المرتبة للمسودة
+    const steps = this.prisma.approvalStep
+      ? await this.prisma.approvalStep.findMany({
+          where: { replyId: id },
+          orderBy: { level: 'asc' },
+        })
+      : [];
+
+    const activeStep = steps.find((s) => s.status === ApprovalStepStatus.PENDING);
+
+    // التحقق من صلاحية المعتمد أو وكيله النشط
+    const eligibility = await this.checkApproverEligibility(reply, user, activeStep?.requiredRole);
+    if (!eligibility.allowed) {
+      if (eligibility.reason === 'يمكنك اعتماد ردود مراسلات قسمك أو المحالة إليك فقط') {
+        throw new ForbiddenException(eligibility.reason);
       }
-      const r = await tx.reply.findUniqueOrThrow({
-        where: { id },
-        include: REPLY_INCLUDE,
-      });
-      await tx.correspondence.update({
-        where: { id: reply.correspondenceId },
-        data: {
-          status: reply.correspondence?.status
-            ? assertTransition(
-                reply.correspondence.status,
-                CorrespondenceAction.APPROVE_REPLY,
-              )
-            : CorrespondenceStatus.APPROVED,
-        },
-      });
-      // الإحالات المفتوحة أصبحت مجابة
-      await tx.referral.updateMany({
-        where: {
-          correspondenceId: reply.correspondenceId,
-          status: ReferralStatus.OPEN,
-        },
-        data: { status: ReferralStatus.ANSWERED, answeredAt: now },
-      });
+      throw new BadRequestException(eligibility.reason ?? 'غير مصرح لك باعتماد هذا الرد');
+    }
 
-      if (this.outbox) {
-        await this.outbox.emit(tx, {
-          type: OutboxEventType.REPLY_APPROVED,
-          payload: {
-            audit: {
-              action: AuditAction.APPROVE,
-              entityType: 'Reply',
-              entityId: id,
-              summary: `اعتماد الرد على المراسلة ${reply.correspondence.refNumber} (بقلم ${reply.author.name})`,
-              metadata: { approver: user.email, correspondenceId: reply.correspondenceId },
-              userId: user.id,
-            },
-            notification: {
-              type: NotificationType.REPLY_APPROVED,
-              userId: reply.authorId,
-              title: `اعتُمد ردك على المراسلة ${reply.correspondence.refNumber}`,
-              body: `اعتمد ${user.name} الرد الذي أعددته على المراسلة ${reply.correspondence.refNumber}`,
-              link: `/correspondences/${reply.correspondenceId}`,
-              entityType: 'Reply',
-              entityId: id,
-            },
+    const currentLevel = activeStep?.level ?? 1;
+    const nextStep = activeStep
+      ? steps.find((s) => s.level > activeStep.level && s.status === ApprovalStepStatus.PENDING)
+      : null;
+    const isFinalLevel = !nextStep;
+    const now = new Date();
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      // 1. تحديث الخطوة الحالية
+      if (activeStep && tx.approvalStep) {
+        await tx.approvalStep.update({
+          where: { id: activeStep.id },
+          data: {
+            status: ApprovalStepStatus.APPROVED,
+            approverId: user.id,
+            decidedAt: now,
           },
         });
       }
 
+      if (isFinalLevel) {
+        // اعتماد نهائي بعد اكتمال كافة المستويات
+        const res = await tx.reply.updateMany({
+          where: {
+            id,
+            ...(reply.version !== undefined ? { version: reply.version } : {}),
+            status: ReplyStatus.SUBMITTED,
+          },
+          data: {
+            status: ReplyStatus.APPROVED,
+            approvedById: user.id,
+            approvedAt: now,
+            ...(reply.version !== undefined ? { version: { increment: 1 } } : {}),
+          },
+        });
+        if (res.count === 0) {
+          const current = await tx.reply.findUnique({
+            where: { id },
+            select: { status: true },
+          });
+          if (!current) throw new NotFoundException('الرد غير موجود');
+          throw new BadRequestException(
+            `تم تغيير حالة الرد للتو من قِبل مستخدم آخر (الحالة الحالية: «${current.status}»)`,
+          );
+        }
+
+        await tx.correspondence.update({
+          where: { id: reply.correspondenceId },
+          data: {
+            status: reply.correspondence?.status
+              ? assertTransition(
+                  reply.correspondence.status,
+                  CorrespondenceAction.APPROVE_REPLY,
+                )
+              : CorrespondenceStatus.APPROVED,
+          },
+        });
+
+        // إغلاق الإحالات المفتوحة
+        await tx.referral.updateMany({
+          where: {
+            correspondenceId: reply.correspondenceId,
+            status: ReferralStatus.OPEN,
+          },
+          data: { status: ReferralStatus.ANSWERED, answeredAt: now },
+        });
+      } else {
+        // مستوى وسيط: الرد يبقى SUBMITTED والمراسلة تبقى PENDING_APPROVAL
+        await tx.reply.update({
+          where: { id },
+          data: { updatedAt: now },
+        });
+      }
+
+      const r = await tx.reply.findUniqueOrThrow({
+        where: { id },
+        include: REPLY_INCLUDE,
+      });
+
+      const summaryText = isFinalLevel
+        ? `اعتماد الرد النهائي على المراسلة ${reply.correspondence.refNumber}`
+        : `اعتماد الرد للمستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber}`;
+
+      const finalSummary = eligibility.actingOnBehalfOf
+        ? `${summaryText} (نيابة عن ${eligibility.actingOnBehalfOf.name})`
+        : summaryText;
+
+      const auditMetadata: Record<string, any> = {
+        approver: user.email,
+        correspondenceId: reply.correspondenceId,
+        level: currentLevel,
+        isFinal: isFinalLevel,
+        version: reply.version,
+        ...(nextStep ? { nextLevel: nextStep.level } : {}),
+        ...(eligibility.actingOnBehalfOf
+          ? {
+              delegatorId: eligibility.actingOnBehalfOf.id,
+              delegatorName: eligibility.actingOnBehalfOf.name,
+              delegateUserId: user.id,
+            }
+          : {}),
+      };
+
+      if (this.outbox) {
+        if (isFinalLevel) {
+          await this.outbox.emit(tx, {
+            type: OutboxEventType.REPLY_APPROVED,
+            payload: {
+              audit: {
+                action: AuditAction.APPROVE,
+                entityType: 'Reply',
+                entityId: id,
+                summary: finalSummary,
+                metadata: auditMetadata,
+                userId: user.id,
+              },
+              notification: {
+                type: NotificationType.REPLY_APPROVED,
+                userId: reply.authorId,
+                title: `اعتُمد ردك النهائي على المراسلة ${reply.correspondence.refNumber}`,
+                body: `اعتمد ${user.name} الرد الذي أعددته على المراسلة ${reply.correspondence.refNumber}`,
+                link: `/correspondences/${reply.correspondenceId}`,
+                entityType: 'Reply',
+                entityId: id,
+              },
+            },
+          });
+        } else if (nextStep) {
+          const nextRecipients = await this.getLevelApproverIds(nextStep.requiredRole, reply);
+          await this.outbox.emit(tx, {
+            type: OutboxEventType.REPLY_SUBMITTED,
+            payload: {
+              audit: {
+                action: AuditAction.APPROVE,
+                entityType: 'Reply',
+                entityId: id,
+                summary: finalSummary,
+                metadata: auditMetadata,
+                userId: user.id,
+              },
+              notification: {
+                type: NotificationType.REPLY_SUBMITTED,
+                recipientIds: nextRecipients,
+                title: `مسودة رد بانتظار اعتمادك (المستوى ${nextStep.level})`,
+                body: `اعتُمد المستوى ${currentLevel} وبانتظار اعتمادك على المراسلة ${reply.correspondence.refNumber}`,
+                link: `/correspondences/${reply.correspondenceId}`,
+                entityType: 'Reply',
+                entityId: id,
+              },
+            },
+          });
+        }
+      }
+
       return r;
     });
+
+    const summaryText = isFinalLevel
+      ? `اعتماد الرد النهائي على المراسلة ${reply.correspondence.refNumber}`
+      : `اعتماد الرد للمستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber}`;
+    const finalSummary = eligibility.actingOnBehalfOf
+      ? `${summaryText} (نيابة عن ${eligibility.actingOnBehalfOf.name})`
+      : summaryText;
 
     if (this.outboxProcessor) {
       this.outboxProcessor.trigger();
@@ -269,32 +422,98 @@ export class RepliesApprovalService {
         action: AuditAction.APPROVE,
         entityType: 'Reply',
         entityId: id,
-        summary: `اعتماد الرد على المراسلة ${reply.correspondence.refNumber} (بقلم ${reply.author.name})`,
-        metadata: { approver: user.email, correspondenceId: reply.correspondenceId },
+        summary: finalSummary,
+        metadata: {
+          approver: user.email,
+          correspondenceId: reply.correspondenceId,
+          level: currentLevel,
+          isFinal: isFinalLevel,
+          version: reply.version,
+          ...(nextStep ? { nextLevel: nextStep.level } : {}),
+          ...(eligibility.actingOnBehalfOf
+            ? {
+                delegatorId: eligibility.actingOnBehalfOf.id,
+                delegatorName: eligibility.actingOnBehalfOf.name,
+                delegateUserId: user.id,
+              }
+            : {}),
+        },
       });
 
-      await this.notifications.notifyReplyApproved({
-        toUserId: reply.authorId,
-        approverName: user.name,
-        refNumber: reply.correspondence.refNumber,
-        correspondenceId: reply.correspondenceId,
-        replyId: id,
-      });
+      if (isFinalLevel) {
+        await this.notifications.notifyReplyApproved({
+          toUserId: reply.authorId,
+          approverName: user.name,
+          refNumber: reply.correspondence.refNumber,
+          correspondenceId: reply.correspondenceId,
+          replyId: id,
+        });
+      } else if (nextStep) {
+        const nextRecipients = await this.getLevelApproverIds(nextStep.requiredRole, reply);
+        await this.notifications.notifyMany(nextRecipients, {
+          type: NotificationType.REPLY_SUBMITTED,
+          title: `مسودة رد بانتظار اعتمادك (المستوى ${nextStep.level})`,
+          body: `اعتُمد المستوى ${currentLevel} وبانتظار اعتمادك على المراسلة ${reply.correspondence.refNumber}`,
+          link: `/correspondences/${reply.correspondenceId}`,
+          entityType: 'Reply',
+          entityId: id,
+        });
+      }
     }
 
     return updated;
   }
 
-  /** رفض الرد مع سبب — يعود للموظف لتعديله */
+  /**
+   * رفض الرد مع سبب — يعود للموظف مع تصفير المستويات الأعلى
+   * وإشعار الكاتب والمعتمد السابق باحتمالية الإعادة
+   */
   async reject(id: string, dto: RejectReplyDto, user: AuthUser): Promise<ReplyRow> {
     const reply = await this.prisma.reply.findUnique({
       where: { id },
       include: { ...REPLY_INCLUDE, correspondence: true },
     });
     if (!reply) throw new NotFoundException('الرد غير موجود');
-    await this.assertApprover(reply, user);
+
+    const steps = this.prisma.approvalStep
+      ? await this.prisma.approvalStep.findMany({
+          where: { replyId: id },
+          orderBy: { level: 'asc' },
+        })
+      : [];
+
+    const activeStep = steps.find((s) => s.status === ApprovalStepStatus.PENDING);
+
+    const eligibility = await this.checkApproverEligibility(reply, user, activeStep?.requiredRole);
+    if (!eligibility.allowed) {
+      throw new BadRequestException(eligibility.reason ?? 'غير مصرح لك برفض هذا الرد');
+    }
+
+    const now = new Date();
+    const currentLevel = activeStep?.level ?? 1;
+    const previousStep = steps.find(
+      (s) => s.level === currentLevel - 1 && s.status === ApprovalStepStatus.APPROVED,
+    );
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      if (activeStep && tx.approvalStep) {
+        // تحديث الخطوة الحالية إلى مرفوضة
+        await tx.approvalStep.update({
+          where: { id: activeStep.id },
+          data: {
+            status: ApprovalStepStatus.REJECTED,
+            approverId: user.id,
+            decidedAt: now,
+            note: dto.note,
+          },
+        });
+
+        // تصفير أو حذف المستويات الأعلى اللاحقة
+        await tx.approvalStep.deleteMany({
+          where: { replyId: id, level: { gt: currentLevel } },
+        });
+      }
+
       const res = await tx.reply.updateMany({
         where: {
           id,
@@ -340,6 +559,10 @@ export class RepliesApprovalService {
         });
       }
 
+      const rejectSummary = eligibility.actingOnBehalfOf
+        ? `رفض الرد في المستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note} (نيابة عن ${eligibility.actingOnBehalfOf.name})`
+        : `رفض الرد في المستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note}`;
+
       if (this.outbox) {
         await this.outbox.emit(tx, {
           type: OutboxEventType.REPLY_REJECTED,
@@ -348,14 +571,27 @@ export class RepliesApprovalService {
               action: AuditAction.REJECT,
               entityType: 'Reply',
               entityId: id,
-              summary: `رفض الرد على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note}`,
-              metadata: { note: dto.note, reviewer: user.email, correspondenceId: reply.correspondenceId },
+              summary: rejectSummary,
+              metadata: {
+                level: currentLevel,
+                note: dto.note,
+                reviewer: user.email,
+                correspondenceId: reply.correspondenceId,
+                version: reply.version,
+                ...(eligibility.actingOnBehalfOf
+                  ? {
+                      delegatorId: eligibility.actingOnBehalfOf.id,
+                      delegatorName: eligibility.actingOnBehalfOf.name,
+                      delegateUserId: user.id,
+                    }
+                  : {}),
+              },
               userId: user.id,
             },
             notification: {
               type: NotificationType.REPLY_REJECTED,
               userId: reply.authorId,
-              title: `رُفض ردك على المراسلة ${reply.correspondence.refNumber}`,
+              title: `رُفض ردك في المستوى ${currentLevel} على ${reply.correspondence.refNumber}`,
               body: `سبب الرفض: ${dto.note}`,
               link: `/correspondences/${reply.correspondenceId}`,
               entityType: 'Reply',
@@ -368,6 +604,10 @@ export class RepliesApprovalService {
       return r;
     });
 
+    const rejectSummary = eligibility.actingOnBehalfOf
+      ? `رفض الرد في المستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note} (نيابة عن ${eligibility.actingOnBehalfOf.name})`
+      : `رفض الرد في المستوى ${currentLevel} على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note}`;
+
     if (this.outboxProcessor) {
       this.outboxProcessor.trigger();
     } else {
@@ -375,8 +615,21 @@ export class RepliesApprovalService {
         action: AuditAction.REJECT,
         entityType: 'Reply',
         entityId: id,
-        summary: `رفض الرد على المراسلة ${reply.correspondence.refNumber} — سبب: ${dto.note}`,
-        metadata: { note: dto.note, reviewer: user.email, correspondenceId: reply.correspondenceId },
+        summary: rejectSummary,
+        metadata: {
+          level: currentLevel,
+          note: dto.note,
+          reviewer: user.email,
+          correspondenceId: reply.correspondenceId,
+          version: reply.version,
+          ...(eligibility.actingOnBehalfOf
+            ? {
+                delegatorId: eligibility.actingOnBehalfOf.id,
+                delegatorName: eligibility.actingOnBehalfOf.name,
+                delegateUserId: user.id,
+              }
+            : {}),
+        },
       });
 
       await this.notifications.notifyReplyRejected({
@@ -389,14 +642,116 @@ export class RepliesApprovalService {
       });
     }
 
+    // إشعار معتمد المستوى السابق بالإلغاء والإعادة المحتملة
+    if (previousStep?.approverId && previousStep.approverId !== user.id) {
+      await this.notifications.notify({
+        userId: previousStep.approverId,
+        type: NotificationType.REPLY_REJECTED,
+        title: `تم رفض الرد في المستوى ${currentLevel} وإعادته للتعديل`,
+        body: `تم رفض الرد الذي اعتمدته سابقًا في المستوى ${previousStep.level} من قِبل ${user.name} بسبب: «${dto.note}»`,
+        link: `/correspondences/${reply.correspondenceId}`,
+        entityType: 'Reply',
+        entityId: id,
+      });
+    }
+
     return updated;
   }
 
-  /** قواعد صلاحية المعتمد: ليس الكاتب (إلا للمدير ومسؤول النظام) + نطاق مدير القسم */
-  private async assertApprover(
+  /** جلب خطوات مسار الاعتماد المضبوطة للأولوية أو الافتراضية */
+  private async getWorkflowStepsForPriority(priority: Priority): Promise<{ level: number; requiredRole: Role }[]> {
+    const config = this.prisma.approvalWorkflowConfig
+      ? await this.prisma.approvalWorkflowConfig.findUnique({
+          where: { priority },
+        })
+      : null;
+
+    if (config && Array.isArray(config.steps) && config.steps.length > 0) {
+      return (config.steps as any[]).map((s) => ({
+        level: s.level,
+        requiredRole: s.requiredRole as Role,
+      }));
+    }
+
+    // القواعد المقترحة الافتراضية
+    if (priority === Priority.URGENT) {
+      return [
+        { level: 1, requiredRole: Role.DEPT_MANAGER },
+        { level: 2, requiredRole: Role.DEPUTY_GM },
+        { level: 3, requiredRole: Role.GM },
+      ];
+    } else if (priority === Priority.HIGH) {
+      return [
+        { level: 1, requiredRole: Role.DEPT_MANAGER },
+        { level: 2, requiredRole: Role.DEPUTY_GM },
+      ];
+    } else {
+      // توافق خلفي كامل: مستوى واحد
+      return [{ level: 1, requiredRole: Role.DEPT_MANAGER }];
+    }
+  }
+
+  /** حساب معرفات معتمدي المستوى بناءً على الدور المعين ونطاق القسم */
+  private async getLevelApproverIds(requiredRole: Role, reply: any): Promise<string[]> {
+    const recipients = new Set<string>();
+
+    if (requiredRole === Role.DEPT_MANAGER) {
+      if (reply.taskId) {
+        const taskRow = await this.prisma.task.findUnique({
+          where: { id: reply.taskId },
+          select: { assignedById: true },
+        });
+        if (taskRow && taskRow.assignedById !== reply.authorId) {
+          recipients.add(taskRow.assignedById);
+        }
+      }
+      const openReferrals = this.prisma.referral
+        ? await this.prisma.referral.findMany({
+            where: { correspondenceId: reply.correspondenceId, status: ReferralStatus.OPEN },
+            select: { fromUserId: true },
+          })
+        : [];
+      for (const ref of openReferrals) {
+        if (ref.fromUserId !== reply.authorId) {
+          recipients.add(ref.fromUserId);
+        }
+      }
+      if (recipients.size === 0 && reply.correspondence?.departmentId) {
+        const dept = await this.prisma.department.findUnique({
+          where: { id: reply.correspondence.departmentId },
+          select: { managerId: true },
+        });
+        if (dept?.managerId && dept.managerId !== reply.authorId) {
+          recipients.add(dept.managerId);
+        }
+      }
+    } else {
+      const users = await this.prisma.user.findMany({
+        where: { role: requiredRole, isActive: true },
+        select: { id: true },
+      });
+      for (const u of users) {
+        if (u.id !== reply.authorId) {
+          recipients.add(u.id);
+        }
+      }
+    }
+
+    return Array.from(recipients);
+  }
+
+  /**
+   * التحقق من أهلية المعتمد (مع دعم الوكالة والتفويض النشط)
+   */
+  private async checkApproverEligibility(
     reply: ReplyRow & { correspondence: { id: string; departmentId: string | null; refNumber: string; status: CorrespondenceStatus } },
     user: AuthUser,
-  ): Promise<void> {
+    requiredRole?: Role,
+  ): Promise<{ allowed: boolean; actingOnBehalfOf?: { id: string; name: string } | null; reason?: string }> {
+    if (reply.authorId === user.id && user.role !== Role.ADMIN) {
+      return { allowed: false, reason: 'لا يمكنك اعتماد أو رفض رد أعددته بنفسك' };
+    }
+
     const openReferrals = this.prisma.referral
       ? await this.prisma.referral.findMany({
           where: { correspondenceId: reply.correspondence.id, toUserId: user.id },
@@ -404,18 +759,80 @@ export class RepliesApprovalService {
         })
       : [];
 
-    const policy = canApproveReply(
+    // 1. فحص مباشر للمستخدم
+    const directPolicy = canApproveReply(
       user,
       reply,
       reply.correspondence as any,
       openReferrals,
     );
 
-    if (!policy.allowed) {
-      if (policy.reason === 'يمكنك اعتماد ردود مراسلات قسمك أو المحالة إليك فقط') {
-        throw new ForbiddenException(policy.reason);
-      }
-      throw new BadRequestException(policy.reason);
+    const matchesRole =
+      !requiredRole ||
+      user.role === requiredRole ||
+      user.role === Role.ADMIN ||
+      (requiredRole === Role.DEPT_MANAGER && (user.role === Role.GM || user.role === Role.DEPUTY_GM)) ||
+      (requiredRole === Role.DEPUTY_GM && user.role === Role.GM);
+
+    if (directPolicy.allowed && matchesRole) {
+      return { allowed: true };
     }
+
+    // 2. فحص ما إذا كان المستخدم وكيلاً نشطًا لمفوِّض يملك الصلاحية
+    if (this.prisma.delegation) {
+      const now = new Date();
+      const activeDelegations = await this.prisma.delegation.findMany({
+        where: {
+          delegateId: user.id,
+          active: true,
+          startsAt: { lte: now },
+          endsAt: { gte: now },
+        },
+        include: { delegator: true },
+      });
+
+      for (const d of activeDelegations) {
+        if (reply.authorId === user.id) continue;
+
+        const delegatorUser: AuthUser = {
+          id: d.delegator.id,
+          name: d.delegator.name,
+          email: d.delegator.email,
+          role: d.delegator.role,
+          departmentId: d.delegator.departmentId,
+        };
+
+        const delegatorReferrals = await this.prisma.referral.findMany({
+          where: { correspondenceId: reply.correspondence.id, toUserId: d.delegatorId },
+          select: { toUserId: true, fromUserId: true },
+        });
+
+        const delegatorPolicy = canApproveReply(
+          delegatorUser,
+          reply,
+          reply.correspondence as any,
+          delegatorReferrals,
+        );
+
+        const delegatorMatchesRole =
+          !requiredRole ||
+          d.delegator.role === requiredRole ||
+          d.delegator.role === Role.ADMIN ||
+          (requiredRole === Role.DEPT_MANAGER && (d.delegator.role === Role.GM || d.delegator.role === Role.DEPUTY_GM)) ||
+          (requiredRole === Role.DEPUTY_GM && d.delegator.role === Role.GM);
+
+        if (delegatorPolicy.allowed && delegatorMatchesRole) {
+          return {
+            allowed: true,
+            actingOnBehalfOf: { id: d.delegator.id, name: d.delegator.name },
+          };
+        }
+      }
+    }
+
+    return {
+      allowed: false,
+      reason: directPolicy.reason ?? 'ليس لديك صلاحية اعتماد هذا المستوى من الرد',
+    };
   }
 }

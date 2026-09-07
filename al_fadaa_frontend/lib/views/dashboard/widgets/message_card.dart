@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../models/correspondence_model.dart';
 import 'attachments_preview.dart';
 import 'draft_action_bar.dart';
+import 'reply_versions_dialog.dart';
 
 class MessageCard extends StatelessWidget {
   final Map<String, dynamic> msg;
@@ -207,6 +208,60 @@ class MessageCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // شارة الإصدار إن وُجدت
+                          if (replyItem != null) ...[
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => showDialog(
+                                context: context,
+                                builder: (_) => ReplyVersionsDialog(reply: replyItem),
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEEF2FF),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: const Color(0xFFC7D2FE)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.history_rounded, size: 11, color: Color(0xFF4338CA)),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      'v${replyItem.version}',
+                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF4338CA)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                          // شارة الوكالة إن كانت المعاملة قد اعتُمدت بتفويض
+                          if (replyItem != null &&
+                              replyItem.approvalSteps.any((s) => s.decidedBy != null && s.decidedBy?.role != s.requiredRole)) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: const Color(0xFFFDE68A)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.supervised_user_circle_outlined, size: 11, color: Color(0xFFD97706)),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    'وكالة',
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       if (senderEmail != null && senderEmail.isNotEmpty) ...[

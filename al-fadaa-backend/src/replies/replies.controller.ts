@@ -102,4 +102,24 @@ export class RepliesController {
   send(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
     return this.repliesService.send(id, user);
   }
+
+  @Get(':id/versions')
+  @ApiOperation({ summary: 'استعراض تاريخ إصدارات الرد' })
+  getVersions(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.repliesService.getVersions(id, user);
+  }
+
+  @Get(':id/diff')
+  @ApiOperation({ summary: 'مقارنة الفروق السطرية بين نسختين للرد' })
+  getDiff(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from') fromVersion?: string,
+    @Query('to') toVersion?: string,
+  ) {
+    return this.repliesService.getDiff(
+      id,
+      fromVersion ? parseInt(fromVersion, 10) : undefined,
+      toVersion ? parseInt(toVersion, 10) : undefined,
+    );
+  }
 }

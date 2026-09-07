@@ -71,6 +71,12 @@ enum ReplyStatus {
   REJECTED  // مرفوضة — تحتاج تعديلًا
 }
 
+enum ApprovalStepStatus {
+  PENDING  // بانتظار الاعتماد
+  APPROVED // اعتُمد من صاحب هذا المستوى
+  REJECTED // رُفض من صاحب هذا المستوى
+}
+
 /// أنواع الأحداث المسجلة في سجل التدقيق
 enum AuditAction {
   LOGIN      // تسجيل دخول
@@ -146,6 +152,10 @@ model User {
   attachments       Attachment[]
   auditLogs         AuditLog[]
   notifications     Notification[]  @relation("UserNotifications")
+  approvalStepsDecided ApprovalStep[] @relation("StepApprover")
+  delegationsGiven     Delegation[]   @relation("UserDelegationsGiven")
+  delegationsReceived  Delegation[]   @relation("UserDelegationsReceived")
+  replyVersions        ReplyVersion[] @relation("ReplyVersionAuthor")
 
   @@index([departmentId])
   @@index([role])
@@ -295,6 +305,8 @@ model Reply {
 
   attachments Attachment[]
   outgoingCorrespondences Correspondence[] @relation("OutgoingSourceReply")
+  approvalSteps ApprovalStep[]
+  versions      ReplyVersion[]
 
   @@index([correspondenceId])
   @@index([authorId, status])
@@ -401,3 +413,68 @@ model SlaState {
   @@unique([entityType, entityId, lastReminderType])
   @@index([entityType, entityId])
 }
+
+/// خطوات مسارات الاعتماد متعددة المستويات للردود
+model ApprovalStep {
+  id           String             @id @default(uuid())
+  replyId      String
+  reply        Reply              @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  level        Int                // 1, 2, 3...
+  requiredRole Role
+  approverId   String?
+  approver     User?              @relation("StepApprover", fields: [approverId], references: [id], onDelete: SetNull)
+  status       ApprovalStepStatus @default(PENDING)
+  decidedAt    DateTime?
+  note         String?            @db.Text
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@unique([replyId, level])
+  @@index([replyId])
+  @@index([approverId])
+}
+
+/// إعدادات مسار الاعتماد حسب درجة أولوية المراسلة
+model ApprovalWorkflowConfig {
+  id        String   @id @default(uuid())
+  priority  Priority @unique
+  steps     Json     // مصفوفة كائنات: [{ level: 1, requiredRole: "DEPT_MANAGER" }, ...]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// التفويض والوكالة التشغيلية — تفويض الصلاحيات أثناء الغياب أو الإجازات
+model Delegation {
+  id          String   @id @default(uuid())
+  delegatorId String
+  delegator   User     @relation("UserDelegationsGiven", fields: [delegatorId], references: [id], onDelete: Cascade)
+  delegateId  String
+  delegate    User     @relation("UserDelegationsReceived", fields: [delegateId], references: [id], onDelete: Cascade)
+  startsAt    DateTime
+  endsAt      DateTime
+  reason      String?  @db.Text
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([delegatorId, active])
+  @@index([delegateId, active])
+}
+
+/// تاريخ إصدارات الردود غير القابلة للتعديل
+model ReplyVersion {
+  id                  String   @id @default(uuid())
+  replyId             String
+  reply               Reply    @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  version             Int
+  body                String   @db.Text
+  attachmentsSnapshot Json?
+  authorId            String
+  author              User     @relation("ReplyVersionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  createdAt           DateTime @default(now())
+
+  @@unique([replyId, version])
+  @@index([replyId])
+  @@index([authorId])
+}
+

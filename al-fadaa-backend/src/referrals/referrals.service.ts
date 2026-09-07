@@ -242,7 +242,26 @@ export class ReferralsService {
     });
     if (!referral) throw new NotFoundException('الإحالة غير موجودة');
 
-    const isRecipient = referral.toUserId === user.id;
+    let isRecipient = referral.toUserId === user.id;
+    let actingOnBehalfOf: { id: string; name: string } | null = null;
+    if (!isRecipient && this.prisma.delegation) {
+      const now = new Date();
+      const delegation = await this.prisma.delegation.findFirst({
+        where: {
+          delegatorId: referral.toUserId,
+          delegateId: user.id,
+          active: true,
+          startsAt: { lte: now },
+          endsAt: { gte: now },
+        },
+        include: { delegator: { select: { id: true, name: true } } },
+      });
+      if (delegation) {
+        isRecipient = true;
+        actingOnBehalfOf = delegation.delegator;
+      }
+    }
+
     const privilegedRoles: Role[] = [Role.ADMIN, Role.GM, Role.DEPUTY_GM];
     const isPrivileged = privilegedRoles.includes(user.role);
     if (!isRecipient && !isPrivileged) {
@@ -332,25 +351,32 @@ export class ReferralsService {
               action: AuditAction.UPDATE,
               entityType: 'Referral',
               entityId: referralId,
-              summary: `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${updated.correspondence.refNumber}`,
+              summary: actingOnBehalfOf
+                ? `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${updated.correspondence.refNumber} (نيابة عن ${actingOnBehalfOf.name})`
+                : `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${updated.correspondence.refNumber}`,
               metadata: {
                 referralId,
                 remainingOpenCount,
+                ...(actingOnBehalfOf
+                  ? { delegatorId: actingOnBehalfOf.id, delegatorName: actingOnBehalfOf.name, delegateUserId: user.id }
+                  : {}),
                 correspondenceNewStatus:
                   remainingOpenCount === 0
                     ? CorrespondenceStatus.IN_PROGRESS
-                    : CorrespondenceStatus.REFERRED,
+                    : undefined,
               },
               userId: user.id,
             },
             notification: {
               type: NotificationType.NEW_REFERRAL,
+              recipientIds,
               title: `تمت إجابة الإحالة للمراسلة ${updated.correspondence.refNumber}`,
-              body: `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${updated.correspondence.subject}»`,
+              body: actingOnBehalfOf
+                ? `أجاب «${user.name}» (نيابة عن ${actingOnBehalfOf.name}) على الإحالة في المراسلة «${updated.correspondence.subject}»`
+                : `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${updated.correspondence.subject}»`,
               link: `/correspondences/${correspondenceId}`,
               entityType: 'Correspondence',
               entityId: correspondenceId,
-              recipientIds,
             },
           },
         });
@@ -367,15 +393,24 @@ export class ReferralsService {
         action: AuditAction.UPDATE,
         entityType: 'Referral',
         entityId: referralId,
-        summary: `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${result.updated.correspondence.refNumber}`,
-        metadata: { referralId },
+        summary: actingOnBehalfOf
+          ? `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${result.updated.correspondence.refNumber} (نيابة عن ${actingOnBehalfOf.name})`
+          : `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${result.updated.correspondence.refNumber}`,
+        metadata: {
+          referralId,
+          ...(actingOnBehalfOf
+            ? { delegatorId: actingOnBehalfOf.id, delegatorName: actingOnBehalfOf.name, delegateUserId: user.id }
+            : {}),
+        },
       });
 
       if (result.recipientIds.length > 0) {
         await this.notifications.notifyMany(result.recipientIds, {
           type: NotificationType.NEW_REFERRAL,
           title: `تمت إجابة الإحالة للمراسلة ${result.updated.correspondence.refNumber}`,
-          body: `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${result.updated.correspondence.subject}»`,
+          body: actingOnBehalfOf
+            ? `أجاب «${user.name}» (نيابة عن ${actingOnBehalfOf.name}) على الإحالة في المراسلة «${result.updated.correspondence.subject}»`
+            : `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${result.updated.correspondence.subject}»`,
           link: `/correspondences/${correspondenceId}`,
           entityType: 'Correspondence',
           entityId: correspondenceId,

@@ -36,6 +36,7 @@ import {
 import { REPLY_INCLUDE, ReplyRow, USER_BRIEF } from './replies.constants';
 import { RepliesApprovalService } from './replies-approval.service';
 import { RepliesSendService } from './replies-send.service';
+import { RepliesVersioningService } from './replies-versioning.service';
 
 export { USER_BRIEF, REPLY_INCLUDE, ReplyRow } from './replies.constants';
 
@@ -43,6 +44,7 @@ export { USER_BRIEF, REPLY_INCLUDE, ReplyRow } from './replies.constants';
 export class RepliesService {
   private readonly approvalService: RepliesApprovalService;
   private readonly sendService: RepliesSendService;
+  private readonly versioningService: RepliesVersioningService;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -54,10 +56,20 @@ export class RepliesService {
     private readonly config: ConfigService,
     @Optional() approvalService?: RepliesApprovalService,
     @Optional() sendService?: RepliesSendService,
+    @Optional() versioningService?: RepliesVersioningService,
   ) {
+    this.versioningService =
+      versioningService ?? new RepliesVersioningService(this.prisma);
     this.approvalService =
       approvalService ??
-      new RepliesApprovalService(this.prisma, this.audit, this.notifications);
+      new RepliesApprovalService(
+        this.prisma,
+        this.audit,
+        this.notifications,
+        undefined,
+        undefined,
+        this.versioningService,
+      );
     this.sendService =
       sendService ??
       new RepliesSendService(
@@ -104,6 +116,11 @@ export class RepliesService {
       include: REPLY_INCLUDE,
     });
 
+    // حفظ أول نسخة إصدار تاريخية غير قابلة للتعديل
+    if (this.prisma.replyVersion) {
+      await this.versioningService.saveSnapshot(reply.id, 1, dto.body, user.id);
+    }
+
     // أول مسودة → المراسلة تدخل مرحلة «جاري إعداد الرد»
     if (corr.status === CorrespondenceStatus.REFERRED) {
       const nextStatus = getNextStatus(corr.status, CorrespondenceAction.START_DRAFT);
@@ -120,18 +137,22 @@ export class RepliesService {
       entityType: 'Reply',
       entityId: reply.id,
       summary: `إنشاء مسودة رد على المراسلة ${corr.refNumber}`,
-      metadata: { correspondenceRef: corr.refNumber },
+      metadata: { correspondenceRef: corr.refNumber, version: 1 },
     });
     return reply;
   }
 
-  /** تعديل المسودة — صاحبها فقط، وفي حالتي DRAFT أو REJECTED (بعد الرفض) */
+  /** تعديل المسودة — صاحبها فقط، وفي حالتي DRAFT أو REJECTED (بعد الرفض)، وممنوع نهائيًا بعد الإرسال */
   async update(id: string, dto: UpdateReplyDto, user: AuthUser): Promise<ReplyRow> {
     const reply = await this.prisma.reply.findUnique({
       where: { id },
       include: REPLY_INCLUDE,
     });
     if (!reply) throw new NotFoundException('الرد غير موجود');
+
+    if (reply.sentAt !== null) {
+      throw new BadRequestException('الرد أُرسل رسميًا وهو ثابت نهائيًا');
+    }
 
     if (reply.authorId !== user.id) {
       throw new ForbiddenException('فقط صاحب المسودة يمكنه تعديلها');
@@ -140,12 +161,23 @@ export class RepliesService {
       throw new BadRequestException('لا يمكن تعديل رد مرفوع للاعتماد أو معتمد');
     }
 
+    const contentChanged = dto.body !== undefined && dto.body !== reply.body;
+    let nextVersion = reply.version;
+    if (reply.status === ReplyStatus.REJECTED) {
+      // صرامة الدورة: REJECTED -> DRAFT مع زيادة الإصدار فقط عند تغير المحتوى فعليًا
+      if (contentChanged) {
+        nextVersion = reply.version + 1;
+      }
+    } else if (contentChanged) {
+      nextVersion = reply.version + 1;
+    }
+
     const updated = await this.prisma.reply.update({
       where: { id },
       data: {
         body: dto.body,
         status: ReplyStatus.DRAFT,
-        version: { increment: 1 },
+        version: nextVersion,
         submittedAt: null,
         reviewedById: null,
         reviewNote: null,
@@ -153,13 +185,28 @@ export class RepliesService {
       include: REPLY_INCLUDE,
     });
 
+    if (contentChanged && this.prisma.replyVersion) {
+      await this.versioningService.saveSnapshot(updated.id, updated.version, updated.body, user.id);
+    }
+
     await this.audit.log({
       action: AuditAction.UPDATE,
       entityType: 'Reply',
       entityId: id,
       summary: `تعديل مسودة الرد (الإصدار ${updated.version}) على المراسلة ${reply.correspondence.refNumber}`,
+      metadata: { version: updated.version },
     });
     return updated;
+  }
+
+  /** استعراض تاريخ إصدارات الرد */
+  getVersions(replyId: string, user: AuthUser) {
+    return this.versioningService.getVersions(replyId, user);
+  }
+
+  /** حساب مقارنة الفروق السطرية بين نسختين للرد */
+  getDiff(replyId: string, fromVersion?: number, toVersion?: number) {
+    return this.versioningService.getDiff(replyId, fromVersion, toVersion);
   }
 
   // ─────────────── تفويض دورة الاعتماد ───────────────

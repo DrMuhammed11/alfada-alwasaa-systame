@@ -53,19 +53,54 @@ export class NotificationsService {
     @Optional() private readonly sse?: SseConnectionsService,
   ) {}
 
+  /**
+   * نقطة تحويل مركزية واحدة: تعيد الوكيل النشط إن وجد تفويض سارٍ، وإلا المستخدم نفسه
+   */
+  async resolveRecipient(userId: string): Promise<string> {
+    try {
+      const now = new Date();
+      const delegation = this.prisma.delegation
+        ? await this.prisma.delegation.findFirst({
+            where: {
+              delegatorId: userId,
+              active: true,
+              startsAt: { lte: now },
+              endsAt: { gte: now },
+            },
+            select: { delegateId: true },
+          })
+        : null;
+      return delegation ? delegation.delegateId : userId;
+    } catch {
+      return userId;
+    }
+  }
+
+  /**
+   * تحويل قائمة مستلمين مع استبدال المفوِّضين بوكلائهم وإزالة التكرار
+   */
+  async resolveRecipients(userIds: string[]): Promise<string[]> {
+    const resolved = await Promise.all(userIds.map((id) => this.resolveRecipient(id)));
+    return [...new Set(resolved.filter(Boolean))];
+  }
+
   // ─────────────── الكتابة — من وحدات الأعمال ───────────────
 
-  /** إرسال إشعار واحد — لا يفشل العملية التجارية أبدًا + بث SSE */
+  /** إرسال إشعار واحد — لا يفشل العملية التجارية أبدًا + بث SSE مع التحويل للوكيل إن وجد */
   async notify(entry: NotifyEntry): Promise<void> {
     try {
+      const targetUserId = await this.resolveRecipient(entry.userId);
       const created = await this.prisma.notification.create({
-        data: entry,
+        data: {
+          ...entry,
+          userId: targetUserId,
+        },
       });
 
       // بث فوري عبر SSE إن توفر
       if (this.sse) {
-        this.sse.sendToUser(entry.userId, 'new-notification', created);
-        this.broadcastUnreadCount(entry.userId);
+        this.sse.sendToUser(targetUserId, 'new-notification', created);
+        this.broadcastUnreadCount(targetUserId);
       }
     } catch (e) {
       this.logger.error(
@@ -76,7 +111,7 @@ export class NotificationsService {
 
   /** إرسال نفس الإشعار لعدة مستلمين — مع إزالة التكرار وتجاهل الفارغ + بث SSE */
   async notifyMany(userIds: string[], entry: Omit<NotifyEntry, 'userId'>): Promise<void> {
-    const unique = [...new Set(userIds.filter(Boolean))];
+    const unique = await this.resolveRecipients(userIds);
     if (unique.length === 0) return;
     try {
       await this.prisma.notification.createMany({

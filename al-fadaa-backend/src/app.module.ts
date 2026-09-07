@@ -16,6 +16,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { OutboxModule } from './outbox/outbox.module';
 import { AdminModule } from './admin/admin.module';
 import { SlaModule } from './sla/sla.module';
+import { DelegationModule } from './delegation/delegation.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
@@ -31,6 +32,7 @@ import { HealthController } from './health.controller';
     OutboxModule,
     SlaModule,
     AdminModule,
+    DelegationModule,
     // وحدات الأعمال
     AuthModule,
     UsersModule,

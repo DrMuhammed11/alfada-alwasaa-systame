@@ -217,8 +217,8 @@ export class RepliesSendService {
               action: AuditAction.SEND,
               entityType: 'Correspondence',
               entityId: corr.id,
-              summary: `إرسال الرد ${outRefNumber} على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
-              metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail },
+              summary: `إرسال الرد ${outRefNumber} (الإصدار ${reply.version}) على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
+              metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail, sentVersion: reply.version },
               userId: user.id,
             },
             notification: {
@@ -242,8 +242,8 @@ export class RepliesSendService {
         action: AuditAction.SEND,
         entityType: 'Correspondence',
         entityId: corr.id,
-        summary: `إرسال الرد ${outRefNumber} على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
-        metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail },
+        summary: `إرسال الرد ${outRefNumber} (الإصدار ${reply.version}) على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
+        metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail, sentVersion: reply.version },
       });
 
       // إشعار الكاتب ومنشئ التكليف بأن الرد أُرسل للعميل
