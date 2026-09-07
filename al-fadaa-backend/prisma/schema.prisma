@@ -1,0 +1,359 @@
+// ═══════════════════════════════════════════════════════════════════
+//  مخطط قاعدة البيانات — نظام إدارة المراسلات | شركة الفضاء الواسع
+//  PostgreSQL + Prisma ORM
+//  الجداول الثمانية مطابقة لمخطط ERD المعتمد (03-مخطط-قاعدة-البيانات)
+// ═══════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────── التعدادات (Enums) ───────────────────
+
+/// أدوار المستخدمين الخمسة وفق مصفوفة الصلاحيات المعتمدة
+enum Role {
+  ADMIN        // مسؤول النظام
+  GM           // المدير العام
+  DEPUTY_GM    // نائب المدير العام
+  DEPT_MANAGER // مدير قسم
+  EMPLOYEE     // موظف
+}
+
+enum CorrespondenceType {
+  INCOMING // وارد — من عميل أو جهة خارجية إلى info@al-fadaa.com
+  OUTGOING // صادر — رد رسمي من الشركة
+  INTERNAL // داخلي — تعميم بين الأقسام
+}
+
+enum Priority {
+  LOW    // عادي
+  NORMAL // مهم
+  HIGH   // عاجل
+  URGENT // عاجل جدًا
+}
+
+/// حالات المراسلة وفق دورة الحياة المعتمدة (9 حالات)
+enum CorrespondenceStatus {
+  RECEIVED         // مستلمة — بانتظار دراسة المدير العام
+  UNDER_REVIEW     // قيد الدراسة
+  REFERRED         // محالة إلى جهة داخلية
+  IN_PROGRESS      // جاري إعداد الرد
+  PENDING_APPROVAL // مرفوعة للاعتماد
+  APPROVED         // معتمدة
+  SENT             // أُرسل الرد للعميل من البريد الرسمي
+  CLOSED           // مغلقة
+  ARCHIVED         // مؤرشفة
+}
+
+enum ReferralStatus {
+  OPEN     // قيد المعالجة لدى الجهة المحال إليها
+  ANSWERED // تم الرد عليها
+  CLOSED   // مغلقة
+}
+
+enum TaskStatus {
+  PENDING     // جديد — بانتظار البدء
+  IN_PROGRESS // جاري التنفيذ
+  SUBMITTED   // تم تسليم النتيجة
+  DONE        // منجز
+  CANCELLED   // ملغى
+}
+
+enum ReplyStatus {
+  DRAFT     // مسودة قيد التحرير
+  SUBMITTED // مرفوعة للاعتماد
+  APPROVED  // معتمدة
+  REJECTED  // مرفوضة — تحتاج تعديلًا
+}
+
+/// أنواع الأحداث المسجلة في سجل التدقيق
+enum AuditAction {
+  LOGIN      // تسجيل دخول
+  CREATE     // إنشاء
+  UPDATE     // تعديل
+  DEACTIVATE // تعطيل حساب
+  REFER      // إحالة
+  ASSIGN     // تكليف
+  SUBMIT     // رفع للاعتماد
+  APPROVE    // اعتماد
+  REJECT     // رفض
+  SEND       // إرسال
+  CLOSE      // إغلاق
+  ARCHIVE    // أرشفة
+  UPLOAD     // رفع مرفق
+  DELETE     // حذف مرفق
+}
+
+/// أنواع الإشعارات — كل حدث جوهري في دورة العمل يولّد إشعارًا للمعنيين به
+enum NotificationType {
+  NEW_REFERRAL     // إحالة جديدة وصلتك — بانتظار معالجتك
+  NEW_TASK         // تكليف جديد وصلك — بانتظار تنفيذك
+  TASK_CANCELLED   // أُلغي تكليف كان مسندًا إليك
+  REPLY_SUBMITTED  // مسودة رد مرفوعة للاعتماد — أنت من المعنيين بالاعتماد
+  REPLY_APPROVED   // اعتُمد ردٌّ أعددته
+  REPLY_REJECTED   // رُفض ردٌّ أعددته — يحتاج تعديلًا وفق سبب الرفض
+  REPLY_SENT       // أُرسل للعميل ردٌّ مرتبط بعملك
+  NEW_INCOMING     // مراسلة واردة جديدة سُجلت في النظام
+}
+
+// ─────────────────── النماذج (Models) ───────────────────
+
+/// المستخدمون — موظفو الشركة المخولون باستخدام النظام
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  employeeNumber String? @unique // الرقم الوظيفي — وفق مخطط قاعدة البيانات
+  passwordHash String
+  role         Role      @default(EMPLOYEE)
+  phone        String?
+  jobTitle     String?
+  isActive     Boolean   @default(true)
+  departmentId String?
+  department   Department? @relation("UserBelongsToDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  departmentManaged Department?     @relation("DepartmentManager")
+  correspondences   Correspondence[] @relation("CorrespondenceCreator")
+  referralsFrom     Referral[]       @relation("ReferralFrom")
+  referralsTo       Referral[]       @relation("ReferralTo")
+  tasksCreated      Task[]           @relation("TaskCreator")
+  tasksAssigned     Task[]           @relation("TaskAssignee")
+  repliesAuthored   Reply[]          @relation("ReplyAuthor")
+  repliesReviewed   Reply[]          @relation("ReplyReviewer")
+  repliesApproved   Reply[]          @relation("ReplyApprover")
+  attachments       Attachment[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]  @relation("UserNotifications")
+
+  @@index([departmentId])
+  @@index([role])
+}
+
+/// الأقسام الإدارية في الشركة
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique
+  managerId String?  @unique
+  manager   User?    @relation("DepartmentManager", fields: [managerId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]           @relation("UserBelongsToDepartment")
+  correspondences Correspondence[]
+
+  @@index([managerId])
+}
+
+/// المراسلات — الوارد والصادر والداخلي (الجدول المحوري للنظام)
+model Correspondence {
+  id        String             @id @default(uuid())
+  refNumber String             @unique // رقم مرجعي فريد مثل: INC-2026-00001
+  type      CorrespondenceType
+  subject   String
+  body      String             @db.Text
+  priority  Priority           @default(NORMAL)
+  status    CorrespondenceStatus @default(RECEIVED)
+
+  // بيانات المرسل الخارجي (للوارد)
+  senderName  String?
+  senderEmail String?
+  senderPhone String?
+  receivedAt  DateTime?
+  channel     String?   // قناة الوصول: email | website | fax | hand — وفق مخطط قاعدة البيانات
+
+  // القسم المسؤول — يُحدد تلقائيًا عند الإحالة لمدير قسم
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  // سلسلة المحادثة: الصادر المرتبط بالوارد الأصلي
+  parentId String?
+  parent   Correspondence?  @relation("CorrespondenceThread", fields: [parentId], references: [id], onDelete: SetNull)
+  children Correspondence[] @relation("CorrespondenceThread")
+
+  createdById String
+  createdBy   User @relation("CorrespondenceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  sentAt   DateTime?
+  closedAt DateTime?
+
+  // معرّف رأس البريد الإلكتروني للمطابقة الدقيقة لسلسلة المحادثات ومكافحة التكرار
+  messageId     String?          @unique
+
+  // ربط بنيوي مباشر بين الصادر والرد الذي وُلد منه (بدل مقارنة النصوص)
+  sourceReplyId String?
+  sourceReply   Reply?           @relation("OutgoingSourceReply", fields: [sourceReplyId], references: [id], onDelete: SetNull)
+
+  referrals   Referral[]
+  tasks       Task[]
+  replies     Reply[]
+  attachments Attachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([type, createdAt])
+  @@index([departmentId])
+  @@index([sourceReplyId])
+}
+
+/// الإحالات — تحويل المدير العام المراسلة إلى نائبه أو مدير قسم
+model Referral {
+  id              String   @id @default(uuid())
+  correspondenceId String
+  correspondence  Correspondence @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
+  fromUserId      String
+  fromUser        User @relation("ReferralFrom", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUserId        String
+  toUser          User @relation("ReferralTo", fields: [toUserId], references: [id], onDelete: Restrict)
+  note            String? @db.Text
+  status          ReferralStatus @default(OPEN)
+  dueDate         DateTime?
+  answeredAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tasks Task[]
+
+  @@index([correspondenceId])
+  @@index([toUserId, status])
+}
+
+/// التكليفات — تكليف موظف بإعداد رد أو إنجاز عمل على مراسلة
+model Task {
+  id               String        @id @default(uuid())
+  correspondenceId String
+  correspondence   Correspondence @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
+  referralId       String?
+  referral         Referral?     @relation(fields: [referralId], references: [id], onDelete: SetNull)
+  title            String
+  description      String?       @db.Text
+  assignedById     String
+  assignedBy       User          @relation("TaskCreator", fields: [assignedById], references: [id], onDelete: Restrict)
+  assignedToId     String
+  assignedTo       User          @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: Restrict)
+  dueDate          DateTime?
+  status           TaskStatus    @default(PENDING)
+  submittedAt      DateTime?
+  doneAt           DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  replies Reply[]
+
+  @@index([correspondenceId])
+  @@index([assignedToId, status])
+}
+
+/// الردود — المسودات التي يعدها الموظفون ثم تُعتمد وتُرسل
+model Reply {
+  id              String        @id @default(uuid())
+  correspondenceId String
+  correspondence  Correspondence @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
+  taskId          String?
+  task            Task?         @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  authorId        String
+  author          User          @relation("ReplyAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  body            String        @db.Text
+  status          ReplyStatus   @default(DRAFT)
+  version         Int           @default(1) // يزيد مع كل تعديل على المسودة
+  submittedAt     DateTime?
+  reviewedById    String?
+  reviewedBy      User?         @relation("ReplyReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewNote      String?       @db.Text
+  approvedById    String?
+  approvedBy      User?         @relation("ReplyApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  sentAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  attachments Attachment[]
+  outgoingCorrespondences Correspondence[] @relation("OutgoingSourceReply")
+
+  @@index([correspondenceId])
+  @@index([authorId, status])
+}
+
+/// المرفقات — ملفات المراسلات والردود
+model Attachment {
+  id              String         @id @default(uuid())
+  fileName        String // الاسم الأصلي للملف
+  storedName      String // الاسم المخزن على القرص
+  mimeType        String
+  size            Int
+  correspondenceId String?
+  correspondence  Correspondence? @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
+  replyId         String?
+  reply           Reply?         @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  uploadedById    String
+  uploadedBy      User           @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt       DateTime       @default(now())
+
+  @@index([correspondenceId])
+  @@index([replyId])
+}
+
+/// سجل التدقيق — غير قابل للتعديل أو الحذف إطلاقًا
+/// (يُفرض على مستوى قاعدة البيانات عبر Trigger — انظر مجلد migrations)
+model AuditLog {
+  id         String      @id @default(uuid())
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType String? // اسم الكيان: Correspondence / Reply / User ...
+  entityId   String?
+  summary    String? // وصف عربي موجز للحدث
+  metadata   Json? // تفاصيل إضافية (الحقول المعدلة مثلاً)
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+}
+
+/// إشعارات المستخدمين — صندوق تنبيهات داخلي لكل مستخدم
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String // المستلم — صاحب الصندوق
+  user       User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String // عنوان موجز بالعربية — يظهر في القائمة المنسدلة
+  body       String?          @db.Text // تفاصيل الإشعار (سبب الرفض مثلاً)
+  link       String? // مسار الواجهة الأمامية للانتقال السريع: /correspondences/{id}
+  entityType String? // نوع الكيان المرتبط: Correspondence / Task / Reply ...
+  entityId   String? // معرف الكيان المرتبط (UUID)
+  isRead     Boolean          @default(false)
+  readAt     DateTime?
+  createdAt  DateTime         @default(now())
+
+  @@index([userId, isRead, createdAt]) // عدّاد غير المقروء + استعراض الأحدث أولًا
+  @@index([userId, createdAt])
+}
+
+/// عدّاد داخلي لتوليد أرقام مرجعية تسلسلية فريدة لكل نوع/سنة
+model Counter {
+  id    String @id @default(uuid())
+  key   String @unique // مثال: INC-2026
+  value Int    @default(0)
+}
+
+/// علامة الماء: أعلى UID معالج لكل صندوق بريد — يمنع إعادة معالجة الرسائل
+model ImapHighWaterMark {
+  id        String   @id @default(uuid())
+  mailbox   String   @unique // مثال: "INBOX"
+  lastUid   Int      @default(0) // أعلى UID تمت معالجته بنجاح
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,26 @@
+# تشغيل قاعدة بيانات PostgreSQL محليًا للتطوير
+# الاستخدام:  docker compose up -d
+# الإيقاف:    docker compose down
+# (مع حذف البيانات نهائيًا: docker compose down -v)
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: alfadaa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: alfadaa
+      POSTGRES_PASSWORD: alfadaa
+      POSTGRES_DB: alfadaa_correspondence
+    ports:
+      - "5432:5432"
+    volumes:
+      - alfadaa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alfadaa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  alfadaa_pgdata:
