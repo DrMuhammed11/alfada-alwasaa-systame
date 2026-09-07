@@ -275,6 +275,7 @@ export class RepliesSendService {
         path: `${uploadDir}/${a.storedName}`,
         contentType: a.mimeType,
       })),
+      replyId: reply.id,
     });
 
     return { success: true, sent: true, refNumber: outRefNumber };
@@ -473,6 +474,7 @@ export class RepliesSendService {
         filename: a.fileName,
         path: path.join(uploadDir, a.storedName),
       })),
+      replyId: result.id,
     });
 
     // 8. إشعار المعنيين

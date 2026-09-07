@@ -11,7 +11,9 @@ export interface SendReplyOptions {
   messageId?: string;
   inReplyTo?: string;
   references?: string;
-  attachments?: { filename: string; path?: string; content?: Buffer }[];
+  attachments?: { filename: string; path?: string; content?: Buffer; contentType?: string }[];
+  replyId?: string;
+  html?: string;
 }
 
 /**

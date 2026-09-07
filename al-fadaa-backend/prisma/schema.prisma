@@ -77,6 +77,13 @@ enum ApprovalStepStatus {
   REJECTED // رُفض من صاحب هذا المستوى
 }
 
+enum OutboxMailStatus {
+  QUEUED  // بانتظار الإرسال أو إعادة المحاولة
+  SENT    // أُرسل بنجاح
+  FAILED  // فشل نهائي بعد استنفاد المحاولات
+  PAUSED  // موقوف يدويًا من قبل الأدمن
+}
+
 /// أنواع الأحداث المسجلة في سجل التدقيق
 enum AuditAction {
   LOGIN      // تسجيل دخول
@@ -307,6 +314,7 @@ model Reply {
   outgoingCorrespondences Correspondence[] @relation("OutgoingSourceReply")
   approvalSteps ApprovalStep[]
   versions      ReplyVersion[]
+  outboxMails   OutboxMail[]
 
   @@index([correspondenceId])
   @@index([authorId, status])
@@ -476,5 +484,29 @@ model ReplyVersion {
   @@unique([replyId, version])
   @@index([replyId])
   @@index([authorId])
+}
+
+/// صندوق البريد الصادر الدائم وقائمة استرداد الرسائل الفاشلة مع التراجع الأسي
+model OutboxMail {
+  id          String           @id @default(uuid())
+  replyId     String?
+  reply       Reply?           @relation(fields: [replyId], references: [id], onDelete: SetNull)
+  refNumber   String
+  to          String
+  subject     String
+  html        String?          @db.Text
+  body        String?          @db.Text
+  attachments Json?
+  attempts    Int              @default(0)
+  maxAttempts Int              @default(3)
+  nextRetryAt DateTime
+  status      OutboxMailStatus @default(QUEUED)
+  lastError   String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  sentAt      DateTime?
+
+  @@index([status, nextRetryAt])
+  @@index([refNumber])
 }
 

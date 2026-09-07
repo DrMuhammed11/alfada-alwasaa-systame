@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { CorrespondenceStatus, ReferralStatus, ReplyStatus, TaskStatus } from '@prisma/client';
+import { Injectable, Optional } from '@nestjs/common';
+import { CorrespondenceStatus, OutboxMailStatus, ReferralStatus, ReplyStatus, TaskStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailRetryService } from '../mail/mail-retry.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly mailRetry?: MailRetryService,
+  ) {}
 
   /**
    * استخراج وتفتيش الكيانات التابعة اليتيمة والمعلقة على مراسلات غير ملائمة:
@@ -126,4 +130,30 @@ export class AdminService {
       update: { steps: sorted },
     });
   }
+
+  /** استعراض رسائل الصادر وحالات المحاولات */
+  async getOutboxList(filter: {
+    status?: OutboxMailStatus;
+    refNumber?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    if (this.mailRetry) {
+      return this.mailRetry.getOutboxList(filter);
+    }
+    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+  }
+
+  /** إعادة محاولة إرسال رسالة صادر يدويًا */
+  async retryOutboxMail(id: string) {
+    if (!this.mailRetry) throw new Error('خدمة استرداد البريد غير مهيأة');
+    return this.mailRetry.retryManually(id);
+  }
+
+  /** إيقاف إعادة المحاولة مؤقتًا */
+  async pauseOutboxMail(id: string) {
+    if (!this.mailRetry) throw new Error('خدمة استرداد البريد غير مهيأة');
+    return this.mailRetry.pauseMail(id);
+  }
 }
+

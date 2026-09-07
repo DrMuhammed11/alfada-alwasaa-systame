@@ -1,6 +1,6 @@
-import { Body, Controller, ForbiddenException, Get, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Body, Controller, ForbiddenException, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { OutboxMailStatus, Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequirePermission } from '../common/decorators/require-permission.decorator';
 import type { AuthUser } from '../common/types';
@@ -45,4 +45,45 @@ export class AdminController {
     }
     return this.adminService.setApprovalWorkflow(body.priority as any, body.steps as any);
   }
+
+  @Get('outbox')
+  @RequirePermission(Permission.USERS_MANAGE)
+  @ApiOperation({ summary: 'استعراض رسائل صندوق البريد الصادر وحالات إعادة المحاولة (للأدمن فقط)' })
+  @ApiQuery({ name: 'status', enum: OutboxMailStatus, required: false })
+  @ApiQuery({ name: 'refNumber', type: String, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  getOutbox(
+    @Query('status') status?: OutboxMailStatus,
+    @Query('refNumber') refNumber?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @CurrentUser() user?: AuthUser,
+  ) {
+    if (user && user.role !== Role.ADMIN) {
+      throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
+    }
+    return this.adminService.getOutboxList({ status, refNumber, page, limit });
+  }
+
+  @Post('outbox/:id/retry')
+  @RequirePermission(Permission.USERS_MANAGE)
+  @ApiOperation({ summary: 'إعادة محاولة إرسال رسالة صادر يدويًا (للأدمن فقط)' })
+  retryOutboxMail(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
+    }
+    return this.adminService.retryOutboxMail(id);
+  }
+
+  @Post('outbox/:id/pause')
+  @RequirePermission(Permission.USERS_MANAGE)
+  @ApiOperation({ summary: 'إيقاف إعادة محاولة إرسال رسالة صادر مؤقتًا (للأدمن فقط)' })
+  pauseOutboxMail(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
+    }
+    return this.adminService.pauseOutboxMail(id);
+  }
 }
+
