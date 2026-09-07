@@ -6,6 +6,16 @@ import { IncomingMailAttachmentService } from './incoming-mail-attachment.servic
 import { IncomingMailMatcherService } from './incoming-mail-matcher.service';
 import { CorrespondencesModule } from '../correspondences/correspondences.module';
 import { MailController } from './mail.controller';
+import {
+  FetchStage,
+  ParseStage,
+  DedupeStage,
+  ThreadMatchStage,
+  PersistStage,
+  AttachmentsStage,
+  NotifyStage,
+  IngestionPipeline,
+} from './pipeline';
 
 @Module({
   imports: [CorrespondencesModule],
@@ -16,6 +26,14 @@ import { MailController } from './mail.controller';
     IncomingMailService,
     IncomingMailAttachmentService,
     IncomingMailMatcherService,
+    FetchStage,
+    ParseStage,
+    DedupeStage,
+    ThreadMatchStage,
+    PersistStage,
+    AttachmentsStage,
+    NotifyStage,
+    IngestionPipeline,
   ],
   exports: [
     MailService,
@@ -23,6 +41,7 @@ import { MailController } from './mail.controller';
     IncomingMailService,
     IncomingMailAttachmentService,
     IncomingMailMatcherService,
+    IngestionPipeline,
   ],
 })
 export class MailModule {}

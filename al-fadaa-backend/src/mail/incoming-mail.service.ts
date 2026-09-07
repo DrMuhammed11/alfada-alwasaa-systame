@@ -19,6 +19,18 @@ import { normalizeSubject, stripHtml } from './incoming-mail.utils';
 import { IncomingMailAttachmentService } from './incoming-mail-attachment.service';
 import { IncomingMailMatcherService } from './incoming-mail-matcher.service';
 
+import {
+  FetchStage,
+  ParseStage,
+  DedupeStage,
+  ThreadMatchStage,
+  PersistStage,
+  AttachmentsStage,
+  NotifyStage,
+  IngestionPipeline,
+  IngestionContext,
+} from './pipeline';
+
 export { normalizeSubject, stripHtml } from './incoming-mail.utils';
 
 @Injectable()
@@ -43,6 +55,7 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
 
   private readonly attachmentService: IncomingMailAttachmentService;
   private readonly matcherService: IncomingMailMatcherService;
+  private readonly pipeline: IngestionPipeline;
 
   constructor(
     private readonly config: ConfigService,
@@ -53,9 +66,21 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     private readonly notifications: NotificationsService,
     @Optional() attachmentService?: IncomingMailAttachmentService,
     @Optional() matcherService?: IncomingMailMatcherService,
+    @Optional() pipeline?: IngestionPipeline,
   ) {
     this.attachmentService = attachmentService ?? new IncomingMailAttachmentService(this.prisma);
     this.matcherService = matcherService ?? new IncomingMailMatcherService(this.prisma);
+    this.pipeline =
+      pipeline ??
+      new IngestionPipeline(
+        new FetchStage(),
+        new ParseStage(),
+        new DedupeStage(this.prisma, this.config),
+        new ThreadMatchStage(this.matcherService),
+        new PersistStage(this.prisma, this.correspondencesService, this.audit),
+        new AttachmentsStage(this.attachmentService),
+        new NotifyStage(this.prisma, this.notifications),
+      );
   }
 
   async onModuleInit(): Promise<void> {
@@ -300,238 +325,28 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
         messageList.sort((a, b) => a.uid - b.uid);
 
         let maxProcessedUid = lastUid;
-        const systemAuthUser = {
-          id: this.systemUserId!,
-          email: 'mail-engine@al-fadaa.internal',
-          name: 'محرك البريد',
-          role: Role.EMPLOYEE as Role,
-        };
 
         for (const item of messageList) {
           try {
-            const parsed = await simpleParser(item.source);
-            const senderEmail = (parsed.from?.value[0]?.address || 'unknown@domain.com').toLowerCase().trim();
-            const senderName = parsed.from?.value[0]?.name || senderEmail.split('@')[0] || 'مرسل خارجي';
-            const subject = (parsed.subject || 'مراسلة واردة عبر البريد الإلكتروني').trim();
-
-            // معالجة HTML الوارد بأمان
-            const hasHtml = typeof parsed.html === 'string' && parsed.html.trim().length > 0;
-            const plainText = (parsed.text || '').trim();
-            const body = plainText || (hasHtml ? stripHtml(parsed.html as string) : '');
-
-            // تجاهل المرسلين المحجوبين من متغير البيئة
-            if (this.blockedSenders.includes(senderEmail)) continue;
-
-            const incomingMessageId = parsed.messageId ? parsed.messageId.trim() : null;
-
-            // 1. مكافحة التكرار بـ messageId الفريد
-            if (incomingMessageId) {
-              const exists = await this.prisma.correspondence.findFirst({
-                where: { messageId: incomingMessageId },
-              });
-              if (exists) {
-                maxProcessedUid = Math.max(maxProcessedUid, item.uid);
-                continue;
-              }
-            } else {
-              const exists = await this.prisma.correspondence.findFirst({
-                where: {
-                  senderEmail,
-                  subject,
-                  body,
-                  receivedAt: parsed.date ? new Date(parsed.date) : undefined,
-                },
-              });
-              if (exists) {
-                maxProcessedUid = Math.max(maxProcessedUid, item.uid);
-                continue;
-              }
-            }
-
             // وسمها كمقروءة في السيرفر
             try {
               await client.messageFlagsAdd(item.uid, ['\\Seen'], { uid: true });
             } catch {}
 
-            // بناء metadata مع وسم HTML
-            const metadata: Record<string, unknown> = {};
-            if (hasHtml) {
-              metadata.hasHtml = true;
-              metadata.htmlBody = (parsed.html as string).slice(0, 10240);
+            const ctx: IngestionContext = {
+              uid: item.uid,
+              source: item.source,
+              systemUserId: this.systemUserId!,
+              mailbox: 'INBOX',
+              stagesExecuted: [],
+              status: 'PENDING',
+            };
+
+            await this.pipeline.execute(ctx);
+
+            if (ctx.status !== 'ABORTED' || ctx.isDuplicate || ctx.isBlocked) {
+              maxProcessedUid = Math.max(maxProcessedUid, item.uid);
             }
-
-            // 2. محرك مطابقة الخيط:
-            const threadRoot = await this.matcherService.findThreadRoot(
-              parsed,
-              senderEmail,
-              subject,
-              body,
-            );
-
-            // 3. الربط أو بدء جذر جديد:
-            if (threadRoot) {
-              const childCount = await this.prisma.correspondence.count({
-                where: { parentId: threadRoot.id },
-              });
-              let seq = childCount + 1;
-              let childRefNumber = `${threadRoot.refNumber}#${seq}`;
-              while (
-                await this.prisma.correspondence.findUnique({
-                  where: { refNumber: childRefNumber },
-                  select: { id: true },
-                })
-              ) {
-                seq++;
-                childRefNumber = `${threadRoot.refNumber}#${seq}`;
-              }
-
-              const childCorr = await this.prisma.correspondence.create({
-                data: {
-                  refNumber: childRefNumber,
-                  type: CorrespondenceType.INCOMING,
-                  subject,
-                  body,
-                  priority: threadRoot.priority,
-                  status: CorrespondenceStatus.RECEIVED,
-                  senderName,
-                  senderEmail,
-                  channel: 'email',
-                  receivedAt: parsed.date ? new Date(parsed.date) : new Date(),
-                  createdById: systemAuthUser.id,
-                  parentId: threadRoot.id,
-                  messageId: incomingMessageId ?? undefined,
-                },
-              });
-
-              // حفظ المرفقات الواردة إن وُجدت
-              await this.attachmentService.saveIncomingAttachments(
-                parsed.attachments,
-                childCorr.id,
-                systemAuthUser.id,
-              );
-
-              // قاعدة فتح الخيط
-              const shouldReopen = (
-                [
-                  CorrespondenceStatus.SENT,
-                  CorrespondenceStatus.CLOSED,
-                  CorrespondenceStatus.ARCHIVED,
-                ] as CorrespondenceStatus[]
-              ).includes(threadRoot.status);
-
-              if (shouldReopen) {
-                await this.prisma.correspondence.update({
-                  where: { id: threadRoot.id },
-                  data: {
-                    status: CorrespondenceStatus.IN_PROGRESS,
-                    closedAt: null,
-                    updatedAt: new Date(),
-                  },
-                });
-                await this.audit.log({
-                  action: AuditAction.UPDATE,
-                  entityType: 'Correspondence',
-                  entityId: threadRoot.id,
-                  summary: 'إعادة فتح الخيط بسبب رد العميل',
-                  metadata: {
-                    previousStatus: threadRoot.status,
-                    newStatus: CorrespondenceStatus.IN_PROGRESS,
-                    childRefNumber,
-                    senderEmail,
-                  },
-                });
-              } else {
-                await this.prisma.correspondence.update({
-                  where: { id: threadRoot.id },
-                  data: { updatedAt: new Date() },
-                });
-              }
-
-              await this.audit.log({
-                action: AuditAction.CREATE,
-                entityType: 'Correspondence',
-                entityId: childCorr.id,
-                summary: `استلام تعقيب جديد ${childRefNumber} من العميل «${senderName}» على المحادثة ${threadRoot.refNumber}`,
-                metadata: {
-                  parentId: threadRoot.id,
-                  parentRefNumber: threadRoot.refNumber,
-                  subject,
-                  messageId: incomingMessageId,
-                  ...metadata,
-                },
-              });
-
-              // الإشعارات
-              const recipientSet = new Set<string>();
-
-              const gmUsers = await this.prisma.user.findMany({
-                where: { role: Role.GM, isActive: true },
-                select: { id: true },
-              });
-              for (const gm of gmUsers) {
-                recipientSet.add(gm.id);
-              }
-
-              const lastApproved = await this.prisma.reply.findFirst({
-                where: { correspondenceId: threadRoot.id, approvedById: { not: null } },
-                orderBy: { approvedAt: 'desc' },
-                select: { approvedById: true },
-              });
-              if (lastApproved?.approvedById) {
-                recipientSet.add(lastApproved.approvedById);
-              }
-
-              const lastReply = await this.prisma.reply.findFirst({
-                where: { correspondenceId: threadRoot.id },
-                orderBy: { createdAt: 'desc' },
-                select: { authorId: true },
-              });
-              if (lastReply?.authorId) {
-                recipientSet.add(lastReply.authorId);
-              }
-
-              if (recipientSet.size > 0) {
-                await this.notifications.notifyMany([...recipientSet], {
-                  type: NotificationType.NEW_INCOMING,
-                  title: `تعقيب جديد من العميل على ${threadRoot.refNumber}`,
-                  body: `أرسل «${senderName}» رداً جديداً: «${subject}»`,
-                  link: `/correspondences/${threadRoot.id}`,
-                  entityType: 'Correspondence',
-                  entityId: threadRoot.id,
-                });
-              }
-
-              this.logger.log(
-                `[IMAP Engine] تم ربط رد وارد جديد ${childRefNumber} بالمحادثة الأصلية ${threadRoot.refNumber} من ${senderEmail}`,
-              );
-            } else {
-              // جذر جديد مع channel=email
-              const corr = await this.correspondencesService.createIncoming(
-                {
-                  subject,
-                  body,
-                  senderName,
-                  senderEmail,
-                  priority: Priority.NORMAL,
-                  messageId: incomingMessageId ?? undefined,
-                  channel: 'email',
-                },
-                systemAuthUser,
-              );
-
-              // حفظ المرفقات الواردة إن وُجدت
-              await this.attachmentService.saveIncomingAttachments(
-                parsed.attachments,
-                corr.id,
-                systemAuthUser.id,
-              );
-
-              this.logger.log(
-                `[IMAP Engine] تم تسجيل مراسلة واردة جديدة برقم ${corr.refNumber} من ${senderEmail} - الموضوع: "${subject}"`,
-              );
-            }
-
-            maxProcessedUid = Math.max(maxProcessedUid, item.uid);
           } catch (msgErr) {
             this.logger.error(`خطأ في معالجة رسالة UID ${item.uid}: ${(msgErr as Error).message}`);
             maxProcessedUid = Math.max(maxProcessedUid, item.uid);
@@ -584,5 +399,12 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     return this.prisma.correspondence.count({
       where: { type: 'INCOMING' },
     });
+  }
+
+  /**
+   * استرجاع خط أنابيب المعالجة للتفتيش والمراقبة
+   */
+  getPipeline(): IngestionPipeline {
+    return this.pipeline;
   }
 }
