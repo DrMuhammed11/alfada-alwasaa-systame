@@ -84,7 +84,43 @@ export class CorrespondencesQueryService {
         include: LIST_INCLUDE,
       }),
     ]);
-    return { data, meta: buildPageMeta(page, limit, total) };
+
+    const now = new Date();
+    const enrichedData = data.map((item: any) => {
+      let isOverdue = false;
+      let maxOverdueDays = 0;
+
+      const dueDates: Date[] = [];
+      if (item.referrals) {
+        for (const r of item.referrals) {
+          if (r.dueDate) dueDates.push(new Date(r.dueDate));
+        }
+      }
+      if (item.tasks) {
+        for (const t of item.tasks) {
+          if (t.dueDate) dueDates.push(new Date(t.dueDate));
+        }
+      }
+
+      for (const d of dueDates) {
+        if (d < now) {
+          isOverdue = true;
+          const diffMs = now.getTime() - d.getTime();
+          const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+          if (days > maxOverdueDays) {
+            maxOverdueDays = days;
+          }
+        }
+      }
+
+      return {
+        ...item,
+        isOverdue,
+        overdueDays: maxOverdueDays,
+      };
+    });
+
+    return { data: enrichedData, meta: buildPageMeta(page, limit, total) };
   }
 
   /** تفاصيل مراسلة — مع فرض نطاق الرؤية نفسه */

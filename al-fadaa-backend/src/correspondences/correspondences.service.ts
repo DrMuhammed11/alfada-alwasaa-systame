@@ -10,7 +10,10 @@ import {
   CorrespondenceType,
   Prisma,
   Priority,
+  ReferralStatus,
+  ReplyStatus,
   Role,
+  TaskStatus,
 } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -225,7 +228,7 @@ export class CorrespondencesService {
   }
 
   /** إغلاق المراسلة (بدون رد أو بعد اكتمال المعالجة) */
-  async close(id: string, user: AuthUser) {
+  async close(id: string, user: AuthUser, options?: { force?: boolean }) {
     const corr = await this.prisma.correspondence.findUnique({ where: { id } });
     if (!corr) throw new NotFoundException('المراسلة غير موجودة');
 
@@ -235,6 +238,102 @@ export class CorrespondencesService {
     const closable = getAllowedStatusesForAction(CorrespondenceAction.CLOSE);
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      // 1. فحص الكيانات التابعة النشطة (إحالات مفتوحة / تكليفات جارية / مسودات رد)
+      const openReferrals = tx.referral?.findMany
+        ? await tx.referral.findMany({
+            where: { correspondenceId: id, status: ReferralStatus.OPEN },
+            include: { toUser: { select: { name: true } } },
+          })
+        : [];
+
+      const activeTasks = tx.task?.findMany
+        ? await tx.task.findMany({
+            where: {
+              correspondenceId: id,
+              status: { in: [TaskStatus.PENDING, TaskStatus.IN_PROGRESS] },
+            },
+            include: { assignedTo: { select: { name: true } } },
+          })
+        : [];
+
+      const activeReplies = tx.reply?.findMany
+        ? await tx.reply.findMany({
+            where: {
+              correspondenceId: id,
+              status: { in: [ReplyStatus.DRAFT, ReplyStatus.SUBMITTED] },
+            },
+            select: { id: true, status: true },
+          })
+        : [];
+
+      // إذا وُجدت أي مسودة رد قيد التحرير أو الاعتماد ➔ يُرفض الإغلاق دائماً
+      if (activeReplies.length > 0) {
+        throw new BadRequestException('لا يمكن إغلاق المراسلة: توجد مسودة رد قيد التحرير أو الاعتماد');
+      }
+
+      const activeReasons: string[] = [];
+      for (const ref of openReferrals) {
+        activeReasons.push(`إحالة مفتوحة لدى ${ref.toUser?.name || 'مستخدم'}`);
+      }
+      for (const task of activeTasks) {
+        activeReasons.push(`تكليف جارٍ لدى ${task.assignedTo?.name || 'مستخدم'}`);
+      }
+
+      if (activeReasons.length > 0) {
+        if (!options?.force) {
+          throw new BadRequestException(`لا يمكن إغلاق المراسلة: توجد ${activeReasons.join(' + ')}`);
+        }
+
+        // عند الإغلاق القسري الصريح (force: true):
+        // أ. إغلاق الإحالات المفتوحة تلقائياً
+        if (tx.referral?.updateMany) {
+          await tx.referral.updateMany({
+            where: { correspondenceId: id, status: ReferralStatus.OPEN },
+            data: { status: ReferralStatus.CLOSED, closedAt: new Date() },
+          });
+        }
+
+        // ب. إلغاء التكليفات المعلقة تلقائياً
+        if (tx.task?.updateMany) {
+          await tx.task.updateMany({
+            where: {
+              correspondenceId: id,
+              status: { in: [TaskStatus.PENDING, TaskStatus.IN_PROGRESS] },
+            },
+            data: { status: TaskStatus.CANCELLED },
+          });
+        }
+
+        // ج. تسجيل تدقيق مستقل لكل كيان تم إنهاؤه
+        for (const ref of openReferrals) {
+          await this.audit.log({
+            action: AuditAction.CLOSE,
+            entityType: 'Referral',
+            entityId: ref.id,
+            summary: `إغلاق إداري آلي للإحالة لـ${ref.toUser?.name || ''} عند إغلاق المراسلة ${corr.refNumber}`,
+            userId: user.id,
+          });
+        }
+        for (const task of activeTasks) {
+          await this.audit.log({
+            action: AuditAction.CLOSE,
+            entityType: 'Task',
+            entityId: task.id,
+            summary: `إلغاء إداري آلي للتكليف لـ${task.assignedTo?.name || ''} عند إغلاق المراسلة ${corr.refNumber}`,
+            userId: user.id,
+          });
+        }
+      }
+
+      // في الإغلاق النظيف: إغلاق الإحالات التي كانت ANSWERED لتصبح CLOSED رسمياً
+      if (tx.referral?.updateMany) {
+        await tx.referral.updateMany({
+          where: { correspondenceId: id, status: ReferralStatus.ANSWERED },
+          data: { status: ReferralStatus.CLOSED, closedAt: new Date() },
+        });
+      }
+
+      // 2. التحديث الذري للمراسلة
       const res = await tx.correspondence.updateMany({
         where: {
           id,
@@ -304,6 +403,50 @@ export class CorrespondencesService {
     const archivable = getAllowedStatusesForAction(CorrespondenceAction.ARCHIVE);
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      // فحص الكيانات التابعة النشطة في الأرشفة
+      const openReferrals = tx.referral?.findMany
+        ? await tx.referral.findMany({
+            where: { correspondenceId: id, status: ReferralStatus.OPEN },
+            include: { toUser: { select: { name: true } } },
+          })
+        : [];
+
+      const activeTasks = tx.task?.findMany
+        ? await tx.task.findMany({
+            where: {
+              correspondenceId: id,
+              status: { in: [TaskStatus.PENDING, TaskStatus.IN_PROGRESS] },
+            },
+            include: { assignedTo: { select: { name: true } } },
+          })
+        : [];
+
+      const activeReplies = tx.reply?.findMany
+        ? await tx.reply.findMany({
+            where: {
+              correspondenceId: id,
+              status: { in: [ReplyStatus.DRAFT, ReplyStatus.SUBMITTED] },
+            },
+            select: { id: true, status: true },
+          })
+        : [];
+
+      if (activeReplies.length > 0) {
+        throw new BadRequestException('لا يمكن أرشفة المراسلة: توجد مسودة رد قيد التحرير أو الاعتماد');
+      }
+
+      const archiveReasons: string[] = [];
+      for (const ref of openReferrals) {
+        archiveReasons.push(`إحالة مفتوحة لدى ${ref.toUser?.name || 'مستخدم'}`);
+      }
+      for (const task of activeTasks) {
+        archiveReasons.push(`تكليف جارٍ لدى ${task.assignedTo?.name || 'مستخدم'}`);
+      }
+
+      if (archiveReasons.length > 0) {
+        throw new BadRequestException(`لا يمكن أرشفة المراسلة: توجد ${archiveReasons.join(' + ')}`);
+      }
+
       const res = await tx.correspondence.updateMany({
         where: {
           id,

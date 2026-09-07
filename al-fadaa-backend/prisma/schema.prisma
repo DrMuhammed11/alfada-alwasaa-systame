@@ -108,6 +108,13 @@ enum OutboxStatus {
   FAILED    // فشل نهائي بعد استنفاد محاولات إعادة الإرسال
 }
 
+/// أنواع تذكيرات اتفاقيات مستوى الخدمة (SLA Reminders)
+enum SlaReminderType {
+  APPROACHING // تذكير قبل اقتراب الموعد النهائي (مثال: 24 ساعة)
+  OVERDUE     // تنبيه ببدء التأخير وتجاوز الموعد
+  ESCALATED   // تصعيد أسبوعي مجمّع للمدير العام
+}
+
 // ─────────────────── النماذج (Models) ───────────────────
 
 /// المستخدمون — موظفو الشركة المخولون باستخدام النظام
@@ -379,4 +386,18 @@ model EventOutbox {
 
   @@index([status, createdAt])
   @@index([status, nextRetryAt])
+}
+
+/// جدول تتبع حالات اتفاقيات مستوى الخدمة والتنبيهات — لمنع تكرار الإشعارات لنفس الكيان
+model SlaState {
+  id               String          @id @default(uuid())
+  entityType       String          // 'Referral' | 'Task'
+  entityId         String          // معرف الإحالة أو التكليف
+  lastReminderType SlaReminderType // آخر نوع تنبيه تم إرساله
+  lastSentAt       DateTime        @default(now()) // تاريخ ووقت إرسال التنبيه
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([entityType, entityId, lastReminderType])
+  @@index([entityType, entityId])
 }

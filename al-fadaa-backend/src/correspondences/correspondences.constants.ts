@@ -20,6 +20,14 @@ export const LIST_INCLUDE = {
       children: true,
     },
   },
+  referrals: {
+    where: { status: 'OPEN', dueDate: { not: null } },
+    select: { dueDate: true },
+  },
+  tasks: {
+    where: { status: { in: ['PENDING', 'IN_PROGRESS'] }, dueDate: { not: null } },
+    select: { dueDate: true },
+  },
 } satisfies Prisma.CorrespondenceInclude;
 
 /** حقول التفاصيل الكاملة — تعرض سلسلة المحادثة كاملة بالتسلسل الزمني */

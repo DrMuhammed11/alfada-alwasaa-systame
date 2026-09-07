@@ -105,6 +105,32 @@ class MasterListItemTile extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            if (item.isOverdue) ...[
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEF2F2),
+                                  borderRadius: BorderRadius.circular(3),
+                                  border: Border.all(color: const Color(0xFFFCA5A5), width: 0.7),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.warning_amber_rounded, size: 9, color: Color(0xFFDC2626)),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      item.overdueDays > 0 ? 'متأخر بـ${item.overdueDays} يوم' : 'متأخر',
+                                      style: const TextStyle(
+                                        fontSize: 8.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFDC2626),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

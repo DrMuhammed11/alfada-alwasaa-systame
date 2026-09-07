@@ -247,6 +247,13 @@ export class TasksService {
     });
     if (!task) throw new NotFoundException('التكليف غير موجود');
 
+    if (
+      task.correspondence?.status === CorrespondenceStatus.CLOSED ||
+      task.correspondence?.status === CorrespondenceStatus.ARCHIVED
+    ) {
+      throw new BadRequestException('المراسلة مغلقة — لا يمكن تسليم عمل عليها');
+    }
+
     if (dto.status === TaskStatus.IN_PROGRESS) {
       if (task.assignedToId !== user.id) {
         throw new ForbiddenException('فقط المكلَّف يمكنه بدء التنفيذ');

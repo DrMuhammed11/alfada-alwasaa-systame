@@ -14,6 +14,8 @@ import { AttachmentsModule } from './attachments/attachments.module';
 import { MailModule } from './mail/mail.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { OutboxModule } from './outbox/outbox.module';
+import { AdminModule } from './admin/admin.module';
+import { SlaModule } from './sla/sla.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
@@ -27,6 +29,8 @@ import { HealthController } from './health.controller';
     AuditModule,
     NotificationsModule,
     OutboxModule,
+    SlaModule,
+    AdminModule,
     // وحدات الأعمال
     AuthModule,
     UsersModule,

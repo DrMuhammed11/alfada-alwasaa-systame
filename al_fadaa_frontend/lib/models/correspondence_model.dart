@@ -38,6 +38,8 @@ class Correspondence {
   final int childrenCount;
   final int repliesCount;
   final List<AttachmentItem> attachments;
+  final bool isOverdue;
+  final int overdueDays;
 
   Correspondence({
     required this.id,
@@ -68,6 +70,8 @@ class Correspondence {
     this.attachments = const [],
     this.childrenCount = 0,
     this.repliesCount = 0,
+    this.isOverdue = false,
+    this.overdueDays = 0,
   });
 
   factory Correspondence.fromJson(Map<String, dynamic> json) {
@@ -93,6 +97,8 @@ class Correspondence {
       parent: json['parent'] != null ? Correspondence.fromJson(json['parent']) : null,
       messageId: json['messageId'],
       sourceReplyId: json['sourceReplyId'],
+      isOverdue: json['isOverdue'] as bool? ?? false,
+      overdueDays: (json['overdueDays'] as num?)?.toInt() ?? 0,
       referrals: json['referrals'] != null
           ? (json['referrals'] as List).map((i) => ReferralItem.fromJson(i)).toList()
           : [],

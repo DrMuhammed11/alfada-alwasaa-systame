@@ -80,8 +80,9 @@ export class CorrespondencesController {
   close(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthUser,
+    @Body() body?: { force?: boolean },
   ) {
-    return this.correspondencesService.close(id, user);
+    return this.correspondencesService.close(id, user, body);
   }
 
   @Post(':id/archive')

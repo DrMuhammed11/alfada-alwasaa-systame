@@ -253,9 +253,27 @@ export class ReferralsService {
       throw new BadRequestException('تمت إجابة هذه الإحالة أو إغلاقها مسبقًا');
     }
 
+    if (
+      referral.correspondence?.status === CorrespondenceStatus.CLOSED ||
+      referral.correspondence?.status === CorrespondenceStatus.ARCHIVED
+    ) {
+      throw new BadRequestException('المراسلة مغلقة — لا يمكن تسليم عمل عليها');
+    }
+
     const correspondenceId = referral.correspondenceId;
 
     const result = await this.prisma.$transaction(async (tx) => {
+      const parentCorr = await tx.correspondence.findUnique({
+        where: { id: correspondenceId },
+        select: { status: true },
+      });
+      if (
+        parentCorr?.status === CorrespondenceStatus.CLOSED ||
+        parentCorr?.status === CorrespondenceStatus.ARCHIVED
+      ) {
+        throw new BadRequestException('المراسلة مغلقة — لا يمكن تسليم عمل عليها');
+      }
+
       // 1. تحديث الإحالة لتصبح ANSWERED مع توثيق answeredAt
       const updated = await tx.referral.update({
         where: { id: referralId },
