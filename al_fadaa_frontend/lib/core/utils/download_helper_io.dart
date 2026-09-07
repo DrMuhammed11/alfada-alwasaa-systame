@@ -11,3 +11,7 @@ Future<void> openFileInViewerImpl(List<int> bytes, String fileName, [String? mim
   final file = File('${tempDir.path}/$fileName');
   await file.writeAsBytes(bytes);
 }
+
+Future<void> printHtmlDossierImpl(String htmlContent) async {
+  // Desktop/mobile IO implementation
+}

@@ -24,6 +24,7 @@ class Correspondence {
   final DateTime createdAt;
   final DateTime? receivedAt;
   final DateTime? sentAt;
+  final DateTime? closedAt;
   final Department? department;
   final User? createdBy;
   final String? parentId;
@@ -53,6 +54,7 @@ class Correspondence {
     required this.createdAt,
     this.receivedAt,
     this.sentAt,
+    this.closedAt,
     this.department,
     this.createdBy,
     this.parentId,
@@ -84,6 +86,7 @@ class Correspondence {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       receivedAt: json['receivedAt'] != null ? DateTime.parse(json['receivedAt']) : null,
       sentAt: json['sentAt'] != null ? DateTime.parse(json['sentAt']) : null,
+      closedAt: json['closedAt'] != null ? DateTime.parse(json['closedAt']) : null,
       department: json['department'] != null ? Department.fromJson(json['department']) : null,
       createdBy: json['createdBy'] != null ? User.fromJson(json['createdBy']) : null,
       parentId: json['parentId'],

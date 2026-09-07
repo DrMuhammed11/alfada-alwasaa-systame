@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/correspondence_model.dart';
@@ -16,6 +17,7 @@ class ConversationHeader extends StatelessWidget {
   final Function(String) onClose;
   final Function(String) onArchive;
   final VoidCallback onRefresh;
+  final VoidCallback onShowDossier;
 
   const ConversationHeader({
     super.key,
@@ -28,6 +30,7 @@ class ConversationHeader extends StatelessWidget {
     required this.onClose,
     required this.onArchive,
     required this.onRefresh,
+    required this.onShowDossier,
   });
 
   @override
@@ -81,21 +84,60 @@ class ConversationHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
 
-          // اسم الشخص وعنوان المراسلة
+          // اسم الشخص وعنوان المراسلة والرقم المرجعي الموحد للطلبية
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  item.senderName ?? item.senderEmail ?? 'عميل خارجي',
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        item.senderName ?? item.senderEmail ?? 'عميل خارجي',
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // شارة الرقم المرجعي الموحد للطلبية
+                    InkWell(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: item.serialNumber));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم نسخ رقم الطلبية')),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A).withAlpha(12),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFF0F172A).withAlpha(35)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.tag_rounded, size: 11, color: Color(0xFF334155)),
+                            const SizedBox(width: 2),
+                            Text(
+                              item.serialNumber,
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   item.subject,
@@ -156,9 +198,39 @@ class ConversationHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
 
-          // --- أزرار الإجراء السلسة والمفهومة ---
+          // --- أزرار سير العمل المرحلية ---
 
-          // 1. زر إنجاز المهمة (يظهر فوراً عند وجود تكليف نشط للمعنيين أو للإدارة)
+          // 1. زر قبول كمعاملة (عندما تكون الرسالة واردة جديدة RECEIVED)
+          if (canAssign && item.status == 'RECEIVED') ...[
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              onPressed: () => onStartReview(item.id),
+              icon: const Icon(Icons.check_box_rounded, size: 15),
+              label: const Text('قبول كمعاملة 📋', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(width: 6),
+            // زر أرشفة / استبعاد للرسائل الواردة غير المقبولة
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF64748B),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              onPressed: () => onArchive(item.id),
+              icon: const Icon(Icons.archive_outlined, size: 15),
+              label: const Text('أرشفة / استبعاد', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(width: 6),
+          ],
+
+          // 2. زر إنجاز المهمة (يظهر فوراً عند وجود تكليف نشط للمعنيين أو للإدارة)
           if (hasActiveTask && (canAssign || activeTasks.any((t) => t.assignedTo?.id == currentUserId))) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -181,7 +253,7 @@ class ConversationHeader extends StatelessWidget {
             const SizedBox(width: 6),
           ],
 
-          // 2. زر تكليف قطاع بالمهمة
+          // 3. زر تكليف قطاع بالمهمة
           if (canAssign && item.status != 'CLOSED' && item.status != 'ARCHIVED') ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -207,9 +279,9 @@ class ConversationHeader extends StatelessWidget {
             const SizedBox(width: 6),
           ],
 
-          // 3. زر إحالة (اختياري للإدارات)
+          // 4. زر إحالة (اختياري للإدارات)
           if (canAssign &&
-              (item.status == 'RECEIVED' || item.status == 'UNDER_REVIEW' || item.status == 'REFERRED')) ...[
+              (item.status == 'UNDER_REVIEW' || item.status == 'REFERRED')) ...[
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF7C3AED),
@@ -230,7 +302,7 @@ class ConversationHeader extends StatelessWidget {
             const SizedBox(width: 6),
           ],
 
-          // 4. زر إغلاق المعاملة
+          // 5. زر إغلاق المعاملة
           if (isExecutive && item.status != 'CLOSED' && item.status != 'ARCHIVED') ...[
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
@@ -246,7 +318,31 @@ class ConversationHeader extends StatelessWidget {
             const SizedBox(width: 6),
           ],
 
-          // 5. زر الأرشفة للمغلقة
+          // 6. زر كشف كامل للعمل (متاح دائماً ويبرز عند إغلاق المعاملة)
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: (item.status == 'CLOSED' || item.status == 'ARCHIVED')
+                  ? const Color(0xFF0F172A)
+                  : Colors.white,
+              foregroundColor: (item.status == 'CLOSED' || item.status == 'ARCHIVED')
+                  ? Colors.white
+                  : const Color(0xFF0F172A),
+              side: BorderSide(
+                color: (item.status == 'CLOSED' || item.status == 'ARCHIVED')
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFFCBD5E1),
+              ),
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            ),
+            onPressed: onShowDossier,
+            icon: const Icon(Icons.assignment_turned_in_rounded, size: 15),
+            label: const Text('كشف كامل للعمل 📄', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: 6),
+
+          // 7. زر الأرشفة للمغلقة
           if (isExecutive && item.status == 'CLOSED')
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(

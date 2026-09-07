@@ -200,6 +200,49 @@ class EmailComposer extends StatelessWidget {
               ),
             ),
           ],
+          // شريط القوالب السريعة الذكية
+          if (!isEditing) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    const Text('قوالب سريعة:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                    const SizedBox(width: 8),
+                    ActionChip(
+                      avatar: const Icon(Icons.bolt_rounded, size: 14, color: Color(0xFF2563EB)),
+                      backgroundColor: const Color(0xFFEFF6FF),
+                      side: const BorderSide(color: Color(0xFFBFDBFE), width: 0.8),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                      label: const Text('رد مبدئي (تأكيد استلام)', style: TextStyle(fontSize: 10.5, color: Color(0xFF1D4ED8), fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        controller.text = 'السلام عليكم ورحمة الله وبركاته،\n\n'
+                            'نود إفادتكم باستلام رسالتكم واستفساركم بنجاح (معاملة رقم: ${item.serialNumber}). '
+                            'يجري حالياً مراجعة الطلب وتوجيهه للمختصين وسنوافيكم بالمستجدات قريباً.\n\n'
+                            'شاكرين ومقدرين تواصلكم معنا،\nشركة الفضاء الواسع.';
+                      },
+                    ),
+                    const SizedBox(width: 6),
+                    ActionChip(
+                      avatar: const Icon(Icons.help_outline_rounded, size: 14, color: Color(0xFFD97706)),
+                      backgroundColor: const Color(0xFFFFFBEB),
+                      side: const BorderSide(color: Color(0xFFFDE68A), width: 0.8),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                      label: const Text('طلب نواقص / تفاصيل', style: TextStyle(fontSize: 10.5, color: Color(0xFFB45309), fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        controller.text = 'السلام عليكم ورحمة الله وبركاته،\n\n'
+                            'بخصوص طلبكم الوارد إلينا (معاملة رقم: ${item.serialNumber})، '
+                            'نرجو التكرم بتزويدنا بالتفاصيل والمستندات الإضافية التالية لنتمكن من استكمال الإجراءات:\n'
+                            '1- ...\n\n'
+                            'شاكرين تعاونكم معنا،\nشركة الفضاء الواسع.';
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
 
           // حقل كتابة الرد
           TextField(

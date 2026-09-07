@@ -24,6 +24,7 @@ class ConversationDetailPane extends StatelessWidget {
   final Function(String) onClose;
   final Function(String) onArchive;
   final VoidCallback onRefresh;
+  final VoidCallback onShowDossier;
   final Function(ReplyItem) onEditDraft;
   final Function(String) onSubmitReply;
   final Function(String) onApproveReply;
@@ -55,6 +56,7 @@ class ConversationDetailPane extends StatelessWidget {
     required this.onClose,
     required this.onArchive,
     required this.onRefresh,
+    required this.onShowDossier,
     required this.onEditDraft,
     required this.onSubmitReply,
     required this.onApproveReply,
@@ -105,6 +107,7 @@ class ConversationDetailPane extends StatelessWidget {
             onClose: onClose,
             onArchive: onArchive,
             onRefresh: onRefresh,
+            onShowDossier: onShowDossier,
           ),
 
           // المحتوى التفصيلي: المحادثة مباشرة تأخذ كامل المساحة!

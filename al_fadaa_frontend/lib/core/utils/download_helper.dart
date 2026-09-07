@@ -7,3 +7,6 @@ Future<void> saveAndDownloadFile(List<int> bytes, String fileName) =>
 
 Future<void> openFileInViewer(List<int> bytes, String fileName, [String? mimeType]) =>
     openFileInViewerImpl(bytes, fileName, mimeType);
+
+Future<void> printHtmlDossier(String htmlContent) =>
+    printHtmlDossierImpl(htmlContent);

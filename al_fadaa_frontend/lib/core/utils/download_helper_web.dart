@@ -22,3 +22,10 @@ Future<void> openFileInViewerImpl(List<int> bytes, String fileName, [String? mim
   // Revoke object URL after delay so browser has time to load it in the new tab
   Future.delayed(const Duration(minutes: 5), () => html.Url.revokeObjectUrl(url));
 }
+
+Future<void> printHtmlDossierImpl(String htmlContent) async {
+  final blob = html.Blob([htmlContent], 'text/html;charset=utf-8');
+  final url = html.Url.createObjectUrlFromBlob(blob);
+  html.window.open(url, '_blank');
+  Future.delayed(const Duration(minutes: 5), () => html.Url.revokeObjectUrl(url));
+}

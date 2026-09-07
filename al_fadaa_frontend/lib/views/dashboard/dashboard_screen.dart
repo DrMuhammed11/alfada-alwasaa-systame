@@ -10,6 +10,7 @@ import '../auth/login_screen.dart';
 import 'widgets/conversation_detail_pane.dart';
 import 'widgets/dashboard_sidebar.dart';
 import 'widgets/master_list_pane.dart';
+import 'widgets/work_dossier_dialog.dart';
 
 class DashboardScreen extends StatefulWidget {
   final User user;
@@ -375,7 +376,26 @@ class _DashboardScreenState extends State<DashboardScreen>
     final res = await ApiService().updateCorrespondenceStatus(id, 'UNDER_REVIEW');
     if (res['success'] == true) {
       await _fetchCorrespondences(selectId: id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم قبول الطلب كمعاملة رسمية بنجاح — يمكنك الآن تكليف قطاع بالمهمة'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      }
     }
+  }
+
+  void _handleShowDossier() {
+    if (_selectedItem == null) return;
+    showDialog(
+      context: context,
+      builder: (_) => WorkDossierDialog(
+        item: _selectedItem!,
+        onDownloadAttachment: _handleDownloadAttachment,
+      ),
+    );
   }
 
   Future<void> _handleClose(String id) async {
@@ -405,7 +425,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('تأكيد الإغلاق'),
+            child: const Text('تأكيد الإغلاق وحفظ الكشف'),
           ),
         ],
       ),
@@ -413,7 +433,12 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     if (confirm == true) {
       final res = await ApiService().closeCorrespondence(id);
-      if (res['success'] == true) await _fetchCorrespondences(selectId: id);
+      if (res['success'] == true) {
+        await _fetchCorrespondences(selectId: id);
+        if (mounted && _selectedItem != null) {
+          _handleShowDossier();
+        }
+      }
     }
   }
 
@@ -771,6 +796,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     onClose: _handleClose,
                     onArchive: _handleArchive,
                     onRefresh: () => _fetchCorrespondences(selectId: _selectedItem?.id),
+                    onShowDossier: _handleShowDossier,
                     onEditDraft: (reply) {
                       setState(() {
                         _editingReplyId = reply.id;
