@@ -32,6 +32,9 @@ import {
   canCloseCorrespondence,
   canArchiveCorrespondence,
 } from '../security/business-policies';
+import { OutboxService } from '../outbox/outbox.service';
+import { OutboxProcessor } from '../outbox/outbox.processor';
+import { OutboxEventType } from '../outbox/outbox.types';
 import {
   CorrespondenceDetailRow,
   CorrespondenceListRow,
@@ -58,6 +61,8 @@ export class CorrespondencesService {
     private readonly refNumbers: RefNumberService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
+    @Optional() private readonly outbox?: OutboxService,
+    @Optional() private readonly outboxProcessor?: OutboxProcessor,
     @Optional() queryService?: CorrespondencesQueryService,
   ) {
     this.queryService = queryService ?? new CorrespondencesQueryService(this.prisma);
@@ -231,31 +236,60 @@ export class CorrespondencesService {
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const res = await tx.correspondence.updateMany({
-        where: { id, status: { in: closable } },
-        data: { status: CorrespondenceStatus.CLOSED, closedAt: new Date() },
+        where: {
+          id,
+          ...(corr.version !== undefined ? { version: corr.version } : {}),
+          status: { in: closable },
+        },
+        data: {
+          status: CorrespondenceStatus.CLOSED,
+          closedAt: new Date(),
+          ...(corr.version !== undefined ? { version: { increment: 1 } } : {}),
+        },
       });
       if (res.count === 0) {
         const current = await tx.correspondence.findUnique({
           where: { id },
-          select: { status: true },
+          select: { status: true, version: true },
         });
         if (!current) throw new NotFoundException('المراسلة غير موجودة');
         throw new BadRequestException(
-          `لا يمكن إغلاق المراسلة — حالتها الحالية «${current.status}» ونُفِّذت للتو عملية أخرى عليها`,
+          'عملية أخرى نُفِّذت للتو على هذا العنصر، حدّث الشاشة وأعد المحاولة',
         );
       }
+
+      if (this.outbox) {
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.CORRESPONDENCE_CLOSED,
+          payload: {
+            audit: {
+              action: AuditAction.CLOSE,
+              entityType: 'Correspondence',
+              entityId: id,
+              summary: `إغلاق المراسلة ${corr.refNumber}`,
+              userId: user.id,
+            },
+          },
+        });
+      }
+
       return tx.correspondence.findUniqueOrThrow({
         where: { id },
         include: DETAIL_INCLUDE,
       });
     });
 
-    await this.audit.log({
-      action: AuditAction.CLOSE,
-      entityType: 'Correspondence',
-      entityId: id,
-      summary: `إغلاق المراسلة ${corr.refNumber}`,
-    });
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.CLOSE,
+        entityType: 'Correspondence',
+        entityId: id,
+        summary: `إغلاق المراسلة ${corr.refNumber}`,
+      });
+    }
+
     return updated;
   }
 
@@ -271,31 +305,59 @@ export class CorrespondencesService {
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const res = await tx.correspondence.updateMany({
-        where: { id, status: { in: archivable } },
-        data: { status: CorrespondenceStatus.ARCHIVED },
+        where: {
+          id,
+          ...(corr.version !== undefined ? { version: corr.version } : {}),
+          status: { in: archivable },
+        },
+        data: {
+          status: CorrespondenceStatus.ARCHIVED,
+          ...(corr.version !== undefined ? { version: { increment: 1 } } : {}),
+        },
       });
       if (res.count === 0) {
         const current = await tx.correspondence.findUnique({
           where: { id },
-          select: { status: true },
+          select: { status: true, version: true },
         });
         if (!current) throw new NotFoundException('المراسلة غير موجودة');
         throw new BadRequestException(
-          `لا يمكن أرشفة المراسلة — حالتها الحالية «${current.status}» ونُفِّذت للتو عملية أخرى عليها`,
+          'عملية أخرى نُفِّذت للتو على هذا العنصر، حدّث الشاشة وأعد المحاولة',
         );
       }
+
+      if (this.outbox) {
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.CORRESPONDENCE_ARCHIVED,
+          payload: {
+            audit: {
+              action: AuditAction.ARCHIVE,
+              entityType: 'Correspondence',
+              entityId: id,
+              summary: `أرشفة المراسلة ${corr.refNumber}`,
+              userId: user.id,
+            },
+          },
+        });
+      }
+
       return tx.correspondence.findUniqueOrThrow({
         where: { id },
         include: DETAIL_INCLUDE,
       });
     });
 
-    await this.audit.log({
-      action: AuditAction.ARCHIVE,
-      entityType: 'Correspondence',
-      entityId: id,
-      summary: `أرشفة المراسلة ${corr.refNumber}`,
-    });
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.ARCHIVE,
+        entityType: 'Correspondence',
+        entityId: id,
+        summary: `أرشفة المراسلة ${corr.refNumber}`,
+      });
+    }
+
     return updated;
   }
 }

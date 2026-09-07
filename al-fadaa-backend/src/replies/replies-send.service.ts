@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
@@ -9,6 +10,7 @@ import {
   AuditAction,
   CorrespondenceStatus,
   CorrespondenceType,
+  NotificationType,
   Priority,
   ReferralStatus,
   ReplyStatus,
@@ -30,6 +32,10 @@ import {
 } from '../workflow/correspondence-state-machine';
 import { canSendReply } from '../security/business-policies';
 
+import { OutboxService } from '../outbox/outbox.service';
+import { OutboxProcessor } from '../outbox/outbox.processor';
+import { OutboxEventType } from '../outbox/outbox.types';
+
 @Injectable()
 export class RepliesSendService {
   constructor(
@@ -40,6 +46,8 @@ export class RepliesSendService {
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
+    @Optional() private readonly outbox?: OutboxService,
+    @Optional() private readonly outboxProcessor?: OutboxProcessor,
   ) {}
 
   /**
@@ -196,15 +204,61 @@ export class RepliesSendService {
         where: { correspondenceId: corr.id, status: { not: ReferralStatus.CLOSED } },
         data: { status: ReferralStatus.CLOSED, closedAt: now },
       });
+
+      if (this.outbox) {
+        const sentRecipients = [reply.authorId];
+        if (reply.taskId && reply.task?.assignedById) {
+          sentRecipients.push(reply.task.assignedById);
+        }
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.REPLY_SENT,
+          payload: {
+            audit: {
+              action: AuditAction.SEND,
+              entityType: 'Correspondence',
+              entityId: corr.id,
+              summary: `إرسال الرد ${outRefNumber} على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
+              metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail },
+              userId: user.id,
+            },
+            notification: {
+              type: NotificationType.REPLY_SENT,
+              recipientIds: sentRecipients,
+              title: `أُرسل الرد ${outRefNumber} للعميل (${corr.senderEmail ?? ''})`,
+              body: `المراسلة الواردة ${rootRefNumber} — الرد الصادر ${outRefNumber}`,
+              link: `/correspondences/${corr.id}`,
+              entityType: 'Correspondence',
+              entityId: corr.id,
+            },
+          },
+        });
+      }
     });
 
-    await this.audit.log({
-      action: AuditAction.SEND,
-      entityType: 'Correspondence',
-      entityId: corr.id,
-      summary: `إرسال الرد ${outRefNumber} على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
-      metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail },
-    });
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.SEND,
+        entityType: 'Correspondence',
+        entityId: corr.id,
+        summary: `إرسال الرد ${outRefNumber} على المراسلة ${corr.refNumber} إلى ${corr.senderName ?? corr.senderEmail}`,
+        metadata: { outRefNumber, messageId: outMessageId, to: corr.senderEmail },
+      });
+
+      // إشعار الكاتب ومنشئ التكليف بأن الرد أُرسل للعميل
+      const sentRecipients = [reply.authorId];
+      if (reply.taskId && reply.task?.assignedById) {
+        sentRecipients.push(reply.task.assignedById);
+      }
+      await this.notifications.notifyReplySent({
+        recipientIds: sentRecipients,
+        outRefNumber,
+        inRefNumber: rootRefNumber,
+        toEmail: corr.senderEmail ?? '',
+        correspondenceId: corr.id,
+      });
+    }
 
     // الإرسال من البريد الرسمي الموحد (console في التطوير / SMTP في الإنتاج)
     const uploadDir = process.env.UPLOAD_DIR || './uploads';
@@ -218,21 +272,9 @@ export class RepliesSendService {
       references: corr.messageId ?? undefined,
       attachments: replyAttachments.map((a) => ({
         filename: a.fileName,
-        path: path.join(uploadDir, a.storedName),
+        path: `${uploadDir}/${a.storedName}`,
+        contentType: a.mimeType,
       })),
-    });
-
-    // إشعار الكاتب ومنشئ التكليف بأن الرد أُرسل للعميل
-    const sentRecipients = [reply.authorId];
-    if (reply.taskId && reply.task?.assignedById) {
-      sentRecipients.push(reply.task.assignedById);
-    }
-    await this.notifications.notifyReplySent({
-      recipientIds: sentRecipients,
-      outRefNumber,
-      inRefNumber: rootRefNumber,
-      toEmail: corr.senderEmail ?? '',
-      correspondenceId: corr.id,
     });
 
     return { success: true, sent: true, refNumber: outRefNumber };

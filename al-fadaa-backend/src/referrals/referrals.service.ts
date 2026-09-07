@@ -3,28 +3,33 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
-import { AuditAction, CorrespondenceStatus, Prisma, Role, ReferralStatus } from '@prisma/client';
-import { AuditService } from '../audit/audit.service';
+import { AuditAction, CorrespondenceStatus, NotificationType, Prisma, Role, ReferralStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { OutboxService } from '../outbox/outbox.service';
+import { OutboxProcessor } from '../outbox/outbox.processor';
+import { OutboxEventType } from '../outbox/outbox.types';
 import type { AuthUser, Paginated } from '../common/types';
 import { buildPageMeta } from '../common/types';
 import { CreateReferralDto, MyReferralsQueryDto } from './dto';
-import { NotificationsService } from '../notifications/notifications.service';
 import {
   CorrespondenceAction,
   assertTransition,
   getNextStatus,
+  getAllowedStatusesForAction,
 } from '../workflow/correspondence-state-machine';
 import { canRefer } from '../security/business-policies';
 
-const USER_BRIEF = { id: true, name: true, email: true } as const;
-
 const REFERRAL_INCLUDE = {
-  fromUser: { select: USER_BRIEF },
-  toUser: { select: USER_BRIEF },
-  correspondence: { select: { id: true, refNumber: true, subject: true, status: true, priority: true } },
+  fromUser: { select: { id: true, name: true, email: true, role: true, departmentId: true } },
+  toUser: { select: { id: true, name: true, email: true, role: true, departmentId: true } },
+  correspondence: {
+    select: { id: true, refNumber: true, subject: true, type: true, priority: true, status: true },
+  },
 } satisfies Prisma.ReferralInclude;
 
 export type ReferralRow = Prisma.ReferralGetPayload<{ include: typeof REFERRAL_INCLUDE }>;
@@ -36,6 +41,8 @@ export class ReferralsService {
     private readonly audit: AuditService,
     private readonly correspondences: CorrespondencesService,
     private readonly notifications: NotificationsService,
+    @Optional() private readonly outbox?: OutboxService,
+    @Optional() private readonly outboxProcessor?: OutboxProcessor,
   ) {}
 
   /**
@@ -67,7 +74,39 @@ export class ReferralsService {
       throw new BadRequestException(policy.reason);
     }
 
+    const referable = getAllowedStatusesForAction(CorrespondenceAction.REFER);
+
     const referral = await this.prisma.$transaction(async (tx) => {
+      // 1. التحديث الذري المشروط بالإصدار لمنع TOCTOU وسباقات الإحالة المتزامنة
+      const updateRes = await tx.correspondence.updateMany({
+        where: {
+          id: correspondenceId,
+          ...(corr.version !== undefined ? { version: corr.version } : {}),
+          status: { in: referable },
+        },
+        data: {
+          ...(corr.version !== undefined ? { version: { increment: 1 } } : {}),
+          status: getNextStatus(corr.status, CorrespondenceAction.REFER) ?? CorrespondenceStatus.REFERRED,
+          departmentId:
+            user.role === Role.DEPT_MANAGER
+              ? corr.departmentId // عند إحالة مدير القسم لا نغير قسم المراسلة (هو قسمه أصلاً)
+              : toUser!.role === Role.DEPT_MANAGER && toUser!.departmentId
+                ? toUser!.departmentId
+                : corr.departmentId,
+        },
+      });
+
+      if (updateRes.count === 0) {
+        const current = await tx.correspondence.findUnique({
+          where: { id: correspondenceId },
+          select: { status: true, version: true },
+        });
+        if (!current) throw new NotFoundException('المراسلة غير موجودة');
+        throw new BadRequestException(
+          'عملية أخرى نُفِّذت للتو على هذا العنصر، حدّث الشاشة وأعد المحاولة',
+        );
+      }
+
       const created = await tx.referral.create({
         data: {
           correspondenceId,
@@ -78,39 +117,60 @@ export class ReferralsService {
         },
         include: REFERRAL_INCLUDE,
       });
-      await tx.correspondence.update({
-        where: { id: correspondenceId },
-        data: {
-          status: getNextStatus(corr.status, CorrespondenceAction.REFER) ?? CorrespondenceStatus.REFERRED,
-          departmentId:
-            user.role === Role.DEPT_MANAGER
-              ? corr.departmentId // عند إحالة مدير القسم لا نغير قسم المراسلة (هو قسمه أصلاً)
-              : toUser!.role === Role.DEPT_MANAGER && toUser!.departmentId
-                ? toUser!.departmentId
-                : corr.departmentId,
-        },
-      });
+
+      // 2. تسجيل الحدث في الـ Outbox داخل نفس المعاملة (Transactional Outbox)
+      if (this.outbox) {
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.REFERRAL_CREATED,
+          payload: {
+            audit: {
+              action: AuditAction.REFER,
+              entityType: 'Correspondence',
+              entityId: correspondenceId,
+              summary: `أحال ${user.name} المراسلة ${corr.refNumber} إلى ${toUser!.name}`,
+              metadata: { toUserId: toUser!.id, note: dto.note ?? null },
+              userId: user.id,
+            },
+            notification: {
+              type: NotificationType.NEW_REFERRAL,
+              userId: toUser!.id,
+              title: `إحالة جديدة من ${user.name}`,
+              body: dto.note
+                ? `الموضوع: «${corr.subject}» — ملاحظة: ${dto.note}`
+                : `الموضوع: «${corr.subject}»`,
+              link: `/correspondences/${corr.id}`,
+              entityType: 'Correspondence',
+              entityId: corr.id,
+            },
+          },
+        });
+      }
+
       return created;
     });
 
-    await this.audit.log({
-      action: AuditAction.REFER,
-      entityType: 'Correspondence',
-      entityId: correspondenceId,
-      summary: `أحال ${user.name} المراسلة ${corr.refNumber} إلى ${toUser!.name}`,
-      metadata: { toUserId: toUser!.id, note: dto.note ?? null },
-    });
+    // 3. تفعيل معالج الـ Outbox فوراً، مع مسار تراجع في غيابه
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.REFER,
+        entityType: 'Correspondence',
+        entityId: correspondenceId,
+        summary: `أحال ${user.name} المراسلة ${corr.refNumber} إلى ${toUser!.name}`,
+        metadata: { toUserId: toUser!.id, note: dto.note ?? null },
+      });
 
-    // إشعار الجهة المحال إليها فورًا
-    await this.notifications.notifyReferralReceived({
-      toUserId: toUser!.id,
-      actorName: user.name,
-      refNumber: corr.refNumber,
-      subject: corr.subject,
-      correspondenceId: corr.id,
-      note: referral.note,
-      dueDate: referral.dueDate,
-    });
+      await this.notifications.notifyReferralReceived({
+        toUserId: toUser!.id,
+        actorName: user.name,
+        refNumber: corr.refNumber,
+        subject: corr.subject,
+        correspondenceId: corr.id,
+        note: referral.note,
+        dueDate: referral.dueDate,
+      });
+    }
 
     return referral;
   }

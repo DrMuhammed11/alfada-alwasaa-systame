@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { AuditAction, CorrespondenceStatus, NotificationType, Prisma, Role, TaskStatus } from '@prisma/client';
 import { AuditService } from '../audit/audit.service';
@@ -13,6 +14,9 @@ import { CreateTaskDto, TasksQueryDto, UpdateTaskDto, UpdateTaskStatusDto } from
 import { NotificationsService } from '../notifications/notifications.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
 import { canAssignTask } from '../security/business-policies';
+import { OutboxService } from '../outbox/outbox.service';
+import { OutboxProcessor } from '../outbox/outbox.processor';
+import { OutboxEventType } from '../outbox/outbox.types';
 
 const USER_BRIEF = { id: true, name: true, email: true } as const;
 
@@ -33,6 +37,8 @@ export class TasksService {
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
     private readonly correspondences: CorrespondencesService,
+    @Optional() private readonly outbox?: OutboxService,
+    @Optional() private readonly outboxProcessor?: OutboxProcessor,
   ) {}
 
   /** إنشاء تكليف — مدير القسم يكلّف موظفي قسمه فقط */
@@ -66,40 +72,77 @@ export class TasksService {
       }
     }
 
-    const task = await this.prisma.task.create({
-      data: {
-        correspondenceId,
-        referralId: dto.referralId,
-        title: dto.title.trim(),
-        description: dto.description,
-        assignedById: user.id,
-        assignedToId: assignee!.id,
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-      },
-      include: TASK_INCLUDE,
+    const task = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.task.create({
+        data: {
+          correspondenceId,
+          referralId: dto.referralId,
+          title: dto.title.trim(),
+          description: dto.description,
+          assignedById: user.id,
+          assignedToId: assignee!.id,
+          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        },
+        include: TASK_INCLUDE,
+      });
+
+      if (this.outbox) {
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.TASK_ASSIGNED,
+          payload: {
+            audit: {
+              action: AuditAction.ASSIGN,
+              entityType: 'Task',
+              entityId: created.id,
+              summary: `تكليف ${assignee!.name} بـ«${created.title}» على المراسلة ${corr.refNumber}`,
+              metadata: {
+                correspondenceId: corr.id,
+                correspondenceRef: corr.refNumber,
+                assignee: assignee!.email,
+              },
+              userId: user.id,
+            },
+            notification: {
+              type: NotificationType.NEW_TASK,
+              userId: assignee!.id,
+              title: `تكليف جديد: ${created.title}`,
+              body: `تم تكليفك بمهمة على المراسلة ${corr.refNumber}`,
+              link: `/tasks/${created.id}`,
+              entityType: 'Task',
+              entityId: created.id,
+            },
+          },
+        });
+      }
+
+      return created;
     });
 
-    await this.audit.log({
-      action: AuditAction.ASSIGN,
-      entityType: 'Task',
-      entityId: task.id,
-      summary: `تكليف ${assignee!.name} بـ«${task.title}» على المراسلة ${corr.refNumber}`,
-      metadata: {
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.ASSIGN,
+        entityType: 'Task',
+        entityId: task.id,
+        summary: `تكليف ${assignee!.name} بـ«${task.title}» على المراسلة ${corr.refNumber}`,
+        metadata: {
+          correspondenceId: corr.id,
+          correspondenceRef: corr.refNumber,
+          assignee: assignee!.email,
+        },
+      });
+
+      // إشعار الموظف المكلّف فورًا
+      await this.notifications.notifyTaskAssigned({
+        toUserId: assignee!.id,
+        actorName: user.name,
+        taskTitle: task.title,
+        refNumber: corr.refNumber,
         correspondenceId: corr.id,
-        correspondenceRef: corr.refNumber,
-        assignee: assignee!.email,
-      },
-    });
-
-    // إشعار الموظف المكلّف فورًا
-    await this.notifications.notifyTaskAssigned({
-      toUserId: assignee!.id,
-      actorName: user.name,
-      taskTitle: task.title,
-      refNumber: corr.refNumber,
-      correspondenceId: corr.id,
-      dueDate: task.dueDate,
-    });
+        dueDate: task.dueDate,
+      });
+    }
 
     return task;
   }

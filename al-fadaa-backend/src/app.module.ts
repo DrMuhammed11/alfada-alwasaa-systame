@@ -13,6 +13,7 @@ import { RepliesModule } from './replies/replies.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { MailModule } from './mail/mail.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { OutboxModule } from './outbox/outbox.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
@@ -25,6 +26,7 @@ import { HealthController } from './health.controller';
     PrismaModule,
     AuditModule,
     NotificationsModule,
+    OutboxModule,
     // وحدات الأعمال
     AuthModule,
     UsersModule,

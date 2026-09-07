@@ -101,6 +101,13 @@ enum NotificationType {
   NEW_INCOMING     // مراسلة واردة جديدة سُجلت في النظام
 }
 
+/// حالات صندوق الأحداث المعاملاتي (Transactional Outbox)
+enum OutboxStatus {
+  PENDING   // قيد الانتظار — لم يُعالج بعد
+  PROCESSED // تم تجهيزه وبثه بنجاح
+  FAILED    // فشل نهائي بعد استنفاد محاولات إعادة الإرسال
+}
+
 // ─────────────────── النماذج (Models) ───────────────────
 
 /// المستخدمون — موظفو الشركة المخولون باستخدام النظام
@@ -162,6 +169,7 @@ model Correspondence {
   body      String             @db.Text
   priority  Priority           @default(NORMAL)
   status    CorrespondenceStatus @default(RECEIVED)
+  version   Int                @default(1) // رقم الإصدار للتزامن المتفائل (Optimistic Concurrency Control)
 
   // بيانات المرسل الخارجي (للوارد)
   senderName  String?
@@ -356,4 +364,19 @@ model ImapHighWaterMark {
   mailbox   String   @unique // مثال: "INBOX"
   lastUid   Int      @default(0) // أعلى UID تمت معالجته بنجاح
   updatedAt DateTime @updatedAt
+}
+
+/// صندوق الأحداث المعاملاتي — يضمن الموثوقية وعدم فقدان سجلات التدقيق أو الإشعارات
+model EventOutbox {
+  id          String       @id @default(uuid())
+  type        String       // نوع الحدث: مثل REFERRAL_CREATED, TASK_ASSIGNED, REPLY_APPROVED
+  payload     Json         // حمولة البيانات الكاملة للتدقيق والإشعارات
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0) // عدد المحاولات المنفذة
+  nextRetryAt DateTime?    // موعد المحاولة التالية بتراجع أسي
+  createdAt   DateTime     @default(now())
+  processedAt DateTime?    // تاريخ وتوقيت المعالجة الناجحة
+
+  @@index([status, createdAt])
+  @@index([status, nextRetryAt])
 }
