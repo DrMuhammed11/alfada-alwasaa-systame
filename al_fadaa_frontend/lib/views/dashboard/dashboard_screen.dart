@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../core/network/api_service.dart';
+import '../../core/network/app_events.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../models/correspondence_model.dart';
 import '../../models/user_model.dart';
 import '../auth/login_screen.dart';
-import '../notifications/notifications_bell.dart';
 import 'widgets/conversation_detail_pane.dart';
 import 'widgets/dashboard_sidebar.dart';
 import 'widgets/master_list_pane.dart';
@@ -37,9 +37,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isSidebarCollapsed = false;
   bool _showExtraDetails = false;
 
-  // جرس الإشعارات
-  final GlobalKey<NotificationsBellState> _bellKey = GlobalKey<NotificationsBellState>();
-
   // المرفقات
   PlatformFile? _pickedFile;
   final Set<String> _downloadingAttachmentIds = {};
@@ -56,10 +53,12 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isSendingReply = false;
   String? _editingReplyId;
 
-  // المزامنة
+  // المزامنة والتحديث الموجّه بالأحداث
   bool _isSyncing = false;
   late AnimationController _syncIconController;
   Timer? _autoRefreshTimer;
+  StreamSubscription<Map<String, dynamic>>? _notificationSubscription;
+  StreamSubscription<void>? _refreshCorrespondencesSubscription;
 
   @override
   void initState() {
@@ -70,13 +69,28 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
     _listScrollController.addListener(_onListScroll);
     _fetchCorrespondences();
-    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+
+    // تحديث موجّه بالأحداث (Event-Driven) فور وصول أي إشعار حي من SSE
+    _notificationSubscription = AppEvents().onNotificationReceived.listen((data) {
+      debugPrint('Live SSE notification received -> silent refresh');
+      _silentRefresh();
+    });
+
+    // الاستماع لطلبات تحديث قائمة المراسلات
+    _refreshCorrespondencesSubscription = AppEvents().onRefreshCorrespondences.listen((_) {
+      _silentRefresh();
+    });
+
+    // مؤقت أمان احتياطي بطيء (60 ثانية) كضمانة احتياطية فقط عند غياب أحداث SSE
+    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
       _silentRefresh();
     });
   }
 
   @override
   void dispose() {
+    _notificationSubscription?.cancel();
+    _refreshCorrespondencesSubscription?.cancel();
     _syncIconController.dispose();
     _autoRefreshTimer?.cancel();
     _listScrollController.removeListener(_onListScroll);
@@ -206,22 +220,61 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Future<void> _silentRefresh() async {
     try {
-      final res = await ApiService().getCorrespondencesPaginated(
-        type: _selectedNav,
-        status: _selectedStatus,
-        search: _searchController.text.trim(),
-        page: 1,
-        limit: 20,
-      );
-      if (mounted) {
-        final List<Correspondence> page1Data = res['data'] as List<Correspondence>;
-        final Map<String, dynamic> meta = res['meta'] as Map<String, dynamic>;
-        final total = meta['total'] as int? ?? _totalItems;
+      List<Correspondence> refreshedItems = [];
+      int total = _totalItems;
+      int totalPages = 1;
 
+      if (_currentPage <= 1) {
+        final res = await ApiService().getCorrespondencesPaginated(
+          type: _selectedNav,
+          status: _selectedStatus,
+          search: _searchController.text.trim(),
+          page: 1,
+          limit: 20,
+        );
+        refreshedItems = res['data'] as List<Correspondence>;
+        final meta = res['meta'] as Map<String, dynamic>;
+        total = meta['total'] as int? ?? refreshedItems.length;
+        totalPages = meta['totalPages'] as int? ?? 1;
+      } else if (_currentPage * 20 <= 100) {
+        // جلب العناصر حتى الصفحة الحالية بدفعة واحدة لتجنب أي انحراف (Pagination Drift)
+        final res = await ApiService().getCorrespondencesPaginated(
+          type: _selectedNav,
+          status: _selectedStatus,
+          search: _searchController.text.trim(),
+          page: 1,
+          limit: _currentPage * 20,
+        );
+        refreshedItems = res['data'] as List<Correspondence>;
+        final meta = res['meta'] as Map<String, dynamic>;
+        total = meta['total'] as int? ?? refreshedItems.length;
+        totalPages = (total / 20).ceil();
+      } else {
+        // عند تصفح صفحات متقدمة جدًا (>100 عنصر)، نجلب الصفحات بالتوازي للحفاظ على اتساق القائمة
+        final futures = <Future<Map<String, dynamic>>>[];
+        for (int p = 1; p <= _currentPage; p++) {
+          futures.add(ApiService().getCorrespondencesPaginated(
+            type: _selectedNav,
+            status: _selectedStatus,
+            search: _searchController.text.trim(),
+            page: p,
+            limit: 20,
+          ));
+        }
+        final results = await Future.wait(futures);
+        for (final res in results) {
+          refreshedItems.addAll(res['data'] as List<Correspondence>);
+        }
+        final lastMeta = results.first['meta'] as Map<String, dynamic>;
+        total = lastMeta['total'] as int? ?? refreshedItems.length;
+        totalPages = lastMeta['totalPages'] as int? ?? 1;
+      }
+
+      if (mounted && refreshedItems.isNotEmpty) {
         setState(() {
+          _items = refreshedItems;
           _totalItems = total;
-          final p1Ids = page1Data.map((e) => e.id).toSet();
-          _items = page1Data + _items.where((i) => !p1Ids.contains(i.id)).toList();
+          _hasMorePages = _currentPage < totalPages;
         });
       }
 
@@ -235,7 +288,8 @@ class _DashboardScreenState extends State<DashboardScreen>
         }
       }
 
-      _bellKey.currentState?.refresh();
+      // تحديث الجرس عبر ناقل الأحداث دون اقتران مباشر
+      AppEvents().triggerBellRefresh();
     } catch (_) {}
   }
 
@@ -262,7 +316,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     try {
       final result = await ApiService().syncMail();
       await _fetchCorrespondences(selectId: _selectedItem?.id);
-      _bellKey.currentState?.refresh();
+      AppEvents().triggerBellRefresh();
 
       if (mounted) {
         final pulled = result['pulled'] ?? 0;
@@ -652,7 +706,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                   outgoingCount: _items.where((i) => i.type == 'OUTGOING').length,
                   isSyncing: _isSyncing,
                   syncIconController: _syncIconController,
-                  bellKey: _bellKey,
                   onToggleCollapse: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
                   onSelectNav: (nav) {
                     setState(() => _selectedNav = nav);

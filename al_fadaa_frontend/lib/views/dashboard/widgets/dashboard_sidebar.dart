@@ -19,7 +19,6 @@ class DashboardSidebar extends StatelessWidget {
   final int outgoingCount;
   final bool isSyncing;
   final AnimationController syncIconController;
-  final GlobalKey<NotificationsBellState> bellKey;
   final VoidCallback onToggleCollapse;
   final Function(String) onSelectNav;
   final Function(String) onOpenCorrespondence;
@@ -39,7 +38,6 @@ class DashboardSidebar extends StatelessWidget {
     required this.outgoingCount,
     required this.isSyncing,
     required this.syncIconController,
-    required this.bellKey,
     required this.onToggleCollapse,
     required this.onSelectNav,
     required this.onOpenCorrespondence,
@@ -85,7 +83,6 @@ class DashboardSidebar extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         NotificationsBell(
-                          key: bellKey,
                           onNotificationTap: onOpenCorrespondence,
                           iconColor: const Color(0xFF94A3B8),
                           iconSize: 18,
@@ -122,7 +119,6 @@ class DashboardSidebar extends StatelessWidget {
                         ),
                       ),
                       NotificationsBell(
-                        key: bellKey,
                         onNotificationTap: onOpenCorrespondence,
                         iconColor: const Color(0xFF94A3B8),
                         iconSize: 18,

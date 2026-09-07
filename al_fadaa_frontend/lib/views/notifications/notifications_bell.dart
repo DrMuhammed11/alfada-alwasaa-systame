@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../core/network/api_service.dart';
+import '../../core/network/app_events.dart';
 import '../../core/theme/app_theme.dart';
 
 class NotificationsBell extends StatefulWidget {
@@ -29,16 +30,22 @@ class NotificationsBellState extends State<NotificationsBell> {
   Timer? _reconnectTimer;
   http.Client? _sseClient;
   bool _isSseConnected = false;
+  StreamSubscription<void>? _bellRefreshSubscription;
 
   @override
   void initState() {
     super.initState();
     refresh();
     _connectSse();
+    // الاستماع لطلبات التحديث المركزية للجرس دون الحاجة لـ GlobalKey
+    _bellRefreshSubscription = AppEvents().onRefreshBell.listen((_) {
+      if (mounted) refresh();
+    });
   }
 
   @override
   void dispose() {
+    _bellRefreshSubscription?.cancel();
     _sseClient?.close();
     _reconnectTimer?.cancel();
     _pollTimer?.cancel();
@@ -62,6 +69,7 @@ class NotificationsBellState extends State<NotificationsBell> {
       final response = await client.send(request);
       if (response.statusCode == 200) {
         _isSseConnected = true;
+        AppEvents().isSseConnected = true;
         _pollTimer?.cancel();
         _pollTimer = null;
 
@@ -97,6 +105,7 @@ class NotificationsBellState extends State<NotificationsBell> {
   void _onSseDisconnected() {
     if (!mounted) return;
     _isSseConnected = false;
+    AppEvents().isSseConnected = false;
     _startFallbackPolling();
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 10), () {
@@ -106,7 +115,7 @@ class NotificationsBellState extends State<NotificationsBell> {
 
   void _startFallbackPolling() {
     if (_pollTimer == null || !_pollTimer!.isActive) {
-      _pollTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _pollTimer = Timer.periodic(const Duration(seconds: 60), (_) {
         refresh();
       });
     }
@@ -121,6 +130,8 @@ class NotificationsBellState extends State<NotificationsBell> {
           setState(() => _unreadCount = count);
         }
       } else if (event == 'new-notification') {
+        // بث الإشعار الجديد لناقل الأحداث لتحديث Dashboard بدون استطلاع دوري أعمى
+        AppEvents().emitNotification(data);
         if (mounted) {
           setState(() {
             _unreadCount++;
