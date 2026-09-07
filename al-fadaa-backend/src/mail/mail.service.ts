@@ -1,6 +1,7 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { MailRetryService } from './mail-retry.service';
 
 export interface SendReplyOptions {
   to: string | null;
@@ -18,16 +19,23 @@ export interface SendReplyOptions {
  * وضعان:
  *  - console : طباعة في الطرفية فقط (افتراضي للتطوير — لا إرسال حقيقي)
  *  - smtp    : إرسال حقيقي عبر خادم بريد الشركة (يُضبط من .env)
- * لا ترمي استثناءً أبدًا (فشل الإرسال يُسجَّل ولا يُفشل العملية).
+ * مزودة بآلية استرداد ذكية (MailRetryService) لإعادة محاولة الرسائل الفاشلة تلقائياً.
  */
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger('Mail');
   private transporter: nodemailer.Transporter | null = null;
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    @Optional() private readonly retryService?: MailRetryService,
+  ) {}
 
   onModuleInit(): void {
+    if (this.retryService) {
+      this.retryService.registerSender(async (opts) => this.rawSend(opts));
+    }
+
     if (this.config.get<string>('MAIL_DRIVER') === 'smtp') {
       const port = Number(this.config.get<number>('SMTP_PORT')) || 465;
       this.transporter = nodemailer.createTransport({
@@ -42,36 +50,35 @@ export class MailService implements OnModuleInit {
           rejectUnauthorized: false,
         },
       });
-      this.logger.log('تمت تهيئة البريد بوضع SMTP — الإرسال حقيقي');
+      this.logger.log('تمت تهيئة البريد بوضع SMTP — الإرسال حقيقي مع محرك الاسترداد');
     } else {
       this.logger.warn('MAIL_DRIVER=console — الرسائل تُطبع في الطرفية ولا تُرسل فعليًا');
     }
   }
 
-  async sendReply(opts: SendReplyOptions): Promise<void> {
+  async rawSend(opts: SendReplyOptions): Promise<boolean> {
     const from = this.config.get<string>('MAIL_FROM') ?? 'info@al-fadaa.com';
-    try {
-      if (!this.transporter) {
-        const attNames = opts.attachments?.map((a) => a.filename).join(', ');
-        this.logger.log(
-          `[وضع التجربة] بريد من ${from} إلى ${opts.to ?? '(بدون بريد)'}` +
-            ` | الموضوع: ${opts.subject} | المرجع: ${opts.refNumber} | معرف: ${opts.messageId ?? '(تلقائي)'}` +
-            (attNames ? ` | المرفقات: ${attNames}` : ''),
-        );
-        return;
-      }
-      if (!opts.to) {
-        this.logger.warn(`لا يوجد بريد إلكتروني للمرسل — لم يُرسَل الرد ${opts.refNumber}`);
-        return;
-      }
-      const escapedBody = opts.body
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    if (!this.transporter) {
+      const attNames = opts.attachments?.map((a) => a.filename).join(', ');
+      this.logger.log(
+        `[وضع التجربة] بريد من ${from} إلى ${opts.to ?? '(بدون بريد)'}` +
+          ` | الموضوع: ${opts.subject} | المرجع: ${opts.refNumber} | معرف: ${opts.messageId ?? '(تلقائي)'}` +
+          (attNames ? ` | المرفقات: ${attNames}` : ''),
+      );
+      return true;
+    }
+    if (!opts.to) {
+      this.logger.warn(`لا يوجد بريد إلكتروني للمرسل — لم يُرسَل الرد ${opts.refNumber}`);
+      return true;
+    }
+    const escapedBody = opts.body
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
 
-      const htmlBody = `<!DOCTYPE html>
+    const htmlBody = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head><meta charset="utf-8"></head>
 <body style="font-family: Arial, Tahoma, sans-serif; line-height: 1.7; color: #1e293b; direction: rtl; text-align: right; background-color: #f8fafc; padding: 20px; margin: 0;">
@@ -88,26 +95,36 @@ export class MailService implements OnModuleInit {
 </body>
 </html>`;
 
-      const mailOptions: nodemailer.SendMailOptions = {
-        from: `"شركة الفضاء الواسع" <${from}>`,
-        to: opts.to,
-        subject: opts.subject,
-        text: opts.body,
-        html: htmlBody,
-      };
-      if (opts.messageId) mailOptions.messageId = opts.messageId;
-      if (opts.inReplyTo) mailOptions.inReplyTo = opts.inReplyTo;
-      if (opts.references) mailOptions.references = opts.references;
-      if (opts.attachments && opts.attachments.length > 0) {
-        mailOptions.attachments = opts.attachments;
-      }
+    const mailOptions: nodemailer.SendMailOptions = {
+      from: `"شركة الفضاء الواسع" <${from}>`,
+      to: opts.to,
+      subject: opts.subject,
+      text: opts.body,
+      html: htmlBody,
+    };
+    if (opts.messageId) mailOptions.messageId = opts.messageId;
+    if (opts.inReplyTo) mailOptions.inReplyTo = opts.inReplyTo;
+    if (opts.references) mailOptions.references = opts.references;
+    if (opts.attachments && opts.attachments.length > 0) {
+      mailOptions.attachments = opts.attachments;
+    }
 
-      const info = await this.transporter.sendMail(mailOptions);
-      this.logger.log(
-        `تم إرسال الرد ${opts.refNumber} إلى ${opts.to} (معرّف الرسالة: ${info.messageId})`,
-      );
+    const info = await this.transporter.sendMail(mailOptions);
+    this.logger.log(
+      `تم إرسال الرد ${opts.refNumber} إلى ${opts.to} (معرّف الرسالة: ${info.messageId})`,
+    );
+    return true;
+  }
+
+  async sendReply(opts: SendReplyOptions): Promise<void> {
+    try {
+      await this.rawSend(opts);
     } catch (e) {
-      this.logger.error(`فشل إرسال البريد ${opts.refNumber}: ${(e as Error).message}`);
+      const err = e as Error;
+      this.logger.error(`فشل إرسال البريد ${opts.refNumber}: ${err.message}`);
+      if (this.retryService && this.transporter) {
+        this.retryService.enqueue(opts, err.message);
+      }
     }
   }
 }
