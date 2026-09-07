@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
@@ -15,40 +15,11 @@ import {
   Priority,
   Role,
 } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
+import { normalizeSubject, stripHtml } from './incoming-mail.utils';
+import { IncomingMailAttachmentService } from './incoming-mail-attachment.service';
+import { IncomingMailMatcherService } from './incoming-mail-matcher.service';
 
-/**
- * تنظيف موضوع الرسالة من البادئات وأرقام المراجع لمطابقة محادثات البريد
- */
-function normalizeSubject(subject: string): string {
-  let s = (subject || '').trim();
-  s = s.replace(/\[?(?:INC|OUT|INT)-\d{4}-\d{5,6}\]?/gi, '').trim();
-  const prefixRegex = /^(re|fwd|fw|رد|اعادة|إعادة)\s*[:：\-]\s*/i;
-  while (prefixRegex.test(s)) {
-    s = s.replace(prefixRegex, '').trim();
-  }
-  return s.trim();
-}
-
-/**
- * تجريد وسوم HTML والإبقاء على النص المرئي فقط
- */
-function stripHtml(html: string): string {
-  return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
+export { normalizeSubject, stripHtml } from './incoming-mail.utils';
 
 @Injectable()
 export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
@@ -62,6 +33,9 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
   /** قائمة المرسلين المحجوبين — تُحمَّل من متغير البيئة */
   private blockedSenders: string[] = [];
 
+  private readonly attachmentService: IncomingMailAttachmentService;
+  private readonly matcherService: IncomingMailMatcherService;
+
   constructor(
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
@@ -69,7 +43,12 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     private readonly refNumbers: RefNumberService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
-  ) {}
+    @Optional() attachmentService?: IncomingMailAttachmentService,
+    @Optional() matcherService?: IncomingMailMatcherService,
+  ) {
+    this.attachmentService = attachmentService ?? new IncomingMailAttachmentService(this.prisma);
+    this.matcherService = matcherService ?? new IncomingMailMatcherService(this.prisma);
+  }
 
   async onModuleInit(): Promise<void> {
     const host = this.config.get<string>('IMAP_HOST');
@@ -259,92 +238,12 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
             }
 
             // 2. محرك مطابقة الخيط:
-            let threadRoot: {
-              id: string;
-              refNumber: string;
-              subject: string;
-              priority: Priority;
-              status: CorrespondenceStatus;
-            } | null = null;
-
-            // (أ) طابق رأس In-Reply-To/References مع messageId المحفوظ
-            const candidateIds: string[] = [];
-            const rawInReplyTo = parsed.inReplyTo || (parsed.headers && parsed.headers.get('in-reply-to'));
-            const rawReferences = parsed.references || (parsed.headers && parsed.headers.get('references'));
-            const parseHeaderIds = (val: unknown) => {
-              if (!val) return;
-              const str = Array.isArray(val) ? val.join(' ') : String(val);
-              const matches = str.match(/<[^>]+>|[^\s,]+/g) || [];
-              for (const m of matches) {
-                const t = m.trim();
-                if (t) {
-                  candidateIds.push(t);
-                  if (t.startsWith('<') && t.endsWith('>')) {
-                    candidateIds.push(t.slice(1, -1));
-                  } else {
-                    candidateIds.push(`<${t}>`);
-                  }
-                }
-              }
-            };
-            parseHeaderIds(rawInReplyTo);
-            parseHeaderIds(rawReferences);
-
-            if (candidateIds.length > 0) {
-              const matchedCorr = await this.prisma.correspondence.findFirst({
-                where: { messageId: { in: [...new Set(candidateIds)] } },
-                select: { id: true, parentId: true },
-              });
-              if (matchedCorr) {
-                const rootId = matchedCorr.parentId ?? matchedCorr.id;
-                threadRoot = await this.prisma.correspondence.findUnique({
-                  where: { id: rootId },
-                  select: { id: true, refNumber: true, subject: true, priority: true, status: true },
-                });
-              }
-            }
-
-            // (ب) إن لم يوجد، فطابق آخر صادر أُرسل لنفس بريد المُرسل خلال آخر 30 يومًا
-            if (!threadRoot) {
-              const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-              const lastOutgoing = await this.prisma.correspondence.findFirst({
-                where: {
-                  type: CorrespondenceType.OUTGOING,
-                  sentAt: { gte: thirtyDaysAgo },
-                  OR: [
-                    { parent: { senderEmail } },
-                    { senderEmail },
-                  ],
-                },
-                orderBy: { sentAt: 'desc' },
-                select: { id: true, parentId: true },
-              });
-              if (lastOutgoing) {
-                const rootId = lastOutgoing.parentId ?? lastOutgoing.id;
-                threadRoot = await this.prisma.correspondence.findUnique({
-                  where: { id: rootId },
-                  select: { id: true, refNumber: true, subject: true, priority: true, status: true },
-                });
-              }
-            }
-
-            // إجراء وقائي: البحث عن رقم مرجعي صريح في الموضوع إن وُجد
-            if (!threadRoot) {
-              const refMatch = subject.match(/(?:INC|OUT|INT)-\d{4}-\d{5,6}/i) || body.match(/(?:INC|OUT|INT)-\d{4}-\d{5,6}/i);
-              if (refMatch) {
-                const referenced = await this.prisma.correspondence.findUnique({
-                  where: { refNumber: refMatch[0].toUpperCase() },
-                  select: { id: true, parentId: true },
-                });
-                if (referenced) {
-                  const rootId = referenced.parentId ?? referenced.id;
-                  threadRoot = await this.prisma.correspondence.findUnique({
-                    where: { id: rootId },
-                    select: { id: true, refNumber: true, subject: true, priority: true, status: true },
-                  });
-                }
-              }
-            }
+            const threadRoot = await this.matcherService.findThreadRoot(
+              parsed,
+              senderEmail,
+              subject,
+              body,
+            );
 
             // 3. الربط أو بدء جذر جديد:
             if (threadRoot) {
@@ -368,7 +267,7 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
               });
 
               // حفظ المرفقات الواردة إن وُجدت
-              await this.saveIncomingAttachments(
+              await this.attachmentService.saveIncomingAttachments(
                 parsed.attachments,
                 childCorr.id,
                 systemAuthUser.id,
@@ -484,7 +383,7 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
               );
 
               // حفظ المرفقات الواردة إن وُجدت
-              await this.saveIncomingAttachments(
+              await this.attachmentService.saveIncomingAttachments(
                 parsed.attachments,
                 corr.id,
                 systemAuthUser.id,
@@ -525,92 +424,16 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
   /**
    * حفظ مرفقات رسالة العميل على القرص وإنشاء سجلات لها في قاعدة البيانات
    */
-  private async saveIncomingAttachments(
+  async saveIncomingAttachments(
     attachments: any[] | undefined,
     correspondenceId: string,
     systemUserId: string,
   ): Promise<void> {
-    if (!attachments || attachments.length === 0) return;
-
-    const allowedMimes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/zip',
-      'text/plain',
-    ];
-    const maxSizeBytes = 15 * 1024 * 1024;
-    const uploadDir = process.env.UPLOAD_DIR || './uploads';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    for (const att of attachments) {
-      try {
-        const size = att.size || att.content?.length || 0;
-        if (size > maxSizeBytes) {
-          this.logger.warn(
-            `تجاوز حجم المرفق «${att.filename}» الحد المسموح (15MB) — تم تخطيه`,
-          );
-          continue;
-        }
-
-        const mime = (att.contentType || '').toLowerCase().trim();
-        const ext = path.extname(att.filename || '').toLowerCase();
-        const isAllowedExt = [
-          '.pdf',
-          '.jpg',
-          '.jpeg',
-          '.png',
-          '.gif',
-          '.webp',
-          '.doc',
-          '.docx',
-          '.xls',
-          '.xlsx',
-          '.zip',
-          '.txt',
-        ].includes(ext);
-
-        if (!allowedMimes.includes(mime) && !isAllowedExt) {
-          this.logger.warn(
-            `نوع المرفق «${att.filename}» (${mime}) غير مدعوم — تم تخطيه`,
-          );
-          continue;
-        }
-
-        const unique = `${Date.now()}-${Math.round(Math.random() * 1_000_000_000)}`;
-        const storedName = `${unique}${ext || ''}`;
-        const filePath = path.join(uploadDir, storedName);
-
-        if (att.content && Buffer.isBuffer(att.content)) {
-          await fs.promises.writeFile(filePath, att.content);
-          await this.prisma.attachment.create({
-            data: {
-              correspondenceId,
-              fileName: att.filename || 'attachment',
-              storedName,
-              mimeType: mime || 'application/octet-stream',
-              size,
-              uploadedById: systemUserId,
-            },
-          });
-          this.logger.log(
-            `[IMAP Engine] تم حفظ المرفق «${att.filename}» (${(size / 1024).toFixed(1)}KB) للمراسلة`,
-          );
-        }
-      } catch (err) {
-        this.logger.error(
-          `فشل حفظ المرفق «${att.filename}»: ${(err as Error).message}`,
-        );
-      }
-    }
+    return this.attachmentService.saveIncomingAttachments(
+      attachments,
+      correspondenceId,
+      systemUserId,
+    );
   }
 
   /**

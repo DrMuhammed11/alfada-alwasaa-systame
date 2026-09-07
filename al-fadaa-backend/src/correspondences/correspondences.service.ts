@@ -1,8 +1,8 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   AuditAction,
@@ -15,7 +15,6 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthUser, Paginated } from '../common/types';
-import { buildPageMeta } from '../common/types';
 import {
   CorrespondencesQueryDto,
   CreateIncomingDto,
@@ -24,110 +23,36 @@ import {
 } from './dto';
 import { RefNumberService } from './ref-number.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  CorrespondenceDetailRow,
+  CorrespondenceListRow,
+  DETAIL_INCLUDE,
+  LIST_INCLUDE,
+  USER_BRIEF,
+} from './correspondences.constants';
+import { CorrespondencesQueryService } from './correspondences-query.service';
 
-const USER_BRIEF = { id: true, name: true, email: true } as const;
-
-/** حقول القائمة المختصرة */
-const LIST_INCLUDE = {
-  department: { select: { id: true, name: true } },
-  createdBy: { select: { id: true, name: true } },
-  children: {
-    select: { id: true, refNumber: true, createdAt: true, body: true },
-    orderBy: { createdAt: 'desc' },
-    take: 1,
-  },
-  _count: {
-    select: {
-      referrals: true,
-      tasks: true,
-      replies: true,
-      attachments: true,
-      children: true,
-    },
-  },
-} satisfies Prisma.CorrespondenceInclude;
-
-/** حقول التفاصيل الكاملة — تعرض سلسلة المحادثة كاملة بالتسلسل الزمني */
-const DETAIL_INCLUDE = {
-  department: { select: { id: true, name: true } },
-  createdBy: { select: { id: true, name: true } },
-  parent: {
-    select: {
-      id: true,
-      refNumber: true,
-      subject: true,
-      body: true,
-      priority: true,
-      status: true,
-      type: true,
-      senderName: true,
-      senderEmail: true,
-      senderPhone: true,
-      receivedAt: true,
-      sentAt: true,
-      createdAt: true,
-      messageId: true,
-      sourceReplyId: true,
-      attachments: true,
-    },
-  },
-  children: {
-    select: {
-      id: true,
-      refNumber: true,
-      subject: true,
-      body: true,
-      priority: true,
-      status: true,
-      type: true,
-      senderName: true,
-      senderEmail: true,
-      senderPhone: true,
-      receivedAt: true,
-      sentAt: true,
-      createdAt: true,
-      messageId: true,
-      sourceReplyId: true,
-      attachments: true,
-    },
-    orderBy: { createdAt: 'asc' },
-  },
-  referrals: {
-    include: { fromUser: { select: USER_BRIEF }, toUser: { select: USER_BRIEF } },
-  },
-  tasks: {
-    include: {
-      assignedTo: { select: USER_BRIEF },
-      assignedBy: { select: USER_BRIEF },
-    },
-  },
-  replies: {
-    include: {
-      author: { select: USER_BRIEF },
-      reviewedBy: { select: USER_BRIEF },
-      approvedBy: { select: USER_BRIEF },
-      attachments: true,
-    },
-    orderBy: { createdAt: 'asc' },
-  },
-  attachments: true,
-} satisfies Prisma.CorrespondenceInclude;
-
-export type CorrespondenceListRow = Prisma.CorrespondenceGetPayload<{
-  include: typeof LIST_INCLUDE;
-}>;
-export type CorrespondenceDetailRow = Prisma.CorrespondenceGetPayload<{
-  include: typeof DETAIL_INCLUDE;
-}>;
+export {
+  USER_BRIEF,
+  LIST_INCLUDE,
+  DETAIL_INCLUDE,
+  CorrespondenceListRow,
+  CorrespondenceDetailRow,
+} from './correspondences.constants';
 
 @Injectable()
 export class CorrespondencesService {
+  private readonly queryService: CorrespondencesQueryService;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly refNumbers: RefNumberService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
-  ) {}
+    @Optional() queryService?: CorrespondencesQueryService,
+  ) {
+    this.queryService = queryService ?? new CorrespondencesQueryService(this.prisma);
+  }
 
   // ─────────────── الإنشاء ───────────────
 
@@ -212,117 +137,27 @@ export class CorrespondencesService {
     return corr;
   }
 
-  // ─────────────── الاستعراض (بنطاق حسب الدور) ───────────────
+  // ─────────────── تفويض الاستعراض والفحص ───────────────
 
-  /**
-   * نطاق الرؤية:
-   *  - ADMIN / GM / DEPUTY_GM : كل المراسلات
-   *  - DEPT_MANAGER           : مراسلات قسمه + ما أُحيل إليه + ما كوّن تكليفاته
-   *  - EMPLOYEE               : ما كُلّف به أو أُحيل إليه أو صاغ ردوده فقط
-   */
-  private buildScope(user: AuthUser): Prisma.CorrespondenceWhereInput {
-    if (user.role === 'ADMIN' || user.role === 'GM' || user.role === 'DEPUTY_GM') {
-      return {};
-    }
-    if (user.role === 'DEPT_MANAGER') {
-      const or: Prisma.CorrespondenceWhereInput[] = [
-        { referrals: { some: { toUserId: user.id } } },
-        { tasks: { some: { assignedById: user.id } } },
-      ];
-      if (user.departmentId) or.push({ departmentId: user.departmentId });
-      return { OR: or };
-    }
-    // EMPLOYEE
-    return {
-      OR: [
-        { tasks: { some: { assignedToId: user.id } } },
-        { referrals: { some: { toUserId: user.id } } },
-        { replies: { some: { authorId: user.id } } },
-      ],
-    };
-  }
-
-  async findAll(
+  /** استعراض المراسلات الجذرية بنطاق الرؤية والفلترة والترقيم */
+  findAll(
     dto: CorrespondencesQueryDto,
     user: AuthUser,
   ): Promise<Paginated<CorrespondenceListRow>> {
-    const page = dto.page ?? 1;
-    const limit = dto.limit ?? 20;
-
-    const filters: Prisma.CorrespondenceWhereInput[] = [this.buildScope(user)];
-    // حصر القائمة في المحادثات الجذرية فقط حتى لا تتكرر الردود في صندوق البريد كبنود منفصلة
-    filters.push({ parentId: null });
-
-    if (dto.type) filters.push({ type: dto.type });
-    if (dto.status) filters.push({ status: dto.status });
-    if (dto.priority) filters.push({ priority: dto.priority });
-    if (dto.departmentId) filters.push({ departmentId: dto.departmentId });
-    if (dto.q) {
-      filters.push({
-        OR: [
-          { subject: { contains: dto.q, mode: 'insensitive' } },
-          { refNumber: { contains: dto.q, mode: 'insensitive' } },
-          { senderName: { contains: dto.q, mode: 'insensitive' } },
-        ],
-      });
-    }
-    const where: Prisma.CorrespondenceWhereInput = { AND: filters };
-
-    const [total, data] = await this.prisma.$transaction([
-      this.prisma.correspondence.count({ where }),
-      this.prisma.correspondence.findMany({
-        where,
-        orderBy: { updatedAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-        include: LIST_INCLUDE,
-      }),
-    ]);
-    return { data, meta: buildPageMeta(page, limit, total) };
+    return this.queryService.findAll(dto, user);
   }
 
   /** تفاصيل مراسلة — مع فرض نطاق الرؤية نفسه */
-  async findOne(id: string, user: AuthUser): Promise<CorrespondenceDetailRow> {
-    const corr = await this.prisma.correspondence.findUnique({
-      where: { id },
-      include: DETAIL_INCLUDE,
-    });
-    if (!corr) throw new NotFoundException('المراسلة غير موجودة');
-    if (!(await this.canView(corr, user))) {
-      throw new ForbiddenException('ليست لديك صلاحية الاطلاع على هذه المراسلة');
-    }
-    return corr;
+  findOne(id: string, user: AuthUser): Promise<CorrespondenceDetailRow> {
+    return this.queryService.findOne(id, user);
   }
 
   /** فحص صلاحية الاطلاع على مراسلة محددة (تُستخدم أيضًا من وحدات أخرى) */
-  async canView(
+  canView(
     corr: { id: string; departmentId: string | null },
     user: AuthUser,
   ): Promise<boolean> {
-    if (user.role === 'ADMIN' || user.role === 'GM' || user.role === 'DEPUTY_GM') {
-      return true;
-    }
-    const [assigned, referred, replied] = await Promise.all([
-      this.prisma.task.count({
-        where: { correspondenceId: corr.id, assignedToId: user.id },
-      }),
-      this.prisma.referral.count({
-        where: { correspondenceId: corr.id, toUserId: user.id },
-      }),
-      this.prisma.reply.count({
-        where: { correspondenceId: corr.id, authorId: user.id },
-      }),
-    ]);
-    if (assigned + referred + replied > 0) return true;
-
-    if (user.role === 'DEPT_MANAGER') {
-      if (corr.departmentId && corr.departmentId === user.departmentId) return true;
-      const createdByMe = await this.prisma.task.count({
-        where: { correspondenceId: corr.id, assignedById: user.id },
-      });
-      return createdByMe > 0;
-    }
-    return false;
+    return this.queryService.canView(corr, user);
   }
 
   // ─────────────── التعديل والإدارة ───────────────

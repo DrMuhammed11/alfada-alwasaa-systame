@@ -24,16 +24,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: [
     Permission.USERS_MANAGE,
     Permission.DEPARTMENTS_MANAGE,
-    Permission.CORR_VIEW_ALL,
-    Permission.CORR_REGISTER,
-    Permission.CORR_REFER,
-    Permission.CORR_ARCHIVE,
-    Permission.TASK_ASSIGN,
-    Permission.REPLY_DRAFT,
-    Permission.REPLY_SUBMIT,
-    Permission.REPLY_APPROVE,
-    Permission.CORR_SEND,
     Permission.AUDIT_VIEW,
+    Permission.CORR_VIEW_ALL,
   ],
   GM: [
     Permission.USERS_MANAGE,       // إدارة المستخدمين — مشتركة مع ADMIN وفق المخطط
@@ -86,6 +78,5 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
 };
 
 export function hasPermission(role: Role, permission: Permission): boolean {
-  if (role === Role.ADMIN) return true;
   return (ROLE_PERMISSIONS[role] ?? []).includes(permission);
 }

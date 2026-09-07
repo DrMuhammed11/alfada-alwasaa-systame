@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SseConnectionsService } from './sse-connections.service';
@@ -50,7 +50,7 @@ export class NotificationsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly sse: SseConnectionsService,
+    @Optional() private readonly sse?: SseConnectionsService,
   ) {}
 
   // ─────────────── الكتابة — من وحدات الأعمال ───────────────
@@ -60,12 +60,13 @@ export class NotificationsService {
     try {
       const created = await this.prisma.notification.create({
         data: entry,
-        select: NOTIFICATION_SELECT,
       });
 
-      // بث فوري عبر SSE
-      this.sse.sendToUser(entry.userId, 'new-notification', created);
-      this.broadcastUnreadCount(entry.userId);
+      // بث فوري عبر SSE إن توفر
+      if (this.sse) {
+        this.sse.sendToUser(entry.userId, 'new-notification', created);
+        this.broadcastUnreadCount(entry.userId);
+      }
     } catch (e) {
       this.logger.error(
         `تعذّر إرسال إشعار (${entry.type}) إلى ${entry.userId}: ${(e as Error).message}`,
@@ -83,18 +84,20 @@ export class NotificationsService {
       });
 
       // بث فوري لكل مستلم عبر SSE
-      for (const userId of unique) {
-        this.sse.sendToUser(userId, 'new-notification', {
-          type: entry.type,
-          title: entry.title,
-          body: entry.body,
-          link: entry.link,
-          entityType: entry.entityType,
-          entityId: entry.entityId,
-          isRead: false,
-          createdAt: new Date().toISOString(),
-        });
-        this.broadcastUnreadCount(userId);
+      if (this.sse) {
+        for (const userId of unique) {
+          this.sse.sendToUser(userId, 'new-notification', {
+            type: entry.type,
+            title: entry.title,
+            body: entry.body,
+            link: entry.link,
+            entityType: entry.entityType,
+            entityId: entry.entityId,
+            isRead: false,
+            createdAt: new Date().toISOString(),
+          });
+          this.broadcastUnreadCount(userId);
+        }
       }
     } catch (e) {
       this.logger.error(
@@ -105,6 +108,7 @@ export class NotificationsService {
 
   /** بث عدد غير المقروء الحالي عبر SSE */
   private async broadcastUnreadCount(userId: string): Promise<void> {
+    if (!this.sse) return;
     try {
       const count = await this.prisma.notification.count({
         where: { userId, isRead: false },
