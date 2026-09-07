@@ -55,4 +55,10 @@ export class ReferralsController {
   close(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
     return this.referralsService.close(id, user);
   }
+
+  @Patch('referrals/:id/answer')
+  @ApiOperation({ summary: 'إجابة إحالة (الجهة المحال إليها أو الإدارة العليا)' })
+  answer(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.referralsService.answerReferral(id, user);
+  }
 }

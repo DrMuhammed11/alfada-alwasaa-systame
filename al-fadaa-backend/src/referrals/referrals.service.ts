@@ -74,9 +74,33 @@ export class ReferralsService {
       throw new BadRequestException(policy.reason);
     }
 
+    // منع تكرار الإحالة لنفس المستخدم ما دامت لديه إحالة مفتوحة (OPEN) على نفس المراسلة
+    const existingOpen = await this.prisma.referral.findFirst({
+      where: {
+        correspondenceId,
+        toUserId: dto.toUserId,
+        status: ReferralStatus.OPEN,
+      },
+    });
+    if (existingOpen) {
+      throw new BadRequestException('توجد إحالة مفتوحة سابقة لهذا المستخدم على هذه المراسلة بالفعل');
+    }
+
     const referable = getAllowedStatusesForAction(CorrespondenceAction.REFER);
 
     const referral = await this.prisma.$transaction(async (tx) => {
+      // فحص ذري داخل المعاملة لمنع سباقات الإحالة المتزامنة لنفس المستخدم
+      const existingOpenTx = await tx.referral.findFirst({
+        where: {
+          correspondenceId,
+          toUserId: dto.toUserId,
+          status: ReferralStatus.OPEN,
+        },
+      });
+      if (existingOpenTx) {
+        throw new BadRequestException('توجد إحالة مفتوحة سابقة لهذا المستخدم على هذه المراسلة بالفعل');
+      }
+
       // 1. التحديث الذري المشروط بالإصدار لمنع TOCTOU وسباقات الإحالة المتزامنة
       const updateRes = await tx.correspondence.updateMany({
         where: {
@@ -206,9 +230,150 @@ export class ReferralsService {
     });
   }
 
+  /**
+   * إجابة إحالة واحدة (ANSWERED مع توثيق answeredAt)
+   * وتحديث حالة المراسلة إلى IN_PROGRESS إن لم تبقَ أي إحالات مفتوحة (OPEN).
+   * ويُشعر كافة مرسلي الإحالات المفتوحة ذات الصلة لا آخرهم فقط.
+   */
+  async answerReferral(referralId: string, user: AuthUser): Promise<ReferralRow> {
+    const referral = await this.prisma.referral.findUnique({
+      where: { id: referralId },
+      include: { correspondence: true },
+    });
+    if (!referral) throw new NotFoundException('الإحالة غير موجودة');
+
+    const isRecipient = referral.toUserId === user.id;
+    const privilegedRoles: Role[] = [Role.ADMIN, Role.GM, Role.DEPUTY_GM];
+    const isPrivileged = privilegedRoles.includes(user.role);
+    if (!isRecipient && !isPrivileged) {
+      throw new ForbiddenException('فقط الجهة المحال إليها أو الإدارة العليا تملك إجابة الإحالة');
+    }
+
+    if (referral.status === ReferralStatus.ANSWERED || referral.status === ReferralStatus.CLOSED) {
+      throw new BadRequestException('تمت إجابة هذه الإحالة أو إغلاقها مسبقًا');
+    }
+
+    const correspondenceId = referral.correspondenceId;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. تحديث الإحالة لتصبح ANSWERED مع توثيق answeredAt
+      const updated = await tx.referral.update({
+        where: { id: referralId },
+        data: {
+          status: ReferralStatus.ANSWERED,
+          answeredAt: new Date(),
+        },
+        include: REFERRAL_INCLUDE,
+      });
+
+      // 2. التحقق من بقاء أي إحالات مفتوحة (OPEN) أخرى على نفس المراسلة
+      const remainingOpenCount = await tx.referral.count({
+        where: {
+          correspondenceId,
+          status: ReferralStatus.OPEN,
+        },
+      });
+
+      // 3. إذا لم تبقَ أي إحالات OPEN، تنتقل المراسلة إلى IN_PROGRESS
+      if (remainingOpenCount === 0) {
+        await tx.correspondence.updateMany({
+          where: {
+            id: correspondenceId,
+            status: CorrespondenceStatus.REFERRED,
+          },
+          data: {
+            status: CorrespondenceStatus.IN_PROGRESS,
+            ...(referral.correspondence.version !== undefined ? { version: { increment: 1 } } : {}),
+          },
+        });
+      }
+
+      // 4. استخراج معرّفات مرسلي الإحالات المفتوحة ذات الصلة ومرسل هذه الإحالة
+      const relatedReferrals = await tx.referral.findMany({
+        where: { correspondenceId },
+        select: { fromUserId: true, status: true },
+      });
+
+      const recipientSet = new Set<string>();
+      if (referral.fromUserId && referral.fromUserId !== user.id) {
+        recipientSet.add(referral.fromUserId);
+      }
+      for (const r of relatedReferrals) {
+        if (r.fromUserId && r.fromUserId !== user.id) {
+          recipientSet.add(r.fromUserId);
+        }
+      }
+      const recipientIds = Array.from(recipientSet);
+
+      // 5. تسجيل الحدث في الـ Outbox داخل نفس المعاملة (Transactional Outbox)
+      if (this.outbox) {
+        await this.outbox.emit(tx, {
+          type: OutboxEventType.REFERRAL_ANSWERED,
+          payload: {
+            audit: {
+              action: AuditAction.UPDATE,
+              entityType: 'Referral',
+              entityId: referralId,
+              summary: `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${updated.correspondence.refNumber}`,
+              metadata: {
+                referralId,
+                remainingOpenCount,
+                correspondenceNewStatus:
+                  remainingOpenCount === 0
+                    ? CorrespondenceStatus.IN_PROGRESS
+                    : CorrespondenceStatus.REFERRED,
+              },
+              userId: user.id,
+            },
+            notification: {
+              type: NotificationType.NEW_REFERRAL,
+              title: `تمت إجابة الإحالة للمراسلة ${updated.correspondence.refNumber}`,
+              body: `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${updated.correspondence.subject}»`,
+              link: `/correspondences/${correspondenceId}`,
+              entityType: 'Correspondence',
+              entityId: correspondenceId,
+              recipientIds,
+            },
+          },
+        });
+      }
+
+      return { updated, recipientIds };
+    });
+
+    // 6. تشغيل المعالج الفوري أو المسار المباشر
+    if (this.outboxProcessor) {
+      this.outboxProcessor.trigger();
+    } else {
+      await this.audit.log({
+        action: AuditAction.UPDATE,
+        entityType: 'Referral',
+        entityId: referralId,
+        summary: `أجاب ${user.name} على الإحالة الخاصة بالمراسلة ${result.updated.correspondence.refNumber}`,
+        metadata: { referralId },
+      });
+
+      if (result.recipientIds.length > 0) {
+        await this.notifications.notifyMany(result.recipientIds, {
+          type: NotificationType.NEW_REFERRAL,
+          title: `تمت إجابة الإحالة للمراسلة ${result.updated.correspondence.refNumber}`,
+          body: `أجاب «${user.name}» على الإحالة الموجهة إليه في المراسلة «${result.updated.correspondence.subject}»`,
+          link: `/correspondences/${correspondenceId}`,
+          entityType: 'Correspondence',
+          entityId: correspondenceId,
+        });
+      }
+    }
+
+    return result.updated;
+  }
+
   /** إغلاق الإحالة — الجهة المحال إليها أو الإدارة العليا */
   async close(id: string, user: AuthUser) {
-    const referral = await this.prisma.referral.findUnique({ where: { id } });
+    const referral = await this.prisma.referral.findUnique({
+      where: { id },
+      include: { correspondence: true },
+    });
     if (!referral) throw new NotFoundException('الإحالة غير موجودة');
 
     const isRecipient = referral.toUserId === user.id;
@@ -221,10 +386,34 @@ export class ReferralsService {
       throw new BadRequestException('الإحالة مغلقة مسبقًا');
     }
 
-    const updated = await this.prisma.referral.update({
-      where: { id },
-      data: { status: ReferralStatus.CLOSED, closedAt: new Date() },
-      include: REFERRAL_INCLUDE,
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const res = await tx.referral.update({
+        where: { id },
+        data: { status: ReferralStatus.CLOSED, closedAt: new Date() },
+        include: REFERRAL_INCLUDE,
+      });
+
+      const remainingOpen = await tx.referral.count({
+        where: {
+          correspondenceId: referral.correspondenceId,
+          status: ReferralStatus.OPEN,
+        },
+      });
+
+      if (remainingOpen === 0) {
+        await tx.correspondence.updateMany({
+          where: {
+            id: referral.correspondenceId,
+            status: CorrespondenceStatus.REFERRED,
+          },
+          data: {
+            status: CorrespondenceStatus.IN_PROGRESS,
+            ...(referral.correspondence.version !== undefined ? { version: { increment: 1 } } : {}),
+          },
+        });
+      }
+
+      return res;
     });
 
     await this.audit.log({

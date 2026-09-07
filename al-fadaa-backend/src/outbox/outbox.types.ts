@@ -2,6 +2,7 @@ import { AuditAction, NotificationType, Prisma } from '@prisma/client';
 
 export enum OutboxEventType {
   REFERRAL_CREATED = 'REFERRAL_CREATED',
+  REFERRAL_ANSWERED = 'REFERRAL_ANSWERED',
   TASK_ASSIGNED = 'TASK_ASSIGNED',
   REPLY_SUBMITTED = 'REPLY_SUBMITTED',
   REPLY_APPROVED = 'REPLY_APPROVED',
