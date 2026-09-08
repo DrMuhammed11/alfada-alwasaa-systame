@@ -1,0 +1,182 @@
+"use client";
+
+import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
+import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone } from "lucide-react";
+import { SITE_CONFIG } from "@/config/site";
+
+export function Hero() {
+  const reduce = useReducedMotion();
+
+  const fadeUp = (delay: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, delay: delay * 0.35, ease: [0.16, 1, 0.3, 1] as const },
+  });
+
+  return (
+    <section id="home" className="relative min-h-[92vh] flex items-center overflow-hidden bg-navy-darker pt-24 pb-16 lg:py-28">
+      {/* Anchor for About to support both #home and #about smoothly */}
+      <span id="about" className="absolute -top-24" />
+
+      {/* Background artwork with elegant overlay */}
+      <div className="absolute inset-0">
+        <Image
+          src={SITE_CONFIG.assets.heroBg}
+          alt="أعمال ومشاريع شركة الفضاء الواسع"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy-darker/95 via-navy/90 to-navy-darker/98" />
+        <div className="dot-grid absolute inset-0 opacity-25" />
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Main 2-Column Responsive Layout: Unified Home & About */}
+        <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+          
+          {/* Column 1: Narrative, Identity, Pillars & CTAs */}
+          <div className="text-right">
+            {/* Trust badge */}
+            <motion.div {...fadeUp(0.05)} className="flex items-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-navy-deep/80 px-4 py-1.5 text-xs font-bold text-gold-light shadow-md backdrop-blur-md">
+                <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
+                <span>كيان مهني متعدد الخدمات</span>
+                <span className="text-white/40">|</span>
+                <span>حلول متكاملة ضمن منظومة واحدة</span>
+              </span>
+            </motion.div>
+
+            {/* Main Headline */}
+            <motion.div {...fadeUp(0.12)} className="mt-4">
+              <h1 className="text-3xl font-black text-white sm:text-4xl lg:text-5xl leading-tight">
+                شركة الفضاء الواسع
+                <span className="block mt-1 text-2xl sm:text-3xl lg:text-4xl font-extrabold bg-gradient-to-l from-gold via-gold-light to-white bg-clip-text text-transparent">
+                  لخدمات الاتصالات والمقاولات
+                </span>
+              </h1>
+
+              {/* Responsive Slogan (Never cuts off) */}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="h-0.5 w-8 rounded-full bg-gold hidden sm:block" />
+                <p className="text-base sm:text-lg font-black tracking-wide text-gold-light">
+                  حلول متكاملة ضمن منظومة واحدة
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Official Narrative text from Profile */}
+            <motion.p {...fadeUp(0.2)} className="mt-5 text-justify text-sm sm:text-base leading-7 sm:leading-8 text-slate-200/95 max-w-2xl">
+              كيان مهني متعدد الخدمات، تأسس على رؤية واضحة تقوم على تقديم حلول متكاملة
+              تجمع بين الخبرة التنفيذية، والانضباط المؤسسي، والقدرة على الإنجاز بمعايير
+              عالية من الجودة والاحتراف. ومنذ انطلاقتها، حرصت الشركة على أن تكون شريكًا
+              موثوقًا للجهات التي تبحث عن أداء رصين، وتنفيذ دقيق، ونتائج تليق بتطلعات
+              المشاريع الكبرى.
+            </motion.p>
+
+            {/* The 3 Core Pillars in Compact Responsive Badges */}
+            <motion.div {...fadeUp(0.28)} className="mt-6 grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl">
+              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
+                <Briefcase className="mx-auto h-5 w-5 text-gold-light" />
+                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">خبرة تنفيذية</h3>
+                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">ممارسة ميدانية متمرسة</p>
+              </div>
+
+              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
+                <ShieldCheck className="mx-auto h-5 w-5 text-gold-light" />
+                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">انضباط مؤسسي</h3>
+                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">التزام دقيق بالمعايير</p>
+              </div>
+
+              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
+                <Award className="mx-auto h-5 w-5 text-gold-light" />
+                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">جودة واحتراف</h3>
+                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">مخرجات رصينة تواكب الكبار</p>
+              </div>
+            </motion.div>
+
+            {/* Quick Action Buttons */}
+            <motion.div {...fadeUp(0.35)} className="mt-8 flex flex-wrap items-center gap-3.5">
+              <a
+                href="#contact"
+                className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-gold px-7 text-xs sm:text-sm font-black text-navy-darker shadow-[0_10px_25px_rgba(198,149,74,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold-light hover:shadow-[0_15px_35px_rgba(198,149,74,0.65)]"
+              >
+                <span>طلب استشارة أو تسعير</span>
+                <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
+              </a>
+
+              <a
+                href="#sectors"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition hover:border-gold/60 hover:text-gold-light"
+              >
+                استكشف قطاعاتنا
+              </a>
+
+              <a
+                href={SITE_CONFIG.contacts.general.telHref}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-5 text-xs sm:text-sm font-bold text-white/90 ring-1 ring-white/15 transition hover:bg-white/15"
+              >
+                <Phone className="h-3.5 w-3.5 text-gold-light" />
+                <span dir="ltr">{SITE_CONFIG.contacts.general.display}</span>
+              </a>
+            </motion.div>
+          </div>
+
+          {/* Column 2: Visual Identity Card & Sector Preview */}
+          <motion.div {...fadeUp(0.22)} className="flex justify-center">
+            <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-b from-white/10 to-white/5 p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+              {/* Decorative gold corner accent */}
+              <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
+              <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
+
+              {/* Logo Presentation (Balanced, Proportionate) */}
+              <div className="relative mx-auto h-40 w-40 sm:h-52 sm:w-52">
+                <Image
+                  src={SITE_CONFIG.assets.logoTransparent}
+                  alt="شعار شركة الفضاء الواسع"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 160px, 208px"
+                  className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.6)]"
+                />
+              </div>
+
+              {/* Sector Icons Strip (Completely visible, pristine, never cuts off) */}
+              <div className="mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
+                <span className="text-[11px] font-bold text-white/60 mb-2.5">
+                  مجالات عمل الشركة الرئيسية
+                </span>
+                <div className="relative h-13 sm:h-14 w-full max-w-[320px] px-1">
+                  <Image
+                    src={SITE_CONFIG.assets.sectorIconsStrip}
+                    alt="المقاولات، الطرق، النفط، الاتصالات، التسويق"
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 280px, 320px"
+                    className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Summary Badges */}
+              <div className="mt-5 grid grid-cols-2 gap-2 pt-4 border-t border-white/10 text-center">
+                <div className="rounded-xl bg-navy-darker/60 py-2 px-3 border border-white/5">
+                  <span className="block font-mono text-sm font-black text-gold">5+ قطاعات</span>
+                  <span className="block text-[10px] text-white/70">متكاملة في منظومة واحدة</span>
+                </div>
+                <div className="rounded-xl bg-navy-darker/60 py-2 px-3 border border-white/5">
+                  <span className="block font-mono text-sm font-black text-gold">100% التزام</span>
+                  <span className="block text-[10px] text-white/70">بالمواصفات والمعايير</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
+

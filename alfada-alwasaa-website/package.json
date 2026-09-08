@@ -1,0 +1,12 @@
+﻿{
+  "name": "alfada-alwasaa-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
+  "scripts": {
+    "dev": "npm --prefix alfada-alwasaa-website/source run dev",
+    "build": "npm --prefix alfada-alwasaa-website/source run build",
+    "start": "npm --prefix alfada-alwasaa-website/source start",
+    "lint": "npm --prefix alfada-alwasaa-website/source run lint"
+  }
+}
