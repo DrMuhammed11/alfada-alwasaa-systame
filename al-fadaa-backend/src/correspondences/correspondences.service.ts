@@ -22,6 +22,7 @@ import {
   CorrespondencesQueryDto,
   CreateIncomingDto,
   CreateInternalDto,
+  PublicInquiryDto,
   UpdateCorrespondenceDto,
 } from './dto';
 import { RefNumberService } from './ref-number.service';
@@ -503,4 +504,64 @@ export class CorrespondencesService {
 
     return updated;
   }
+
+  // ─────────────── استقبال وتتبع استفسارات الموقع الإلكتروني ───────────────
+
+  /** تسجيل طلب عرض سعر أو استشارة واردة من موقع الشركة الإلكتروني */
+  async createPublicInquiry(dto: PublicInquiryDto) {
+    const systemUser = await this.prisma.user.findFirst({
+      where: { role: { in: [Role.ADMIN, Role.GM, Role.EMPLOYEE] }, isActive: true },
+      select: { id: true, email: true, name: true, role: true },
+    });
+    if (!systemUser) {
+      throw new BadRequestException('نظام استقبال الطلبات غير متاح حالياً');
+    }
+
+    const subject = `طلب عرض سعر أو استشارة: ${dto.service.trim()}`;
+    const body = dto.message?.trim()
+      ? `الخدمة المطلوبة: ${dto.service.trim()}\n\nتفاصيل الطلب:\n${dto.message.trim()}`
+      : `طلب وارد عبر الموقع الإلكتروني بخصوص: ${dto.service.trim()}`;
+
+    const corr = await this.createIncoming(
+      {
+        subject,
+        body,
+        senderName: dto.name.trim(),
+        senderPhone: dto.phone.trim(),
+        senderEmail: dto.email?.trim().toLowerCase(),
+        priority: Priority.NORMAL,
+        channel: 'website',
+      },
+      systemUser as AuthUser,
+    );
+
+    return {
+      success: true,
+      refNumber: corr.refNumber,
+      message: 'تم استلام طلبكم بنجاح ومحال للمراجعة والرد من الفريق المختص',
+    };
+  }
+
+  /** استعلام عام عن حالة مراسلة برقمها المرجعي للعملاء */
+  async trackPublicInquiry(refNumber: string) {
+    const corr = await this.prisma.correspondence.findUnique({
+      where: { refNumber: refNumber.trim().toUpperCase() },
+      select: {
+        refNumber: true,
+        subject: true,
+        status: true,
+        receivedAt: true,
+      },
+    });
+    if (!corr) {
+      throw new NotFoundException('لم يتم العثور على مراسلة بهذا الرقم المرجعي');
+    }
+    return {
+      refNumber: corr.refNumber,
+      subject: corr.subject,
+      status: corr.status,
+      receivedAt: corr.receivedAt,
+    };
+  }
 }
+

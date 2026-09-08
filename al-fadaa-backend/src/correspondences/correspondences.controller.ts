@@ -14,10 +14,12 @@ import {
   CorrespondencesQueryDto,
   CreateIncomingDto,
   CreateInternalDto,
+  PublicInquiryDto,
   UpdateCorrespondenceDto,
 } from './dto';
 import { RequirePermission } from '../common/decorators/require-permission.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import type { AuthUser } from '../common/types';
 import { Permission } from '../security/permissions';
 
@@ -26,6 +28,24 @@ import { Permission } from '../security/permissions';
 @Controller('correspondences')
 export class CorrespondencesController {
   constructor(private readonly correspondencesService: CorrespondencesService) {}
+
+  @Public()
+  @Post('public/inquiry')
+  @ApiOperation({
+    summary: 'تقديم طلب عرض سعر أو استشارة من الموقع الإلكتروني الرسمي للشركة',
+  })
+  createPublicInquiry(@Body() dto: PublicInquiryDto) {
+    return this.correspondencesService.createPublicInquiry(dto);
+  }
+
+  @Public()
+  @Get('public/track/:refNumber')
+  @ApiOperation({
+    summary: 'استعلام عام لعملاء الموقع عن حالة معاملة برقمها المرجعي',
+  })
+  trackPublicInquiry(@Param('refNumber') refNumber: string) {
+    return this.correspondencesService.trackPublicInquiry(refNumber);
+  }
 
   @Post('incoming')
   @RequirePermission(Permission.CORR_REGISTER)

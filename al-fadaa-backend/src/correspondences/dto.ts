@@ -152,3 +152,31 @@ export class CorrespondencesQueryDto extends PaginationDto {
   @IsString()
   q?: string;
 }
+
+export class PublicInquiryDto {
+  @ApiProperty({ description: 'الاسم الكامل أو اسم الجهة', example: 'م. فهد العتيبي' })
+  @IsString({ message: 'الاسم مطلوب' })
+  @IsNotEmpty({ message: 'الاسم مطلوب' })
+  name!: string;
+
+  @ApiProperty({ description: 'رقم الهاتف / الجوال للتواصل', example: '777123456' })
+  @IsString({ message: 'رقم الهاتف مطلوب' })
+  @IsNotEmpty({ message: 'رقم الهاتف مطلوب' })
+  phone!: string;
+
+  @ApiPropertyOptional({ description: 'البريد الإلكتروني للعميل', example: 'client@example.com' })
+  @IsOptional()
+  @IsEmail({}, { message: 'البريد الإلكتروني غير صالح' })
+  email?: string;
+
+  @ApiProperty({ description: 'المجال أو الخدمة المطلوبة', example: 'خدمات الاتصالات وتقنية المعلومات' })
+  @IsString({ message: 'الخدمة المطلوبة يجب أن تكون نصًا' })
+  @IsNotEmpty({ message: 'الخدمة المطلوبة مطلوبة' })
+  service!: string;
+
+  @ApiPropertyOptional({ description: 'تفاصيل المشروع أو الاستفسار' })
+  @IsOptional()
+  @IsString()
+  message?: string;
+}
+
