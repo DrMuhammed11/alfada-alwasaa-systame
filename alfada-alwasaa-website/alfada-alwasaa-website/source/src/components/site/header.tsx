@@ -105,14 +105,6 @@ export function SiteHeader() {
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 lg:flex">
           <a
-            href={process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:5000"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-gold/40 bg-navy-darker/60 px-4 py-2 text-xs font-bold text-gold-light transition hover:bg-gold/20 hover:border-gold shadow-sm"
-          >
-            بوابة الموظفين
-          </a>
-          <a
             href="#contact"
             className="rounded-full bg-gold px-5 py-2 text-xs font-extrabold text-navy-darker shadow-[0_4px_14px_rgba(198,149,74,0.4)] transition hover:bg-gold-light hover:shadow-[0_6px_20px_rgba(198,149,74,0.6)]"
           >
@@ -161,14 +153,6 @@ export function SiteHeader() {
                 </li>
               ))}
               <li className="pt-2 space-y-2">
-                <a
-                  href={process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:5000"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-xl border border-gold/40 bg-white/5 py-2.5 text-xs font-bold text-gold-light ring-1 ring-gold/20"
-                >
-                  بوابة الموظفين (نظام المراسلات)
-                </a>
                 <a
                   href="#contact"
                   onClick={() => setOpen(false)}

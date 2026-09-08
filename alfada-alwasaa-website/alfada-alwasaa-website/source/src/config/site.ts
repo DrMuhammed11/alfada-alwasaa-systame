@@ -57,8 +57,8 @@ export const SITE_CONFIG = {
 
     // البريد الإلكتروني الرسمي
     email: {
-      address: "info@alfada-alwasaa.com",
-      mailHref: "mailto:info@alfada-alwasaa.com",
+      address: "info@alfadaalwasaa.com",
+      mailHref: "mailto:info@alfadaalwasaa.com",
       label: "البريد الإلكتروني الرسمي",
     },
 
