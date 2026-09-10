@@ -228,7 +228,7 @@ export function Contact() {
   );
 
   return (
-    <section id="contact" className="relative overflow-hidden bg-mist py-24">
+    <section id="contact" className="relative overflow-hidden bg-mist pt-10 pb-16 sm:pt-14 sm:pb-20">
       {/* Decorative corner accents */}
       <div
         aria-hidden
@@ -252,7 +252,7 @@ export function Contact() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-[1.1fr_1.3fr] items-start">
+        <div className="mt-10 sm:mt-12 grid gap-8 lg:grid-cols-[1.1fr_1.3fr] items-start">
           {/* Contact Details & Highlights */}
           <Reveal delay={0.15}>
             <div className="space-y-6">

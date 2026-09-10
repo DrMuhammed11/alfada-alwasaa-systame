@@ -3,16 +3,16 @@ import { Reveal } from "./reveal";
 
 export function Conclusion() {
   return (
-    <section id="conclusion" className="relative overflow-hidden bg-mist py-24">
+    <section id="conclusion" className="relative overflow-hidden bg-mist pt-14 pb-6 sm:pt-16 sm:pb-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <Reveal className="mb-16 text-center">
+        <Reveal className="mb-8 sm:mb-10 text-center">
           <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy sm:text-4xl lg:text-[2.75rem]">
             خاتمة تعريفية
           </h2>
         </Reveal>
 
         <Reveal delay={0.12}>
-          <div className="relative pt-14">
+          <div className="relative pt-8">
             {/* Navy card with the handshake emblem, echoing the profile closing page */}
             <div className="relative rounded-[2rem] bg-navy px-7 py-10 text-center shadow-[0_35px_90px_-35px_rgba(5,30,49,0.8)] sm:px-12 sm:py-12">
               <div className="absolute -top-12 start-1/2 -translate-x-1/2">

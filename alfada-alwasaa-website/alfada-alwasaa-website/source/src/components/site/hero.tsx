@@ -127,16 +127,30 @@ export function Hero() {
               <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
               <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
 
-              {/* Logo Presentation (Balanced, Proportionate) */}
-              <div className="relative mx-auto h-40 w-40 sm:h-52 sm:w-52">
-                <Image
-                  src={SITE_CONFIG.assets.logoTransparent}
-                  alt="شعار شركة الفضاء الواسع"
-                  fill
-                  priority
-                  sizes="(max-width: 640px) 160px, 208px"
-                  className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.6)]"
-                />
+              {/* Logo Presentation (Complete, Pristine, Never cropped) */}
+              <div className="flex flex-col items-center text-center">
+                <div className="relative h-24 w-24 sm:h-32 sm:w-32 drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+                  <Image
+                    src={SITE_CONFIG.assets.logoMark}
+                    alt="شعار شركة الفضاء الواسع"
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 96px, 128px"
+                    className="object-contain"
+                  />
+                </div>
+                <div className="mt-3">
+                  <span className="block text-2xl sm:text-3xl font-black text-white">
+                    الفضاء الواسع
+                  </span>
+                  <div className="mt-1 flex items-center justify-center gap-2.5">
+                    <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
+                    <span className="text-[11px] sm:text-xs font-black tracking-[0.25em] text-gold-light">
+                      AL-FADA AL-WASAA
+                    </span>
+                    <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
+                  </div>
+                </div>
               </div>
 
               {/* Sector Icons Strip (Completely visible, pristine, never cuts off) */}

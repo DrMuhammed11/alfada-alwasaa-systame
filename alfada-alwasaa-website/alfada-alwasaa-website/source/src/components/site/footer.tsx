@@ -9,43 +9,57 @@ export function SiteFooter() {
       <div aria-hidden className="h-1 w-full bg-gradient-to-l from-gold via-gold-light to-gold" />
       <div className="dot-grid absolute inset-0 opacity-20" aria-hidden />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-8 text-center">
-          {/* Logo lockup */}
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+        <div className="flex flex-col items-center gap-5 sm:gap-6 text-center">
+          {/* Complete, pristine Logo Lockup (Never cropped, perfectly harmonious) */}
           <Reveal>
-            <div className="relative h-36 w-36 sm:h-44 sm:w-44">
-              <Image
-                src={SITE_CONFIG.assets.logoTransparent}
-                alt={SITE_CONFIG.company.fullName}
-                fill
-                sizes="(max-width: 640px) 144px, 176px"
-                className="object-contain"
-              />
+            <div className="flex flex-col items-center text-center">
+              <div className="relative h-20 w-20 sm:h-24 sm:w-24 drop-shadow-[0_4px_20px_rgba(198,149,74,0.35)]">
+                <Image
+                  src={SITE_CONFIG.assets.logoMark}
+                  alt={SITE_CONFIG.company.fullName}
+                  fill
+                  sizes="(max-width: 640px) 80px, 96px"
+                  className="object-contain"
+                />
+              </div>
+              <div className="mt-3">
+                <span className="block text-2xl sm:text-3xl font-black tracking-tight text-white">
+                  الفضاء الواسع
+                </span>
+                <div className="mt-1 flex items-center justify-center gap-2.5">
+                  <span className="h-[1px] w-6 sm:w-8 bg-gold/70 rounded-full" />
+                  <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.25em] text-gold-light">
+                    AL-FADA AL-WASAA
+                  </span>
+                  <span className="h-[1px] w-6 sm:w-8 bg-gold/70 rounded-full" />
+                </div>
+              </div>
             </div>
           </Reveal>
 
           {/* Live Tagline (Scalable typography) */}
-          <Reveal delay={0.08}>
-            <p className="text-base sm:text-lg font-black tracking-wide text-gold-light">
+          <Reveal delay={0.06}>
+            <p className="-mt-1 text-sm sm:text-base font-extrabold tracking-wide text-gold-light">
               {SITE_CONFIG.company.tagline}
             </p>
           </Reveal>
 
           {/* Pristine Complete Sector Icons */}
-          <Reveal delay={0.14}>
-            <div className="relative h-13 sm:h-14 w-full max-w-[280px]">
+          <Reveal delay={0.1}>
+            <div className="relative h-11 sm:h-12 w-full max-w-[260px]">
               <Image
                 src={SITE_CONFIG.assets.sectorIconsStrip}
                 alt="المقاولات العامة، الطرق والجسور، النفط، الاتصالات، التسويق"
                 fill
-                sizes="280px"
+                sizes="260px"
                 className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
               />
             </div>
           </Reveal>
 
           {/* Quick links */}
-          <Reveal delay={0.18}>
+          <Reveal delay={0.14}>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-white/80">
               {SITE_CONFIG.navItems.map((item) => (
                 <a
@@ -60,8 +74,8 @@ export function SiteFooter() {
           </Reveal>
 
           {/* Quick contact and address in footer */}
-          <Reveal delay={0.2}>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-white/70">
+          <Reveal delay={0.18}>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/70">
               <span className="flex items-center gap-2">
                 <span className="text-gold font-bold">العنوان:</span>
                 <span>{SITE_CONFIG.contacts.location.fullAddress}</span>
@@ -93,14 +107,14 @@ export function SiteFooter() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.22}>
-            <p className="max-w-xl text-sm leading-8 text-white/60">
+          <Reveal delay={0.2}>
+            <p className="max-w-xl text-xs sm:text-sm leading-7 text-white/60">
               {SITE_CONFIG.company.fullName} — {SITE_CONFIG.company.brief}
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 sm:flex-row">
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 sm:flex-row">
           <p className="text-xs font-semibold text-white/50">
             جميع الحقوق محفوظة © {new Date().getFullYear()} — {SITE_CONFIG.company.fullName}
           </p>

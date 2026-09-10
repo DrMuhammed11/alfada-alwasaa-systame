@@ -4,7 +4,7 @@ import { SITE_CONFIG } from "@/config/site";
 export function WhyUs() {
 
   return (
-    <section id="why" className="relative overflow-hidden bg-white py-24">
+    <section id="why" className="relative overflow-hidden bg-white py-16 sm:py-20">
       <div
         aria-hidden
         className="corner-ribbon start-0 top-0 bg-[linear-gradient(135deg,var(--color-gold)_0%,var(--color-gold)_30%,transparent_30.5%)] opacity-70"
