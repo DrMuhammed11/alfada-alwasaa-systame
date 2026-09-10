@@ -190,7 +190,7 @@ export const SITE_CONFIG = {
     logoTransparent: "/profile/logo_transparent.png",
     logoMark: "/profile/logo_mark.png",
     sectorIconsStrip: "/profile/sector_icons_strip.png",
-    heroBg: "/profile/hero_bg.jpeg",
+    heroBg: "/profile/hero_bg.webp",
   },
 } as const;
 

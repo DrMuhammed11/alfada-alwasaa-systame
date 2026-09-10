@@ -32,8 +32,8 @@ const SECTORS: Sector[] = [
       "تقديم حلول داعمة للاتصال والتواصل التقني وفق متطلبات الأعمال الحديثة.",
     ],
     photos: [
-      { src: "/profile/telecom_tower_sky.jpeg", alt: "أبراج اتصالات للمشروعات الميدانية" },
-      { src: "/profile/telecom_antenna_city.jpeg", alt: "هوائيات اتصالات فوق إحدى المدن" },
+      { src: "/profile/telecom_tower_sky.webp", alt: "أبراج اتصالات للمشروعات الميدانية" },
+      { src: "/profile/telecom_antenna_city.webp", alt: "هوائيات اتصالات فوق إحدى المدن" },
     ],
   },
   {
@@ -46,8 +46,8 @@ const SECTORS: Sector[] = [
       "التوريدات والتموينات الإنشائية.",
     ],
     photos: [
-      { src: "/profile/construction_building.jpeg", alt: "أعمال إنشاءات ومقاولات عامة" },
-      { src: "/profile/road_roller.jpeg", alt: "أعمال مدح وتسوية الطرق" },
+      { src: "/profile/construction_building.webp", alt: "أعمال إنشاءات ومقاولات عامة" },
+      { src: "/profile/road_roller.webp", alt: "أعمال مدح وتسوية الطرق" },
     ],
   },
   {
@@ -59,8 +59,8 @@ const SECTORS: Sector[] = [
       "التموينات والمساندة التشغيلية.",
     ],
     photos: [
-      { src: "/profile/oil_tanks_truck.jpeg", alt: "صهاريج توريدات نفطية" },
-      { src: "/profile/oil_valve_flare.jpeg", alt: "محطات وتموينات نفطية" },
+      { src: "/profile/oil_tanks_truck.webp", alt: "صهاريج توريدات نفطية" },
+      { src: "/profile/oil_valve_flare.webp", alt: "محطات وتموينات نفطية" },
     ],
   },
   {
@@ -72,8 +72,8 @@ const SECTORS: Sector[] = [
       "التخليص الجمركي وإدارة سلاسل الإمداد.",
     ],
     photos: [
-      { src: "/profile/port_ship.jpeg", alt: "شحن بحري في الموانئ" },
-      { src: "/profile/container_truck.jpeg", alt: "نقل الحاويات برًا" },
+      { src: "/profile/port_ship.webp", alt: "شحن بحري في الموانئ" },
+      { src: "/profile/container_truck.webp", alt: "نقل الحاويات برًا" },
     ],
   },
   {
@@ -85,8 +85,8 @@ const SECTORS: Sector[] = [
       "الاستشارات التسويقية والترويج المتخصص.",
     ],
     photos: [
-      { src: "/profile/marketing_laptop.jpeg", alt: "تحليلات الحملات التسويقية" },
-      { src: "/profile/social_media.jpeg", alt: "منصات التواصل الاجتماعي" },
+      { src: "/profile/marketing_laptop.webp", alt: "تحليلات الحملات التسويقية" },
+      { src: "/profile/social_media.webp", alt: "منصات التواصل الاجتماعي" },
     ],
   },
 ];

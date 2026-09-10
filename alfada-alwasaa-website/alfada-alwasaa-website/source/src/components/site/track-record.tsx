@@ -6,27 +6,27 @@ import { SectionHeading } from "./section-heading";
 const TRACK_ITEMS = [
   {
     caption: "أعمال الطرق والحفريات",
-    src: "/profile/track_roller.jpeg",
+    src: "/profile/track_roller.webp",
     Icon: Route,
   },
   {
     caption: "التخليص الجمركي",
-    src: "/profile/track_ship.jpeg",
+    src: "/profile/track_ship.webp",
     Icon: ClipboardCheck,
   },
   {
     caption: "خدمات الاتصالات والدعم الفني",
-    src: "/profile/track_tower.jpeg",
+    src: "/profile/track_tower.webp",
     Icon: RadioTower,
   },
   {
     caption: "التوريدات والتموينات",
-    src: "/profile/track_forklift.jpeg",
+    src: "/profile/track_forklift.webp",
     Icon: Package,
   },
   {
     caption: "الخدمات اللوجستية والشحن",
-    src: "/profile/track_truck.jpeg",
+    src: "/profile/track_truck.webp",
     Icon: Ship,
   },
 ];
