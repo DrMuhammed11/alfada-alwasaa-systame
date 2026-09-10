@@ -78,23 +78,19 @@ export function Hero() {
 
             {/* The 3 Core Pillars in Compact Responsive Badges */}
             <motion.div {...fadeUp(0.28)} className="mt-6 grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl">
-              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
-                <Briefcase className="mx-auto h-5 w-5 text-gold-light" />
-                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">خبرة تنفيذية</h3>
-                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">ممارسة ميدانية متمرسة</p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
-                <ShieldCheck className="mx-auto h-5 w-5 text-gold-light" />
-                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">انضباط مؤسسي</h3>
-                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">التزام دقيق بالمعايير</p>
-              </div>
-
-              <div className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10">
-                <Award className="mx-auto h-5 w-5 text-gold-light" />
-                <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">جودة واحتراف</h3>
-                <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">مخرجات رصينة تواكب الكبار</p>
-              </div>
+              {SITE_CONFIG.pillars.map((pillar, idx) => {
+                const PillarIcon = [Briefcase, ShieldCheck, Award][idx];
+                return (
+                  <div
+                    key={pillar.title}
+                    className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10"
+                  >
+                    <PillarIcon className="mx-auto h-5 w-5 text-gold-light" />
+                    <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">{pillar.title}</h3>
+                    <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">{pillar.subtitle}</p>
+                  </div>
+                );
+              })}
             </motion.div>
 
             {/* Quick Action Buttons */}

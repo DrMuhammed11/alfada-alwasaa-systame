@@ -9,8 +9,7 @@ import {
   Truck, 
   TrendingUp, 
   CheckCircle2, 
-  ArrowLeft,
-  Layers
+  ArrowLeft
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";

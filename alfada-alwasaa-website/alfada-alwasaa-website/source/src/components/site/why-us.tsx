@@ -1,6 +1,8 @@
 import { Reveal } from "./reveal";
+import { SITE_CONFIG } from "@/config/site";
 
 export function WhyUs() {
+
   return (
     <section id="why" className="relative overflow-hidden bg-white py-24">
       <div
@@ -50,20 +52,7 @@ export function WhyUs() {
 
           <Reveal delay={0.24}>
             <div className="mt-9 grid gap-4 sm:grid-cols-3">
-              {[
-                {
-                  title: "عقلية النتائج",
-                  desc: "تركيز كامل على تحقيق المستهدفات وإنجاز المهام وفق الخطة بأعلى كفاءة.",
-                },
-                {
-                  title: "منهجية واضحة",
-                  desc: "إدارة منظمة ودقة ومتابعة مستمرة لجميع مراحل العمل من البداية للتسليم.",
-                },
-                {
-                  title: "التزام كامل",
-                  desc: "انضباط مهني صارم بالمواعيد والمواصفات وبناء علاقات استراتيجية دائمة.",
-                },
-              ].map((item) => (
+              {SITE_CONFIG.values.map((item) => (
                 <div
                   key={item.title}
                   className="group rounded-2xl border border-navy/10 bg-white p-5 shadow-[0_10px_30px_-15px_rgba(10,52,83,0.3)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 hover:shadow-[0_15px_35px_-15px_rgba(198,149,74,0.4)]"

@@ -12,50 +12,20 @@ import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 import { SITE_CONFIG } from "@/config/site";
 
-const SERVICES = [
-  {
-    num: "01",
-    title: "المقاولات العامة",
-    desc: "تنفيذ الأعمال الإنشائية والميدانية وفق معايير هندسية وإدارية دقيقة.",
-    Icon: Building2,
-  },
-  {
-    num: "02",
-    title: "الطرق والجسور",
-    desc: "إنشاء وصيانة البنية التحتية الحيوية بكفاءة عالية.",
-    Icon: Route,
-  },
-  {
-    num: "03",
-    title: "أعمال الحفريات",
-    desc: "تجهيز المواقع وأعمال الحفر والردم والتسوية باحترافية.",
-    Icon: Shovel,
-  },
-  {
-    num: "04",
-    title: "التوريدات والتموينات",
-    desc: "توفير الاحتياجات التشغيلية والميدانية بسرعة وموثوقية.",
-    Icon: Package,
-  },
-  {
-    num: "05",
-    title: "خدمات الاتصال",
-    desc: "تقديم حلول داعمة للاتصال والتواصل التقني وفق متطلبات الأعمال الحديثة.",
-    Icon: RadioTower,
-  },
-  {
-    num: "06",
-    title: "التسويق الإلكتروني",
-    desc: "بناء حضور رقمي فعال يدعم وصول العلامات التجارية إلى جمهورها المستهدف.",
-    Icon: MonitorSmartphone,
-  },
-  {
-    num: "07",
-    title: "الشحن والتخليص الجمركي",
-    desc: "إدارة سلسلة الحركة اللوجستية وتسهيل الإجراءات بكفاءة.",
-    Icon: Ship,
-  },
+const SERVICE_ICONS = [
+  Building2,
+  Route,
+  Shovel,
+  Package,
+  RadioTower,
+  MonitorSmartphone,
+  Ship,
 ];
+
+const SERVICES = SITE_CONFIG.servicesList.map((service, idx) => ({
+  ...service,
+  Icon: SERVICE_ICONS[idx],
+}));
 
 export function Services() {
   return (

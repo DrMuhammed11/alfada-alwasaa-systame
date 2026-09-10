@@ -10,12 +10,10 @@ import {
   MessageSquare, 
   Clock, 
   Building2,
-  ArrowLeft,
   Search,
   Copy,
   Check,
-  AlertCircle,
-  FileText
+  AlertCircle
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";

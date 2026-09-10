@@ -1,37 +1,16 @@
-﻿"use client";
-
-import { motion } from "framer-motion";
 import { Award, Layers, Clock, ShieldCheck } from "lucide-react";
 import { Reveal } from "./reveal";
+import { SITE_CONFIG } from "@/config/site";
 
-const STATS = [
-  {
-    num: "5+",
-    label: "قطاعات أعمال استراتيجية",
-    sub: "تغطية شاملة ومترابطة",
-    Icon: Layers,
-  },
-  {
-    num: "7+",
-    label: "منظومات خدمية متكاملة",
-    sub: "من التخطيط للتسليم",
-    Icon: ShieldCheck,
-  },
-  {
-    num: "100%",
-    label: "التزام بالمعايير والمواصفات",
-    sub: "انضباط وجودة تنفيذية",
-    Icon: Award,
-  },
-  {
-    num: "24/7",
-    label: "جاهزية واستجابة مستمرة",
-    sub: "متابعة وإشراف ميداني",
-    Icon: Clock,
-  },
-];
+const STAT_ICONS = [Layers, ShieldCheck, Award, Clock];
+
+const STATS = SITE_CONFIG.stats.map((item, idx) => ({
+  ...item,
+  Icon: STAT_ICONS[idx],
+}));
 
 export function Stats() {
+
   return (
     <section className="relative -mt-10 z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <Reveal>
