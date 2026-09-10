@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { 
   Phone, 
   Mail, 
@@ -13,80 +17,200 @@ import {
   Search,
   Copy,
   Check,
-  AlertCircle
+  AlertCircle,
+  Loader2,
+  RotateCw
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 import { SITE_CONFIG } from "@/config/site";
-import { submitInquiry, trackInquiry, type TrackingResult } from "@/lib/api";
+import { submitInquiry, trackInquiry } from "@/lib/api";
+import { inquirySchema, type InquiryFormValues } from "@/lib/validation";
 
 const SECTORS_OPTIONS = SITE_CONFIG.sectorOptions;
 
-interface ContactFormData {
-  name: string;
-  phone: string;
-  email: string;
-  service: string;
-  message: string;
+/** دالة مساعدة لتحديد مظهر وتدرج ألوان شارة حالة المعاملة */
+function getStatusBadge(status: string, statusArabic: string) {
+  const upper = status?.toUpperCase() || "";
+  if (upper === "RECEIVED" || upper === "UNDER_REVIEW") {
+    return {
+      label: statusArabic || "قيد المراجعة الفنية",
+      badgeClass: "bg-amber-50 text-amber-800 ring-1 ring-amber-300",
+      dotClass: "bg-amber-500",
+    };
+  }
+  if (upper === "REFERRED" || upper === "IN_PROGRESS") {
+    return {
+      label: statusArabic || "جاري العمل والدراسة",
+      badgeClass: "bg-sky-50 text-sky-800 ring-1 ring-sky-300",
+      dotClass: "bg-sky-500",
+    };
+  }
+  if (
+    upper === "APPROVED" || 
+    upper === "SENT" || 
+    upper === "CLOSED" || 
+    upper === "ARCHIVED"
+  ) {
+    return {
+      label: statusArabic || "مكتمل — تم الرد والإنجاز",
+      badgeClass: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-300",
+      dotClass: "bg-emerald-500",
+    };
+  }
+  if (upper === "CANCELLED" || upper === "REJECTED") {
+    return {
+      label: statusArabic || "طلب ملغي أو معتذر عنه",
+      badgeClass: "bg-rose-50 text-rose-800 ring-1 ring-rose-300",
+      dotClass: "bg-rose-500",
+    };
+  }
+  return {
+    label: statusArabic || "قيد المتابعة",
+    badgeClass: "bg-slate-100 text-slate-800 ring-1 ring-slate-300",
+    dotClass: "bg-slate-500",
+  };
+}
+
+function subscribeToStorage(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getStoredRefSnapshot(): string | null {
+  try {
+    return localStorage.getItem("lastInquiryRef");
+  } catch {
+    return null;
+  }
+}
+
+function getStoredRefServerSnapshot(): string | null {
+  return null;
 }
 
 export function Contact() {
   const [activeTab, setActiveTab] = useState<"form" | "track">("form");
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [generatedRef, setGeneratedRef] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // حالة التتبع
-  const [trackInput, setTrackInput] = useState("");
-  const [trackLoading, setTrackLoading] = useState(false);
-  const [trackResult, setTrackResult] = useState<TrackingResult | null>(null);
-  const [trackError, setTrackError] = useState<string | null>(null);
+  // استرجاع آخر رقم مرجعي من التخزين المحلي لتسهيل التتبع بطريقة متوافقة مع React 19
+  const storedRef = useSyncExternalStore(
+    subscribeToStorage,
+    getStoredRefSnapshot,
+    getStoredRefServerSnapshot
+  );
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const savedRefNumber = submittedRef || storedRef;
 
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    phone: "",
-    email: "",
-    service: SECTORS_OPTIONS[0],
-    message: "",
+  const [selectedService, setSelectedService] = useState<string>(SECTORS_OPTIONS[0]);
+
+  // إدارة النموذج بواسطة React Hook Form مع التحقق التلقائي عبر Zod
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<InquiryFormValues>({
+    resolver: zodResolver(inquirySchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
+      service: SECTORS_OPTIONS[0],
+      message: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage(null);
+  // إرسال النموذج ومعالجة الحالات
+  const onSubmit = async (values: InquiryFormValues) => {
+    setSubmitError(null);
+    try {
+      const res = await submitInquiry({
+        name: values.name.trim(),
+        phone: values.phone.trim(),
+        email: values.email?.trim() || undefined,
+        service: values.service,
+        message: values.message?.trim() || undefined,
+      });
 
-    const res = await submitInquiry({
-      name: formData.name.trim(),
-      phone: formData.phone.trim(),
-      email: formData.email.trim() || undefined,
-      service: formData.service,
-      message: formData.message.trim() || undefined,
-    });
-
-    setLoading(false);
-    if (res.success) {
-      setGeneratedRef(res.refNumber || "");
-      setSubmitted(true);
-    } else {
-      setErrorMessage(res.message);
+      if (res.success && res.refNumber) {
+        setGeneratedRef(res.refNumber);
+        setSubmitted(true);
+        setSubmittedRef(res.refNumber);
+        try {
+          localStorage.setItem("lastInquiryRef", res.refNumber);
+          window.dispatchEvent(new Event("storage"));
+        } catch {
+          // تجاهل
+        }
+        toast.success("تم استلام وتوثيق طلبكم بنجاح!", {
+          description: `الرقم المرجعي لمعاملتكم: ${res.refNumber}`,
+        });
+      } else {
+        const msg = res.message || "تعذر إرسال الطلب، يرجى المحاولة لاحقاً";
+        setSubmitError(msg);
+        toast.error("تعذر إرسال الطلب", {
+          description: msg,
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "حدث خطأ غير متوقع أثناء إرسال الطلب";
+      setSubmitError(msg);
+      toast.error("خطأ في الاتصال", {
+        description: msg,
+      });
     }
   };
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackInput.trim()) return;
-    setTrackLoading(true);
-    setTrackError(null);
-    setTrackResult(null);
+  // حالة التتبع عبر React Query
+  const [trackInput, setTrackInput] = useState("");
+  const [trackQueryRef, setTrackQueryRef] = useState<string | null>(null);
 
-    const res = await trackInquiry(trackInput);
-    setTrackLoading(false);
-    if (res.success && res.data) {
-      setTrackResult(res.data);
+  const {
+    data: trackingResult,
+    isLoading: isTrackLoading,
+    isFetching: isTrackFetching,
+    error: trackQueryError,
+    refetch: refetchTrack,
+  } = useQuery({
+    queryKey: ["inquiry-tracking", trackQueryRef],
+    queryFn: async () => {
+      if (!trackQueryRef) return null;
+      const res = await trackInquiry(trackQueryRef);
+      if (!res.success || !res.data) {
+        throw new Error(res.error || "لم يتم العثور على معاملة بهذا الرقم المرجعي");
+      }
+      return res.data;
+    },
+    enabled: !!trackQueryRef,
+    staleTime: 1000 * 60 * 5, // تخزين مؤقت لمدة 5 دقائق
+    retry: 1,
+  });
+
+  const isTracking = isTrackLoading || isTrackFetching;
+  const trackErrorMessage = trackQueryError instanceof Error ? trackQueryError.message : null;
+
+  const handleTrackSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = trackInput.trim().toUpperCase();
+    if (!clean) return;
+
+    if (clean === trackQueryRef) {
+      refetchTrack();
     } else {
-      setTrackError(res.error || "لم يتم العثور على المعاملة");
+      setTrackQueryRef(clean);
+    }
+  };
+
+  const handleQuickTrack = (ref: string) => {
+    setTrackInput(ref);
+    if (ref === trackQueryRef) {
+      refetchTrack();
+    } else {
+      setTrackQueryRef(ref);
     }
   };
 
@@ -94,12 +218,13 @@ export function Contact() {
     if (generatedRef) {
       navigator.clipboard.writeText(generatedRef);
       setCopied(true);
+      toast.info("تم نسخ الرقم المرجعي إلى الحافظة");
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const whatsappMessage = encodeURIComponent(
-    `السلام عليكم ورحمة الله، أود الاستفسار عن خدمات شركة الفضاء الواسع بخصوص: ${formData.service || "خدمات الشركة"}`
+    `السلام عليكم ورحمة الله، أود الاستفسار عن خدمات شركة الفضاء الواسع بخصوص: ${selectedService || "خدمات الشركة"}`
   );
 
   return (
@@ -262,7 +387,6 @@ export function Contact() {
                   type="button"
                   onClick={() => {
                     setActiveTab("form");
-                    setSubmitted(false);
                   }}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition ${
                     activeTab === "form"
@@ -296,10 +420,21 @@ export function Contact() {
                     أدخل تفاصيل مشروعك وسيقوم فريقنا المختص بالتواصل معك في أقرب وقت.
                   </p>
 
-                  {errorMessage && (
-                    <div className="mt-6 flex items-center gap-3 rounded-xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200">
-                      <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
-                      <span>{errorMessage}</span>
+                  {/* رسالة الخطأ مع زر إعادة المحاولة */}
+                  {submitError && (
+                    <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200">
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
+                        <span>{submitError}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSubmit(onSubmit)}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-rose-700 shrink-0"
+                      >
+                        <RotateCw className="h-3.5 w-3.5" />
+                        <span>إعادة المحاولة</span>
+                      </button>
                     </div>
                   )}
 
@@ -339,13 +474,14 @@ export function Contact() {
                         </div>
                       )}
 
-                      <div className="mt-6">
+                      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                         <button
                           type="button"
                           onClick={() => {
                             setSubmitted(false);
                             setGeneratedRef("");
-                            setFormData({
+                            setSubmitError(null);
+                            reset({
                               name: "",
                               phone: "",
                               email: "",
@@ -357,10 +493,23 @@ export function Contact() {
                         >
                           إرسال طلب آخر
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab("track");
+                            if (generatedRef) {
+                              handleQuickTrack(generatedRef);
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 text-sm font-bold text-navy-darker transition hover:bg-gold-light"
+                        >
+                          <Search className="h-4 w-4" />
+                          <span>متابعة حالة هذا الطلب</span>
+                        </button>
                       </div>
                     </div>
                   ) : (
-                    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
                           <label className="block text-sm font-bold text-navy mb-2">
@@ -368,12 +517,15 @@ export function Contact() {
                           </label>
                           <input
                             type="text"
-                            required
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            {...register("name")}
                             placeholder="مثال: م. فهد العتيبي"
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30"
+                            className={`w-full rounded-xl border ${
+                              errors.name ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
+                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30`}
                           />
+                          {errors.name && (
+                            <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.name.message}</p>
+                          )}
                         </div>
 
                         <div>
@@ -382,12 +534,15 @@ export function Contact() {
                           </label>
                           <input
                             type="tel"
-                            required
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            placeholder="776XXXXXX"
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                            {...register("phone")}
+                            placeholder="776XXXXXX أو +967..."
+                            className={`w-full rounded-xl border ${
+                              errors.phone ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
+                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
                           />
+                          {errors.phone && (
+                            <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.phone.message}</p>
+                          )}
                         </div>
                       </div>
 
@@ -398,11 +553,15 @@ export function Contact() {
                           </label>
                           <input
                             type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            {...register("email")}
                             placeholder="example@domain.com"
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                            className={`w-full rounded-xl border ${
+                              errors.email ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
+                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
                           />
+                          {errors.email && (
+                            <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.email.message}</p>
+                          )}
                         </div>
 
                         <div>
@@ -410,9 +569,14 @@ export function Contact() {
                             المجال أو الخدمة المطلوبة <span className="text-rose-500">*</span>
                           </label>
                           <select
-                            value={formData.service}
-                            onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30"
+                            {...register("service")}
+                            onChange={(e) => {
+                              register("service").onChange(e);
+                              setSelectedService(e.target.value);
+                            }}
+                            className={`w-full rounded-xl border ${
+                              errors.service ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
+                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30`}
                           >
                             {SECTORS_OPTIONS.map((opt) => (
                               <option key={opt} value={opt}>
@@ -420,6 +584,9 @@ export function Contact() {
                               </option>
                             ))}
                           </select>
+                          {errors.service && (
+                            <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.service.message}</p>
+                          )}
                         </div>
                       </div>
 
@@ -429,21 +596,28 @@ export function Contact() {
                         </label>
                         <textarea
                           rows={4}
-                          value={formData.message}
-                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          {...register("message")}
                           placeholder="اذكر بإيجاز طبيعة المشروع، الموقع، والجدول الزمني المتوقع إن وجد..."
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none"
+                          className={`w-full rounded-xl border ${
+                            errors.message ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
+                          } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none`}
                         />
+                        {errors.message && (
+                          <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.message.message}</p>
+                        )}
                       </div>
 
                       <div className="pt-2">
                         <button
                           type="submit"
-                          disabled={loading}
+                          disabled={isSubmitting}
                           className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-gold px-8 py-4 text-base font-extrabold text-navy-darker shadow-[0_15px_35px_-10px_rgba(198,149,74,0.5)] transition hover:bg-gold-light hover:shadow-[0_20px_40px_-10px_rgba(198,149,74,0.65)] disabled:opacity-60"
                         >
-                          {loading ? (
-                            <span>جارٍ تسجيل الطلب في النظام...</span>
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="h-5 w-5 animate-spin text-navy-darker" />
+                              <span>جارٍ إرسال الطلب...</span>
+                            </>
                           ) : (
                             <>
                               <span>إرسال طلب الاستشارة / عرض السعر</span>
@@ -466,7 +640,28 @@ export function Contact() {
                     </p>
                   </div>
 
-                  <form onSubmit={handleTrack} className="space-y-4">
+                  {/* زر التتبع السريع لآخر طلب إن وجد */}
+                  {savedRefNumber && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-2xl bg-gold/10 p-4 ring-1 ring-gold/30">
+                      <div className="flex items-center gap-2 text-navy text-xs font-bold">
+                        <Clock className="h-4 w-4 text-gold shrink-0" />
+                        <span>آخر معاملة قمت بتقديمها:</span>
+                        <span className="font-mono font-black text-sm tracking-wider" dir="ltr">
+                          {savedRefNumber}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickTrack(savedRefNumber)}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gold px-4 py-2 text-xs font-extrabold text-navy-darker hover:bg-gold-light transition shadow-sm"
+                      >
+                        <Search className="h-3.5 w-3.5" />
+                        <span>تتبع هذا الطلب</span>
+                      </button>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleTrackSubmit} className="space-y-4">
                     <div>
                       <label className="block text-sm font-bold text-navy mb-2">
                         الرقم المرجعي للمعاملة
@@ -482,11 +677,14 @@ export function Contact() {
                         />
                         <button
                           type="submit"
-                          disabled={trackLoading}
+                          disabled={isTracking}
                           className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-bold text-navy-darker hover:bg-gold-light transition disabled:opacity-50"
                         >
-                          {trackLoading ? (
-                            <span>جارٍ الاستعلام...</span>
+                          {isTracking ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span>جارٍ الاستعلام...</span>
+                            </>
                           ) : (
                             <>
                               <Search className="h-4 w-4" />
@@ -498,39 +696,54 @@ export function Contact() {
                     </div>
                   </form>
 
-                  {trackError && (
+                  {/* رسالة الخطأ في التتبع */}
+                  {trackErrorMessage && (
                     <div className="flex items-center gap-3 rounded-xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200">
                       <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
-                      <span>{trackError}</span>
+                      <span>{trackErrorMessage}</span>
                     </div>
                   )}
 
-                  {trackResult && (
-                    <div className="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 space-y-4">
+                  {/* بطاقة عرض تفاصيل المعاملة */}
+                  {trackingResult && (
+                    <div className="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 space-y-4 shadow-sm">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <span className="text-xs font-bold text-slate-500">رقم المعاملة:</span>
-                        <span className="font-mono text-base font-black text-navy" dir="ltr">{trackResult.refNumber}</span>
+                        <span className="font-mono text-base font-black text-navy" dir="ltr">
+                          {trackingResult.refNumber}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <span className="text-xs font-bold text-slate-500">موضوع الطلب:</span>
-                        <span className="text-sm font-bold text-slate-800">{trackResult.subject}</span>
+                        <span className="text-sm font-bold text-slate-800">
+                          {trackingResult.subject}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <span className="text-xs font-bold text-slate-500">تاريخ التسجيل:</span>
                         <span className="text-sm text-slate-700">
-                          {new Date(trackResult.receivedAt).toLocaleDateString("ar-SA", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {trackingResult.receivedAt
+                            ? new Date(trackingResult.receivedAt).toLocaleDateString("ar-SA", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "—"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-xs font-bold text-slate-500">الحالة الراهنة:</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                          <span>{trackResult.statusArabic}</span>
-                        </span>
+                        {(() => {
+                          const badge = getStatusBadge(trackingResult.status, trackingResult.statusArabic);
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-bold ${badge.badgeClass}`}
+                            >
+                              <span className={`h-2 w-2 rounded-full ${badge.dotClass}`} />
+                              <span>{badge.label}</span>
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
@@ -543,4 +756,5 @@ export function Contact() {
     </section>
   );
 }
+
 
