@@ -6,6 +6,12 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
+/**
+ * تم تحديد المهلة الزمنية بـ 12 ثانية لتغطية زمن استيقاظ الخوادم السحابية المجانية (Cold Starts)
+ * وفي نفس الوقت تفادي تعليق واجهة المستخدم لفترة طويلة في حال تعثر الشبكة.
+ */
+const REQUEST_TIMEOUT_MS = 12000;
+
 export interface InquiryPayload {
   name: string;
   phone: string;
@@ -50,22 +56,53 @@ export function getClientStatusLabel(status: string): string {
   }
 }
 
+/** فحص ما إذا كان الخطأ ناتجاً عن انتهاء المهلة الزمنية */
+function isTimeoutError(err: unknown): boolean {
+  return (
+    (err instanceof DOMException && err.name === "AbortError") ||
+    (err instanceof Error && err.name === "AbortError")
+  );
+}
+
+/** دالة مساعدة لتنفيذ الطلبات مع دعم AbortController والمهلة الزمنية */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 /** إرسال طلب عرض سعر أو استشارة جديدة إلى نظام المراسلات */
 export async function submitInquiry(
   payload: InquiryPayload
 ): Promise<InquiryResponse> {
   try {
-    const res = await fetch(`${API_BASE_URL}/correspondences/public/inquiry`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetchWithTimeout(
+      `${API_BASE_URL}/correspondences/public/inquiry`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await res.json().catch(() => ({}));
 
+    // خطأ من جانب الخادم (Server Error)
     if (!res.ok) {
       const errMsg =
         data.message ||
@@ -79,12 +116,25 @@ export async function submitInquiry(
       refNumber: data.refNumber,
       message: data.message || "تم استلام طلبكم بنجاح",
     };
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("submitInquiry error:", err);
+
+    // خطأ انتهاء المهلة الزمنية (Timeout Error)
+    if (isTimeoutError(err)) {
+      return {
+        success: false,
+        message:
+          "استغرق الطلب وقتاً أطول من المتوقع (انتهت المهلة 12 ثانية). يرجى التحقق من الاتصال والمحاولة مجدداً.",
+        error: "انتهت مهلة الطلب (Request Timeout)",
+      };
+    }
+
+    // خطأ في الشبكة أو تعذر الاتصال (Network Error)
     return {
       success: false,
-      message: "تعذر الاتصال بخادم الشركة. يرجى التحقق من الاتصال والمحاولة مجدداً.",
-      error: (err as Error).message,
+      message:
+        "تعذر الاتصال بخادم الشركة. يرجى التحقق من الاتصال والمحاولة مجدداً.",
+      error: err instanceof Error ? err.message : String(err),
     };
   }
 }
@@ -95,8 +145,10 @@ export async function trackInquiry(
 ): Promise<{ success: boolean; data?: TrackingResult; error?: string }> {
   try {
     const cleanRef = refNumber.trim().toUpperCase();
-    const res = await fetch(
-      `${API_BASE_URL}/correspondences/public/track/${encodeURIComponent(cleanRef)}`,
+    const res = await fetchWithTimeout(
+      `${API_BASE_URL}/correspondences/public/track/${encodeURIComponent(
+        cleanRef
+      )}`,
       {
         method: "GET",
         headers: { Accept: "application/json" },
@@ -105,6 +157,7 @@ export async function trackInquiry(
 
     const data = await res.json().catch(() => ({}));
 
+    // خطأ من جانب الخادم أو المعاملة غير موجودة (Server/Not Found Error)
     if (!res.ok) {
       return {
         success: false,
@@ -122,8 +175,19 @@ export async function trackInquiry(
         receivedAt: data.receivedAt,
       },
     };
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("trackInquiry error:", err);
+
+    // خطأ انتهاء المهلة الزمنية (Timeout Error)
+    if (isTimeoutError(err)) {
+      return {
+        success: false,
+        error:
+          "استغرقت عملية الاستعلام وقتاً أطول من المتوقع (انتهت مهلة 12 ثانية). يرجى المحاولة مجدداً.",
+      };
+    }
+
+    // خطأ في الشبكة أو تعذر الاتصال (Network Error)
     return {
       success: false,
       error: "تعذر الاتصال بالخادم لمتابعة المعاملة",
