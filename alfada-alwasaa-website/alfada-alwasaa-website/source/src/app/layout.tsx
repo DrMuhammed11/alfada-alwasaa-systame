@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { SITE_CONFIG } from "@/config/site";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -98,38 +99,61 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": "https://www.alfadaalwasaa.com/#organization",
-      name: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
+      name: SITE_CONFIG.company.fullName,
       alternateName: [
+        SITE_CONFIG.company.shortName,
+        SITE_CONFIG.company.enName,
         "الفضاء الواسع",
         "شركة الفضاء الواسع",
         "Al-Fada Al-Wasaa",
         "alfadaalwasaa",
       ],
+      description: SITE_CONFIG.company.brief,
       url: "https://www.alfadaalwasaa.com",
-      logo: "https://www.alfadaalwasaa.com/profile/logo_mark.png",
-      email: "info@alfadaalwasaa.com",
-      telephone: "+967776999942",
+      logo: `https://www.alfadaalwasaa.com${SITE_CONFIG.assets.logoMark}`,
+      email: SITE_CONFIG.contacts.email.address,
+      telephone: SITE_CONFIG.contacts.general.raw,
       address: {
         "@type": "PostalAddress",
-        streetAddress: "جوار مصنع شملان",
-        addressLocality: "صنعاء",
+        streetAddress: SITE_CONFIG.contacts.location.fullAddress,
+        addressLocality: SITE_CONFIG.contacts.location.city,
         addressCountry: "YE",
       },
       contactPoint: [
         {
           "@type": "ContactPoint",
-          telephone: "+967776999942",
+          telephone: SITE_CONFIG.contacts.general.raw,
           contactType: "customer service",
           areaServed: "YE",
           availableLanguage: ["Arabic", "English"],
         },
+        {
+          "@type": "ContactPoint",
+          telephone: SITE_CONFIG.contacts.deputy.raw,
+          contactType: "project management",
+          areaServed: "YE",
+          availableLanguage: ["Arabic", "English"],
+        },
       ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "منظومة خدمات وقطاعات شركة الفضاء الواسع",
+        itemListElement: SITE_CONFIG.servicesList.map((service, index) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: service.title,
+            description: service.desc,
+          },
+          position: index + 1,
+        })),
+      },
     },
     {
       "@type": "WebSite",
       "@id": "https://www.alfadaalwasaa.com/#website",
       url: "https://www.alfadaalwasaa.com",
-      name: "شركة الفضاء الواسع",
+      name: SITE_CONFIG.company.shortName,
       publisher: {
         "@id": "https://www.alfadaalwasaa.com/#organization",
       },
