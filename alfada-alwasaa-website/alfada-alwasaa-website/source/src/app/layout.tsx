@@ -9,7 +9,12 @@ const cairo = Cairo({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
+/**
+ * إعدادات البيانات الوصفية (Metadata) وتحسين محركات البحث (SEO)
+ * موجهة للغة العربية والظهور في نتائج البحث ووسائل التواصل
+ */
 export const metadata: Metadata = {
+  // النطاق الأساسي لتوحيد روابط OpenGraph ومحركات البحث
   metadataBase: new URL("https://www.alfadaalwasaa.com"),
   title: {
     default: "شركة الفضاء الواسع | لخدمات الاتصالات والمقاولات العامة",
