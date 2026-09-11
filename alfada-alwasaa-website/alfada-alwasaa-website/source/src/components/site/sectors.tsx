@@ -155,19 +155,35 @@ export function Sectors() {
           {filteredSectors.map((sector, idx) => (
             <Reveal key={sector.num} delay={idx * 0.05}>
               <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 bg-white shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_25px_50px_-20px_rgba(10,52,83,0.35)]">
-                {/* Visual Imagery with Dual-Photo Preview */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
-                  <Image
-                    src={sector.photos[0].src}
-                    alt={sector.photos[0].alt}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/80 via-navy-darker/20 to-transparent" />
+                {/* عرض الصورتين جنباً لجنب بنسبة 50/50 */}
+                <div className="relative flex aspect-[16/10] w-full overflow-hidden bg-navy-darker">
+                  {/* الصورة الأولى */}
+                  <div className="relative w-1/2 overflow-hidden">
+                    <Image
+                      src={sector.photos[0].src}
+                      alt={sector.photos[0].alt}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  {/* فاصل رفيع بين الصورتين */}
+                  <div aria-hidden className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-px bg-white/40 z-10" />
+                  {/* الصورة الثانية */}
+                  <div className="relative w-1/2 overflow-hidden">
+                    <Image
+                      src={sector.photos[1].src}
+                      alt={sector.photos[1].alt}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  {/* تدرج سفلي لإظهار العنوان */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/80 via-navy-darker/10 to-transparent" />
 
-                  {/* Top Badges */}
-                  <div className="absolute top-4 inset-x-4 flex items-center justify-between">
+                  {/* الشارات العلوية */}
+                  <div className="absolute top-4 inset-x-4 flex items-center justify-between z-10">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/90 text-gold-light shadow-md ring-1 ring-gold/30 backdrop-blur-md">
                       <sector.Icon className="h-5 w-5" />
                     </span>
@@ -176,19 +192,8 @@ export function Sectors() {
                     </span>
                   </div>
 
-                  {/* Secondary thumbnail inset */}
-                  <div className="absolute bottom-3 end-3 h-12 w-16 overflow-hidden rounded-lg border-2 border-white/80 shadow-lg sm:h-14 sm:w-20">
-                    <Image
-                      src={sector.photos[1].src}
-                      alt={sector.photos[1].alt}
-                      fill
-                      sizes="(max-width: 640px) 64px, 80px"
-                      className="object-cover"
-                    />
-                  </div>
-
-                  {/* Bottom Title overlay */}
-                  <div className="absolute bottom-3 start-4">
+                  {/* اسم القطاع في الأسفل */}
+                  <div className="absolute bottom-3 start-4 z-10">
                     <h3 className="text-xl font-black text-white drop-shadow-md">
                       {sector.title}
                     </h3>
