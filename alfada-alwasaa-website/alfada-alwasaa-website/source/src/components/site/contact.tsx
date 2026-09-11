@@ -107,7 +107,7 @@ export function Contact() {
 
   const [selectedService, setSelectedService] = useState<string>(SECTORS_OPTIONS[0]);
 
-  // إدارة النموذج بواسطة React Hook Form مع التحقق التلقائي عبر Zod
+  // إدارة النموذج بواسطة React Hook Form مع التحقق التلقائي عبر Zod فور لمس الحقل
   const {
     register,
     handleSubmit,
@@ -115,6 +115,7 @@ export function Contact() {
     formState: { errors, isSubmitting },
   } = useForm<InquiryFormValues>({
     resolver: zodResolver(inquirySchema),
+    mode: "onTouched",
     defaultValues: {
       name: "",
       phone: "",
@@ -518,6 +519,8 @@ export function Contact() {
                           <input
                             type="text"
                             {...register("name")}
+                            required
+                            aria-required="true"
                             placeholder="مثال: م. فهد العتيبي"
                             className={`w-full rounded-xl border ${
                               errors.name ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
@@ -535,6 +538,8 @@ export function Contact() {
                           <input
                             type="tel"
                             {...register("phone")}
+                            required
+                            aria-required="true"
                             placeholder="776XXXXXX أو +967..."
                             className={`w-full rounded-xl border ${
                               errors.phone ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
@@ -570,6 +575,8 @@ export function Contact() {
                           </label>
                           <select
                             {...register("service")}
+                            required
+                            aria-required="true"
                             onChange={(e) => {
                               register("service").onChange(e);
                               setSelectedService(e.target.value);

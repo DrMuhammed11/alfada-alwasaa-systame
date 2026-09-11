@@ -39,6 +39,31 @@ export function SiteHeader() {
     return () => observer.disconnect();
   }, []);
 
+  // معالج النقر على روابط التنقل لحل مشكلة عدم تمرير قائمة الجوال وضمان التمرير السلس
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      setOpen(false);
+      const targetId = href.slice(1);
+
+      // تأخير طفيف للسماح للقائمة ببدء الإغلاق ثم التمرير بدقة مع خصم ارتفاع الهيدر
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          const headerOffset = 80;
+          const elementPosition = el.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: "smooth",
+          });
+          window.history.pushState(null, "", href);
+          setActive(href);
+        }
+      }, 100);
+    }
+  };
+
   // Close the mobile menu after navigation completes (hashchange)
   useEffect(() => {
     const onHashChange = () => setOpen(false);
@@ -57,7 +82,12 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
-        <a href="#home" className="flex items-center gap-3" aria-label="الفضاء الواسع - الرئيسية">
+        <a 
+          href="#home" 
+          onClick={(e) => handleNavClick(e, "#home")}
+          className="flex items-center gap-3" 
+          aria-label="الفضاء الواسع - الرئيسية"
+        >
           <span className="relative h-11 w-11 overflow-hidden rounded-xl bg-white/5 ring-1 ring-gold/40 sm:h-12 sm:w-12">
             <Image
               src={SITE_CONFIG.assets.logoMark}
@@ -84,6 +114,7 @@ export function SiteHeader() {
             <a
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
               className={cn(
                 "relative rounded-full px-2.5 py-1.5 text-[12px] font-bold transition-colors duration-300 xl:px-3.5 xl:text-[13.5px]",
                 active === item.href
@@ -106,6 +137,7 @@ export function SiteHeader() {
         <div className="hidden items-center gap-3 lg:flex">
           <a
             href="#contact"
+            onClick={(e) => handleNavClick(e, "#contact")}
             className="rounded-full bg-gold px-5 py-2 text-xs font-extrabold text-navy-darker shadow-[0_4px_14px_rgba(198,149,74,0.4)] transition hover:bg-gold-light hover:shadow-[0_6px_20px_rgba(198,149,74,0.6)]"
           >
             طلب استشارة
@@ -140,7 +172,7 @@ export function SiteHeader() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     className={cn(
                       "block rounded-lg px-4 py-3 text-sm font-semibold transition",
                       active === item.href
@@ -155,7 +187,7 @@ export function SiteHeader() {
               <li className="pt-2 space-y-2">
                 <a
                   href="#contact"
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => handleNavClick(e, "#contact")}
                   className="flex items-center justify-center rounded-xl bg-gold py-3 text-sm font-black text-navy-darker shadow-md"
                 >
                   طلب عرض سعر أو استشارة

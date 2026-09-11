@@ -54,26 +54,30 @@ export function TrackRecord() {
           </Reveal>
         </div>
 
-        {/* Photo strip — the five fields from the profile */}
-        <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {/* Photo strip — the five fields from the profile with fully balanced responsive layout */}
+        <div className="mt-14 grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-5">
           {TRACK_ITEMS.map((item, idx) => (
-            <Reveal key={item.caption} delay={idx * 0.08}>
-              <figure className="group overflow-hidden rounded-2xl bg-white shadow-[0_15px_45px_-25px_rgba(10,52,83,0.35)] ring-1 ring-navy/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-25px_rgba(10,52,83,0.45)]">
+            <Reveal 
+              key={item.caption} 
+              delay={idx * 0.08}
+              className={idx === 4 ? "col-span-2 sm:col-span-1 md:col-span-1 max-w-[280px] sm:max-w-none mx-auto w-full" : "w-full"}
+            >
+              <figure className="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-[0_15px_45px_-25px_rgba(10,52,83,0.35)] ring-1 ring-navy/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-25px_rgba(10,52,83,0.45)]">
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
                     src={item.src}
                     alt={item.caption}
                     fill
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 220px"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/55 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 </div>
-                <figcaption className="flex flex-col items-center gap-2.5 px-3 py-4 text-center">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-gold-light transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker">
-                    <item.Icon className="h-5.5 w-5.5" strokeWidth={1.8} />
+                <figcaption className="flex flex-1 flex-col items-center justify-center gap-2 px-2.5 py-3.5 text-center">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy text-gold-light transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker sm:h-11 sm:w-11">
+                    <item.Icon className="h-5 w-5" strokeWidth={1.8} />
                   </span>
-                  <span className="text-[0.82rem] font-extrabold leading-6 text-navy">
+                  <span className="text-[0.78rem] font-extrabold leading-5 text-navy sm:text-[0.82rem]">
                     {item.caption}
                   </span>
                 </figcaption>

@@ -32,8 +32,8 @@ const SECTORS: Sector[] = [
       "تقديم حلول داعمة للاتصال والتواصل التقني وفق متطلبات الأعمال الحديثة.",
     ],
     photos: [
-      { src: "/profile/telecom_tower_sky.webp", alt: "أبراج اتصالات للمشروعات الميدانية" },
-      { src: "/profile/telecom_antenna_city.webp", alt: "هوائيات اتصالات فوق إحدى المدن" },
+      { src: "/profile/site_telecom_tower.webp", alt: "أبراج اتصالات وشبكات المايكروويف الميدانية" },
+      { src: "/profile/site_solar_array.webp", alt: "منظومة الطاقة الشمسية لتشغيل محطات الاتصالات" },
     ],
   },
   {
@@ -46,7 +46,7 @@ const SECTORS: Sector[] = [
       "التوريدات والتموينات الإنشائية.",
     ],
     photos: [
-      { src: "/profile/construction_building.webp", alt: "أعمال إنشاءات ومقاولات عامة" },
+      { src: "/profile/site_mountain_station.webp", alt: "أعمال إنشاء المحطات والأبراج في المواقع الجبلية" },
       { src: "/profile/road_roller.webp", alt: "أعمال مدح وتسوية الطرق" },
     ],
   },
