@@ -1,9 +1,7 @@
 ﻿{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
   "headers": [
     {
-      "source": "/profile/(.*)",
+      "source": "/profile/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -12,35 +10,13 @@
       ]
     },
     {
-      "source": "/projects/(.*)",
+      "source": "/_next/static/:path*",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
         }
       ]
-    },
-    {
-      "source": "/_next/static/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "alfadaalwasaa.com"
-        }
-      ],
-      "destination": "https://www.alfadaalwasaa.com/:path*",
-      "permanent": true
     }
   ]
 }
