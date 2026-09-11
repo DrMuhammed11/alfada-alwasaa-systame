@@ -68,7 +68,7 @@ export const SITE_CONFIG = {
 
   // شريط الروابط والتنقل الموحد
   navItems: [
-    { label: "الرئيسية ومن نحن", href: "#home" },
+    { label: "الرئيسية", href: "#home" },
     { label: "قطاعاتنا", href: "#sectors" },
     { label: "خدماتنا", href: "#services" },
     { label: "مكانتنا", href: "#position" },

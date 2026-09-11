@@ -23,7 +23,7 @@ export function WhyUs() {
               <span aria-hidden className="absolute -end-1.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-navy" />
               <span
                 aria-hidden
-                className="absolute -bottom-10 -start-8 select-none text-[6.5rem] font-black leading-none text-gold/90 sm:-bottom-12 sm:-start-10 sm:text-[8rem]"
+                className="absolute -bottom-6 -start-4 select-none text-[4.5rem] font-black leading-none text-gold/90 sm:-bottom-8 sm:-start-6 sm:text-[6rem]"
               >
                 ؟
               </span>

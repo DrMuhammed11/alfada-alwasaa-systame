@@ -72,8 +72,8 @@ section[id] {
 .corner-ribbon {
   pointer-events: none;
   position: absolute;
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   opacity: 0.9;
 }
 
