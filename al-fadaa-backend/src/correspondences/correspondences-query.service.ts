@@ -63,6 +63,7 @@ export class CorrespondencesQueryService {
     if (dto.status) filters.push({ status: dto.status });
     if (dto.priority) filters.push({ priority: dto.priority });
     if (dto.departmentId) filters.push({ departmentId: dto.departmentId });
+    if (dto.channel) filters.push({ channel: dto.channel });
     if (dto.q) {
       filters.push({
         OR: [

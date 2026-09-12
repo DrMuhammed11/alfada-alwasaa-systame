@@ -30,6 +30,7 @@ class DashboardViewModel extends ChangeNotifier {
 
   String selectedNav = 'ALL';
   String selectedStatus = 'ALL';
+  bool isWebsiteFilter = false;
   final TextEditingController searchController = TextEditingController();
   final TextEditingController quickReplyController = TextEditingController();
   String? editingReplyId;
@@ -79,6 +80,11 @@ class DashboardViewModel extends ChangeNotifier {
     fetchCorrespondences();
   }
 
+  void toggleWebsiteFilter() {
+    isWebsiteFilter = !isWebsiteFilter;
+    fetchCorrespondences();
+  }
+
   Future<void> fetchMyTasks() async {
     try {
       myTasks = await ApiService().getMyTasks();
@@ -101,6 +107,7 @@ class DashboardViewModel extends ChangeNotifier {
       final res = await ApiService().getCorrespondencesPaginated(
         type: apiType,
         status: selectedStatus,
+        channel: isWebsiteFilter ? 'website' : null,
         search: query,
         page: 1,
         limit: 20,
@@ -138,6 +145,7 @@ class DashboardViewModel extends ChangeNotifier {
       final res = await ApiService().getCorrespondencesPaginated(
         type: selectedNav,
         status: selectedStatus,
+        channel: isWebsiteFilter ? 'website' : null,
         search: searchController.text.trim(),
         page: nextPage,
         limit: 20,

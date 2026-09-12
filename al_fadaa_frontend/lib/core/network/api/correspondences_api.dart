@@ -13,6 +13,7 @@ class CorrespondencesApi {
     String? type,
     String? status,
     String? priority,
+    String? channel,
     String? search,
     int page = 1,
     int limit = 20,
@@ -25,6 +26,7 @@ class CorrespondencesApi {
       if (type != null && type.isNotEmpty && type != 'ALL') queryParams['type'] = type;
       if (status != null && status.isNotEmpty && status != 'ALL') queryParams['status'] = status;
       if (priority != null && priority.isNotEmpty && priority != 'ALL') queryParams['priority'] = priority;
+      if (channel != null && channel.isNotEmpty && channel != 'ALL') queryParams['channel'] = channel;
       if (search != null && search.isNotEmpty) queryParams['q'] = search;
 
       final uri = Uri.parse(ApiConstants.correspondences).replace(queryParameters: queryParams);

@@ -10,9 +10,11 @@ class MasterListPane extends StatelessWidget {
   final int totalItems;
   final Correspondence? selectedItem;
   final String selectedStatus;
+  final bool isWebsiteFilter;
   final TextEditingController searchController;
   final ScrollController scrollController;
   final Function(String) onStatusChanged;
+  final VoidCallback onToggleWebsiteFilter;
   final VoidCallback onSearchSubmitted;
   final VoidCallback onRefresh;
   final Function(Correspondence) onSelectItem;
@@ -26,9 +28,11 @@ class MasterListPane extends StatelessWidget {
     required this.totalItems,
     required this.selectedItem,
     required this.selectedStatus,
+    required this.isWebsiteFilter,
     required this.searchController,
     required this.scrollController,
     required this.onStatusChanged,
+    required this.onToggleWebsiteFilter,
     required this.onSearchSubmitted,
     required this.onRefresh,
     required this.onSelectItem,
@@ -87,11 +91,12 @@ class MasterListPane extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // فلاتر الحالة
+                // فلاتر الحالة مع فلتر وارد الموقع السريع
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
+                      _buildWebsiteChip(),
                       _buildStatusChip('الكل', 'ALL'),
                       _buildStatusChip('مستلمة', 'RECEIVED'),
                       _buildStatusChip('قيد الإجراء', 'IN_PROGRESS'),
@@ -234,6 +239,32 @@ class MasterListPane extends StatelessWidget {
             onStatusChanged(value);
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildWebsiteChip() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: FilterChip(
+        avatar: const Text('🌐', style: TextStyle(fontSize: 11)),
+        label: const Text('وارد الموقع'),
+        selected: isWebsiteFilter,
+        selectedColor: const Color(0xFFD1FAE5),
+        backgroundColor: const Color(0xFFF1F5F9),
+        checkmarkColor: const Color(0xFF047857),
+        side: BorderSide(
+          color: isWebsiteFilter ? const Color(0xFF059669) : const Color(0xFFCBD5E1),
+          width: isWebsiteFilter ? 1.4 : 0.8,
+        ),
+        labelStyle: TextStyle(
+          color: isWebsiteFilter ? const Color(0xFF065F46) : const Color(0xFF475569),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onSelected: (_) => onToggleWebsiteFilter(),
       ),
     );
   }

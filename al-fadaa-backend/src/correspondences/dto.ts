@@ -144,6 +144,11 @@ export class CorrespondencesQueryDto extends PaginationDto {
   @IsUUID('4', { message: 'معرف القسم غير صالح' })
   departmentId?: string;
 
+  @ApiPropertyOptional({ description: 'تصفية بحسب قناة الوصول: website | email | fax | portal' })
+  @IsOptional()
+  @IsString()
+  channel?: string;
+
   @ApiPropertyOptional({
     description: 'بحث نصي في (الموضوع / الرقم المرجعي / اسم المرسل)',
     example: 'عرض سعر',

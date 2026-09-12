@@ -33,6 +33,11 @@ export interface TrackingResult {
   status: string;
   statusArabic: string;
   receivedAt: string;
+  reply?: {
+    refNumber?: string;
+    body: string;
+    sentAt?: string;
+  } | null;
 }
 
 /** ترجمة الحالات المؤسسية للمراسلة إلى عبارات مفهومة للعميل */
@@ -173,6 +178,7 @@ export async function trackInquiry(
         status: data.status,
         statusArabic: getClientStatusLabel(data.status),
         receivedAt: data.receivedAt,
+        reply: data.reply ?? null,
       },
     };
   } catch (err: unknown) {

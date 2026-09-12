@@ -868,6 +868,61 @@ export function Contact() {
                           );
                         })()}
                       </div>
+
+                      {/* عرض الرد الرسمي المعتمد من الشركة إن وُجد */}
+                      {trackingResult.reply && (
+                        <div className="pt-4 mt-2 border-t border-slate-200">
+                          <div className="rounded-2xl border border-emerald-300/80 bg-gradient-to-br from-emerald-50/70 to-white p-5 shadow-sm">
+                            <div className="flex items-center justify-between gap-3 mb-3 border-b border-emerald-100 pb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
+                                  <CheckCircle2 className="h-4 w-4" />
+                                </span>
+                                <div>
+                                  <span className="block text-xs font-black text-emerald-950">
+                                    الرد الرسمي المعتمد من الشركة
+                                  </span>
+                                  {trackingResult.reply.refNumber && (
+                                    <span className="block text-[10px] font-mono text-emerald-700" dir="ltr">
+                                      رقم القيد الصادر: {trackingResult.reply.refNumber}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {trackingResult.reply.sentAt && (
+                                <span className="text-[11px] font-medium text-slate-500">
+                                  {new Date(trackingResult.reply.sentAt).toLocaleDateString("ar-SA", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="rounded-xl bg-white/90 p-4 border border-emerald-100/70 text-slate-800 text-sm leading-relaxed whitespace-pre-wrap text-justify shadow-inner">
+                              {trackingResult.reply.body}
+                            </div>
+
+                            <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+                              <span>صدر هذا الرد رسمياً من الإدارة المختصة بشركة الفضاء الواسع.</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (trackingResult.reply?.body) {
+                                    navigator.clipboard.writeText(trackingResult.reply.body);
+                                    toast.success("تم نسخ نص الرد الرسمي");
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1 font-bold text-emerald-700 hover:text-emerald-900 transition"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>نسخ نص الرد</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

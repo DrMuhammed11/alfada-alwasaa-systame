@@ -672,7 +672,7 @@ export class CorrespondencesService {
     };
   }
 
-  /** استعلام عام عن حالة مراسلة برقمها المرجعي للعملاء */
+  /** استعلام عام عن حالة مراسلة برقمها المرجعي للعملاء وإظهار الرد الرسمي المعتمد إن وُجد */
   async trackPublicInquiry(refNumber: string) {
     const corr = await this.prisma.correspondence.findUnique({
       where: { refNumber: refNumber.trim().toUpperCase() },
@@ -681,16 +681,61 @@ export class CorrespondencesService {
         subject: true,
         status: true,
         receivedAt: true,
+        replies: {
+          where: {
+            OR: [
+              { status: ReplyStatus.APPROVED },
+              { sentAt: { not: null } },
+            ],
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            body: true,
+            sentAt: true,
+            approvedAt: true,
+            createdAt: true,
+          },
+        },
+        children: {
+          where: {
+            type: CorrespondenceType.OUTGOING,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            refNumber: true,
+            body: true,
+            sentAt: true,
+            createdAt: true,
+          },
+        },
       },
     });
     if (!corr) {
       throw new NotFoundException('لم يتم العثور على مراسلة بهذا الرقم المرجعي');
     }
+
+    const latestReply = corr.children[0]
+      ? {
+          refNumber: corr.children[0].refNumber,
+          body: corr.children[0].body,
+          sentAt: corr.children[0].sentAt ?? corr.children[0].createdAt,
+        }
+      : corr.replies[0]
+      ? {
+          refNumber: undefined,
+          body: corr.replies[0].body,
+          sentAt: corr.replies[0].sentAt ?? corr.replies[0].approvedAt ?? corr.replies[0].createdAt,
+        }
+      : null;
+
     return {
       refNumber: corr.refNumber,
       subject: corr.subject,
       status: corr.status,
       receivedAt: corr.receivedAt,
+      reply: latestReply,
     };
   }
 }
