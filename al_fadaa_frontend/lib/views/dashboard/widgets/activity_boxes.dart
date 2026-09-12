@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/referral_model.dart';
 import '../../../models/task_model.dart';
 
@@ -209,7 +210,7 @@ class ReferralsBox extends StatelessWidget {
                         if (r.dueDate != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            'الموعد النهائي: ${_formatDate(r.dueDate!)}',
+                            'الموعد النهائي: ${AppDateFormatter.formatListDate(r.dueDate!)}',
                             style: const TextStyle(fontSize: 10, color: Color(0xFFD97706), fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -217,8 +218,8 @@ class ReferralsBox extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    _formatDate(r.createdAt),
-                    style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                    AppDateFormatter.formatListDate(r.createdAt),
+                    style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -227,14 +228,6 @@ class ReferralsBox extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
 

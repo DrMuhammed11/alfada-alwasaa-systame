@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/correspondence_model.dart';
 
 class MasterListItemTile extends StatelessWidget {
@@ -20,7 +21,7 @@ class MasterListItemTile extends StatelessWidget {
     final statusColor = AppTheme.getStatusColor(item.status);
     final totalMessages = 1 + item.childrenCount + item.repliesCount;
     final displayDate = item.children.isNotEmpty
-        ? item.children.first.createdAt
+        ? (item.children.first.receivedAt ?? item.children.first.createdAt)
         : (item.receivedAt ?? item.createdAt);
     final snippet = (item.children.isNotEmpty && item.children.first.body != null && item.children.first.body!.trim().isNotEmpty)
         ? item.children.first.body!.trim().replaceAll('\n', ' ')
@@ -167,8 +168,12 @@ class MasterListItemTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _formatDate(displayDate),
-                        style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                        AppDateFormatter.formatListDate(displayDate),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -242,15 +247,5 @@ class MasterListItemTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    if (diff.inMinutes < 1) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }

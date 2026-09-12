@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/correspondence_model.dart';
 import 'attachments_preview.dart';
 import 'draft_action_bar.dart';
@@ -90,8 +91,8 @@ class MessageCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
-              style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+              AppDateFormatter.formatListDate(date),
+              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -276,12 +277,31 @@ class MessageCard extends StatelessWidget {
                   ),
                 ),
 
-                // التوقيت
-                Text(
-                  _formatDate(date),
-                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                // التوقيت الفعلي
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(200),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
+                      const SizedBox(width: 4),
+                      Text(
+                        AppDateFormatter.formatFullDateTime(date),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF334155),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
 
                 // زر النسخ
                 IconButton(
@@ -330,16 +350,6 @@ class MessageCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    if (diff.inMinutes < 1) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
 

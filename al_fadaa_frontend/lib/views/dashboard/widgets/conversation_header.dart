@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/correspondence_model.dart';
 import '../../referrals/referral_dialog.dart';
 import '../../tasks/create_task_dialog.dart';
@@ -167,15 +168,45 @@ class ConversationHeader extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  item.subject,
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    color: Color(0xFF64748B),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.subject,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          color: Color(0xFF64748B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F9FF),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFFBAE6FD), width: 0.8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.inbox_rounded, size: 11.5, color: Color(0xFF0284C7)),
+                          const SizedBox(width: 4),
+                          Text(
+                            AppDateFormatter.formatDetailedArrival(item.receivedAt ?? item.createdAt),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0369A1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

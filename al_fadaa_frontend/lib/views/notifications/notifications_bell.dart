@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../core/network/api_service.dart';
 import '../../core/network/app_events.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_date_formatter.dart';
 
 class NotificationsBell extends StatefulWidget {
   final Function(String correspondenceId)? onNotificationTap;
@@ -462,12 +463,7 @@ class NotificationsBellState extends State<NotificationsBell> {
   }
 
   String _formatTimeAgo(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inSeconds < 60) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
-    return '${date.year}/${date.month}/${date.day}';
+    return AppDateFormatter.formatListDate(date);
   }
 
   @override
