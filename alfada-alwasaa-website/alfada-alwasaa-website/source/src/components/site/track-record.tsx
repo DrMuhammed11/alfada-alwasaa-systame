@@ -1,33 +1,94 @@
 import Image from "next/image";
-import { Quote, Route, ClipboardCheck, RadioTower, Package, Ship } from "lucide-react";
+import { 
+  Quote, 
+  Route, 
+  ClipboardCheck, 
+  RadioTower, 
+  Package, 
+  Truck, 
+  CheckCircle2, 
+  ShieldCheck, 
+  ArrowLeft 
+} from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 
-const TRACK_ITEMS = [
+type TrackCaseStudy = {
+  id: string;
+  title: string;
+  tag: string;
+  scope: string;
+  metrics: string[];
+  src: string;
+  alt: string;
+  Icon: React.ElementType;
+};
+
+const TRACK_CASE_STUDIES: TrackCaseStudy[] = [
   {
-    caption: "أعمال الطرق والحفريات",
+    id: "roads",
+    title: "مشاريع شق وتعبيد الطرق وتسوية المسارات",
+    tag: "مقاولات وأعمال مدنية",
+    scope: "تنفيذ أعمال الحفريات الصخرية والردم والتسوية وفرش الطبقات الإسفلتية، مع تشييد العبّارات وتدعيم المنحدرات لضمان سلامة الطرق واستدامتها في التضاريس الوعرة.",
+    metrics: [
+      "مطابقة كود الطرق وأعلى المعايير والمواصفات الفنية",
+      "أسطول معدات ثقيلة متكامل وكوادر هندسية ومساحية ميدانية",
+    ],
     src: "/profile/track_roller.webp",
+    alt: "أعمال شق وتسوية وسفلتة الطرق",
     Icon: Route,
   },
   {
-    caption: "التخليص الجمركي",
+    id: "customs",
+    title: "التخليص الجمركي وإدارة سلاسل الإفراج المينائي",
+    tag: "تخليص وتجارة دولية",
+    scope: "إنهاء المعاملات الجمركية بكفاءة متقدمة للشحنات التجارية والمعدات الثقيلة عبر الموانئ والمنافذ، مع سرعة التدقيق والمطابقة النظامية لتفادي أي تأخير تشغيلي.",
+    metrics: [
+      "تسريع دورة الإفراج الجمركي وتقليص أوقات الانتظار",
+      "امتثال قانوني كامل وسلامة موثقة لكافة الواردات",
+    ],
     src: "/profile/track_ship.webp",
+    alt: "عمليات التخليص الجمركي وتفريغ الحاويات",
     Icon: ClipboardCheck,
   },
   {
-    caption: "خدمات الاتصالات والدعم الفني",
+    id: "telecom",
+    title: "تجهيز أبراج الاتصالات والصيانة الميدانية المستمرة",
+    tag: "اتصالات وبنية شبكية",
+    scope: "مسح وتشييد أبراج التغطية والهوائيات وربط خطوط المايكروويف، وتزويد المحطات بحلول الطاقة الهجينة والمولدات، مع توفير فرق طوارئ متخصصة للدعم الفني.",
+    metrics: [
+      "جاهزية تشغيلية واستجابة فنية طارئة على مدار 24/7",
+      "استقرار التغطية وشبكات البث في أصعب المواقع والمحافظات",
+    ],
     src: "/profile/track_tower.webp",
+    alt: "أبراج وهوائيات شبكات الاتصالات",
     Icon: RadioTower,
   },
   {
-    caption: "التوريدات والتموينات",
+    id: "supplies",
+    title: "سلاسل التوريدات الصناعية والتموين المتخصص",
+    tag: "توريدات وتموين عام",
+    scope: "تأمين المواد والمعدات وقطع الغيار والمستلزمات التشغيلية للمشاريع الكبرى والجهات الحيوية، وفق آليات فحص جودة صارمة وجداول إمداد منتظمة تحمي خطط العمل.",
+    metrics: [
+      "فحص واعتماد مطابق لأعلى معايير الجودة المعتمدة",
+      "التزام دقيق بالمواعيد وسلاسل إمداد مستدامة ومنضبطة",
+    ],
     src: "/profile/track_forklift.webp",
+    alt: "التوريدات والتموينات اللوجستية للمشاريع",
     Icon: Package,
   },
   {
-    caption: "الخدمات اللوجستية والشحن",
+    id: "logistics",
+    title: "الخدمات اللوجستية والشحن البري التكاملي",
+    tag: "لوجستيات وشحن متعدد الوسائط",
+    scope: "إدارة أساطيل النقل الثقيل لشحن البضائع والمعدات الضخمة والحاويات، وتحديد المسارات الآمنة مع أنظمة التتبع الحي والمتابعة المستمرة لكافة الشحنات حتى وجهتها.",
+    metrics: [
+      "أسطول نقل حديث مجهز بتقنيات التتبع المباشر والسلامة",
+      "تغطية جغرافية شاملة ومرونة عالية في نقل الحمولات الحساسة",
+    ],
     src: "/profile/track_truck.webp",
-    Icon: Ship,
+    alt: "شحن ونقل المعدات والبضائع",
+    Icon: Truck,
   },
 ];
 
@@ -38,7 +99,7 @@ export function TrackRecord() {
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <SectionHeading kicker="سابقة الأعمال" title="سابقة تُعتمد" />
           <Reveal delay={0.1}>
-            <div className="mb-2 flex items-start gap-3 rounded-2xl border border-gold/30 bg-white/70 p-4">
+            <div className="mb-2 flex items-start gap-3 rounded-2xl border border-gold/30 bg-white/70 p-4 shadow-sm backdrop-blur-sm">
               <Quote className="mt-1 h-6 w-6 shrink-0 text-gold" strokeWidth={2} />
               <p className="text-lg font-extrabold text-navy">
                 شواهد على الثقة والإنجاز
@@ -54,43 +115,107 @@ export function TrackRecord() {
           </Reveal>
         </div>
 
-        {/* Photo strip — the five fields from the profile with fully balanced responsive layout */}
-        <div className="mt-14 grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-5">
-          {TRACK_ITEMS.map((item, idx) => (
-            <Reveal 
-              key={item.caption} 
-              delay={idx * 0.08}
-              className={idx === 4 ? "col-span-2 sm:col-span-1 md:col-span-1 max-w-[280px] sm:max-w-none mx-auto w-full" : "w-full"}
-            >
-              <figure className="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-[0_15px_45px_-25px_rgba(10,52,83,0.35)] ring-1 ring-navy/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-25px_rgba(10,52,83,0.45)]">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={item.src}
-                    alt={item.caption}
-                    fill
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 20vw, 220px"
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/55 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </div>
-                <figcaption className="flex flex-1 flex-col items-center justify-center gap-2 px-2.5 py-3.5 text-center">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy text-gold-light transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker sm:h-11 sm:w-11">
-                    <item.Icon className="h-5 w-5" strokeWidth={1.8} />
-                  </span>
-                  <span className="text-[0.78rem] font-extrabold leading-5 text-navy sm:text-[0.82rem]">
-                    {item.caption}
-                  </span>
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
+        {/* Case Study Cards Grid — 5 documented fields in balanced layout */}
+        <div className="mt-14 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-6">
+          {TRACK_CASE_STUDIES.map((item, idx) => {
+            // Span 2 columns in a 6-col grid for the first 3 cards, and 3 columns for the bottom 2 cards
+            const colSpanClass =
+              idx < 3
+                ? "lg:col-span-2"
+                : "lg:col-span-3 md:col-span-1";
+
+            return (
+              <Reveal 
+                key={item.id} 
+                delay={idx * 0.08}
+                className={`${colSpanClass} w-full`}
+              >
+                <article className="group flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 bg-white shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_24px_55px_-15px_rgba(10,52,83,0.22)]">
+                  {/* Card Media Header */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/85 via-navy-darker/20 to-transparent" />
+
+                    {/* Top Floating Badge & Icon */}
+                    <div className="absolute inset-x-4 top-4 flex items-center justify-between z-10">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/90 text-gold-light shadow-md ring-1 ring-gold/30 backdrop-blur-md transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker">
+                        <item.Icon className="h-5 w-5" strokeWidth={1.8} />
+                      </span>
+                      <span className="rounded-full border border-gold/40 bg-navy-deep/85 px-3.5 py-1 text-xs font-bold text-gold-light shadow-md backdrop-blur-md">
+                        {item.tag}
+                      </span>
+                    </div>
+
+                    {/* Bottom overlay highlight title */}
+                    <div className="absolute bottom-3 start-4 end-4 z-10">
+                      <span className="text-[0.7rem] font-bold uppercase tracking-wider text-gold-light">
+                        مجال الإنجاز {idx + 1}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Body & Scope of Work */}
+                  <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-navy transition-colors duration-300 group-hover:text-gold leading-snug">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-slate-600 text-justify">
+                        {item.scope}
+                      </p>
+                    </div>
+
+                    {/* Metrics / Quality Benchmarks */}
+                    <div className="mt-6 border-t border-slate-100 pt-5">
+                      <span className="text-[0.72rem] font-black uppercase tracking-wider text-gold">
+                        شواهد الجودة والمعايير:
+                      </span>
+                      <ul className="mt-2.5 space-y-2">
+                        {item.metrics.map((metric, mIdx) => (
+                          <li 
+                            key={mIdx} 
+                            className="flex items-start gap-2 text-xs leading-5 text-slate-700 font-semibold"
+                          >
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                            <span>{metric}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
         </div>
 
-        {/* Closing strip — literal from the profile page */}
+        {/* High-Trust Closing Banner */}
         <Reveal delay={0.15}>
-          <p className="mt-12 text-center text-sm font-bold tracking-wide text-navy/60">
-            شريكك .. لاستقبال أوسع
-          </p>
+          <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-3xl border border-gold/30 bg-gradient-to-r from-navy to-navy-darker p-7 sm:p-9 text-white shadow-[0_20px_50px_-20px_rgba(10,52,83,0.5)]">
+            <div className="text-center sm:text-start">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-gold-light text-sm font-black mb-1">
+                <ShieldCheck className="h-5 w-5 text-gold" />
+                <span>شريكك .. لاستقبال أوسع</span>
+              </div>
+              <p className="text-base sm:text-lg font-bold text-white">
+                جاهزون لتقديم حلول تنفيذية متكاملة تضمن نجاح مشروعكم القادم بأعلى معايير الدقة
+              </p>
+            </div>
+            <a
+              href="#contact"
+              className="inline-flex shrink-0 items-center gap-2.5 rounded-2xl bg-gold px-6 py-3.5 text-sm font-black text-navy-darker shadow-lg transition-all duration-300 hover:bg-gold-light hover:scale-105 active:scale-95"
+            >
+              <span>طلب دراسة أو استشارة مشروع</span>
+              <ArrowLeft className="h-4 w-4" />
+            </a>
+          </div>
         </Reveal>
       </div>
     </section>

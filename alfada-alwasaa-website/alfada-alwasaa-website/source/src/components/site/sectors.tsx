@@ -157,6 +157,8 @@ export function Sectors() {
                       src={sector.photos[0].src}
                       alt={sector.photos[0].alt}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -169,6 +171,8 @@ export function Sectors() {
                       src={sector.photos[1].src}
                       alt={sector.photos[1].alt}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />

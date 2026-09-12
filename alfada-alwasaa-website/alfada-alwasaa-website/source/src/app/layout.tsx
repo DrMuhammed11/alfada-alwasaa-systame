@@ -1,10 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { SITE_CONFIG } from "@/config/site";
+
+export const viewport: Viewport = {
+  themeColor: "#0a3453",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+};
 
 const cairo = Cairo({
   variable: "--font-cairo",
