@@ -95,6 +95,40 @@ export class IncomingMailMatcherService {
       }
     }
 
+    // (د) توحيد رسائل نفس الشخص في محادثة واحدة (WhatsApp-style Threading):
+    // إذا لم يتطابق ما سبق وتوفر بريد المرسل، نربط الرسالة بآخر محادثة قائمة لنفس المرسل
+    if (!threadRoot && senderEmail && senderEmail.trim().length > 0) {
+      const normalizedEmail = senderEmail.trim().toLowerCase();
+      // البحث أولاً عن أحدث معاملة غير مغلقة/غير مؤرشفة لهذا الشخص
+      let matchedPersonCorr = await this.prisma.correspondence.findFirst({
+        where: {
+          senderEmail: { equals: normalizedEmail, mode: 'insensitive' },
+          status: { notIn: [CorrespondenceStatus.CLOSED, CorrespondenceStatus.ARCHIVED] },
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, parentId: true },
+      });
+
+      // إذا لم توجد معاملة نشطة، نطابق أحدث معاملة سابقة للمرسل لإعادة فتحها كمحادثة موحدة ومستمرة
+      if (!matchedPersonCorr) {
+        matchedPersonCorr = await this.prisma.correspondence.findFirst({
+          where: {
+            senderEmail: { equals: normalizedEmail, mode: 'insensitive' },
+          },
+          orderBy: { updatedAt: 'desc' },
+          select: { id: true, parentId: true },
+        });
+      }
+
+      if (matchedPersonCorr) {
+        const rootId = matchedPersonCorr.parentId ?? matchedPersonCorr.id;
+        threadRoot = await this.prisma.correspondence.findUnique({
+          where: { id: rootId },
+          select: { id: true, refNumber: true, subject: true, priority: true, status: true },
+        });
+      }
+    }
+
     return threadRoot;
   }
 }

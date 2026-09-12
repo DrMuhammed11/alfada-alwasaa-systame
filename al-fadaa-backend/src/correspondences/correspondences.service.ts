@@ -86,6 +86,139 @@ export class CorrespondencesService {
 
   /** تسجيل مراسلة واردة وصلت إلى بريد الشركة الموحد */
   async createIncoming(dto: CreateIncomingDto, user: AuthUser) {
+    const normalizedEmail = dto.senderEmail?.toLowerCase().trim();
+    const normalizedPhone = dto.senderPhone?.trim();
+
+    // فحص ما إذا كان هناك محادثة سابقة لنفس الشخص لدمج الرسائل في مكان واحد (محادثة واتساب)
+    let existingCorr: { id: string; parentId: string | null } | null = null;
+    if (normalizedEmail) {
+      existingCorr = await this.prisma.correspondence.findFirst({
+        where: {
+          senderEmail: { equals: normalizedEmail, mode: 'insensitive' },
+          status: { notIn: [CorrespondenceStatus.CLOSED, CorrespondenceStatus.ARCHIVED] },
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, parentId: true },
+      });
+      if (!existingCorr) {
+        existingCorr = await this.prisma.correspondence.findFirst({
+          where: { senderEmail: { equals: normalizedEmail, mode: 'insensitive' } },
+          orderBy: { updatedAt: 'desc' },
+          select: { id: true, parentId: true },
+        });
+      }
+    } else if (normalizedPhone) {
+      existingCorr = await this.prisma.correspondence.findFirst({
+        where: {
+          senderPhone: { equals: normalizedPhone },
+          status: { notIn: [CorrespondenceStatus.CLOSED, CorrespondenceStatus.ARCHIVED] },
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, parentId: true },
+      });
+      if (!existingCorr) {
+        existingCorr = await this.prisma.correspondence.findFirst({
+          where: { senderPhone: { equals: normalizedPhone } },
+          orderBy: { updatedAt: 'desc' },
+          select: { id: true, parentId: true },
+        });
+      }
+    }
+
+    // إذا وُجد خيط محادثة سابق لنفس الشخص، يتم إدراج الرسالة كتابعة ضمن نفس المحادثة (WhatsApp-style)
+    if (existingCorr) {
+      const rootId = existingCorr.parentId ?? existingCorr.id;
+      const rootCorr = await this.prisma.correspondence.findUnique({
+        where: { id: rootId },
+      });
+
+      if (rootCorr) {
+        const childCount = await this.prisma.correspondence.count({
+          where: { parentId: rootId },
+        });
+        let seq = childCount + 1;
+        let childRefNumber = `${rootCorr.refNumber}#${seq}`;
+        while (
+          await this.prisma.correspondence.findUnique({
+            where: { refNumber: childRefNumber },
+            select: { id: true },
+          })
+        ) {
+          seq++;
+          childRefNumber = `${rootCorr.refNumber}#${seq}`;
+        }
+
+        const childCorr = await this.prisma.correspondence.create({
+          data: {
+            refNumber: childRefNumber,
+            type: CorrespondenceType.INCOMING,
+            subject: dto.subject.trim(),
+            body: dto.body ?? '',
+            priority: dto.priority ?? rootCorr.priority,
+            status: CorrespondenceStatus.RECEIVED,
+            senderName: dto.senderName.trim(),
+            senderEmail: normalizedEmail,
+            senderPhone: dto.senderPhone,
+            receivedAt: dto.receivedAt ? new Date(dto.receivedAt) : new Date(),
+            createdById: user.id,
+            parentId: rootId,
+            messageId: dto.messageId ?? undefined,
+            channel: dto.channel ?? undefined,
+          },
+        });
+
+        // إعادة فتح الخيط إن كان منتهيًا أو مغلقًا وتحديث توقيت المحادثة
+        const shouldReopen = (
+          [
+            CorrespondenceStatus.SENT,
+            CorrespondenceStatus.CLOSED,
+            CorrespondenceStatus.ARCHIVED,
+          ] as CorrespondenceStatus[]
+        ).includes(rootCorr.status);
+
+        await this.prisma.correspondence.update({
+          where: { id: rootId },
+          data: {
+            ...(shouldReopen ? { status: CorrespondenceStatus.IN_PROGRESS, closedAt: null } : {}),
+            updatedAt: new Date(),
+          },
+        });
+
+        await this.audit.log({
+          action: AuditAction.CREATE,
+          entityType: 'Correspondence',
+          entityId: childCorr.id,
+          summary: `استلام رسالة جديدة ${childRefNumber} من «${childCorr.senderName}» ضمن محادثة ${rootCorr.refNumber}`,
+          metadata: {
+            parentId: rootId,
+            parentRefNumber: rootCorr.refNumber,
+            subject: childCorr.subject,
+            senderEmail: childCorr.senderEmail,
+            priority: childCorr.priority,
+            messageId: dto.messageId,
+          },
+        });
+
+        const gmUsers = await this.prisma.user.findMany({
+          where: { role: Role.GM, isActive: true },
+          select: { id: true },
+        });
+        const gmRecipients = gmUsers.map((g) => g.id);
+        if (gmRecipients.length > 0) {
+          await this.notifications.notifyIncomingRegistered({
+            recipientIds: gmRecipients,
+            refNumber: childRefNumber,
+            senderName: childCorr.senderName ?? '',
+            subject: childCorr.subject,
+            priority: childCorr.priority,
+            correspondenceId: childCorr.id,
+          });
+        }
+
+        return childCorr;
+      }
+    }
+
     const refNumber = await this.refNumbers.generate('INC');
     const corr = await this.prisma.correspondence.create({
       data: {
@@ -96,7 +229,7 @@ export class CorrespondencesService {
         priority: dto.priority ?? Priority.NORMAL,
         status: CorrespondenceStatus.RECEIVED,
         senderName: dto.senderName.trim(),
-        senderEmail: dto.senderEmail?.toLowerCase().trim(),
+        senderEmail: normalizedEmail,
         senderPhone: dto.senderPhone,
         receivedAt: dto.receivedAt ? new Date(dto.receivedAt) : new Date(),
         createdById: user.id,
