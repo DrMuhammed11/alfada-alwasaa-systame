@@ -65,6 +65,8 @@ export class PersistStage implements IngestionStage {
           childRefNumber = `${threadRoot.refNumber}#${seq}`;
         }
 
+        const actualEmailDate = parsed.date ? new Date(parsed.date) : new Date();
+
         const childCorr = await this.prisma.correspondence.create({
           data: {
             refNumber: childRefNumber,
@@ -76,7 +78,9 @@ export class PersistStage implements IngestionStage {
             senderName,
             senderEmail,
             channel: 'email',
-            receivedAt: parsed.date ? new Date(parsed.date) : new Date(),
+            receivedAt: actualEmailDate,
+            createdAt: actualEmailDate,
+            updatedAt: actualEmailDate,
             createdById: systemAuthUser.id,
             parentId: threadRoot.id,
             messageId: incomingMessageId ?? undefined,
@@ -102,7 +106,7 @@ export class PersistStage implements IngestionStage {
             data: {
               status: CorrespondenceStatus.IN_PROGRESS,
               closedAt: null,
-              updatedAt: new Date(),
+              updatedAt: actualEmailDate,
             },
           });
           await this.audit.log({
@@ -120,7 +124,7 @@ export class PersistStage implements IngestionStage {
         } else {
           await this.prisma.correspondence.update({
             where: { id: threadRoot.id },
-            data: { updatedAt: new Date() },
+            data: { updatedAt: actualEmailDate },
           });
         }
 
@@ -138,7 +142,9 @@ export class PersistStage implements IngestionStage {
           },
         });
       } else {
-        // 2. تسجيل جذر مراسلة واردة جديد
+        const actualEmailDate = parsed.date ? new Date(parsed.date) : new Date();
+
+        // 2. تسجيل جذر مراسلة واردة جديد مع تمرير تاريخ الاستلام الفعلي
         const corr = await this.correspondencesService.createIncoming(
           {
             subject,
@@ -148,6 +154,7 @@ export class PersistStage implements IngestionStage {
             priority: Priority.NORMAL,
             messageId: incomingMessageId ?? undefined,
             channel: 'email',
+            receivedAt: actualEmailDate.toISOString(),
           },
           systemAuthUser,
         );

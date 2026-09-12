@@ -19,9 +19,14 @@ class MasterListItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = AppTheme.getStatusColor(item.status);
     final totalMessages = 1 + item.childrenCount + item.repliesCount;
-    final snippet = (item.body != null && item.body!.trim().isNotEmpty)
-        ? item.body!.trim().replaceAll('\n', ' ')
-        : 'مراسلة واردة عبر البريد الإلكتروني';
+    final displayDate = item.children.isNotEmpty
+        ? item.children.first.createdAt
+        : (item.receivedAt ?? item.createdAt);
+    final snippet = (item.children.isNotEmpty && item.children.first.body != null && item.children.first.body!.trim().isNotEmpty)
+        ? item.children.first.body!.trim().replaceAll('\n', ' ')
+        : ((item.body != null && item.body!.trim().isNotEmpty)
+            ? item.body!.trim().replaceAll('\n', ' ')
+            : 'مراسلة واردة عبر البريد الإلكتروني');
 
     final senderDisplayName = (item.senderName != null && item.senderName!.trim().isNotEmpty)
         ? item.senderName!.trim()
@@ -162,7 +167,7 @@ class MasterListItemTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _formatDate(item.createdAt),
+                        _formatDate(displayDate),
                         style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
                       ),
                     ],

@@ -88,7 +88,7 @@ class ConversationTimeline extends StatelessWidget {
             ? child.senderName!
             : (item.senderName ?? 'العميل (رد إضافي)'),
         'senderEmail': child.senderEmail ?? item.senderEmail,
-        'date': child.createdAt,
+        'date': child.receivedAt ?? child.createdAt,
         'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : 'لا يوجد نص',
         'badge': isChildClient ? 'رسالة إضافية من العميل' : 'رسالة فرعية تابعة',
         'badgeColor': isChildClient ? const Color(0xFF0284C7) : const Color(0xFF059669),

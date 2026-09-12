@@ -148,6 +148,8 @@ export class CorrespondencesService {
           childRefNumber = `${rootCorr.refNumber}#${seq}`;
         }
 
+        const receivedDate = dto.receivedAt ? new Date(dto.receivedAt) : new Date();
+
         const childCorr = await this.prisma.correspondence.create({
           data: {
             refNumber: childRefNumber,
@@ -159,7 +161,9 @@ export class CorrespondencesService {
             senderName: dto.senderName.trim(),
             senderEmail: normalizedEmail,
             senderPhone: dto.senderPhone,
-            receivedAt: dto.receivedAt ? new Date(dto.receivedAt) : new Date(),
+            receivedAt: receivedDate,
+            createdAt: receivedDate,
+            updatedAt: receivedDate,
             createdById: user.id,
             parentId: rootId,
             messageId: dto.messageId ?? undefined,
@@ -167,7 +171,7 @@ export class CorrespondencesService {
           },
         });
 
-        // إعادة فتح الخيط إن كان منتهيًا أو مغلقًا وتحديث توقيت المحادثة
+        // إعادة فتح الخيط إن كان منتهيًا أو مغلقًا وتحديث توقيت المحادثة ليعكس التوقيت الفعلي للرسالة
         const shouldReopen = (
           [
             CorrespondenceStatus.SENT,
@@ -180,7 +184,7 @@ export class CorrespondencesService {
           where: { id: rootId },
           data: {
             ...(shouldReopen ? { status: CorrespondenceStatus.IN_PROGRESS, closedAt: null } : {}),
-            updatedAt: new Date(),
+            updatedAt: receivedDate,
           },
         });
 
@@ -220,6 +224,8 @@ export class CorrespondencesService {
     }
 
     const refNumber = await this.refNumbers.generate('INC');
+    const receivedDate = dto.receivedAt ? new Date(dto.receivedAt) : new Date();
+
     const corr = await this.prisma.correspondence.create({
       data: {
         refNumber,
@@ -231,7 +237,9 @@ export class CorrespondencesService {
         senderName: dto.senderName.trim(),
         senderEmail: normalizedEmail,
         senderPhone: dto.senderPhone,
-        receivedAt: dto.receivedAt ? new Date(dto.receivedAt) : new Date(),
+        receivedAt: receivedDate,
+        createdAt: receivedDate,
+        updatedAt: receivedDate,
         createdById: user.id,
         messageId: dto.messageId ?? undefined,
         channel: dto.channel ?? undefined,
