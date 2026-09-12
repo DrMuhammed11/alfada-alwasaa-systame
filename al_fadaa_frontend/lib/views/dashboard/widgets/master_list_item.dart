@@ -105,6 +105,32 @@ class MasterListItemTile extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            if (item.channel == 'website') ...[
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(3),
+                                  border: Border.all(color: const Color(0xFFA7F3D0), width: 0.8),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.language_rounded, size: 10, color: Color(0xFF059669)),
+                                    SizedBox(width: 2.5),
+                                    Text(
+                                      'الموقع',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF059669),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             if (item.isOverdue) ...[
                               const SizedBox(width: 4),
                               Container(

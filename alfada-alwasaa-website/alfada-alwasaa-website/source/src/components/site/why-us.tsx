@@ -5,10 +5,6 @@ export function WhyUs() {
 
   return (
     <section id="why" className="relative overflow-hidden bg-white py-16 sm:py-20">
-      <div
-        aria-hidden
-        className="corner-ribbon start-0 top-0 bg-[linear-gradient(135deg,var(--color-gold)_0%,var(--color-gold)_30%,transparent_30.5%)] opacity-70"
-      />
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-8">
         {/* "لماذا نحن؟" visual echoing the profile page */}
         <Reveal>

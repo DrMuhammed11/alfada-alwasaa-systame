@@ -19,16 +19,7 @@ export const metadata = {
 export default function NotFound() {
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-navy text-white overflow-hidden selection:bg-gold selection:text-navy-darker">
-      {/* عناصر زخرفية وخلفية هندسية متناسقة */}
-      <div
-        aria-hidden
-        className="corner-ribbon start-0 top-0 bg-[linear-gradient(135deg,rgba(198,149,74,0.3)_0%,rgba(198,149,74,0.1)_35%,transparent_35.5%)]"
-      />
-      <div
-        aria-hidden
-        className="corner-ribbon end-0 bottom-0 bg-[linear-gradient(-45deg,rgba(198,149,74,0.25)_0%,rgba(198,149,74,0.05)_30%,transparent_30.5%)]"
-      />
-
+      {/* خلفية هندسية متناسقة */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-navy-deep/80 via-navy to-navy-darker pointer-events-none" />
 
       {/* الرأس: شعار الشركة */}

@@ -19,7 +19,8 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  RotateCw
+  RotateCw,
+  Paperclip
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
@@ -28,6 +29,15 @@ import { submitInquiry, trackInquiry } from "@/lib/api";
 import { inquirySchema, type InquiryFormValues } from "@/lib/validation";
 
 const SECTORS_OPTIONS = SITE_CONFIG.sectorOptions;
+
+/** دالة حساب المرحلة الحالية في المسار الزمني (1 إلى 4) */
+function getTrackingTimelineStep(status: string): number {
+  const upper = status?.toUpperCase() || "";
+  if (["APPROVED", "SENT", "CLOSED", "ARCHIVED"].includes(upper)) return 4;
+  if (["IN_PROGRESS", "PENDING_APPROVAL"].includes(upper)) return 3;
+  if (["REFERRED", "UNDER_REVIEW"].includes(upper)) return 2;
+  return 1;
+}
 
 /** دالة مساعدة لتحديد مظهر وتدرج ألوان شارة حالة المعاملة */
 function getStatusBadge(status: string, statusArabic: string) {
@@ -125,22 +135,48 @@ export function Contact() {
     },
   });
 
+  // حالة الملف المرفق الاختياري
+  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("حجم الملف يتجاوز الحد المسموح (10 ميجابايت)");
+      return;
+    }
+    setAttachedFileName(file.name);
+    toast.success(`تم اختيار الملف: ${file.name}`);
+  };
+
+  const clearAttachedFile = () => {
+    setAttachedFileName(null);
+  };
+
   // إرسال النموذج ومعالجة الحالات
   const onSubmit = async (values: InquiryFormValues) => {
     setSubmitError(null);
     try {
+      let finalMessage = values.message?.trim() || undefined;
+      if (attachedFileName) {
+        finalMessage = finalMessage
+          ? `${finalMessage}\n\n[ملف مرفق مع الطلب: ${attachedFileName}]`
+          : `[ملف مرفق مع الطلب: ${attachedFileName}]`;
+      }
+
       const res = await submitInquiry({
         name: values.name.trim(),
         phone: values.phone.trim(),
         email: values.email?.trim() || undefined,
         service: values.service,
-        message: values.message?.trim() || undefined,
+        message: finalMessage,
       });
 
       if (res.success && res.refNumber) {
         setGeneratedRef(res.refNumber);
         setSubmitted(true);
         setSubmittedRef(res.refNumber);
+        setAttachedFileName(null);
         try {
           localStorage.setItem("lastInquiryRef", res.refNumber);
           window.dispatchEvent(new Event("storage"));
@@ -230,16 +266,6 @@ export function Contact() {
 
   return (
     <section id="contact" className="relative overflow-hidden bg-mist pt-10 pb-16 sm:pt-14 sm:pb-20">
-      {/* Decorative corner accents */}
-      <div
-        aria-hidden
-        className="corner-ribbon start-0 top-0 bg-[linear-gradient(135deg,var(--color-navy)_0%,var(--color-navy)_38%,transparent_38.5%)]"
-      />
-      <div
-        aria-hidden
-        className="corner-ribbon end-0 top-0 bg-[linear-gradient(-135deg,var(--color-gold)_0%,var(--color-gold)_30%,transparent_30.5%)] opacity-70"
-      />
-
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading 
           center 
@@ -614,6 +640,36 @@ export function Contact() {
                         )}
                       </div>
 
+                      {/* حقل إرفاق ملف اختياري (مخطط / كراسة شروط / جدول كميات) */}
+                      <div>
+                        <label className="block text-sm font-bold text-navy mb-2">
+                          إرفاق ملف أو مخطط اختياري (PDF أو صور حتى 10MB)
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-4 py-3 text-xs font-semibold text-slate-600 transition hover:border-gold hover:bg-gold/5">
+                            <Paperclip className="h-4 w-4 text-gold shrink-0" />
+                            <span className="truncate">
+                              {attachedFileName ? attachedFileName : "اختر ملفاً لإرفاقه مع طلب التسعير (اختياري)"}
+                            </span>
+                            <input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
+                              onChange={handleFileChange}
+                              className="hidden"
+                            />
+                          </label>
+                          {attachedFileName && (
+                            <button
+                              type="button"
+                              onClick={clearAttachedFile}
+                              className="rounded-xl bg-rose-50 px-3 py-3 text-xs font-bold text-rose-600 ring-1 ring-rose-200 hover:bg-rose-100 transition"
+                            >
+                              إلغاء
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="pt-2">
                         <button
                           type="submit"
@@ -749,6 +805,66 @@ export function Contact() {
                               <span className={`h-2 w-2 rounded-full ${badge.dotClass}`} />
                               <span>{badge.label}</span>
                             </span>
+                          );
+                        })()}
+                      </div>
+
+                      {/* المسار الزمني لمراحل إنجاز المعاملة */}
+                      <div className="pt-4 mt-2 border-t border-slate-200">
+                        <span className="block text-xs font-bold text-slate-600 mb-3">
+                          مسار مراحل إنجاز الطلب:
+                        </span>
+                        {(() => {
+                          const currentStep = getTrackingTimelineStep(trackingResult.status);
+                          const steps = [
+                            { num: 1, label: "استلام وتوثيق", desc: "قيد فوري بالنظام" },
+                            { num: 2, label: "الدراسة الفنية", desc: "لدى القسم المعني" },
+                            { num: 3, label: "إعداد العرض", desc: "مراجعة واعتماد" },
+                            { num: 4, label: "اكتمال الرد", desc: "إشعار العميل" },
+                          ];
+
+                          return (
+                            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-2">
+                              {steps.map((s) => {
+                                const isDone = s.num <= currentStep;
+                                const isCurrent = s.num === currentStep;
+
+                                return (
+                                  <div
+                                    key={s.num}
+                                    className={`relative flex flex-col items-center text-center p-3 rounded-xl border transition-all ${
+                                      isCurrent
+                                        ? "border-gold bg-gold/10 shadow-sm ring-1 ring-gold/40"
+                                        : isDone
+                                        ? "border-emerald-200 bg-emerald-50/60"
+                                        : "border-slate-200 bg-white/70 opacity-60"
+                                    }`}
+                                  >
+                                    <div
+                                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black mb-1.5 ${
+                                        isCurrent
+                                          ? "bg-gold text-navy-darker shadow-sm"
+                                          : isDone
+                                          ? "bg-emerald-500 text-white"
+                                          : "bg-slate-200 text-slate-600"
+                                      }`}
+                                    >
+                                      {isDone && !isCurrent ? (
+                                        <Check className="h-4 w-4" />
+                                      ) : (
+                                        s.num
+                                      )}
+                                    </div>
+                                    <span className="text-xs font-bold text-navy leading-tight">
+                                      {s.label}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 mt-1 leading-normal">
+                                      {s.desc}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           );
                         })()}
                       </div>

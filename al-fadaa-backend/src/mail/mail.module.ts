@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { MailRetryService } from './mail-retry.service';
 import { IncomingMailService } from './incoming-mail.service';
@@ -18,7 +18,7 @@ import {
 } from './pipeline';
 
 @Module({
-  imports: [CorrespondencesModule],
+  imports: [forwardRef(() => CorrespondencesModule)],
   controllers: [MailController],
   providers: [
     MailService,

@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CorrespondencesController } from './correspondences.controller';
 import { CorrespondencesService } from './correspondences.service';
 import { CorrespondencesQueryService } from './correspondences-query.service';
 import { RefNumberService } from './ref-number.service';
+import { MailModule } from '../mail/mail.module';
 
 /**
  * وحدة المراسلات — تُصدِّر خدماتها لأن بقية الوحدات
@@ -12,6 +13,7 @@ import { RefNumberService } from './ref-number.service';
  *  - RefNumberService            : توليد الأرقام المرجعية
  */
 @Module({
+  imports: [forwardRef(() => MailModule)],
   controllers: [CorrespondencesController],
   providers: [CorrespondencesService, CorrespondencesQueryService, RefNumberService],
   exports: [CorrespondencesService, CorrespondencesQueryService, RefNumberService],

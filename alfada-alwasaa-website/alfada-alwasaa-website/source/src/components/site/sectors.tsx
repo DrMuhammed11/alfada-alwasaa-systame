@@ -100,12 +100,6 @@ export function Sectors() {
 
   return (
     <section id="sectors" className="relative overflow-hidden bg-mist py-24">
-      {/* Background accents */}
-      <div
-        aria-hidden
-        className="corner-ribbon start-0 top-0 bg-[linear-gradient(135deg,var(--color-navy)_0%,var(--color-navy)_38%,transparent_38.5%)] opacity-80"
-      />
-
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <SectionHeading center kicker="قطاعاتنا" title="حلول متكاملة ضمن منظومة واحدة" />

@@ -68,14 +68,6 @@ section[id] {
   transform: translateX(50%);
 }
 
-/* Subtle diagonal corner ribbons echoing the profile page frames */
-.corner-ribbon {
-  pointer-events: none;
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  opacity: 0.9;
-}
 
 /* Fine dotted pattern used on hero overlays */
 .dot-grid {

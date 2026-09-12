@@ -102,7 +102,7 @@ export class MailService implements OnModuleInit {
       to: opts.to,
       subject: opts.subject,
       text: opts.body,
-      html: htmlBody,
+      html: opts.html ?? htmlBody,
     };
     if (opts.messageId) mailOptions.messageId = opts.messageId;
     if (opts.inReplyTo) mailOptions.inReplyTo = opts.inReplyTo;

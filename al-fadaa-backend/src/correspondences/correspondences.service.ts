@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   Optional,
@@ -8,6 +10,7 @@ import {
   AuditAction,
   CorrespondenceStatus,
   CorrespondenceType,
+  NotificationType,
   Prisma,
   Priority,
   ReferralStatus,
@@ -47,6 +50,7 @@ import {
   USER_BRIEF,
 } from './correspondences.constants';
 import { CorrespondencesQueryService } from './correspondences-query.service';
+import { MailService } from '../mail/mail.service';
 
 export {
   USER_BRIEF,
@@ -68,6 +72,7 @@ export class CorrespondencesService {
     @Optional() private readonly outbox?: OutboxService,
     @Optional() private readonly outboxProcessor?: OutboxProcessor,
     @Optional() queryService?: CorrespondencesQueryService,
+    @Optional() @Inject(forwardRef(() => MailService)) private readonly mail?: MailService,
   ) {
     this.queryService = queryService ?? new CorrespondencesQueryService(this.prisma);
   }
@@ -522,6 +527,7 @@ export class CorrespondencesService {
       ? `الخدمة المطلوبة: ${dto.service.trim()}\n\nتفاصيل الطلب:\n${dto.message.trim()}`
       : `طلب وارد عبر الموقع الإلكتروني بخصوص: ${dto.service.trim()}`;
 
+    // 1. إنشاء المراسلة الواردة الرسمية
     const corr = await this.createIncoming(
       {
         subject,
@@ -534,6 +540,130 @@ export class CorrespondencesService {
       },
       systemUser as AuthUser,
     );
+
+    // 2. التوزيع الآلي الذكي على القسم المختص
+    let targetDeptCode = 'CS'; // الافتراضي: قسم خدمة العملاء والردود
+    const serviceLower = dto.service.toLowerCase();
+    if (
+      serviceLower.includes('اتصال') ||
+      serviceLower.includes('انترنت') ||
+      serviceLower.includes('إنترنت') ||
+      serviceLower.includes('شبك') ||
+      serviceLower.includes('تقني') ||
+      serviceLower.includes('مايكروويف')
+    ) {
+      targetDeptCode = 'IT'; // قسم تقنية المعلومات
+    } else if (
+      serviceLower.includes('مقاول') ||
+      serviceLower.includes('طرق') ||
+      serviceLower.includes('جسور') ||
+      serviceLower.includes('حفريات') ||
+      serviceLower.includes('إنشائ') ||
+      serviceLower.includes('هندس')
+    ) {
+      targetDeptCode = 'ENG'; // القسم الهندسي
+    }
+
+    const targetDept = await this.prisma.department.findUnique({
+      where: { code: targetDeptCode },
+      select: { id: true, name: true, code: true, managerId: true },
+    });
+
+    if (targetDept) {
+      // ربط المراسلة بالقسم وتحديث حالتها
+      await this.prisma.correspondence.update({
+        where: { id: corr.id },
+        data: {
+          departmentId: targetDept.id,
+          status: targetDept.managerId ? CorrespondenceStatus.REFERRED : CorrespondenceStatus.RECEIVED,
+        },
+      });
+
+      // إذا وُجد مدير للقسم، إنشاء إحالة رسمية تلقائية وإشعار فوري
+      if (targetDept.managerId) {
+        await this.prisma.referral.create({
+          data: {
+            correspondenceId: corr.id,
+            fromUserId: systemUser.id,
+            toUserId: targetDept.managerId,
+            note: `إحالة آلية فورية لطلب عرض سعر / استشارة وارد من الموقع الإلكتروني بخصوص: ${dto.service.trim()}`,
+            status: ReferralStatus.OPEN,
+          },
+        });
+
+        await this.notifications.notify({
+          userId: targetDept.managerId,
+          type: NotificationType.NEW_REFERRAL,
+          title: `طلب موقع جديد: ${dto.service.trim()}`,
+          body: `ورد طلب عرض سعر من ${dto.name.trim()} (${dto.phone.trim()}). رُقم القيد: ${corr.refNumber}`,
+          entityId: corr.id,
+          entityType: 'Correspondence',
+        });
+      }
+    }
+
+    // 3. إرسال بريد توثيقي فوري للعميل عند توفر بريده الإلكتروني
+    if (this.mail && dto.email?.trim()) {
+      const clientEmail = dto.email.trim().toLowerCase();
+      const trackingUrl = 'https://www.alfadaalwasaa.com/#contact';
+      const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>شركة الفضاء الواسع — إشعار استلام طلب</title>
+</head>
+<body style="margin: 0; padding: 24px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; color: #1e293b; direction: rtl; text-align: right;">
+  <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(10,52,83,0.1); border: 1px solid #e2e8f0;">
+    <div style="background: linear-gradient(135deg, #051e31 0%, #0a3453 100%); padding: 32px 24px; text-align: center; border-bottom: 4px solid #c6954a;">
+      <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800;">شركة الفضاء الواسع</h1>
+      <p style="margin: 6px 0 0; color: #dcb26b; font-size: 13px; font-weight: 600; letter-spacing: 2px;">AL-FADA AL-WASAA</p>
+      <div style="margin-top: 14px; display: inline-block; background: rgba(198,149,74,0.15); border: 1px solid rgba(198,149,74,0.4); border-radius: 20px; padding: 4px 16px;">
+        <span style="color: #ffffff; font-size: 12px; font-weight: 700;">إشعار استلام وتوثيق معاملة رسمية</span>
+      </div>
+    </div>
+    <div style="padding: 32px 28px;">
+      <p style="font-size: 16px; font-weight: 700; color: #0a3453; margin-top: 0;">عزيزنا العميل: ${dto.name.trim()}</p>
+      <p style="font-size: 14px; line-height: 1.8; color: #334155;">
+        نشكر تواصلكم مع <strong>شركة الفضاء الواسع لخدمات الاتصالات والمقاولات</strong>. نفيدكم بأنه تم استلام وتوثيق طلبكم رسمياً في نظام إدارة المراسلات المعتمد وإحالته للإدارة الفنية المختصة لدراسته وإعداد العرض المناسب.
+      </p>
+      <div style="background: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1; padding: 20px; margin: 24px 0; text-align: center;">
+        <span style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">الرقم المرجعي المعتمد لمعاملتكم</span>
+        <span style="display: inline-block; font-size: 24px; font-weight: 900; color: #0a3453; letter-spacing: 1px; font-family: monospace; background: #e2e8f0; padding: 6px 18px; border-radius: 8px; border: 1px dashed #94a3b8;">
+          ${corr.refNumber}
+        </span>
+        <div style="margin-top: 14px; font-size: 13px; color: #475569;">
+          <div><strong>الخدمة المطلوبة:</strong> ${dto.service.trim()}</div>
+          <div style="margin-top: 4px;"><strong>حالة الطلب:</strong> <span style="color: #0284c7; font-weight: 700;">محالة — قيد الدراسة والتسعير لدى الإدارة المختصة</span></div>
+        </div>
+      </div>
+      <div style="text-align: center; margin: 30px 0 10px;">
+        <a href="${trackingUrl}" target="_blank" style="display: inline-block; background: #c6954a; color: #051e31; text-decoration: none; padding: 14px 32px; border-radius: 30px; font-weight: 800; font-size: 14px; box-shadow: 0 4px 14px rgba(198,149,74,0.4);">
+          متابعة حالة المعاملة عبر الموقع
+        </a>
+      </div>
+      <p style="text-align: center; font-size: 11px; color: #94a3b8; margin-top: 8px;">
+        يمكنكم الاستعلام في أي وقت باستخدام رقم القيد أعلاه
+      </p>
+    </div>
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 24px; text-align: center; font-size: 12px; color: #64748b; line-height: 1.6;">
+      <div>شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة</div>
+      <div style="margin-top: 4px;">هاتف: +967 777 472 071 | بريد: info@alfadaalwasaa.com</div>
+      <div style="margin-top: 8px; font-size: 11px; color: #94a3b8;">هذه رسالة آلية تم توليدها بواسطة نظام المراسلات الإلكتروني — يرجى عدم الرد المباشر على هذا البريد.</div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      this.mail.sendReply({
+        to: clientEmail,
+        subject: `تأكيد استلام طلبكم برقم قيد [${corr.refNumber}] — شركة الفضاء الواسع`,
+        body: `عزيزنا ${dto.name.trim()}، تم استلام وتوثيق طلبكم بخصوص (${dto.service.trim()}) بنجاح برقم قيد معتمد: ${corr.refNumber}. يمكنكم المتابعة عبر: ${trackingUrl}`,
+        refNumber: corr.refNumber,
+        html,
+      }).catch((e) => {
+        console.error('فشل إرسال بريد التأكيد التلقائي للعميل:', e);
+      });
+    }
 
     return {
       success: true,
