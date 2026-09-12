@@ -24,6 +24,7 @@ export class StageError extends Error {
 export interface IngestionContext {
   uid: number;
   source?: Buffer;
+  internalDate?: Date;
   parsed?: ParsedMail;
   senderEmail?: string;
   senderName?: string;

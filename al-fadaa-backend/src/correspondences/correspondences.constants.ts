@@ -7,7 +7,7 @@ export const LIST_INCLUDE = {
   department: { select: { id: true, name: true } },
   createdBy: { select: { id: true, name: true } },
   children: {
-    select: { id: true, refNumber: true, createdAt: true, body: true },
+    select: { id: true, refNumber: true, createdAt: true, receivedAt: true, body: true },
     orderBy: { createdAt: 'desc' },
     take: 1,
   },

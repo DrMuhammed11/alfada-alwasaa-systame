@@ -311,11 +311,12 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
 
         // 2. جلب الرسائل بعد آخر UID معالج فقط
         const range = `${lastUid + 1}:*`;
-        const messageList: { uid: number; source: Buffer }[] = [];
+        const messageList: { uid: number; source: Buffer; internalDate?: Date }[] = [];
 
-        for await (const m of client.fetch(range, { uid: true, source: true }, { uid: true })) {
+        for await (const m of client.fetch(range, { uid: true, source: true, internalDate: true }, { uid: true })) {
           if (m.source && m.uid && m.uid > lastUid) {
-            messageList.push({ uid: m.uid, source: m.source });
+            const internalDate = m.internalDate ? new Date(m.internalDate) : undefined;
+            messageList.push({ uid: m.uid, source: m.source, internalDate });
           }
         }
 
@@ -336,6 +337,7 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
             const ctx: IngestionContext = {
               uid: item.uid,
               source: item.source,
+              internalDate: item.internalDate,
               systemUserId: this.systemUserId!,
               mailbox: 'INBOX',
               stagesExecuted: [],

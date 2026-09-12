@@ -65,7 +65,7 @@ export class PersistStage implements IngestionStage {
           childRefNumber = `${threadRoot.refNumber}#${seq}`;
         }
 
-        const actualEmailDate = parsed.date ? new Date(parsed.date) : new Date();
+        const actualEmailDate = ctx.internalDate || (parsed.date ? new Date(parsed.date) : new Date());
 
         const childCorr = await this.prisma.correspondence.create({
           data: {
@@ -142,7 +142,7 @@ export class PersistStage implements IngestionStage {
           },
         });
       } else {
-        const actualEmailDate = parsed.date ? new Date(parsed.date) : new Date();
+        const actualEmailDate = ctx.internalDate || (parsed.date ? new Date(parsed.date) : new Date());
 
         // 2. تسجيل جذر مراسلة واردة جديد مع تمرير تاريخ الاستلام الفعلي
         const corr = await this.correspondencesService.createIncoming(
