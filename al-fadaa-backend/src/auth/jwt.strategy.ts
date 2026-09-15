@@ -20,7 +20,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get<string>('JWT_SECRET') ?? 'alfadaa-dev-secret',
+      secretOrKey: config.getOrThrow<string>('JWT_SECRET'),
+      issuer: config.get<string>('JWT_ISSUER') || 'alfadaa-api',
+      audience: config.get<string>('JWT_AUDIENCE') || 'alfadaa-app',
     });
   }
 

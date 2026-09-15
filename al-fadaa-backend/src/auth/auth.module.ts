@@ -12,9 +12,11 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') ?? 'alfadaa-dev-secret',
+        secret: config.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '12h') as JwtSignOptions['expiresIn'],
+          issuer: config.get<string>('JWT_ISSUER') || 'alfadaa-api',
+          audience: config.get<string>('JWT_AUDIENCE') || 'alfadaa-app',
         },
       }),
     }),

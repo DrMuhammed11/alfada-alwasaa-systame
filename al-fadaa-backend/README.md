@@ -87,8 +87,10 @@ npm run start:dev
 | `DATABASE_URL` | رابط PostgreSQL (**بدون علامات اقتباس** — Prisma لا يقبلها) | — |
 | `PORT` | منفذ الخادم | 3000 |
 | `CORS_ORIGIN` | النطاقات المسموحة مفصولة بفواصل — **في الإنتاج: فارغ أو `*` يمنع التشغيل** | `localhost:3000,3001,5000` |
-| `JWT_SECRET` | سر التوقيع — **إلزامي تغييره في الإنتاج** | — |
-| `JWT_EXPIRES_IN` | مدة صلاحية الرمز | `12h` |
+| `JWT_SECRET` | سر التوقيع — **إلزامي (يفشل التشغيل عند غيابه)** | — |
+| `JWT_EXPIRES_IN` | مدة صلاحية الرمز — **إلزامي** | `12h` |
+| `JWT_ISSUER` | جهة إصدار الرمز المعتمدة | `alfadaa-api` |
+| `JWT_AUDIENCE` | الجمهور المستهدف للرمز | `alfadaa-app` |
 | `MAIL_DRIVER` | `console` (تطوير) أو `smtp` (إرسال حقيقي) | `console` |
 | `MAIL_FROM` | البريد الرسمي الموحد | `info@al-fadaa.com` |
 | `SMTP_HOST/PORT/USER/PASS` | بيانات خادم بريد الشركة (مع `MAIL_DRIVER=smtp`) | فارغة |

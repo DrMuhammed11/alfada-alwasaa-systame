@@ -21,10 +21,15 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
 
+import { validateEnv } from './common/config/env.validation';
+
 @Module({
   imports: [
-    // متغيرات البيئة متاحة عالميًا
-    ConfigModule.forRoot({ isGlobal: true }),
+    // متغيرات البيئة متاحة عالميًا مع التحقق الصارم من صحتها واكتمالها
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validateEnv,
+    }),
     // وحدات عامة (Global)
     PrismaModule,
     AuditModule,
