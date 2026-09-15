@@ -23,6 +23,7 @@ export interface InquiryPayload {
 export interface InquiryResponse {
   success: boolean;
   refNumber?: string;
+  trackingToken?: string;
   message: string;
   error?: string;
 }
@@ -119,6 +120,7 @@ export async function submitInquiry(
     return {
       success: true,
       refNumber: data.refNumber,
+      trackingToken: data.trackingToken,
       message: data.message || "تم استلام طلبكم بنجاح",
     };
   } catch (err: unknown) {
@@ -144,21 +146,21 @@ export async function submitInquiry(
   }
 }
 
-/** تتبع حالة طلب أو معاملة برقمها المرجعي الرسمي */
+/** تتبع حالة طلب أو معاملة برقمها المرجعي الرسمي ورمز التتبع الآمن */
 export async function trackInquiry(
-  refNumber: string
+  refNumber: string,
+  token?: string
 ): Promise<{ success: boolean; data?: TrackingResult; error?: string }> {
   try {
     const cleanRef = refNumber.trim().toUpperCase();
-    const res = await fetchWithTimeout(
-      `${API_BASE_URL}/correspondences/public/track/${encodeURIComponent(
-        cleanRef
-      )}`,
-      {
-        method: "GET",
-        headers: { Accept: "application/json" },
-      }
-    );
+    const cleanToken = token?.trim() || "";
+    const url = `${API_BASE_URL}/correspondences/public/track/${encodeURIComponent(cleanRef)}${
+      cleanToken ? `?token=${encodeURIComponent(cleanToken)}` : ""
+    }`;
+    const res = await fetchWithTimeout(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
 
     const data = await res.json().catch(() => ({}));
 

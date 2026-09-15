@@ -220,6 +220,9 @@ model Correspondence {
   // معرّف رأس البريد الإلكتروني للمطابقة الدقيقة لسلسلة المحادثات ومكافحة التكرار
   messageId     String?          @unique
 
+  // رمز تتبع عشوائي مشفر للمراسلات العامة لمنع تخمين أرقام القيد ومعاينة الردود دون إذن
+  publicTrackingToken String?    @unique
+
   // ربط بنيوي مباشر بين الصادر والرد الذي وُلد منه (بدل مقارنة النصوص)
   sourceReplyId String?
   sourceReply   Reply?           @relation("OutgoingSourceReply", fields: [sourceReplyId], references: [id], onDelete: SetNull)

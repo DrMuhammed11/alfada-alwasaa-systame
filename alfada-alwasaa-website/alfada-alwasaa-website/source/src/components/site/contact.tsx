@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -179,6 +179,10 @@ export function Contact() {
         setAttachedFileName(null);
         try {
           localStorage.setItem("lastInquiryRef", res.refNumber);
+          if (res.trackingToken) {
+            localStorage.setItem("lastTrackingToken", res.trackingToken);
+            setTrackTokenInput(res.trackingToken);
+          }
           window.dispatchEvent(new Event("storage"));
         } catch {
           // تجاهل
@@ -204,7 +208,18 @@ export function Contact() {
 
   // حالة التتبع عبر React Query
   const [trackInput, setTrackInput] = useState("");
+  const [trackTokenInput, setTrackTokenInput] = useState("");
   const [trackQueryRef, setTrackQueryRef] = useState<string | null>(null);
+  const [trackQueryToken, setTrackQueryToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedToken = localStorage.getItem("lastTrackingToken");
+      if (savedToken && !trackTokenInput) {
+        setTrackTokenInput(savedToken);
+      }
+    } catch {}
+  }, []);
 
   const {
     data: trackingResult,
@@ -213,12 +228,12 @@ export function Contact() {
     error: trackQueryError,
     refetch: refetchTrack,
   } = useQuery({
-    queryKey: ["inquiry-tracking", trackQueryRef],
+    queryKey: ["inquiry-tracking", trackQueryRef, trackQueryToken],
     queryFn: async () => {
       if (!trackQueryRef) return null;
-      const res = await trackInquiry(trackQueryRef);
+      const res = await trackInquiry(trackQueryRef, trackQueryToken || undefined);
       if (!res.success || !res.data) {
-        throw new Error(res.error || "لم يتم العثور على معاملة بهذا الرقم المرجعي");
+        throw new Error(res.error || "لم يتم العثور على معاملة بهذا الرقم المرجعي أو رمز التتبع غير صحيح");
       }
       return res.data;
     },
@@ -232,23 +247,30 @@ export function Contact() {
 
   const handleTrackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = trackInput.trim().toUpperCase();
-    if (!clean) return;
+    const cleanRef = trackInput.trim().toUpperCase();
+    const cleanToken = trackTokenInput.trim();
+    if (!cleanRef) return;
 
-    if (clean === trackQueryRef) {
+    if (cleanRef === trackQueryRef && cleanToken === trackQueryToken) {
       refetchTrack();
     } else {
-      setTrackQueryRef(clean);
+      setTrackQueryRef(cleanRef);
+      setTrackQueryToken(cleanToken);
     }
   };
 
   const handleQuickTrack = (ref: string) => {
     setTrackInput(ref);
-    if (ref === trackQueryRef) {
-      refetchTrack();
-    } else {
-      setTrackQueryRef(ref);
-    }
+    let token = trackTokenInput;
+    try {
+      const saved = localStorage.getItem("lastTrackingToken");
+      if (saved) {
+        token = saved;
+        setTrackTokenInput(saved);
+      }
+    } catch {}
+    setTrackQueryRef(ref);
+    setTrackQueryToken(token);
   };
 
   const handleCopyRef = () => {
@@ -476,28 +498,42 @@ export function Contact() {
                       </p>
 
                       {generatedRef && (
-                        <div className="mt-6 inline-flex flex-col sm:flex-row items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-emerald-300 shadow-sm">
-                          <span className="text-xs font-bold text-slate-500">الرقم المرجعي للمعاملة:</span>
-                          <span className="font-mono text-lg font-black text-navy tracking-wider" dir="ltr">
-                            {generatedRef}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleCopyRef}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
-                          >
-                            {copied ? (
-                              <>
-                                <Check className="h-3.5 w-3.5 text-emerald-600" />
-                                <span className="text-emerald-700 font-bold">تم النسخ</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="h-3.5 w-3.5 text-slate-500" />
-                                <span>نسخ الرقم</span>
-                              </>
-                            )}
-                          </button>
+                        <div className="mt-6 flex flex-col gap-3 max-w-md mx-auto text-right">
+                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-emerald-300 shadow-sm">
+                            <span className="text-xs font-bold text-slate-500">الرقم المرجعي:</span>
+                            <span className="font-mono text-lg font-black text-navy tracking-wider" dir="ltr">
+                              {generatedRef}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleCopyRef}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
+                            >
+                              {copied ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                  <span className="text-emerald-700 font-bold">تم النسخ</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3.5 w-3.5 text-slate-500" />
+                                  <span>نسخ الرقم</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          {trackTokenInput && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-white p-3 ring-1 ring-gold/40 shadow-sm text-xs">
+                              <span className="font-bold text-slate-600">رمز التتبع الآمن:</span>
+                              <span className="font-mono font-bold text-navy" dir="ltr">
+                                {trackTokenInput}
+                              </span>
+                              <span className="text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+                                محفوظ تلقائياً
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -725,37 +761,55 @@ export function Contact() {
                   )}
 
                   <form onSubmit={handleTrackSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-bold text-navy mb-2">
-                        الرقم المرجعي للمعاملة
-                      </label>
-                      <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-bold text-navy mb-2">
+                          الرقم المرجعي للمعاملة
+                        </label>
                         <input
                           type="text"
                           required
                           value={trackInput}
                           onChange={(e) => setTrackInput(e.target.value)}
                           placeholder="مثال: INC-2026-000001"
-                          className="flex-1 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm font-mono uppercase text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm font-mono uppercase text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
                         />
-                        <button
-                          type="submit"
-                          disabled={isTracking}
-                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-bold text-navy-darker hover:bg-gold-light transition disabled:opacity-50"
-                        >
-                          {isTracking ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span>جارٍ الاستعلام...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Search className="h-4 w-4" />
-                              <span>استعلام</span>
-                            </>
-                          )}
-                        </button>
                       </div>
+                      <div>
+                        <label className="block text-sm font-bold text-navy mb-2">
+                          رمز التتبع الآمن (Token)
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={trackTokenInput}
+                          onChange={(e) => setTrackTokenInput(e.target.value)}
+                          placeholder="رمز التتبع السري"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm font-mono text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <p className="text-xs text-slate-500">
+                        🔒 يُطلب رمز التتبع لضمان سرية المعاملة ومنع استعراض الردود دون إذن.
+                      </p>
+                      <button
+                        type="submit"
+                        disabled={isTracking}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-8 py-3 text-sm font-bold text-navy-darker hover:bg-gold-light transition disabled:opacity-50 shrink-0"
+                      >
+                        {isTracking ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>جارٍ الاستعلام...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Search className="h-4 w-4" />
+                            <span>استعلام عن المعاملة</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </form>
 

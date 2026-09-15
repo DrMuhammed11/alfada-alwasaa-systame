@@ -5,7 +5,9 @@ import {
   Injectable,
   NotFoundException,
   Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import {
   AuditAction,
   CorrespondenceStatus,
@@ -602,10 +604,17 @@ export class CorrespondencesService {
       }
     }
 
+    // توليد رمز تتبع مشفر غير قابل للتخمين للعميل
+    const publicTrackingToken = crypto.randomBytes(16).toString('hex');
+    await this.prisma.correspondence.update({
+      where: { id: corr.id },
+      data: { publicTrackingToken },
+    });
+
     // 3. إرسال بريد توثيقي فوري للعميل عند توفر بريده الإلكتروني
     if (this.mail && dto.email?.trim()) {
       const clientEmail = dto.email.trim().toLowerCase();
-      const trackingUrl = 'https://www.alfadaalwasaa.com/#contact';
+      const trackingUrl = `https://www.alfadaalwasaa.com/#contact?ref=${encodeURIComponent(corr.refNumber)}&token=${encodeURIComponent(publicTrackingToken)}`;
       const html = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -633,6 +642,7 @@ export class CorrespondencesService {
         </span>
         <div style="margin-top: 14px; font-size: 13px; color: #475569;">
           <div><strong>الخدمة المطلوبة:</strong> ${dto.service.trim()}</div>
+          <div style="margin-top: 4px;"><strong>رمز التتبع الآمن (خاص بكم):</strong> <code style="color: #c6954a; font-weight: 700;">${publicTrackingToken}</code></div>
           <div style="margin-top: 4px;"><strong>حالة الطلب:</strong> <span style="color: #0284c7; font-weight: 700;">محالة — قيد الدراسة والتسعير لدى الإدارة المختصة</span></div>
         </div>
       </div>
@@ -642,7 +652,7 @@ export class CorrespondencesService {
         </a>
       </div>
       <p style="text-align: center; font-size: 11px; color: #94a3b8; margin-top: 8px;">
-        يمكنكم الاستعلام في أي وقت باستخدام رقم القيد أعلاه
+        يمكنكم الاستعلام في أي وقت باستخدام رقم القيد ورمز التتبع الآمن
       </p>
     </div>
     <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 24px; text-align: center; font-size: 12px; color: #64748b; line-height: 1.6;">
@@ -657,7 +667,7 @@ export class CorrespondencesService {
       this.mail.sendReply({
         to: clientEmail,
         subject: `تأكيد استلام طلبكم برقم قيد [${corr.refNumber}] — شركة الفضاء الواسع`,
-        body: `عزيزنا ${dto.name.trim()}، تم استلام وتوثيق طلبكم بخصوص (${dto.service.trim()}) بنجاح برقم قيد معتمد: ${corr.refNumber}. يمكنكم المتابعة عبر: ${trackingUrl}`,
+        body: `عزيزنا ${dto.name.trim()}، تم استلام وتوثيق طلبكم بخصوص (${dto.service.trim()}) بنجاح برقم قيد معتمد: ${corr.refNumber}. رمز التتبع الآمن: ${publicTrackingToken}. يمكنكم المتابعة عبر: ${trackingUrl}`,
         refNumber: corr.refNumber,
         html,
       }).catch((e) => {
@@ -668,12 +678,17 @@ export class CorrespondencesService {
     return {
       success: true,
       refNumber: corr.refNumber,
+      trackingToken: publicTrackingToken,
       message: 'تم استلام طلبكم بنجاح ومحال للمراجعة والرد من الفريق المختص',
     };
   }
 
-  /** استعلام عام عن حالة مراسلة برقمها المرجعي للعملاء وإظهار الرد الرسمي المعتمد إن وُجد */
-  async trackPublicInquiry(refNumber: string) {
+  /** استعلام عام عن حالة مراسلة برقمها المرجعي للعملاء وإظهار الرد الرسمي المعتمد بشرط توفر رمز التتبع الصحيح */
+  async trackPublicInquiry(refNumber: string, token?: string) {
+    if (!token || !token.trim()) {
+      throw new UnauthorizedException('رمز التتبع الخاص بالمعاملة مطلوب لعرض تفاصيل وحالة الطلب');
+    }
+
     const corr = await this.prisma.correspondence.findUnique({
       where: { refNumber: refNumber.trim().toUpperCase() },
       select: {
@@ -681,6 +696,7 @@ export class CorrespondencesService {
         subject: true,
         status: true,
         receivedAt: true,
+        publicTrackingToken: true,
         replies: {
           where: {
             OR: [
@@ -714,6 +730,11 @@ export class CorrespondencesService {
     });
     if (!corr) {
       throw new NotFoundException('لم يتم العثور على مراسلة بهذا الرقم المرجعي');
+    }
+
+    // التحقق الصارم من رمز التتبع
+    if (!corr.publicTrackingToken || corr.publicTrackingToken !== token.trim()) {
+      throw new UnauthorizedException('رمز التتبع غير صحيح — لا يمكن عرض تفاصيل المعاملة');
     }
 
     const latestReply = corr.children[0]

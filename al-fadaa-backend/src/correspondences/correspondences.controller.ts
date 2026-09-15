@@ -45,10 +45,13 @@ export class CorrespondencesController {
   @Throttle(ThrottlerLimits.publicTrack)
   @Get('public/track/:refNumber')
   @ApiOperation({
-    summary: 'استعلام عام لعملاء الموقع عن حالة معاملة برقمها المرجعي',
+    summary: 'استعلام عام لعملاء الموقع عن حالة معاملة برقمها المرجعي ورمز التتبع الآمن',
   })
-  trackPublicInquiry(@Param('refNumber') refNumber: string) {
-    return this.correspondencesService.trackPublicInquiry(refNumber);
+  trackPublicInquiry(
+    @Param('refNumber') refNumber: string,
+    @Query('token') token?: string,
+  ) {
+    return this.correspondencesService.trackPublicInquiry(refNumber, token);
   }
 
   @Post('incoming')
