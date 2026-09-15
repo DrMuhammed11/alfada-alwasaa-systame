@@ -5,6 +5,7 @@ import { requestContextStorage } from './common/context/request-context';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import { JsonLogger } from './common/logger/json-logger';
+import { buildCorsOriginFunction } from './common/cors/build-cors-origin';
 
 /**
  * إعدادات مشتركة بين التشغيل الحقيقي (main.ts) واختبارات e2e —
@@ -53,9 +54,10 @@ export function configureApp(app: INestApplication): void {
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
-  // السماح للواجهة الأمامية (فلاتر وبقية الواجهات) بالاتصال
+  // السماح للواجهة الأمامية (فلاتر وبقية الواجهات) بالاتصال — قائمة بيضاء من CORS_ORIGIN
+  const isProduction = process.env.NODE_ENV === 'production';
   app.enableCors({
-    origin: true,
+    origin: buildCorsOriginFunction(process.env.CORS_ORIGIN, isProduction),
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Accept,Authorization,X-Request-Id',
