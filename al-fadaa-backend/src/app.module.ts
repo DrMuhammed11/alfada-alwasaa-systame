@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { buildThrottlerOptions } from './common/throttler/throttler-config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
@@ -30,6 +32,12 @@ import { validateEnv } from './common/config/env.validation';
       isGlobal: true,
       validate: validateEnv,
     }),
+    // تحديد معدل الطلبات لحماية النظام من الإغراق وهجمات الحرمان من الخدمة
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: buildThrottlerOptions,
+    }),
     // وحدات عامة (Global)
     PrismaModule,
     AuditModule,
@@ -51,6 +59,8 @@ import { validateEnv } from './common/config/env.validation';
   ],
   controllers: [HealthController],
   providers: [
+    // الحارس الأول: تحديد معدل الطلبات قبل أي معالجة ثقيلة
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // الحارسان العامان — الترتيب مهم: توثيق أولاً ثم الصلاحيات
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },

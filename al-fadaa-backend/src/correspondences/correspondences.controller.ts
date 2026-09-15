@@ -22,6 +22,8 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import type { AuthUser } from '../common/types';
 import { Permission } from '../security/permissions';
+import { Throttle } from '@nestjs/throttler';
+import { ThrottlerLimits } from '../common/throttler/throttler-config';
 
 @ApiTags('المراسلات')
 @ApiBearerAuth()
@@ -30,6 +32,7 @@ export class CorrespondencesController {
   constructor(private readonly correspondencesService: CorrespondencesService) {}
 
   @Public()
+  @Throttle(ThrottlerLimits.publicInquiry)
   @Post('public/inquiry')
   @ApiOperation({
     summary: 'تقديم طلب عرض سعر أو استشارة من الموقع الإلكتروني الرسمي للشركة',
@@ -39,6 +42,7 @@ export class CorrespondencesController {
   }
 
   @Public()
+  @Throttle(ThrottlerLimits.publicTrack)
   @Get('public/track/:refNumber')
   @ApiOperation({
     summary: 'استعلام عام لعملاء الموقع عن حالة معاملة برقمها المرجعي',

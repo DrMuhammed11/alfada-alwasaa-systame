@@ -95,6 +95,12 @@ npm run start:dev
 | `MAIL_FROM` | البريد الرسمي الموحد | `info@al-fadaa.com` |
 | `SMTP_HOST/PORT/USER/PASS` | بيانات خادم بريد الشركة (مع `MAIL_DRIVER=smtp`) | فارغة |
 | `UPLOAD_DIR` | مجلد حفظ المرفقات | `./uploads` |
+| `THROTTLE_TTL` | نافذة حد الطلبات العام بالثواني | `60` |
+| `THROTTLE_LIMIT` | الحد الأقصى للطلبات العامة في النافذة | `60` |
+| `THROTTLE_LOGIN_LIMIT` | حد محاولات تسجيل الدخول في الدقيقة | `5` |
+| `THROTTLE_INQUIRY_LIMIT` | حد استفسارات الموقع في الدقيقة | `5` |
+| `THROTTLE_TRACK_LIMIT` | حد تتبع المعاملات في الدقيقة | `15` |
+| `REDIS_URL` | رابط خادم Redis لمخزن التوزيع في الإنتاج | اختياري |
 
 ---
 

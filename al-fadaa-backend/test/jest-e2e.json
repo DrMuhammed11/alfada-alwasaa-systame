@@ -6,6 +6,9 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "moduleNameMapper": {
+    "^@nestjs/schedule$": "<rootDir>/mocks/nestjs-schedule.mock.ts"
+  },
   "globalSetup": "./global-setup.e2e.ts",
   "setupFiles": ["./setup-e2e.ts"],
   "testTimeout": 30000
