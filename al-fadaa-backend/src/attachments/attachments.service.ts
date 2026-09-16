@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -11,10 +12,12 @@ import {
 } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import type { Response } from 'express';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
+import { validateMagicBytes, isZipAllowed } from '../common/attachments/magic-bytes';
 import type { AuthUser } from '../common/types';
 
 const ATTACHMENT_INCLUDE = {
@@ -27,6 +30,8 @@ export type AttachmentRow = Prisma.AttachmentGetPayload<{
 
 @Injectable()
 export class AttachmentsService {
+  private readonly logger = new Logger('Attachments');
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
@@ -79,27 +84,78 @@ export class AttachmentsService {
     user: AuthUser,
     refNumber: string,
   ): Promise<AttachmentRow> {
-    const attachment = await this.prisma.attachment.create({
-      data: {
-        fileName: file.originalname,
-        storedName: file.filename,
-        mimeType: file.mimetype,
-        size: file.size,
-        correspondenceId: link.correspondenceId,
-        replyId: link.replyId,
-        uploadedById: user.id,
-      },
-      include: ATTACHMENT_INCLUDE,
-    });
+    const filePath = path.join(this.uploadDir(), file.filename);
+
+    // ── 1. حظر ZIP ما لم يكن مسموحاً صراحة ──
+    if (file.mimetype === 'application/zip' && !isZipAllowed()) {
+      this.deleteFileQuietly(filePath);
+      throw new BadRequestException(
+        'رفع ملفات ZIP معطّل — تواصل مع المسؤول لتفعيله',
+      );
+    }
+
+    // ── 2. فحص البايتات السحرية — المحتوى الفعلي يجب أن يطابق النوع المُعلن ──
+    if (!validateMagicBytes(filePath, file.mimetype)) {
+      this.deleteFileQuietly(filePath);
+      throw new BadRequestException(
+        'محتوى الملف لا يطابق نوعه المُعلن — تأكد من صحة الملف',
+      );
+    }
+
+    // ── 3. حساب بصمة SHA-256 ──
+    const sha256 = await this.computeSha256(filePath);
+
+    // ── 4. حفظ السجل في قاعدة البيانات — مع تنظيف الملف عند الفشل ──
+    let attachment: AttachmentRow;
+    try {
+      attachment = await this.prisma.attachment.create({
+        data: {
+          fileName: file.originalname,
+          storedName: file.filename,
+          mimeType: file.mimetype,
+          size: file.size,
+          sha256,
+          correspondenceId: link.correspondenceId,
+          replyId: link.replyId,
+          uploadedById: user.id,
+        },
+        include: ATTACHMENT_INCLUDE,
+      });
+    } catch (err) {
+      // فشل إنشاء السجل — نحذف الملف لمنع ملفات يتيمة
+      this.logger.error(`فشل حفظ سجل المرفق — حذف الملف: ${file.filename}`);
+      this.deleteFileQuietly(filePath);
+      throw err;
+    }
 
     await this.audit.log({
       action: AuditAction.UPLOAD,
       entityType: 'Attachment',
       entityId: attachment.id,
       summary: `رفع مرفق «${file.originalname}» (${(file.size / 1024).toFixed(1)}KB) على ${refNumber}`,
-      metadata: { fileName: file.originalname, size: file.size, mimeType: file.mimetype },
+      metadata: { fileName: file.originalname, size: file.size, mimeType: file.mimetype, sha256 },
     });
     return attachment;
+  }
+
+  /** حساب SHA-256 لملف */
+  private async computeSha256(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const hash = crypto.createHash('sha256');
+      const stream = fs.createReadStream(filePath);
+      stream.on('data', (chunk) => hash.update(chunk));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', reject);
+    });
+  }
+
+  /** حذف ملف من القرص بصمت — لا يرمي استثناء */
+  private deleteFileQuietly(filePath: string): void {
+    try {
+      fs.unlinkSync(filePath);
+    } catch {
+      // الملف قد لا يكون موجوداً — نتجاهل
+    }
   }
 
   /** تنزيل مرفق — مع فرض نطاق رؤية المراسلة/الرد */
@@ -118,6 +174,16 @@ export class AttachmentsService {
     if (!fs.existsSync(filePath)) {
       throw new NotFoundException('ملف المرفق غير موجود على الخادم');
     }
+
+    // ── تسجيل حدث التنزيل في سجل التدقيق ──
+    await this.audit.log({
+      action: AuditAction.DOWNLOAD,
+      entityType: 'Attachment',
+      entityId: id,
+      summary: `تنزيل مرفق «${a.fileName}»`,
+      metadata: { fileName: a.fileName, mimeType: a.mimeType, size: a.size },
+    });
+
     // دعم أسماء الملفات العربية في رأس التنزيل
     res.setHeader(
       'Content-Disposition',

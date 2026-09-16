@@ -100,6 +100,7 @@ enum AuditAction {
   ARCHIVE    // أرشفة
   UPLOAD     // رفع مرفق
   DELETE     // حذف مرفق
+  DOWNLOAD   // تنزيل مرفق
 }
 
 /// أنواع الإشعارات — كل حدث جوهري في دورة العمل يولّد إشعارًا للمعنيين به
@@ -330,6 +331,7 @@ model Attachment {
   storedName      String // الاسم المخزن على القرص
   mimeType        String
   size            Int
+  sha256          String? // بصمة SHA-256 للملف — للتحقق من السلامة
   correspondenceId String?
   correspondence  Correspondence? @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
   replyId         String?
