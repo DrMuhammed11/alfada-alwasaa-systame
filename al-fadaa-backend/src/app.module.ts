@@ -19,6 +19,7 @@ import { OutboxModule } from './outbox/outbox.module';
 import { AdminModule } from './admin/admin.module';
 import { SlaModule } from './sla/sla.module';
 import { DelegationModule } from './delegation/delegation.module';
+import { BackupModule } from './backup/backup.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
@@ -46,6 +47,7 @@ import { validateEnv } from './common/config/env.validation';
     SlaModule,
     AdminModule,
     DelegationModule,
+    BackupModule,
     // وحدات الأعمال
     AuthModule,
     UsersModule,

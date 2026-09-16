@@ -562,6 +562,7 @@ npm run test:e2e
 ```bash
 npx prisma studio        # استعراض الجداول وتعديلها بصريًا (http://localhost:5555)
 npm run db:reset         # إعادة بناء قاعدة التطوير من الصفر + seed (يمسح كل البيانات!)
+npm run db:backup        # أخذ نسخة احتياطية فورية مضغوطة من قاعدة البيانات (.sql.gz) مع التدوير
 npm run test:e2e -- --verbose   # تفاصيل كل اختبار
 ```
 

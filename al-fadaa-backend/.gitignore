@@ -10,6 +10,10 @@ coverage/
 uploads/*
 !uploads/.gitkeep
 
+# النسخ الاحتياطية لقاعدة البيانات
+backups/*
+!backups/.gitkeep
+
 # ملفات النظام
 *.log
 .DS_Store
