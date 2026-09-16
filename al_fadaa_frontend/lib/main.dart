@@ -6,6 +6,8 @@ import 'core/network/api_service.dart';
 import 'core/network/app_events.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/page_transitions.dart';
+import 'core/utils/in_app_notification_manager.dart';
+import 'core/utils/system_notification_service.dart';
 import 'models/user_model.dart';
 import 'views/auth/login_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
@@ -53,6 +55,14 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
     super.initState();
     _checkAuth();
 
+    // تهيئة مدير التنبيهات المنبثقة التفاعلية اللحظية
+    InAppNotificationManager().init(
+      navigatorKey: appNavigatorKey,
+    );
+
+    // طلب إذن إشعارات المتصفح والنظام
+    SystemNotificationService().requestPermission();
+
     // الاستماع لحدث انتهاء الجلسة المركزي عند خطأين 401 متتاليين
     _sessionExpiredSubscription = AppEvents().onSessionExpired.listen((message) {
       if (!mounted) return;
@@ -79,6 +89,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
 
   @override
   void dispose() {
+    InAppNotificationManager().dispose();
     _sessionExpiredSubscription?.cancel();
     super.dispose();
   }
