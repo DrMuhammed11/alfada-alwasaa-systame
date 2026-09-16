@@ -3,6 +3,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   Optional,
   UnauthorizedException,
@@ -64,6 +65,7 @@ export {
 
 @Injectable()
 export class CorrespondencesService {
+  private readonly logger = new Logger('Correspondences');
   private readonly queryService: CorrespondencesQueryService;
 
   constructor(
@@ -671,7 +673,7 @@ export class CorrespondencesService {
         refNumber: corr.refNumber,
         html,
       }).catch((e) => {
-        console.error('فشل إرسال بريد التأكيد التلقائي للعميل:', e);
+        this.logger.error(`فشل إرسال بريد التأكيد التلقائي للعميل: ${(e as Error).message}`);
       });
     }
 

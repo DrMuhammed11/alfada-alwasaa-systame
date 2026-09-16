@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const logger = new Logger('Bootstrap');
 
   // للحصول على IP الحقيقي للعميل خلف البروكسي (nginx وغيره)
   app.set('trust proxy', 1);
@@ -31,10 +33,10 @@ async function bootstrap(): Promise<void> {
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
 
-  console.log('──────────────────────────────────────────────');
-  console.log(`🚀 الواجهة الخلفية تعمل على:  http://localhost:${port}/api/v1`);
-  console.log(`📘 توثيق Swagger:            http://localhost:${port}/api/docs`);
-  console.log('──────────────────────────────────────────────');
+  logger.log('──────────────────────────────────────────────');
+  logger.log(`🚀 الواجهة الخلفية تعمل على:  http://localhost:${port}/api/v1`);
+  logger.log(`📘 توثيق Swagger:            http://localhost:${port}/api/docs`);
+  logger.log('──────────────────────────────────────────────');
 }
 
 void bootstrap();

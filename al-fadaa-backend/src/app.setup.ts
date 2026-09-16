@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { requestContextStorage } from './common/context/request-context';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
-import { JsonLogger } from './common/logger/json-logger';
+import { AppLogger } from './common/logger/app-logger';
 import { buildCorsOriginFunction } from './common/cors/build-cors-origin';
 
 /**
@@ -12,10 +12,8 @@ import { buildCorsOriginFunction } from './common/cors/build-cors-origin';
  * حتى تُختبر التطبيقات بنفس سلوك الإنتاج تمامًا.
  */
 export function configureApp(app: INestApplication): void {
-  // تبديل مسجل الأحداث إلى صيغة JSON المنظمة في بيئة الإنتاج فقط
-  if (process.env.NODE_ENV === 'production') {
-    app.useLogger(new JsonLogger());
-  }
+  // مسجل الأحداث المركزي المنظم: JSON في الإنتاج وملون مع requestId في التطوير
+  app.useLogger(new AppLogger());
 
   // رؤوس أمان HTTP القياسية
   app.use(helmet({
