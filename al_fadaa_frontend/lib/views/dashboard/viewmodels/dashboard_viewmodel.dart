@@ -3,6 +3,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../core/network/api_service.dart';
 import '../../../core/network/app_events.dart';
+import '../../../core/offline/offline_storage_service.dart';
+import '../../../core/offline/offline_sync_engine.dart';
 import '../../../models/correspondence_model.dart';
 import '../../../models/user_model.dart';
 
@@ -42,6 +44,7 @@ class DashboardViewModel extends ChangeNotifier {
   Timer? _autoRefreshTimer;
 
   void init() {
+    OfflineSyncEngine().init();
     fetchCorrespondences();
     fetchMyTasks();
 
@@ -87,8 +90,22 @@ class DashboardViewModel extends ChangeNotifier {
 
   Future<void> fetchMyTasks() async {
     try {
-      myTasks = await ApiService().getMyTasks();
-      notifyListeners();
+      // 1. تحميل المهام المحفوظة محلياً فورياً (0 ثوانٍ تأخير)
+      final cached = await OfflineStorageService().getCachedMyTasks();
+      if (cached.isNotEmpty) {
+        myTasks = cached;
+        notifyListeners();
+      }
+
+      // 2. إذا كان متصلاً، تحديثها من الخادم وحفظها محلياً
+      if (OfflineSyncEngine().isOnline) {
+        final onlineTasks = await ApiService().getMyTasks();
+        if (onlineTasks.isNotEmpty) {
+          myTasks = onlineTasks;
+          await OfflineStorageService().cacheMyTasks(onlineTasks);
+          notifyListeners();
+        }
+      }
     } catch (e) {
       debugPrint('fetchMyTasks error: $e');
     }
@@ -104,20 +121,47 @@ class DashboardViewModel extends ChangeNotifier {
       final apiType = isMyTasks ? null : selectedNav;
       final query = searchController.text.trim();
 
-      final res = await ApiService().getCorrespondencesPaginated(
+      // 1. استرجاع فوري من الذاكرة المحلية (Cache-First)
+      final cached = await OfflineStorageService().getCachedCorrespondences(
         type: apiType,
         status: selectedStatus,
-        channel: isWebsiteFilter ? 'website' : null,
         search: query,
-        page: 1,
-        limit: 20,
       );
+      if (cached.isNotEmpty) {
+        items = cached;
+        totalItems = cached.length;
+        isLoading = false;
+        if (selectId != null) {
+          final target = items.where((i) => i.id == selectId);
+          if (target.isNotEmpty) selectedItem = target.first;
+        } else if (selectedItem == null || !items.any((i) => i.id == selectedItem!.id)) {
+          selectedItem = items.first;
+        }
+        notifyListeners();
+      }
 
-      items = res['data'] as List<Correspondence>;
-      final meta = res['meta'] as Map<String, dynamic>;
-      totalItems = meta['total'] as int? ?? items.length;
-      final totalPages = meta['totalPages'] as int? ?? 1;
-      hasMorePages = currentPage < totalPages;
+      // 2. إذا كان أونلاين، تحديث البيانات من الخادم في الخلفية
+      if (OfflineSyncEngine().isOnline) {
+        final res = await ApiService().getCorrespondencesPaginated(
+          type: apiType,
+          status: selectedStatus,
+          channel: isWebsiteFilter ? 'website' : null,
+          search: query,
+          page: 1,
+          limit: 20,
+        );
+
+        final networkItems = res['data'] as List<Correspondence>;
+        if (networkItems.isNotEmpty) {
+          items = networkItems;
+          final meta = res['meta'] as Map<String, dynamic>;
+          totalItems = meta['total'] as int? ?? items.length;
+          final totalPages = meta['totalPages'] as int? ?? 1;
+          hasMorePages = currentPage < totalPages;
+          await OfflineStorageService().cacheCorrespondences(networkItems);
+          OfflineSyncEngine().setOnlineStatus(true);
+        }
+      }
 
       if (items.isNotEmpty) {
         if (selectId != null) {
@@ -129,6 +173,9 @@ class DashboardViewModel extends ChangeNotifier {
       } else {
         selectedItem = null;
       }
+    } catch (e) {
+      debugPrint('fetchCorrespondences network error: $e');
+      OfflineSyncEngine().setOnlineStatus(false);
     } finally {
       isLoading = false;
       notifyListeners();
@@ -162,6 +209,10 @@ class DashboardViewModel extends ChangeNotifier {
       }
       currentPage = nextPage;
       hasMorePages = nextPage < totalPages;
+      await OfflineStorageService().cacheCorrespondences(nextData);
+    } catch (e) {
+      debugPrint('loadMore network error: $e');
+      OfflineSyncEngine().setOnlineStatus(false);
     } finally {
       isLoadingMore = false;
       notifyListeners();
@@ -179,9 +230,23 @@ class DashboardViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final detailed = await ApiService().getCorrespondenceById(item.id);
-      if (detailed != null && selectedItem?.id == item.id) {
-        selectedItem = detailed;
+      if (OfflineSyncEngine().isOnline) {
+        final detailed = await ApiService().getCorrespondenceById(item.id);
+        if (detailed != null && selectedItem?.id == item.id) {
+          selectedItem = detailed;
+          await OfflineStorageService().updateCachedCorrespondence(detailed);
+        }
+      } else {
+        final local = await OfflineStorageService().getCachedCorrespondence(item.id);
+        if (local != null && selectedItem?.id == item.id) {
+          selectedItem = local;
+        }
+      }
+    } catch (e) {
+      debugPrint('selectItem online fetch error, using local: $e');
+      final local = await OfflineStorageService().getCachedCorrespondence(item.id);
+      if (local != null && selectedItem?.id == item.id) {
+        selectedItem = local;
       }
     } finally {
       isLoadingDetail = false;
@@ -194,20 +259,29 @@ class DashboardViewModel extends ChangeNotifier {
       fetchMyTasks();
       final isMyTasks = selectedNav == 'MY_TASKS';
       final apiType = isMyTasks ? null : selectedNav;
-      final res = await ApiService().getCorrespondencesPaginated(
-        type: apiType,
-        status: selectedStatus,
-        search: searchController.text.trim(),
-        page: 1,
-        limit: 20,
-      );
-      items = res['data'] as List<Correspondence>;
-      final meta = res['meta'] as Map<String, dynamic>;
-      totalItems = meta['total'] as int? ?? items.length;
+      if (OfflineSyncEngine().isOnline) {
+        final res = await ApiService().getCorrespondencesPaginated(
+          type: apiType,
+          status: selectedStatus,
+          search: searchController.text.trim(),
+          page: 1,
+          limit: 20,
+        );
+        final freshItems = res['data'] as List<Correspondence>;
+        if (freshItems.isNotEmpty) {
+          items = freshItems;
+          final meta = res['meta'] as Map<String, dynamic>;
+          totalItems = meta['total'] as int? ?? items.length;
+          await OfflineStorageService().cacheCorrespondences(freshItems);
+        }
 
-      if (selectedItem != null) {
-        final detailed = await ApiService().getCorrespondenceById(selectedItem!.id);
-        if (detailed != null) selectedItem = detailed;
+        if (selectedItem != null) {
+          final detailed = await ApiService().getCorrespondenceById(selectedItem!.id);
+          if (detailed != null) {
+            selectedItem = detailed;
+            await OfflineStorageService().updateCachedCorrespondence(detailed);
+          }
+        }
       }
       notifyListeners();
     } catch (e) {
@@ -219,6 +293,9 @@ class DashboardViewModel extends ChangeNotifier {
     isSyncing = true;
     notifyListeners();
     try {
+      // 1. رفع كافة العمليات المعلقة محلياً
+      await OfflineSyncEngine().syncPendingMutations();
+      // 2. جلب البريد الجديد من الخادم
       final res = await ApiService().syncMail();
       await silentRefresh();
       return res['success'] == true;

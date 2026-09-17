@@ -180,12 +180,53 @@ class ReplyItem {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'authorId': authorId,
       'body': body,
       'status': status,
       'version': version,
       'isApproved': isApproved,
       'reviewNote': reviewNote,
       'createdAt': createdAt.toIso8601String(),
+      'author': author?.toJson(),
+      'reviewedBy': reviewedBy?.toJson(),
+      'approvedBy': approvedBy?.toJson(),
+      'sourceReplyId': sourceReplyId,
+      'attachments': attachments.map((a) => a.toJson()).toList(),
+      'approvalSteps': approvalSteps.map((s) => s.toJson()).toList(),
     };
+  }
+
+  ReplyItem copyWith({
+    String? id,
+    String? authorId,
+    String? body,
+    String? status,
+    int? version,
+    bool? isApproved,
+    String? reviewNote,
+    DateTime? createdAt,
+    User? author,
+    User? reviewedBy,
+    User? approvedBy,
+    String? sourceReplyId,
+    List<AttachmentItem>? attachments,
+    List<ApprovalStepItem>? approvalSteps,
+  }) {
+    return ReplyItem(
+      id: id ?? this.id,
+      authorId: authorId ?? this.authorId,
+      body: body ?? this.body,
+      status: status ?? this.status,
+      version: version ?? this.version,
+      isApproved: isApproved ?? this.isApproved,
+      reviewNote: reviewNote ?? this.reviewNote,
+      createdAt: createdAt ?? this.createdAt,
+      author: author ?? this.author,
+      reviewedBy: reviewedBy ?? this.reviewedBy,
+      approvedBy: approvedBy ?? this.approvedBy,
+      sourceReplyId: sourceReplyId ?? this.sourceReplyId,
+      attachments: attachments ?? this.attachments,
+      approvalSteps: approvalSteps ?? this.approvalSteps,
+    );
   }
 }

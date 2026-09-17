@@ -50,6 +50,8 @@ class ReferralItem {
       if (note != null) 'note': note,
       'status': status,
       'createdAt': createdAt.toIso8601String(),
+      if (fromUser != null) 'fromUser': fromUser!.toJson(),
+      if (toUser != null) 'toUser': toUser!.toJson(),
       if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
       if (answeredAt != null) 'answeredAt': answeredAt!.toIso8601String(),
     };

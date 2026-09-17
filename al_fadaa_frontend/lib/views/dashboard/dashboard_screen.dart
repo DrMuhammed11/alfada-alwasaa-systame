@@ -5,6 +5,7 @@ import 'viewmodels/dashboard_viewmodel.dart';
 import 'widgets/conversation_detail_pane.dart';
 import 'widgets/dashboard_sidebar.dart';
 import 'widgets/master_list_pane.dart';
+import 'widgets/sync_status_banner.dart';
 
 /// الشاشة الرئيسية للنظام — مصممة بنظام الأعمدة الثلاثية المتوازنة RTL
 class DashboardScreen extends StatefulWidget {
@@ -79,92 +80,99 @@ class _DashboardScreenState extends State<DashboardScreen>
 
             return Scaffold(
               backgroundColor: const Color(0xFFF8FAFC),
-              body: Row(
+              body: Column(
                 children: [
-                  // 1. الشريط الجانبي (Sidebar)
-                  SizedBox(
-                    width: sidebarWidth,
-                    child: DashboardSidebar(
-                      user: widget.user,
-                      isAdminOrGM: isAdminOrGM,
-                      isCollapsed: _vm.isSidebarCollapsed,
-                      selectedNav: _vm.selectedNav,
-                      totalCount: _vm.items.length,
-                      incomingCount: _vm.items.where((i) => i.type == 'INCOMING').length,
-                      internalCount: _vm.items.where((i) => i.type == 'INTERNAL').length,
-                      outgoingCount: _vm.items.where((i) => i.type == 'OUTGOING').length,
-                      myTasksCount: _vm.myTasks.where((t) => !t.isDone).length,
-                      isSyncing: _vm.isSyncing,
-                      syncIconController: _syncIconController,
-                      onToggleCollapse: _vm.toggleSidebar,
-                      onSelectNav: _vm.setNav,
-                      onOpenCorrespondence: (id) => _vm.fetchCorrespondences(selectId: id),
-                      onRefresh: () {
-                        _vm.fetchMyTasks();
-                        _vm.fetchCorrespondences();
-                      },
-                      onSyncMail: _handleSync,
-                      onLogout: _actions.logout,
+                  const SyncStatusBanner(),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        // 1. الشريط الجانبي (Sidebar)
+                        SizedBox(
+                          width: sidebarWidth,
+                          child: DashboardSidebar(
+                            user: widget.user,
+                            isAdminOrGM: isAdminOrGM,
+                            isCollapsed: _vm.isSidebarCollapsed,
+                            selectedNav: _vm.selectedNav,
+                            totalCount: _vm.items.length,
+                            incomingCount: _vm.items.where((i) => i.type == 'INCOMING').length,
+                            internalCount: _vm.items.where((i) => i.type == 'INTERNAL').length,
+                            outgoingCount: _vm.items.where((i) => i.type == 'OUTGOING').length,
+                            myTasksCount: _vm.myTasks.where((t) => !t.isDone).length,
+                            isSyncing: _vm.isSyncing,
+                            syncIconController: _syncIconController,
+                            onToggleCollapse: _vm.toggleSidebar,
+                            onSelectNav: _vm.setNav,
+                            onOpenCorrespondence: (id) => _vm.fetchCorrespondences(selectId: id),
+                            onRefresh: () {
+                              _vm.fetchMyTasks();
+                              _vm.fetchCorrespondences();
+                            },
+                            onSyncMail: _handleSync,
+                            onLogout: _actions.logout,
+                          ),
+                        ),
+
+                        // 2. قائمة المحادثات (Master List Pane)
+                        SizedBox(
+                          width: listWidth,
+                          child: MasterListPane(
+                            items: _vm.items,
+                            isLoading: _vm.isLoading,
+                            isLoadingMore: _vm.isLoadingMore,
+                            hasMorePages: _vm.hasMorePages,
+                            totalItems: _vm.totalItems,
+                            selectedItem: _vm.selectedItem,
+                            selectedStatus: _vm.selectedStatus,
+                            isWebsiteFilter: _vm.isWebsiteFilter,
+                            searchController: _vm.searchController,
+                            scrollController: _listScrollController,
+                            onStatusChanged: _vm.setStatus,
+                            onToggleWebsiteFilter: _vm.toggleWebsiteFilter,
+                            onSearchSubmitted: _vm.fetchCorrespondences,
+                            onRefresh: _vm.fetchCorrespondences,
+                            onSelectItem: _vm.selectItem,
+                          ),
+                        ),
+
+                        // 3. لوحة تفاصيل المحادثة (Detail Pane)
+                        if (isWide)
+                          Expanded(
+                            child: ConversationDetailPane(
+                              selectedItem: _vm.selectedItem,
+                              isLoadingDetail: _vm.isLoadingDetail,
+                              currentUserId: widget.user.id,
+                              role: role,
+                              showExtraDetails: _vm.showExtraDetails,
+                              isEditing: _vm.editingReplyId != null,
+                              isSendingReply: _vm.isSendingReply,
+                              quickReplyController: _vm.quickReplyController,
+                              detailScrollController: _detailScrollController,
+                              pickedFile: _vm.pickedFile,
+                              downloadingAttachmentIds: _vm.downloadingAttachmentIds,
+                              onToggleExtraDetails: _vm.toggleExtraDetails,
+                              onStartReview: _actions.handleStartReview,
+                              onClose: _actions.handleClose,
+                              onArchive: _actions.handleArchive,
+                              onRefresh: () => _vm.fetchCorrespondences(selectId: _vm.selectedItem?.id),
+                              onShowDossier: _actions.handleShowDossier,
+                              onEditDraft: _vm.startEditingReply,
+                              onSubmitReply: _actions.submitReply,
+                              onApproveReply: _actions.approveReply,
+                              onRejectReply: _actions.rejectReply,
+                              onSendReply: _actions.sendReply,
+                              onDownloadAttachment: _actions.handleDownloadAttachment,
+                              onCancelEdit: _vm.cancelEditingReply,
+                              onSaveEdit: _actions.saveEditedReply,
+                              onSendDirect: _actions.sendDirectReply,
+                              onSaveDraft: _actions.addReply,
+                              onPickFile: _vm.pickFile,
+                              onRemoveFile: _vm.removeFile,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-
-                  // 2. قائمة المحادثات (Master List Pane)
-                  SizedBox(
-                    width: listWidth,
-                    child: MasterListPane(
-                      items: _vm.items,
-                      isLoading: _vm.isLoading,
-                      isLoadingMore: _vm.isLoadingMore,
-                      hasMorePages: _vm.hasMorePages,
-                      totalItems: _vm.totalItems,
-                      selectedItem: _vm.selectedItem,
-                      selectedStatus: _vm.selectedStatus,
-                      isWebsiteFilter: _vm.isWebsiteFilter,
-                      searchController: _vm.searchController,
-                      scrollController: _listScrollController,
-                      onStatusChanged: _vm.setStatus,
-                      onToggleWebsiteFilter: _vm.toggleWebsiteFilter,
-                      onSearchSubmitted: _vm.fetchCorrespondences,
-                      onRefresh: _vm.fetchCorrespondences,
-                      onSelectItem: _vm.selectItem,
-                    ),
-                  ),
-
-                  // 3. لوحة تفاصيل المحادثة (Detail Pane)
-                  if (isWide)
-                    Expanded(
-                      child: ConversationDetailPane(
-                        selectedItem: _vm.selectedItem,
-                        isLoadingDetail: _vm.isLoadingDetail,
-                        currentUserId: widget.user.id,
-                        role: role,
-                        showExtraDetails: _vm.showExtraDetails,
-                        isEditing: _vm.editingReplyId != null,
-                        isSendingReply: _vm.isSendingReply,
-                        quickReplyController: _vm.quickReplyController,
-                        detailScrollController: _detailScrollController,
-                        pickedFile: _vm.pickedFile,
-                        downloadingAttachmentIds: _vm.downloadingAttachmentIds,
-                        onToggleExtraDetails: _vm.toggleExtraDetails,
-                        onStartReview: _actions.handleStartReview,
-                        onClose: _actions.handleClose,
-                        onArchive: _actions.handleArchive,
-                        onRefresh: () => _vm.fetchCorrespondences(selectId: _vm.selectedItem?.id),
-                        onShowDossier: _actions.handleShowDossier,
-                        onEditDraft: _vm.startEditingReply,
-                        onSubmitReply: _actions.submitReply,
-                        onApproveReply: _actions.approveReply,
-                        onRejectReply: _actions.rejectReply,
-                        onSendReply: _actions.sendReply,
-                        onDownloadAttachment: _actions.handleDownloadAttachment,
-                        onCancelEdit: _vm.cancelEditingReply,
-                        onSaveEdit: _actions.saveEditedReply,
-                        onSendDirect: _actions.sendDirectReply,
-                        onSaveDraft: _actions.addReply,
-                        onPickFile: _vm.pickFile,
-                        onRemoveFile: _vm.removeFile,
-                      ),
-                    ),
                 ],
               ),
             );

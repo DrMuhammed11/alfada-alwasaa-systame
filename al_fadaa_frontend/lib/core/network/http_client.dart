@@ -92,6 +92,18 @@ class AppHttpClient {
     );
   }
 
+  Future<http.Response> put(
+    Uri uri, {
+    Map<String, String>? headers,
+    Object? body,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    return _executeWithRetry(
+      () => http.put(uri, headers: headers ?? defaultHeaders, body: body).timeout(timeout),
+      description: 'PUT ${uri.path}',
+    );
+  }
+
   Future<http.Response> delete(
     Uri uri, {
     Map<String, String>? headers,
