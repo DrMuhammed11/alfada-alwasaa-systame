@@ -281,4 +281,56 @@ class CorrespondencesApi {
       return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
     }
   }
+
+  Future<Map<String, dynamic>> searchCorrespondences({
+    String? q,
+    String? type,
+    String? status,
+    String? priority,
+    String? departmentId,
+    String? from,
+    String? to,
+    bool? hasAttachments,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final queryParams = <String, String>{
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
+      if (q != null && q.trim().isNotEmpty) queryParams['q'] = q.trim();
+      if (type != null && type.isNotEmpty && type != 'ALL') queryParams['type'] = type;
+      if (status != null && status.isNotEmpty && status != 'ALL') queryParams['status'] = status;
+      if (priority != null && priority.isNotEmpty && priority != 'ALL') queryParams['priority'] = priority;
+      if (departmentId != null && departmentId.isNotEmpty && departmentId != 'ALL') queryParams['departmentId'] = departmentId;
+      if (from != null && from.isNotEmpty) queryParams['from'] = from;
+      if (to != null && to.isNotEmpty) queryParams['to'] = to;
+      if (hasAttachments != null) queryParams['hasAttachments'] = hasAttachments.toString();
+
+      final uri = Uri.parse('${ApiConstants.correspondences}/search').replace(queryParameters: queryParams);
+      final response = await _http.get(uri, timeout: const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final List list = body['data'] ?? (body is List ? body : []);
+        final items = list.map((json) => Correspondence.fromJson(json)).toList();
+        final meta = body['meta'] is Map<String, dynamic>
+            ? body['meta'] as Map<String, dynamic>
+            : {
+                'page': page,
+                'limit': limit,
+                'total': items.length,
+                'totalPages': 1,
+              };
+        return {'data': items, 'meta': meta};
+      }
+    } catch (e) {
+      debugPrint('searchCorrespondences exception: $e');
+    }
+    return {
+      'data': <Correspondence>[],
+      'meta': {'page': page, 'limit': limit, 'total': 0, 'totalPages': 0}
+    };
+  }
 }

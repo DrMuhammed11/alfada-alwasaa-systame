@@ -65,6 +65,31 @@ class ApiService {
         limit: limit,
       );
 
+  Future<Map<String, dynamic>> searchCorrespondences({
+    String? q,
+    String? type,
+    String? status,
+    String? priority,
+    String? departmentId,
+    String? from,
+    String? to,
+    bool? hasAttachments,
+    int page = 1,
+    int limit = 20,
+  }) =>
+      _correspondences.searchCorrespondences(
+        q: q,
+        type: type,
+        status: status,
+        priority: priority,
+        departmentId: departmentId,
+        from: from,
+        to: to,
+        hasAttachments: hasAttachments,
+        page: page,
+        limit: limit,
+      );
+
   Future<List<Correspondence>> getCorrespondences({
     String? type,
     String? status,
