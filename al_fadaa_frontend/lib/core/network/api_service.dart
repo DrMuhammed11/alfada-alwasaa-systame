@@ -90,6 +90,9 @@ class ApiService {
         limit: limit,
       );
 
+  Future<Map<String, dynamic>?> getCorrespondenceLineage(String id) =>
+      _correspondences.getLineage(id);
+
   Future<List<Correspondence>> getCorrespondences({
     String? type,
     String? status,

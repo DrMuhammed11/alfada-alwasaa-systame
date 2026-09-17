@@ -333,4 +333,17 @@ class CorrespondencesApi {
       'meta': {'page': page, 'limit': limit, 'total': 0, 'totalPages': 0}
     };
   }
+
+  Future<Map<String, dynamic>?> getLineage(String id) async {
+    try {
+      final uri = Uri.parse('${ApiConstants.correspondences}/$id/lineage');
+      final response = await _http.get(uri, timeout: const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      debugPrint('getLineage exception: $e');
+    }
+    return null;
+  }
 }

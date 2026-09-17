@@ -6,6 +6,7 @@ import '../../../models/correspondence_model.dart';
 import '../../referrals/referral_dialog.dart';
 import '../../tasks/create_task_dialog.dart';
 import '../../tasks/complete_task_dialog.dart';
+import 'correspondence_lineage_dialog.dart';
 
 class ConversationHeader extends StatelessWidget {
   final Correspondence item;
@@ -290,6 +291,30 @@ class ConversationHeader extends StatelessWidget {
             const SizedBox(width: 8),
           ],
 
+          // --- زر شجرة المعاملة والترابط البياني ---
+          IconButton(
+            icon: const Icon(Icons.account_tree_rounded, size: 19, color: AppTheme.accent),
+            tooltip: 'شجرة المعاملة والترابط البياني',
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFF8FAFC),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+                side: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              padding: const EdgeInsets.all(6),
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => CorrespondenceLineageDialog(
+                  correspondenceId: item.id,
+                  onSelectCorrespondence: (id) => onRefresh(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+
           // --- 2. قائمة الخيارات والإجراءات التكميلية الموحدة (⋮) ---
           PopupMenuButton<String>(
             tooltip: 'خيارات وإجراءات المعاملة',
@@ -305,7 +330,15 @@ class ConversationHeader extends StatelessWidget {
               child: const Icon(Icons.more_vert_rounded, size: 18, color: Color(0xFF475569)),
             ),
             onSelected: (action) async {
-              if (action == 'dossier') {
+              if (action == 'lineage') {
+                showDialog(
+                  context: context,
+                  builder: (_) => CorrespondenceLineageDialog(
+                    correspondenceId: item.id,
+                    onSelectCorrespondence: (id) => onRefresh(),
+                  ),
+                );
+              } else if (action == 'dossier') {
                 onShowDossier();
               } else if (action == 'task') {
                 final res = await showDialog<bool>(
@@ -326,6 +359,16 @@ class ConversationHeader extends StatelessWidget {
               }
             },
             itemBuilder: (ctx) => [
+              const PopupMenuItem(
+                value: 'lineage',
+                child: Row(
+                  children: [
+                    Icon(Icons.account_tree_rounded, size: 16, color: AppTheme.accent),
+                    SizedBox(width: 8),
+                    Text('شجرة المعاملة والترابط البياني 🌳', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'dossier',
                 child: Row(
