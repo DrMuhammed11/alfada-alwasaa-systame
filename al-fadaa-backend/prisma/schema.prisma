@@ -355,13 +355,16 @@ model AuditLog {
   entityId   String?
   summary    String? // وصف عربي موجز للحدث
   metadata   Json? // تفاصيل إضافية (الحقول المعدلة مثلاً)
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime    @default(now())
+  ipAddress    String?
+  userAgent    String?
+  previousHash String?     // بصمة الهاش للسجل السابق في السلسلة المشفرة
+  recordHash   String?     // بصمة SHA-256 الفريدة لهذا السجل لضمان عدم التلاعب
+  createdAt    DateTime    @default(now())
 
   @@index([userId, createdAt])
   @@index([entityType, entityId])
   @@index([action, createdAt])
+  @@index([recordHash])
 }
 
 /// إشعارات المستخدمين — صندوق تنبيهات داخلي لكل مستخدم

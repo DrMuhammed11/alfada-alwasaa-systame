@@ -11,6 +11,15 @@ import { Permission } from '../security/permissions';
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
+  @Get('verify')
+  @RequirePermission(Permission.AUDIT_VIEW)
+  @ApiOperation({
+    summary: 'فحص النزاهة التشفيرية لسجل التدقيق والأرشيف ضد أي تلاعب',
+  })
+  verifyIntegrity(@Query('limit') limit?: number) {
+    return this.auditService.verifyIntegrity(limit ? Number(limit) : 1000);
+  }
+
   @Get()
   @RequirePermission(Permission.AUDIT_VIEW)
   @ApiOperation({
