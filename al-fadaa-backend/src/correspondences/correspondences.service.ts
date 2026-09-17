@@ -290,6 +290,24 @@ export class CorrespondencesService {
         throw new BadRequestException('لا يمكن إغلاق المراسلة: توجد مسودة رد قيد التحرير أو الاعتماد');
       }
 
+      // فحص حوكمة الإغلاق المترابط: التحقق من عدم وجود معاملات فرعية تابعة ما زالت نشطة
+      const activeChildren = tx.correspondence?.findMany
+        ? await tx.correspondence.findMany({
+            where: {
+              parentId: id,
+              status: { notIn: [CorrespondenceStatus.CLOSED, CorrespondenceStatus.ARCHIVED] },
+            },
+            select: { id: true, refNumber: true, status: true },
+          })
+        : [];
+
+      if (activeChildren.length > 0) {
+        const refs = activeChildren.map((c) => c.refNumber).join('، ');
+        throw new BadRequestException(
+          `لا يمكن إغلاق المعاملة: توجد معاملات فرعية تابعة لها ما زالت نشطة (${refs})؛ يجب إنجاز وإغلاق المعاملات الفرعية أولاً لضمان عدم ضياع الالتزامات المؤسسية.`,
+        );
+      }
+
       const activeReasons: string[] = [];
       for (const ref of openReferrals) {
         activeReasons.push(`إحالة مفتوحة لدى ${ref.toUser?.name || 'مستخدم'}`);
@@ -768,6 +786,194 @@ export class CorrespondencesService {
       status: corr.status,
       receivedAt: corr.receivedAt,
       reply: latestReply,
+    };
+  }
+
+  /** استرجاع شجرة الأنساب والترابط البياني للمعاملة وحوكمة الإغلاق */
+  async getLineage(id: string, user: AuthUser) {
+    const initial = await this.prisma.correspondence.findUnique({
+      where: { id },
+      select: { id: true, parentId: true },
+    });
+    if (!initial) throw new NotFoundException('المراسلة غير موجودة');
+
+    // 1. البحث عن الجذر الأصلي للشجرة (Root Ancestor)
+    let rootId = initial.id;
+    let currentParentId = initial.parentId;
+    let depthGuard = 0;
+
+    while (currentParentId && depthGuard < 10) {
+      const parent = await this.prisma.correspondence.findUnique({
+        where: { id: currentParentId },
+        select: { id: true, parentId: true },
+      });
+      if (!parent) break;
+      rootId = parent.id;
+      currentParentId = parent.parentId;
+      depthGuard++;
+    }
+
+    // 2. جلب كافة المعاملات المتفرعة من الجذر الأصلي
+    const allInFamily = await this.fetchCorrespondenceSubtree(rootId);
+
+    // 3. احتساب مؤشرات الشجرة وحوكمة الإغلاق للمعاملة المطلوبة
+    const targetNode = allInFamily.find((n) => n.id === id);
+    const targetChildren = allInFamily.filter((n) => n.parentId === id);
+
+    let openReferralsCount = 0;
+    let activeTasksCount = 0;
+    let draftRepliesCount = 0;
+    let activeDescendantsCount = 0;
+    const blockingReasons: string[] = [];
+
+    for (const node of allInFamily) {
+      openReferralsCount += (node.referrals || []).filter((r: any) => r.status === ReferralStatus.OPEN).length;
+      activeTasksCount += (node.tasks || []).filter(
+        (t: any) => t.status === TaskStatus.PENDING || t.status === TaskStatus.IN_PROGRESS,
+      ).length;
+      draftRepliesCount += (node.replies || []).filter(
+        (r: any) => r.status === ReplyStatus.DRAFT || r.status === ReplyStatus.SUBMITTED,
+      ).length;
+    }
+
+    for (const child of targetChildren) {
+      if (child.status !== CorrespondenceStatus.CLOSED && child.status !== CorrespondenceStatus.ARCHIVED) {
+        activeDescendantsCount++;
+        blockingReasons.push(`معاملة فرعية نشطة: ${child.refNumber} (${child.subject})`);
+      }
+    }
+
+    if (targetNode) {
+      const targetOpenRefs = (targetNode.referrals || []).filter((r: any) => r.status === ReferralStatus.OPEN);
+      const targetActiveTasks = (targetNode.tasks || []).filter(
+        (t: any) => t.status === TaskStatus.PENDING || t.status === TaskStatus.IN_PROGRESS,
+      );
+      const targetActiveReplies = (targetNode.replies || []).filter(
+        (r: any) => r.status === ReplyStatus.DRAFT || r.status === ReplyStatus.SUBMITTED,
+      );
+
+      for (const r of targetOpenRefs) {
+        blockingReasons.push(`إحالة مفتوحة بانتظار المعالجة لدى ${r.toUser?.name || 'مستخدم'}`);
+      }
+      for (const t of targetActiveTasks) {
+        blockingReasons.push(`تكليف جارٍ قيد التنفيذ: "${t.title}"`);
+      }
+      for (const _ of targetActiveReplies) {
+        blockingReasons.push('مسودة رد قيد الصياغة أو الاعتماد');
+      }
+    }
+
+    const canClose = blockingReasons.length === 0;
+    const tree = this.buildHierarchyTree(allInFamily, rootId);
+
+    return {
+      currentNodeId: id,
+      rootId,
+      totalNodes: allInFamily.length,
+      metrics: {
+        totalNodes: allInFamily.length,
+        openReferralsCount,
+        activeTasksCount,
+        draftRepliesCount,
+        activeDescendantsCount,
+      },
+      cascadingClosure: {
+        canClose,
+        blockingReasons,
+      },
+      tree,
+    };
+  }
+
+  private async fetchCorrespondenceSubtree(rootId: string) {
+    const queue = [rootId];
+    const visited = new Set<string>();
+    const results: any[] = [];
+
+    const NODE_INCLUDE = {
+      department: { select: { id: true, name: true, code: true } },
+      createdBy: { select: { id: true, name: true, email: true, role: true } },
+      referrals: {
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          notes: true,
+          fromUser: { select: { id: true, name: true } },
+          toUser: { select: { id: true, name: true } },
+        },
+      },
+      tasks: {
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          dueDate: true,
+          doneAt: true,
+          isDone: true,
+          assignedTo: { select: { id: true, name: true } },
+        },
+      },
+      replies: {
+        select: {
+          id: true,
+          status: true,
+          body: true,
+          createdAt: true,
+          author: { select: { id: true, name: true } },
+        },
+      },
+      children: { select: { id: true } },
+    };
+
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      if (visited.has(currentId)) continue;
+      visited.add(currentId);
+
+      const node = await this.prisma.correspondence.findUnique({
+        where: { id: currentId },
+        include: NODE_INCLUDE,
+      });
+
+      if (node) {
+        results.push(node);
+        for (const child of (node.children || [])) {
+          if (!visited.has(child.id)) {
+            queue.push(child.id);
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  private buildHierarchyTree(nodes: any[], currentId: string): any {
+    const node = nodes.find((n) => n.id === currentId);
+    if (!node) return null;
+
+    const children = nodes
+      .filter((n) => n.parentId === currentId)
+      .map((c) => this.buildHierarchyTree(nodes, c.id))
+      .filter(Boolean);
+
+    return {
+      id: node.id,
+      refNumber: node.refNumber,
+      type: node.type,
+      subject: node.subject,
+      status: node.status,
+      priority: node.priority,
+      parentId: node.parentId,
+      department: node.department,
+      createdBy: node.createdBy,
+      createdAt: node.createdAt,
+      closedAt: node.closedAt,
+      referrals: node.referrals || [],
+      tasks: node.tasks || [],
+      replies: node.replies || [],
+      children,
     };
   }
 }

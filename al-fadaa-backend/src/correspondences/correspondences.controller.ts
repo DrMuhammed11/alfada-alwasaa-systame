@@ -93,6 +93,12 @@ export class CorrespondencesController {
     return this.correspondencesService.search(dto, user);
   }
 
+  @Get(':id/lineage')
+  @ApiOperation({ summary: 'استعراض شجرة الأنساب والترابط البياني للمعاملة وحوكمة الإغلاق' })
+  getLineage(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
+    return this.correspondencesService.getLineage(id, user);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'تفاصيل مراسلة كاملة (الإحالات / التكليفات / الردود / المرفقات)' })
   findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthUser) {
