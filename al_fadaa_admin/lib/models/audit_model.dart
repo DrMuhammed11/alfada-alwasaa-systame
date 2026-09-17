@@ -5,6 +5,8 @@ class AuditLogItem {
   final String? userName;
   final String? userEmail;
   final String? ipAddress;
+  final String? previousHash;
+  final String? recordHash;
   final DateTime createdAt;
   final Map<String, dynamic>? details;
 
@@ -15,6 +17,8 @@ class AuditLogItem {
     this.userName,
     this.userEmail,
     this.ipAddress,
+    this.previousHash,
+    this.recordHash,
     required this.createdAt,
     this.details,
   });
@@ -28,8 +32,39 @@ class AuditLogItem {
       userName: user?['name'] ?? user?['fullName'] ?? 'النظام',
       userEmail: user?['email'],
       ipAddress: json['ipAddress'],
+      previousHash: json['previousHash'],
+      recordHash: json['recordHash'],
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) ?? DateTime.now() : DateTime.now(),
       details: json['details'] is Map<String, dynamic> ? json['details'] : null,
+    );
+  }
+}
+
+class AuditIntegrityReport {
+  final bool isTamperFree;
+  final int totalVerified;
+  final String chainStatus;
+  final String verifiedUntil;
+  final String details;
+  final String? brokenRecordId;
+
+  AuditIntegrityReport({
+    required this.isTamperFree,
+    required this.totalVerified,
+    required this.chainStatus,
+    required this.verifiedUntil,
+    required this.details,
+    this.brokenRecordId,
+  });
+
+  factory AuditIntegrityReport.fromJson(Map<String, dynamic> json) {
+    return AuditIntegrityReport(
+      isTamperFree: json['isTamperFree'] ?? false,
+      totalVerified: json['totalVerified'] ?? 0,
+      chainStatus: json['chainStatus'] ?? 'UNKNOWN',
+      verifiedUntil: json['verifiedUntil'] ?? '',
+      details: json['details'] ?? '',
+      brokenRecordId: json['brokenRecordId'],
     );
   }
 }

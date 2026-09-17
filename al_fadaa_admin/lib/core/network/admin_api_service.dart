@@ -280,6 +280,19 @@ class AdminApiService {
     return [];
   }
 
+  Future<AuditIntegrityReport?> verifyAuditIntegrity({int limit = 1000}) async {
+    try {
+      final uri = Uri.parse('${ApiConstants.audit}/verify?limit=$limit');
+      final response = await _http.get(uri);
+      if (response.statusCode == 200) {
+        return AuditIntegrityReport.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      debugPrint('verifyAuditIntegrity error: $e');
+    }
+    return null;
+  }
+
   // ─── أدوات النظام والنسخ الاحتياطي ───
   Future<Map<String, dynamic>> resendFailedMails() async {
     try {
