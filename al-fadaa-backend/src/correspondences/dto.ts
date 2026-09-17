@@ -14,6 +14,7 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { PaginationDto } from '../common/dto/pagination.dto';
 
 export class CreateIncomingDto {
@@ -184,4 +185,50 @@ export class PublicInquiryDto {
   @IsString()
   message?: string;
 }
+
+export class SearchCorrespondencesDto extends PaginationDto {
+  @ApiPropertyOptional({
+    description: 'نص البحث الشامل (في الموضوع والمحتوى والردود والملاحظات والمرسل)',
+    example: 'عقد توريد',
+  })
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @ApiPropertyOptional({ enum: CorrespondenceType, description: 'النوع: وارد / صادر / داخلي' })
+  @IsOptional()
+  @IsEnum(CorrespondenceType, { message: 'النوع غير صالح' })
+  type?: CorrespondenceType;
+
+  @ApiPropertyOptional({ enum: CorrespondenceStatus, description: 'الحالة' })
+  @IsOptional()
+  @IsEnum(CorrespondenceStatus, { message: 'الحالة غير صالحة' })
+  status?: CorrespondenceStatus;
+
+  @ApiPropertyOptional({ enum: Priority, description: 'الأهمية' })
+  @IsOptional()
+  @IsEnum(Priority, { message: 'الأهمية غير صالحة' })
+  priority?: Priority;
+
+  @ApiPropertyOptional({ description: 'تصفية بحسب القسم (UUID)' })
+  @IsOptional()
+  @IsUUID('4', { message: 'معرف القسم غير صالح' })
+  departmentId?: string;
+
+  @ApiPropertyOptional({ description: 'تاريخ البداية (ISO)', example: '2026-01-01T00:00:00Z' })
+  @IsOptional()
+  @IsDateString({}, { message: 'صيغة تاريخ البداية غير صالحة' })
+  from?: string;
+
+  @ApiPropertyOptional({ description: 'تاريخ النهاية (ISO)', example: '2026-12-31T23:59:59Z' })
+  @IsOptional()
+  @IsDateString({}, { message: 'صيغة تاريخ النهاية غير صالحة' })
+  to?: string;
+
+  @ApiPropertyOptional({ description: 'هل تحتوي على مرفقات؟' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  hasAttachments?: boolean;
+}
+
 

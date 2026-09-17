@@ -29,6 +29,7 @@ import {
   CreateIncomingDto,
   CreateInternalDto,
   PublicInquiryDto,
+  SearchCorrespondencesDto,
   UpdateCorrespondenceDto,
 } from './dto';
 import { RefNumberService } from './ref-number.service';
@@ -172,6 +173,14 @@ export class CorrespondencesService {
     user: AuthUser,
   ): Promise<Paginated<CorrespondenceListRow>> {
     return this.queryService.findAll(dto, user);
+  }
+
+  /** البحث المتقدم في المراسلات والردود والمحتوى النصي */
+  search(
+    dto: SearchCorrespondencesDto,
+    user: AuthUser,
+  ): Promise<Paginated<CorrespondenceListRow>> {
+    return this.queryService.search(dto, user);
   }
 
   /** تفاصيل مراسلة — مع فرض نطاق الرؤية نفسه */

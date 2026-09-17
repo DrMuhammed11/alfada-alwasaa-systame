@@ -15,6 +15,7 @@ import {
   CreateIncomingDto,
   CreateInternalDto,
   PublicInquiryDto,
+  SearchCorrespondencesDto,
   UpdateCorrespondenceDto,
 } from './dto';
 import { RequirePermission } from '../common/decorators/require-permission.decorator';
@@ -82,6 +83,14 @@ export class CorrespondencesController {
   })
   findAll(@Query() dto: CorrespondencesQueryDto, @CurrentUser() user: AuthUser) {
     return this.correspondencesService.findAll(dto, user);
+  }
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'البحث المتقدم والفلاتر الشاملة في المراسلات والردود والنصوص',
+  })
+  search(@Query() dto: SearchCorrespondencesDto, @CurrentUser() user: AuthUser) {
+    return this.correspondencesService.search(dto, user);
   }
 
   @Get(':id')

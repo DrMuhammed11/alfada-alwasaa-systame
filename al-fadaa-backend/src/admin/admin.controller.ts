@@ -6,6 +6,7 @@ import { RequirePermission } from '../common/decorators/require-permission.decor
 import type { AuthUser } from '../common/types';
 import { Permission } from '../security/permissions';
 import { AdminService } from './admin.service';
+import { AdminAnalyticsQueryDto } from './dto/admin-analytics-query.dto';
 
 @ApiTags('لوحة تحكم النظام (Admin)')
 @ApiBearerAuth()
@@ -21,6 +22,19 @@ export class AdminController {
       throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
     }
     return this.adminService.findOrphans();
+  }
+
+  @Get('analytics')
+  @RequirePermission(Permission.AUDIT_VIEW)
+  @ApiOperation({ summary: 'مؤشرات الأداء والإحصائيات الشاملة للوحة الإدارة (Analytics)' })
+  getAnalytics(
+    @Query() dto: AdminAnalyticsQueryDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    if (user.role !== Role.ADMIN && user.role !== Role.GM && user.role !== Role.DEPUTY_GM) {
+      throw new ForbiddenException('الاطلاع على الإحصائيات التحليلية متاح للإدارة العليا ومسؤول النظام فقط');
+    }
+    return this.adminService.getAnalytics(dto);
   }
 
   @Get('approval-workflows')

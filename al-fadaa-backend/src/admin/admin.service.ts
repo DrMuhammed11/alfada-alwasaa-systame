@@ -1,7 +1,17 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { CorrespondenceStatus, OutboxMailStatus, ReferralStatus, ReplyStatus, TaskStatus } from '@prisma/client';
+import {
+  CorrespondenceStatus,
+  CorrespondenceType,
+  OutboxMailStatus,
+  Priority,
+  ReferralStatus,
+  ReplyStatus,
+  TaskStatus,
+  Prisma,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailRetryService } from '../mail/mail-retry.service';
+import { AdminAnalyticsQueryDto } from './dto/admin-analytics-query.dto';
 
 @Injectable()
 export class AdminService {
@@ -154,6 +164,214 @@ export class AdminService {
   async pauseOutboxMail(id: string) {
     if (!this.mailRetry) throw new Error('خدمة استرداد البريد غير مهيأة');
     return this.mailRetry.pauseMail(id);
+  }
+
+  /** استخراج مؤشرات الأداء والإحصائيات التحليلية للوحة الإدارة */
+  async getAnalytics(dto: AdminAnalyticsQueryDto) {
+    const now = new Date();
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    if (dto.from) {
+      startDate = new Date(dto.from);
+    } else if (dto.period && dto.period !== 'all') {
+      const days = dto.period === '7d' ? 7 : dto.period === '90d' ? 90 : dto.period === 'year' ? 365 : 30;
+      startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    }
+
+    if (dto.to) {
+      endDate = new Date(dto.to);
+    }
+
+    const dateFilter: Prisma.DateTimeFilter | undefined =
+      startDate || endDate
+        ? {
+            ...(startDate ? { gte: startDate } : {}),
+            ...(endDate ? { lte: endDate } : {}),
+          }
+        : undefined;
+
+    const baseWhere: Prisma.CorrespondenceWhereInput = {
+      parentId: null,
+      ...(dateFilter ? { createdAt: dateFilter } : {}),
+      ...(dto.departmentId ? { departmentId: dto.departmentId } : {}),
+    };
+
+    // 1. التلخيص العام للمراسلات والأولويات
+    const [
+      total,
+      incoming,
+      outgoing,
+      internal,
+      closed,
+      archived,
+      urgentCount,
+      highCount,
+      normalCount,
+      lowCount,
+      allCorrespondences,
+      departments,
+    ] = await Promise.all([
+      this.prisma.correspondence.count({ where: baseWhere }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.INCOMING } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.OUTGOING } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.INTERNAL } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, status: CorrespondenceStatus.CLOSED } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, status: CorrespondenceStatus.ARCHIVED } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.URGENT } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.HIGH } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.NORMAL } }),
+      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.LOW } }),
+      this.prisma.correspondence.findMany({
+        where: baseWhere,
+        select: {
+          id: true,
+          createdAt: true,
+          type: true,
+          status: true,
+          departmentId: true,
+        },
+      }),
+      this.prisma.department.findMany({
+        select: { id: true, name: true, code: true },
+      }),
+    ]);
+
+    // 2. تحليل المهام ومؤشرات الالتزام بالـ SLA
+    const taskWhere: Prisma.TaskWhereInput = {
+      ...(dateFilter ? { createdAt: dateFilter } : {}),
+      ...(dto.departmentId ? { correspondence: { departmentId: dto.departmentId } } : {}),
+    };
+
+    const tasks = await this.prisma.task.findMany({
+      where: taskWhere,
+      select: {
+        id: true,
+        status: true,
+        dueDate: true,
+        doneAt: true,
+        correspondence: { select: { departmentId: true } },
+      },
+    });
+
+    let onTimeTasks = 0;
+    let overdueTasks = 0;
+    let pendingTasks = 0;
+
+    for (const t of tasks) {
+      if (t.status === TaskStatus.DONE) {
+        if (t.dueDate && t.doneAt && t.doneAt > t.dueDate) {
+          overdueTasks++;
+        } else {
+          onTimeTasks++;
+        }
+      } else if (t.status === TaskStatus.PENDING || t.status === TaskStatus.IN_PROGRESS) {
+        pendingTasks++;
+        if (t.dueDate && t.dueDate < now) {
+          overdueTasks++;
+        }
+      }
+    }
+
+    const evaluatedTasks = onTimeTasks + overdueTasks;
+    const slaComplianceRate =
+      evaluatedTasks > 0
+        ? Math.round((onTimeTasks / evaluatedTasks) * 1000) / 10
+        : 100.0;
+
+    // 3. أداء الأقسام
+    const deptMap: Record<
+      string,
+      {
+        id: string;
+        name: string;
+        code: string;
+        correspondences: number;
+        tasksTotal: number;
+        tasksCompleted: number;
+        tasksPending: number;
+      }
+    > = {};
+
+    for (const d of departments) {
+      deptMap[d.id] = {
+        id: d.id,
+        name: d.name,
+        code: d.code,
+        correspondences: 0,
+        tasksTotal: 0,
+        tasksCompleted: 0,
+        tasksPending: 0,
+      };
+    }
+
+    for (const c of allCorrespondences) {
+      if (c.departmentId && deptMap[c.departmentId]) {
+        deptMap[c.departmentId].correspondences++;
+      }
+    }
+
+    for (const t of tasks) {
+      const depId = t.correspondence?.departmentId;
+      if (depId && deptMap[depId]) {
+        deptMap[depId].tasksTotal++;
+        if (t.status === TaskStatus.DONE) {
+          deptMap[depId].tasksCompleted++;
+        } else {
+          deptMap[depId].tasksPending++;
+        }
+      }
+    }
+
+    const departmentPerformance = Object.values(deptMap).map((item) => ({
+      ...item,
+      complianceRate:
+        item.tasksTotal > 0
+          ? Math.round((item.tasksCompleted / item.tasksTotal) * 1000) / 10
+          : 100.0,
+    }));
+
+    // 4. السلسلة الزمنية للرسم البياني
+    const trendMap: Record<string, { date: string; incoming: number; outgoing: number; closed: number }> = {};
+    for (const c of allCorrespondences) {
+      const dateKey = c.createdAt.toISOString().slice(0, 10);
+      if (!trendMap[dateKey]) {
+        trendMap[dateKey] = { date: dateKey, incoming: 0, outgoing: 0, closed: 0 };
+      }
+      if (c.type === CorrespondenceType.INCOMING) trendMap[dateKey].incoming++;
+      if (c.type === CorrespondenceType.OUTGOING) trendMap[dateKey].outgoing++;
+      if (c.status === CorrespondenceStatus.CLOSED) trendMap[dateKey].closed++;
+    }
+
+    const trend = Object.values(trendMap).sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      period: dto.period ?? '30d',
+      summary: {
+        total,
+        incoming,
+        outgoing,
+        internal,
+        closed,
+        archived,
+        active: total - (closed + archived),
+      },
+      sla: {
+        totalTasks: tasks.length,
+        onTimeTasks,
+        overdueTasks,
+        pendingTasks,
+        complianceRate: slaComplianceRate,
+      },
+      priorities: {
+        urgent: urgentCount,
+        high: highCount,
+        normal: normalCount,
+        low: lowCount,
+      },
+      departmentPerformance,
+      trend,
+    };
   }
 }
 

@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthUser, Paginated } from '../common/types';
 import { buildPageMeta } from '../common/types';
-import { CorrespondencesQueryDto } from './dto';
+import { CorrespondencesQueryDto, SearchCorrespondencesDto } from './dto';
 import {
   CorrespondenceDetailRow,
   CorrespondenceListRow,
@@ -166,5 +166,110 @@ export class CorrespondencesQueryService {
       return createdByMe > 0;
     }
     return false;
+  }
+
+  /**
+   * البحث المتقدم في المراسلات والردود والمحتوى النصي
+   * - يشمل: الموضوع، المحتوى/النص الأصلي، نصوص الردود، الملاحظات، بيانات المرسل
+   * - فلاتر متقدمة: النوع، الحالة، الأولوية، القسم، النطاق الزمني (from/to)، وجود مرفقات
+   * - خاضع لحوكمة نطاق الرؤية وفق دور المستخدم
+   */
+  async search(
+    dto: SearchCorrespondencesDto,
+    user: AuthUser,
+  ): Promise<Paginated<CorrespondenceListRow>> {
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 20;
+
+    const filters: Prisma.CorrespondenceWhereInput[] = [this.buildScope(user)];
+    filters.push({ parentId: null });
+
+    if (dto.type) filters.push({ type: dto.type });
+    if (dto.status) filters.push({ status: dto.status });
+    if (dto.priority) filters.push({ priority: dto.priority });
+    if (dto.departmentId) filters.push({ departmentId: dto.departmentId });
+
+    if (dto.from || dto.to) {
+      filters.push({
+        createdAt: {
+          ...(dto.from ? { gte: new Date(dto.from) } : {}),
+          ...(dto.to ? { lte: new Date(dto.to) } : {}),
+        },
+      });
+    }
+
+    if (dto.hasAttachments !== undefined) {
+      if (dto.hasAttachments) {
+        filters.push({ attachments: { some: {} } });
+      } else {
+        filters.push({ attachments: { none: {} } });
+      }
+    }
+
+    if (dto.q && dto.q.trim().length > 0) {
+      const q = dto.q.trim();
+      filters.push({
+        OR: [
+          { subject: { contains: q, mode: 'insensitive' } },
+          { body: { contains: q, mode: 'insensitive' } },
+          { refNumber: { contains: q, mode: 'insensitive' } },
+          { senderName: { contains: q, mode: 'insensitive' } },
+          { senderEmail: { contains: q, mode: 'insensitive' } },
+          { senderPhone: { contains: q, mode: 'insensitive' } },
+          { channel: { contains: q, mode: 'insensitive' } },
+          { replies: { some: { body: { contains: q, mode: 'insensitive' } } } },
+        ],
+      });
+    }
+
+    const where: Prisma.CorrespondenceWhereInput = { AND: filters };
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.correspondence.count({ where }),
+      this.prisma.correspondence.findMany({
+        where,
+        orderBy: { updatedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: LIST_INCLUDE,
+      }),
+    ]);
+
+    const now = new Date();
+    const enrichedData = data.map((item: any) => {
+      let isOverdue = false;
+      let maxOverdueDays = 0;
+
+      const dueDates: Date[] = [];
+      if (item.referrals) {
+        for (const r of item.referrals) {
+          if (r.dueDate) dueDates.push(new Date(r.dueDate));
+        }
+      }
+      if (item.tasks) {
+        for (const t of item.tasks) {
+          if (t.dueDate) dueDates.push(new Date(t.dueDate));
+        }
+      }
+
+      for (const d of dueDates) {
+        if (d < now) {
+          isOverdue = true;
+          const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays > maxOverdueDays) maxOverdueDays = diffDays;
+        }
+      }
+
+      return {
+        ...item,
+        isOverdue,
+        overdueDays: maxOverdueDays,
+      };
+    });
+
+    return {
+      data: enrichedData,
+      meta: buildPageMeta(page, limit, total),
+    };
   }
 }
