@@ -4,9 +4,17 @@ class ApiConstants {
     defaultValue: 'http://localhost:3000/api/v1',
   );
 
+  // وضع التطوير فقط — يتأكد من DEV_MODE قبل عرض بيانات تجريبية
+  static const bool isDevMode = bool.fromEnvironment(
+    'DEV_MODE',
+    defaultValue: false,
+  );
+
   // Auth
   static const String login = '$baseUrl/auth/login';
   static const String me = '$baseUrl/auth/me';
+  static const String refresh = '$baseUrl/auth/refresh';
+  static const String logout = '$baseUrl/auth/logout';
 
   // Correspondences
   static const String correspondences = '$baseUrl/correspondences';
@@ -19,20 +27,6 @@ class ApiConstants {
   static const String audit = '$baseUrl/audit';
   static const String tasks = '$baseUrl/tasks';
   static const String referrals = '$baseUrl/referrals/my';
-
-  // Demo Credentials
-  static const Map<String, String> demoAccounts = {
-    'ADMIN': 'admin@al-fadaa.com',
-    'GM': 'gm@al-fadaa.com',
-    'DEPUTY_GM': 'deputy@al-fadaa.com',
-    'DEPT_MANAGER': 'eng.manager@al-fadaa.com',
-    'EMPLOYEE': 'eng.employee1@al-fadaa.com',
-    'FINANCE': 'fin.manager@al-fadaa.com',
-    'RECEPTION': 'reception@al-fadaa.com',
-    'CUSTOMER_SERVICE': 'cs.manager@al-fadaa.com',
-  };
-
-  static const String defaultPassword = 'Alfadaa@2026';
 
   // Roles Arabic Names
   static String getRoleName(String role) {

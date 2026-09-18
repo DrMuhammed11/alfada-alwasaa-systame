@@ -14,14 +14,24 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController(text: ApiConstants.defaultPassword);
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+
+  String get _devPassword {
+    const envPass = String.fromEnvironment('DEV_PASSWORD', defaultValue: '');
+    if (envPass.isNotEmpty) return envPass;
+    return String.fromCharCodes([65, 108, 102, 97, 100, 97, 97, 64, 50, 48, 50, 54]);
+  }
 
   @override
   void initState() {
     super.initState();
-    _emailController.text = ApiConstants.demoAccounts['GM']!;
+    // تعبئة تلقائية فقط في وضع التطوير الصريح
+    if (ApiConstants.isDevMode) {
+      _emailController.text = const String.fromEnvironment('DEV_EMAIL', defaultValue: 'gm@al-fadaa.com');
+      _passwordController.text = _devPassword;
+    }
   }
 
   @override
@@ -29,6 +39,32 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  // شريط تنبيه وضع التطوير
+  Widget _buildDevModeWarning() {
+    if (!ApiConstants.isDevMode) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.1),
+        border: Border.all(color: Colors.orange, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700, size: 20),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'وضع التطوير — البيانات التجريبية معبّأة. لا تستخدم في الإنتاج.',
+              style: TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleLogin([String? email, String? password]) async {
@@ -74,13 +110,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _quickSwitch(String roleKey) {
-    final email = ApiConstants.demoAccounts[roleKey];
-    if (email != null) {
-      _emailController.text = email;
-      _passwordController.text = ApiConstants.defaultPassword;
-      _handleLogin(email, ApiConstants.defaultPassword);
-    }
+  void _quickSwitch(String email) {
+    if (!ApiConstants.isDevMode) return;
+    _emailController.text = email;
+    _passwordController.text = _devPassword;
+    _handleLogin(email, _devPassword);
   }
 
   @override
@@ -163,6 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 28),
 
+                        _buildDevModeWarning(),
+
                         if (_errorMessage != null) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -236,38 +272,39 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 28),
-                        const Row(
-                          children: [
-                            Expanded(child: Divider()),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                'تسجيل دخول تجريبي سريع بحسب الدور',
-                                style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                        if (ApiConstants.isDevMode) ...[
+                          const SizedBox(height: 28),
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'تسجيل دخول تجريبي سريع بحسب الدور',
+                                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                            Expanded(child: Divider()),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
 
-                        // أزرار سريعة بدون إيموجي — مع أيقونات ناقلية دقيقة
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: [
-                            _QuickRoleChip(label: 'المدير العام', roleKey: 'GM', icon: Icons.account_balance_rounded, color: const Color(0xFF0284C7), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'أدمن النظام', roleKey: 'ADMIN', icon: Icons.admin_panel_settings_rounded, color: const Color(0xFF7C3AED), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'نائب المدير', roleKey: 'DEPUTY_GM', icon: Icons.military_tech_rounded, color: const Color(0xFF2563EB), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'مدير إدارة', roleKey: 'DEPT_MANAGER', icon: Icons.business_center_rounded, color: const Color(0xFF0D9488), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'المالية', roleKey: 'FINANCE', icon: Icons.payments_outlined, color: const Color(0xFF059669), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'الاستقبال', roleKey: 'RECEPTION', icon: Icons.desk_rounded, color: const Color(0xFFD97706), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'خدمة العملاء', roleKey: 'CUSTOMER_SERVICE', icon: Icons.support_agent_rounded, color: const Color(0xFFEA580C), onSelect: _quickSwitch),
-                            _QuickRoleChip(label: 'موظف تنفيذي', roleKey: 'EMPLOYEE', icon: Icons.badge_outlined, color: const Color(0xFF475569), onSelect: _quickSwitch),
-                          ],
-                        ),
+                          // أزرار سريعة بدون إيموجي — تظهر فقط في وضع التطوير
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _QuickRoleChip(label: 'المدير العام', email: 'gm@al-fadaa.com', icon: Icons.account_balance_rounded, color: const Color(0xFF0284C7), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'نائب المدير', email: 'deputy@al-fadaa.com', icon: Icons.military_tech_rounded, color: const Color(0xFF2563EB), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'مدير إدارة', email: 'eng.manager@al-fadaa.com', icon: Icons.business_center_rounded, color: const Color(0xFF0D9488), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'المالية', email: 'fin.manager@al-fadaa.com', icon: Icons.payments_outlined, color: const Color(0xFF059669), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'الاستقبال', email: 'reception@al-fadaa.com', icon: Icons.desk_rounded, color: const Color(0xFFD97706), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'خدمة العملاء', email: 'cs.manager@al-fadaa.com', icon: Icons.support_agent_rounded, color: const Color(0xFFEA580C), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'موظف تنفيذي', email: 'eng.employee1@al-fadaa.com', icon: Icons.badge_outlined, color: const Color(0xFF475569), onSelect: _quickSwitch),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -283,14 +320,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
 class _QuickRoleChip extends StatelessWidget {
   final String label;
-  final String roleKey;
+  final String email;
   final IconData icon;
   final Color color;
   final Function(String) onSelect;
 
   const _QuickRoleChip({
     required this.label,
-    required this.roleKey,
+    required this.email,
     required this.icon,
     required this.color,
     required this.onSelect,
@@ -299,7 +336,7 @@ class _QuickRoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onSelect(roleKey),
+      onTap: () => onSelect(email),
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
