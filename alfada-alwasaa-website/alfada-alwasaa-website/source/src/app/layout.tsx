@@ -59,6 +59,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.alfadaalwasaa.com",
   },
+  verification: {
+    google: "016da0dfa06d1301",
+    other: {
+      "google-site-verification": [
+        "google016da0dfa06d1301.html",
+        "016da0dfa06d1301",
+      ],
+    },
+  },
   icons: {
     icon: "/profile/logo_mark.png",
     apple: "/profile/logo_mark.png",
