@@ -36,6 +36,10 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   CORS_ORIGIN?: string;
+
+  @IsOptional()
+  @IsString()
+  IMAP_TLS_REJECT_UNAUTHORIZED?: string; // 'false' للتطوير فقط
 }
 
 /**

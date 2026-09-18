@@ -153,7 +153,13 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
         port,
         secure: true,
         auth: { user, pass },
-        tls: { rejectUnauthorized: false },
+        tls: {
+          // التحقق من شهادة TLS إلزامي في بيئة الإنتاج لمنع هجمات MITM، ومتاح التعطيل للتطوير فقط
+          rejectUnauthorized:
+            this.config.get<string>('NODE_ENV') === 'production'
+              ? true
+              : (this.config.get<string>('IMAP_TLS_REJECT_UNAUTHORIZED') !== 'false'),
+        },
         logger: false,
         connectionTimeout: 20000,
         socketTimeout: 30000,
@@ -288,7 +294,13 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
       port,
       secure: true,
       auth: { user, pass },
-      tls: { rejectUnauthorized: false },
+      tls: {
+        // التحقق من شهادة TLS إلزامي في بيئة الإنتاج لمنع هجمات MITM، ومتاح التعطيل للتطوير فقط
+        rejectUnauthorized:
+          this.config.get<string>('NODE_ENV') === 'production'
+            ? true
+            : (this.config.get<string>('IMAP_TLS_REJECT_UNAUTHORIZED') !== 'false'),
+      },
       logger: false,
       connectionTimeout: 15000,
       socketTimeout: 20000,

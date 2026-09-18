@@ -49,7 +49,11 @@ export class MailService implements OnModuleInit {
           pass: this.config.get<string>('SMTP_PASS'),
         },
         tls: {
-          rejectUnauthorized: false,
+          // التحقق من شهادة TLS إلزامي في بيئة الإنتاج لمنع هجمات MITM، ومتاح التعطيل للتطوير فقط
+          rejectUnauthorized:
+            this.config.get<string>('NODE_ENV') === 'production'
+              ? true
+              : (this.config.get<string>('IMAP_TLS_REJECT_UNAUTHORIZED') !== 'false'),
         },
       });
       this.logger.log('تمت تهيئة البريد بوضع SMTP — الإرسال حقيقي مع محرك الاسترداد');
