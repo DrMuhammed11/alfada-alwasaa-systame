@@ -10,3 +10,9 @@ export class LoginDto {
   @IsNotEmpty({ message: 'كلمة المرور مطلوبة' })
   password!: string;
 }
+
+export class RefreshTokenDto {
+  @ApiProperty({ description: 'رمز التحديث (Refresh Token)' })
+  @IsNotEmpty({ message: 'رمز التحديث مطلوب' })
+  refreshToken!: string;
+}

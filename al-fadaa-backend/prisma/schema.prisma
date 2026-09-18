@@ -164,9 +164,27 @@ model User {
   delegationsGiven     Delegation[]   @relation("UserDelegationsGiven")
   delegationsReceived  Delegation[]   @relation("UserDelegationsReceived")
   replyVersions        ReplyVersion[] @relation("ReplyVersionAuthor")
+  refreshTokens        RefreshToken[] @relation("UserRefreshTokens")
 
   @@index([departmentId])
   @@index([role])
+}
+
+/// الرموز المنعشة (Refresh Tokens) — تُستخدم لتجديد JWT قصير العمر
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique // الـ refresh token نفسه (hashed)
+  userId      String
+  user        User     @relation("UserRefreshTokens", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime // عادة 30 يوم
+  revokedAt   DateTime? // null = ساري، non-null = مُبطّل
+  replacedBy  String?  // معرّف الرمز الذي حلّ محله (rotation)
+  createdAt   DateTime @default(now())
+  userAgent   String?
+  ipAddress   String?
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
 /// الأقسام الإدارية في الشركة
