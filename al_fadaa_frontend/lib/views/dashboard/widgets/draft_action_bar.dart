@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../models/reply_model.dart';
 import 'reply_versions_dialog.dart';
 
@@ -34,12 +35,12 @@ class DraftActionBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
+        color: AppTheme.backgroundLight,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(8),
           bottomRight: Radius.circular(8),
         ),
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(top: BorderSide(color: AppTheme.borderLight)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,11 +48,11 @@ class DraftActionBar extends StatelessWidget {
           // شريط الحالة ومسار الاعتماد وتاريخ الإصدارات
           Row(
             children: [
-              const Icon(Icons.shield_outlined, size: 14, color: Color(0xFF64748B)),
+              const Icon(Icons.shield_outlined, size: 14, color: AppTheme.textMuted),
               const SizedBox(width: 6),
               Text(
                 'حالة المسودة: ${getReplyStatusText(replyItem.status)}',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
               ),
               const SizedBox(width: 10),
 
@@ -65,18 +66,18 @@ class DraftActionBar extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
+                    color: AppTheme.purple.withAlpha(20),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFFC7D2FE)),
+                    border: Border.all(color: AppTheme.purple.withAlpha(80)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.history_rounded, size: 12, color: Color(0xFF4338CA)),
+                      const Icon(Icons.history_rounded, size: 12, color: AppTheme.purple),
                       const SizedBox(width: 4),
                       Text(
                         'إصدار v${replyItem.version}',
-                        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF4338CA)),
+                        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppTheme.purple),
                       ),
                     ],
                   ),
@@ -90,16 +91,16 @@ class DraftActionBar extends StatelessWidget {
                 Wrap(
                   spacing: 4,
                   children: replyItem.approvalSteps.map((step) {
-                    Color stepColor = const Color(0xFF94A3B8);
+                    Color stepColor = AppTheme.textOnLight;
                     IconData stepIcon = Icons.radio_button_unchecked;
                     if (step.status == 'APPROVED') {
-                      stepColor = const Color(0xFF059669);
+                      stepColor = AppTheme.emerald;
                       stepIcon = Icons.check_circle_rounded;
                     } else if (step.status == 'REJECTED') {
-                      stepColor = const Color(0xFFDC2626);
+                      stepColor = AppTheme.crimson;
                       stepIcon = Icons.cancel_rounded;
                     } else if (step.status == 'PENDING') {
-                      stepColor = const Color(0xFF2563EB);
+                      stepColor = AppTheme.accent;
                       stepIcon = Icons.hourglass_top_rounded;
                     }
 
@@ -109,13 +110,13 @@ class DraftActionBar extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                       decoration: BoxDecoration(
                         color: stepColor.withAlpha(20),
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: stepColor.withAlpha(80), width: 0.8),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: stepColor.withAlpha(80)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(stepIcon, size: 10, color: stepColor),
+                          Icon(stepIcon, size: 11, color: stepColor),
                           const SizedBox(width: 3),
                           Text(
                             '${ApiConstants.getRoleName(step.requiredRole)}${isDelegated ? ' (وكالة)' : ''}',
@@ -129,7 +130,7 @@ class DraftActionBar extends StatelessWidget {
             ],
           ),
 
-          const Divider(height: 12, thickness: 0.8, color: Color(0xFFE2E8F0)),
+          const Divider(height: 12, thickness: 0.8, color: AppTheme.borderLight),
 
           // أزرار اتخاذ القرار والإجراءات
           Row(
@@ -140,13 +141,13 @@ class DraftActionBar extends StatelessWidget {
               if (isAuthor && (replyItem.status == 'DRAFT' || replyItem.status == 'REJECTED')) ...[
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF334155),
-                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    foregroundColor: AppTheme.secondary,
+                    side: const BorderSide(color: AppTheme.borderLight),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   ),
                   onPressed: () => onEditDraft(replyItem),
-                  icon: const Icon(Icons.edit_note_rounded, size: 15, color: Color(0xFF475569)),
+                  icon: const Icon(Icons.edit_note_rounded, size: 15, color: AppTheme.textMuted),
                   label: const Text('تعديل المسودة', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),
@@ -156,7 +157,7 @@ class DraftActionBar extends StatelessWidget {
               if (isAuthor && replyItem.status == 'DRAFT') ...[
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: AppTheme.accent,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -173,8 +174,8 @@ class DraftActionBar extends StatelessWidget {
               if ((replyItem.status == 'SUBMITTED' || replyItem.status == 'DRAFT') && canApprove) ...[
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFDC2626),
-                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    foregroundColor: AppTheme.crimson,
+                    side: BorderSide(color: AppTheme.crimson.withAlpha(80)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   ),
@@ -185,7 +186,7 @@ class DraftActionBar extends StatelessWidget {
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: AppTheme.accent,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -203,7 +204,7 @@ class DraftActionBar extends StatelessWidget {
                   (role == 'GM' || role == 'DEPUTY_GM' || role == 'ADMIN'))
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
+                    backgroundColor: AppTheme.emerald,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),

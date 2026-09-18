@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../core/network/api_service.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../models/attachment_model.dart';
 
 class AttachmentsPreview extends StatelessWidget {
@@ -164,19 +165,19 @@ class AttachmentsPreview extends StatelessWidget {
     final ext = fileName.split('.').last.toLowerCase();
     switch (ext) {
       case 'pdf':
-        return const Color(0xFFDC2626);
+        return AppTheme.crimson;
       case 'doc':
       case 'docx':
-        return const Color(0xFF2563EB);
+        return AppTheme.accent;
       case 'xls':
       case 'xlsx':
-        return const Color(0xFF059669);
+        return AppTheme.emerald;
       case 'jpg':
       case 'jpeg':
       case 'png':
-        return const Color(0xFFD97706);
+        return AppTheme.amber;
       default:
-        return const Color(0xFF64748B);
+        return AppTheme.textMuted;
     }
   }
 }
@@ -241,7 +242,7 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: const BoxDecoration(
-                color: Color(0xFF0F172A),
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
               ),
               child: Row(
@@ -257,7 +258,7 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
                   ),
                   Text(
                     widget.attachment.formattedSize,
-                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                    style: const TextStyle(color: AppTheme.textOnLight, fontSize: 11),
                   ),
                   const SizedBox(width: 12),
                   IconButton(
@@ -307,7 +308,7 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFCBD5E1)),
+          border: Border.all(color: AppTheme.borderLight),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withAlpha(8),
@@ -333,13 +334,13 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.broken_image_rounded, size: 24, color: Color(0xFF94A3B8)),
+                              const Icon(Icons.broken_image_rounded, size: 24, color: AppTheme.textOnLight),
                               const SizedBox(height: 4),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 6),
                                 child: Text(
                                   widget.attachment.fileName,
-                                  style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+                                  style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),

@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../models/correspondence_model.dart';
 import 'email_composer.dart';
 import 'message_card.dart';
@@ -108,23 +109,23 @@ class ConversationTimeline extends StatelessWidget {
 
       if (canView) {
         String badge = 'رد رسمي صادر';
-        Color badgeColor = const Color(0xFF059669);
+        Color badgeColor = AppTheme.emerald;
 
         if (reply.status == 'DRAFT') {
           badge = 'مسودة قيد الإعداد';
-          badgeColor = const Color(0xFFD97706);
+          badgeColor = AppTheme.amber;
         } else if (reply.status == 'SUBMITTED') {
           badge = 'مسودة بانتظار الاعتماد';
-          badgeColor = const Color(0xFF2563EB);
+          badgeColor = AppTheme.accent;
         } else if (reply.status == 'REJECTED') {
           badge = 'مسودة مرفوضة (تحتاج تعديل)';
-          badgeColor = const Color(0xFFDC2626);
+          badgeColor = AppTheme.crimson;
         } else if (reply.status == 'APPROVED') {
           badge = 'رد معتمد (جاهز للإرسال)';
-          badgeColor = const Color(0xFF059669);
+          badgeColor = AppTheme.emerald;
         } else if (reply.status == 'SENT') {
           badge = 'رد مرسل رسميًا للعميل بالبريد';
-          badgeColor = const Color(0xFF059669);
+          badgeColor = AppTheme.emerald;
         }
 
         messages.add({
@@ -160,7 +161,7 @@ class ConversationTimeline extends StatelessWidget {
         'title': '📋 تكليف قطاع بالمهمة: «${task.title}»',
         'subtitle': 'المسؤول المكلف: ${task.assignedTo?.fullName ?? 'القطاع'}${task.dueDate != null ? ' | الموعد المتوقع: ${task.dueDate!.year}/${task.dueDate!.month}/${task.dueDate!.day}' : ''}',
         'description': task.description,
-        'eventColor': const Color(0xFFD97706),
+        'eventColor': AppTheme.amber,
       });
 
       // 2. حدث إنجاز المهمة بواسطة القطاع
@@ -176,7 +177,7 @@ class ConversationTimeline extends StatelessWidget {
           'title': '✅ تم إنجاز المهمة بواسطة: «${task.assignedTo?.fullName ?? 'القطاع'}»',
           'subtitle': 'المعاملة عادت لتكون جاهزة للرد على العميل بالانتهاء وإغلاقها',
           'description': task.description,
-          'eventColor': const Color(0xFF059669),
+          'eventColor': AppTheme.emerald,
         });
       }
     }
@@ -194,7 +195,7 @@ class ConversationTimeline extends StatelessWidget {
         'title': '↪️ إحالة وتوجيه إلى: «${ref.toUser?.fullName ?? 'المسؤول المختص'}»',
         'subtitle': 'الحالة: ${ApiConstants.getReferralStatusLabel(ref.status)}${ref.dueDate != null ? ' | الموعد النهائي: ${ref.dueDate!.year}/${ref.dueDate!.month}/${ref.dueDate!.day}' : ''}',
         'description': ref.note,
-        'eventColor': const Color(0xFF7C3AED),
+        'eventColor': AppTheme.purple,
       });
     }
 

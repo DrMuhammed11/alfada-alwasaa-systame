@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/correspondence_model.dart';
 import 'attachments_preview.dart';
@@ -37,7 +38,7 @@ class MessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (msg['isSystemEvent'] == true) {
-      final Color eventColor = (msg['eventColor'] as Color?) ?? const Color(0xFF64748B);
+      final Color eventColor = (msg['eventColor'] as Color?) ?? AppTheme.textMuted;
       final String title = msg['title'] as String;
       final String? subtitle = msg['subtitle'] as String?;
       final String? description = msg['description'] as String?;
@@ -76,14 +77,14 @@ class MessageCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                     ),
                   ],
                   if (description != null && description.trim().isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       description.trim(),
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155), height: 1.35),
+                      style: const TextStyle(fontSize: 11.5, color: AppTheme.secondary, height: 1.35),
                     ),
                   ],
                 ],
@@ -92,7 +93,7 @@ class MessageCard extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               AppDateFormatter.formatListDate(date),
-              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 10, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -116,19 +117,19 @@ class MessageCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isDraft
-            ? const Color(0xFFFFFBEB)
-            : (isClient ? Colors.white : const Color(0xFFF8FAFC)),
+            ? AppTheme.amber.withAlpha(12)
+            : (isClient ? Colors.white : AppTheme.backgroundLight),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isDraft
-              ? const Color(0xFFFDE68A)
-              : (isClient ? const Color(0xFFE2E8F0) : const Color(0xFFCBD5E1)),
+              ? AppTheme.amber.withAlpha(50)
+              : AppTheme.borderLight,
           width: isClient ? 1.2 : 1.0,
         ),
         boxShadow: isClient
             ? [
                 BoxShadow(
-                  color: const Color(0xFF0284C7).withAlpha(8),
+                  color: AppTheme.accent.withAlpha(8),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 )
@@ -143,15 +144,15 @@ class MessageCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isDraft
-                  ? const Color(0xFFFEF3C7).withAlpha(60)
-                  : (isClient ? const Color(0xFFF0F9FF) : const Color(0xFFF1F5F9)),
+                  ? AppTheme.amber.withAlpha(20)
+                  : (isClient ? AppTheme.accent.withAlpha(15) : AppTheme.backgroundLight),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
               ),
               border: Border(
                 bottom: BorderSide(
-                  color: isDraft ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0),
+                  color: isDraft ? AppTheme.amber.withAlpha(50) : AppTheme.borderLight,
                 ),
               ),
             ),
@@ -161,14 +162,14 @@ class MessageCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 17,
                   backgroundColor: isClient
-                      ? const Color(0xFF0284C7).withAlpha(25)
-                      : (isDraft ? const Color(0xFFD97706).withAlpha(25) : const Color(0xFF059669).withAlpha(25)),
+                      ? AppTheme.accent.withAlpha(25)
+                      : (isDraft ? AppTheme.amber.withAlpha(25) : AppTheme.emerald.withAlpha(25)),
                   child: Icon(
                     isClient ? Icons.person_rounded : (isDraft ? Icons.edit_note_rounded : Icons.business_rounded),
                     size: 16,
                     color: isClient
-                        ? const Color(0xFF0284C7)
-                        : (isDraft ? const Color(0xFFD97706) : const Color(0xFF059669)),
+                        ? AppTheme.accent
+                        : (isDraft ? AppTheme.amber : AppTheme.emerald),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -186,7 +187,7 @@ class MessageCard extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F172A),
+                                color: AppTheme.primary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -221,18 +222,18 @@ class MessageCard extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEEF2FF),
+                                  color: AppTheme.purple.withAlpha(20),
                                   borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: const Color(0xFFC7D2FE)),
+                                  border: Border.all(color: AppTheme.purple.withAlpha(80)),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.history_rounded, size: 11, color: Color(0xFF4338CA)),
+                                    const Icon(Icons.history_rounded, size: 11, color: AppTheme.purple),
                                     const SizedBox(width: 3),
                                     Text(
                                       'v${replyItem.version}',
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF4338CA)),
+                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.purple),
                                     ),
                                   ],
                                 ),
@@ -246,18 +247,18 @@ class MessageCard extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: AppTheme.amber.withAlpha(20),
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: const Color(0xFFFDE68A)),
+                                border: Border.all(color: AppTheme.amber.withAlpha(60)),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.supervised_user_circle_outlined, size: 11, color: Color(0xFFD97706)),
+                                  Icon(Icons.supervised_user_circle_outlined, size: 11, color: AppTheme.amber),
                                   SizedBox(width: 3),
                                   Text(
                                     'وكالة',
-                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.amber),
                                   ),
                                 ],
                               ),
@@ -269,7 +270,7 @@ class MessageCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           senderEmail,
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                          style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -283,19 +284,19 @@ class MessageCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withAlpha(200),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF64748B)),
+                      const Icon(Icons.access_time_rounded, size: 12, color: AppTheme.textMuted),
                       const SizedBox(width: 4),
                       Text(
                         AppDateFormatter.formatFullDateTime(date),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF334155),
+                          color: AppTheme.secondary,
                         ),
                       ),
                     ],
@@ -305,7 +306,7 @@ class MessageCard extends StatelessWidget {
 
                 // زر النسخ
                 IconButton(
-                  icon: const Icon(Icons.copy_rounded, size: 14, color: Color(0xFF94A3B8)),
+                  icon: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.textOnLight),
                   tooltip: 'نسخ نص الرسالة',
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -377,7 +378,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
           widget.body,
           style: const TextStyle(
             fontSize: 13.5,
-            color: Color(0xFF1E293B),
+            color: AppTheme.textDark,
             height: 1.65,
           ),
         ),
@@ -395,7 +396,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
               parsed.introText!.trim(),
               style: const TextStyle(
                 fontSize: 13.5,
-                color: Color(0xFF1E293B),
+                color: AppTheme.textDark,
                 height: 1.65,
               ),
             ),
@@ -405,9 +406,9 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
           // بطاقة الرسالة الموجهة المرتبة
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppTheme.backgroundLight,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AppTheme.borderLight),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,7 +421,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     child: Row(
                       children: [
-                        const Icon(Icons.forward_to_inbox_rounded, size: 16, color: Color(0xFF2563EB)),
+                        const Icon(Icons.forward_to_inbox_rounded, size: 16, color: AppTheme.accent),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -431,7 +432,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F172A),
+                                  color: AppTheme.primary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -439,7 +440,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                               if (parsed.from != null && parsed.from!.isNotEmpty)
                                 Text(
                                   'من: ${parsed.from}${parsed.date != null ? " | ${parsed.date}" : ""}',
-                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                                  style: const TextStyle(fontSize: 10.5, color: AppTheme.textMuted),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -448,13 +449,13 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                         ),
                         Text(
                           _showDetails ? 'إخفاء التفاصيل' : 'عرض التفاصيل',
-                          style: const TextStyle(fontSize: 10.5, color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: 10.5, color: AppTheme.accent, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 4),
                         Icon(
                           _showDetails ? Icons.expand_less_rounded : Icons.expand_more_rounded,
                           size: 16,
-                          color: const Color(0xFF2563EB),
+                          color: AppTheme.accent,
                         ),
                       ],
                     ),
@@ -463,11 +464,11 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
 
                 // تفاصيل الترويسة الفنية القابلة للطي
                 if (_showDetails) ...[
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  const Divider(height: 1, color: AppTheme.borderLight),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
-                    color: const Color(0xFFF1F5F9).withAlpha(120),
+                    color: AppTheme.backgroundLight,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -489,7 +490,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
             parsed.cleanBody,
             style: const TextStyle(
               fontSize: 13.5,
-              color: Color(0xFF1E293B),
+              color: AppTheme.textDark,
               height: 1.65,
             ),
           ),
@@ -508,13 +509,13 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
             ),
           ),
           Expanded(
             child: SelectableText(
               value,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B)),
+              style: const TextStyle(fontSize: 11, color: AppTheme.textDark),
             ),
           ),
         ],

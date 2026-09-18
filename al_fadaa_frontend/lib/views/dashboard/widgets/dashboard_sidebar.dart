@@ -26,6 +26,7 @@ class DashboardSidebar extends StatelessWidget {
   final VoidCallback onRefresh;
   final VoidCallback onSyncMail;
   final VoidCallback onLogout;
+  final VoidCallback? onNavigate;
 
   const DashboardSidebar({
     super.key,
@@ -46,14 +47,15 @@ class DashboardSidebar extends StatelessWidget {
     required this.onRefresh,
     required this.onSyncMail,
     required this.onLogout,
+    this.onNavigate,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
-        border: Border(left: BorderSide(color: Color(0xFF1E293B))),
+      decoration: BoxDecoration(
+        color: AppTheme.primary,
+        border: Border(left: BorderSide(color: AppTheme.secondary.withAlpha(80))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,8 +66,8 @@ class DashboardSidebar extends StatelessWidget {
               horizontal: isCollapsed ? 8 : 14,
               vertical: isCollapsed ? 12 : 16,
             ),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppTheme.secondary.withAlpha(80))),
             ),
             child: isCollapsed
                 ? Center(
@@ -75,7 +77,7 @@ class DashboardSidebar extends StatelessWidget {
                         IconButton(
                           icon: const Icon(
                             Icons.chevron_left_rounded,
-                            color: Color(0xFF94A3B8),
+                            color: AppTheme.textOnLight,
                             size: 20,
                           ),
                           tooltip: 'توسيع القائمة',
@@ -86,7 +88,7 @@ class DashboardSidebar extends StatelessWidget {
                         const SizedBox(height: 12),
                         NotificationsBell(
                           onNotificationTap: onOpenCorrespondence,
-                          iconColor: const Color(0xFF94A3B8),
+                          iconColor: AppTheme.textOnLight,
                           iconSize: 18,
                         ),
                       ],
@@ -115,21 +117,21 @@ class DashboardSidebar extends StatelessWidget {
                             ),
                             Text(
                               'نظام المراسلات المؤسسي',
-                              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                              style: TextStyle(color: AppTheme.textOnLight, fontSize: 10),
                             ),
                           ],
                         ),
                       ),
                       NotificationsBell(
                         onNotificationTap: onOpenCorrespondence,
-                        iconColor: const Color(0xFF94A3B8),
+                        iconColor: AppTheme.textOnLight,
                         iconSize: 18,
                       ),
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(
                           Icons.chevron_right_rounded,
-                          color: Color(0xFF94A3B8),
+                          color: AppTheme.textOnLight,
                           size: 18,
                         ),
                         tooltip: 'تصغير القائمة',
@@ -194,11 +196,11 @@ class DashboardSidebar extends StatelessWidget {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFF334155)),
+                        side: const BorderSide(color: AppTheme.secondary),
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       ),
-                      icon: const Icon(Icons.description_outlined, size: 15, color: Color(0xFF94A3B8)),
+                      icon: const Icon(Icons.description_outlined, size: 15, color: AppTheme.textOnLight),
                       label: const Text('خطاب داخلي', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                     ),
                   ),
@@ -272,9 +274,9 @@ class DashboardSidebar extends StatelessWidget {
             padding: EdgeInsets.all(isCollapsed ? 6 : 10),
             margin: EdgeInsets.all(isCollapsed ? 6 : 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: AppTheme.secondary.withAlpha(60),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF334155)),
+              border: Border.all(color: AppTheme.secondary),
             ),
             child: isCollapsed
                 ? Center(
@@ -299,7 +301,7 @@ class DashboardSidebar extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF10B981),
+                          color: AppTheme.emerald,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -335,8 +337,8 @@ class DashboardSidebar extends StatelessWidget {
               horizontal: isCollapsed ? 6 : 12,
               vertical: 12,
             ),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: Color(0xFF1E293B))),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: AppTheme.secondary.withAlpha(80))),
             ),
             child: isCollapsed
                 ? Center(
@@ -356,7 +358,7 @@ class DashboardSidebar extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         IconButton(
-                          icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 17),
+                          icon: const Icon(Icons.logout_rounded, color: AppTheme.crimson, size: 17),
                           tooltip: 'تسجيل الخروج',
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -388,13 +390,13 @@ class DashboardSidebar extends StatelessWidget {
                             ),
                             Text(
                               ApiConstants.getRoleName(user.role),
-                              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9),
+                              style: const TextStyle(color: AppTheme.textOnLight, fontSize: 9),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 16),
+                        icon: const Icon(Icons.logout_rounded, color: AppTheme.crimson, size: 16),
                         tooltip: 'تسجيل الخروج',
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -419,7 +421,10 @@ class DashboardSidebar extends StatelessWidget {
       return Tooltip(
         message: '$title ${count != null ? "($count)" : ""}',
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            onTap();
+            onNavigate?.call();
+          },
           borderRadius: BorderRadius.circular(6),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 3),
@@ -431,7 +436,7 @@ class DashboardSidebar extends StatelessWidget {
             child: Icon(
               icon,
               size: 20,
-              color: isSelected ? AppTheme.accent : const Color(0xFF94A3B8),
+              color: isSelected ? AppTheme.accent : AppTheme.textOnLight,
             ),
           ),
         ),
@@ -448,12 +453,12 @@ class DashboardSidebar extends StatelessWidget {
       leading: Icon(
         icon,
         size: 18,
-        color: isSelected ? AppTheme.accent : const Color(0xFF94A3B8),
+        color: isSelected ? AppTheme.accent : AppTheme.textOnLight,
       ),
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
+          color: isSelected ? Colors.white : AppTheme.textOnLight,
           fontSize: 12,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
@@ -462,7 +467,7 @@ class DashboardSidebar extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.accent : const Color(0xFF1E293B),
+                color: isSelected ? AppTheme.accent : AppTheme.secondary.withAlpha(80),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -471,7 +476,10 @@ class DashboardSidebar extends StatelessWidget {
               ),
             )
           : null,
-      onTap: onTap,
+      onTap: () {
+        onTap();
+        onNavigate?.call();
+      },
     );
   }
 }

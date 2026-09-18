@@ -314,7 +314,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
               if (depth > 0)
                 const Padding(
                   padding: EdgeInsets.only(left: 6, top: 12),
-                  child: Icon(Icons.subdirectory_arrow_left_rounded, size: 16, color: Color(0xFF94A3B8)),
+                  child: Icon(Icons.subdirectory_arrow_left_rounded, size: 16, color: AppTheme.textOnLight),
                 ),
               Expanded(
                 child: InkWell(

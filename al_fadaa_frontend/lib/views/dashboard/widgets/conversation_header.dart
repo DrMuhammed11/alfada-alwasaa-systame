@@ -51,10 +51,10 @@ class ConversationHeader extends StatelessWidget {
         final task = activeTasks.first;
         final assignee = task.assignedTo?.fullName ?? 'القطاع';
         statusLabel = 'قيد المعالجة لدى: $assignee';
-        statusColor = const Color(0xFFD97706);
+        statusColor = AppTheme.amber;
       } else if (hasDoneTask) {
         statusLabel = 'تم إنجاز المهمة ✅ — جاهزة للرد';
-        statusColor = const Color(0xFF059669);
+        statusColor = AppTheme.emerald;
       }
     }
 
@@ -65,7 +65,7 @@ class ConversationHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AppTheme.borderLight)),
       ),
       child: Row(
         children: [
@@ -100,7 +100,7 @@ class ConversationHeader extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+                          color: AppTheme.primary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -119,21 +119,21 @@ class ConversationHeader extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: AppTheme.backgroundLight,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AppTheme.borderLight),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.tag_rounded, size: 11, color: Color(0xFF64748B)),
+                            const Icon(Icons.tag_rounded, size: 11, color: AppTheme.textMuted),
                             const SizedBox(width: 2),
                             Text(
                               item.serialNumber,
                               style: const TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF334155),
+                                color: AppTheme.secondary,
                               ),
                             ),
                           ],
@@ -145,21 +145,21 @@ class ConversationHeader extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFECFDF5),
+                          color: AppTheme.emerald.withAlpha(20),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFFA7F3D0)),
+                          border: Border.all(color: AppTheme.emerald.withAlpha(80)),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.language_rounded, size: 12, color: Color(0xFF059669)),
+                            Icon(Icons.language_rounded, size: 12, color: AppTheme.emerald),
                             SizedBox(width: 3),
                             Text(
                               'وارد من الموقع الإلكتروني',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF059669),
+                                color: AppTheme.emerald,
                               ),
                             ),
                           ],
@@ -176,7 +176,7 @@ class ConversationHeader extends StatelessWidget {
                         item.subject,
                         style: const TextStyle(
                           fontSize: 11.5,
-                          color: Color(0xFF64748B),
+                          color: AppTheme.textMuted,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -186,21 +186,21 @@ class ConversationHeader extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0F9FF),
+                        color: AppTheme.accent.withAlpha(20),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFFBAE6FD), width: 0.8),
+                        border: Border.all(color: AppTheme.accent.withAlpha(60), width: 0.8),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.inbox_rounded, size: 11.5, color: Color(0xFF0284C7)),
+                          const Icon(Icons.inbox_rounded, size: 11.5, color: AppTheme.accent),
                           const SizedBox(width: 4),
                           Text(
                             AppDateFormatter.formatDetailedArrival(item.receivedAt ?? item.createdAt),
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF0369A1),
+                              color: AppTheme.accent,
                             ),
                           ),
                         ],
@@ -249,7 +249,7 @@ class ConversationHeader extends StatelessWidget {
             icon: Icon(
               showExtraDetails ? Icons.info_rounded : Icons.info_outline_rounded,
               size: 20,
-              color: showExtraDetails ? AppTheme.accent : const Color(0xFF64748B),
+              color: showExtraDetails ? AppTheme.accent : AppTheme.textMuted,
             ),
             tooltip: showExtraDetails ? 'إخفاء تفاصيل المعاملة' : 'عرض تفاصيل المعاملة',
             padding: const EdgeInsets.all(6),
@@ -262,7 +262,7 @@ class ConversationHeader extends StatelessWidget {
           if (canAssign && item.status == 'RECEIVED') ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: AppTheme.accent,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -276,7 +276,7 @@ class ConversationHeader extends StatelessWidget {
           ] else if (hasActiveTask && (canAssign || activeTasks.any((t) => t.assignedTo?.id == currentUserId))) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF059669),
+                backgroundColor: AppTheme.emerald,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -299,9 +299,9 @@ class ConversationHeader extends StatelessWidget {
           ] else if (canAssign && item.status != 'CLOSED' && item.status != 'ARCHIVED') ...[
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1E293B),
-                side: const BorderSide(color: Color(0xFFCBD5E1)),
-                backgroundColor: const Color(0xFFF8FAFC),
+                foregroundColor: AppTheme.primary,
+                side: const BorderSide(color: AppTheme.borderLight),
+                backgroundColor: AppTheme.backgroundLight,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -313,7 +313,7 @@ class ConversationHeader extends StatelessWidget {
                 );
                 if (res == true) onRefresh();
               },
-              icon: const Icon(Icons.domain_add_rounded, size: 15, color: Color(0xFF2563EB)),
+              icon: const Icon(Icons.domain_add_rounded, size: 15, color: AppTheme.accent),
               label: Text(
                 hasActiveTask ? 'تكليف قطاع آخر' : 'تكليف قطاع بالمهمة',
                 style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
@@ -327,10 +327,10 @@ class ConversationHeader extends StatelessWidget {
             icon: const Icon(Icons.account_tree_rounded, size: 19, color: AppTheme.accent),
             tooltip: 'شجرة المعاملة والترابط البياني',
             style: IconButton.styleFrom(
-              backgroundColor: const Color(0xFFF8FAFC),
+              backgroundColor: AppTheme.backgroundLight,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                side: const BorderSide(color: AppTheme.borderLight),
               ),
               padding: const EdgeInsets.all(6),
             ),
@@ -355,10 +355,10 @@ class ConversationHeader extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                color: const Color(0xFFF8FAFC),
+                border: Border.all(color: AppTheme.borderLight),
+                color: AppTheme.backgroundLight,
               ),
-              child: const Icon(Icons.more_vert_rounded, size: 18, color: Color(0xFF475569)),
+              child: const Icon(Icons.more_vert_rounded, size: 18, color: AppTheme.textMuted),
             ),
             onSelected: (action) async {
               if (action == 'lineage') {
@@ -404,7 +404,7 @@ class ConversationHeader extends StatelessWidget {
                 value: 'dossier',
                 child: Row(
                   children: [
-                    Icon(Icons.assignment_turned_in_rounded, size: 16, color: Color(0xFF2563EB)),
+                    Icon(Icons.assignment_turned_in_rounded, size: 16, color: AppTheme.accent),
                     SizedBox(width: 8),
                     Text('كشف كامل للعمل 📄', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                   ],
@@ -415,7 +415,7 @@ class ConversationHeader extends StatelessWidget {
                   value: 'task',
                   child: Row(
                     children: [
-                      const Icon(Icons.domain_add_rounded, size: 16, color: Color(0xFF0284C7)),
+                      const Icon(Icons.domain_add_rounded, size: 16, color: AppTheme.accent),
                       const SizedBox(width: 8),
                       Text(hasActiveTask ? 'تكليف قطاع آخر' : 'تكليف قطاع بالمهمة', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
@@ -426,7 +426,7 @@ class ConversationHeader extends StatelessWidget {
                   value: 'referral',
                   child: Row(
                     children: [
-                      Icon(Icons.swap_horiz_rounded, size: 16, color: Color(0xFF7C3AED)),
+                      Icon(Icons.swap_horiz_rounded, size: 16, color: AppTheme.purple),
                       SizedBox(width: 8),
                       Text('إحالة وتوجيه إداري', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
@@ -437,9 +437,9 @@ class ConversationHeader extends StatelessWidget {
                   value: 'close',
                   child: Row(
                     children: [
-                      Icon(Icons.lock_outline_rounded, size: 16, color: Color(0xFFDC2626)),
+                      Icon(Icons.lock_outline_rounded, size: 16, color: AppTheme.crimson),
                       SizedBox(width: 8),
-                      Text('إغلاق المعاملة', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFDC2626))),
+                      Text('إغلاق المعاملة', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.crimson)),
                     ],
                   ),
                 ),
@@ -448,7 +448,7 @@ class ConversationHeader extends StatelessWidget {
                   value: 'archive',
                   child: Row(
                     children: [
-                      Icon(Icons.archive_outlined, size: 16, color: Color(0xFF64748B)),
+                      Icon(Icons.archive_outlined, size: 16, color: AppTheme.textMuted),
                       SizedBox(width: 8),
                       Text('أرشفة / استبعاد', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],

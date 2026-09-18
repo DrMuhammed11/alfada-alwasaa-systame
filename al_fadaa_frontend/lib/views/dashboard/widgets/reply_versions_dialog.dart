@@ -248,12 +248,12 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                             const SizedBox(width: 4),
                             Text(
                               v.createdBy?.fullName ?? 'غير محدد',
-                              style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+                              style: const TextStyle(fontSize: 11, color: AppTheme.textDark),
                             ),
                             const Spacer(),
                             Text(
                               '${v.createdAt.year}/${v.createdAt.month}/${v.createdAt.day}',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                              style: const TextStyle(fontSize: 10, color: AppTheme.textOnLight),
                             ),
                           ],
                         ),
@@ -283,7 +283,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                           ),
                           const Spacer(),
                           IconButton(
-                            icon: const Icon(Icons.copy_rounded, size: 16, color: Color(0xFF64748B)),
+                            icon: const Icon(Icons.copy_rounded, size: 16, color: AppTheme.textMuted),
                             tooltip: 'نسخ النص',
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: _selectedVersion!.body));
@@ -326,11 +326,11 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.info_outline_rounded, size: 36, color: Color(0xFF94A3B8)),
+            Icon(Icons.info_outline_rounded, size: 36, color: AppTheme.textOnLight),
             SizedBox(height: 12),
             Text(
               'يتطلب عرض الفروق وجود نسختين على الأقل من هذا الرد',
-              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -383,11 +383,11 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                 children: [
                   Container(width: 10, height: 10, color: const Color(0xFFDC2626)),
                   const SizedBox(width: 4),
-                  const Text('محذوف (-)', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                  const Text('محذوف (-)', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
                   const SizedBox(width: 12),
                   Container(width: 10, height: 10, color: const Color(0xFF16A34A)),
                   const SizedBox(width: 4),
-                  const Text('مضاف (+)', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                  const Text('مضاف (+)', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
                 ],
               ),
             ],

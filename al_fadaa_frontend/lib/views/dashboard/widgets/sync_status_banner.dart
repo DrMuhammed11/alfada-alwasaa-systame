@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/offline/offline_sync_engine.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'sync_queue_dialog.dart';
 
 class SyncStatusBanner extends StatelessWidget {
@@ -27,21 +28,21 @@ class SyncStatusBanner extends StatelessWidget {
         String subtitle;
 
         if (isSyncing) {
-          bgColor = const Color(0xFFEFF6FF);
-          borderColor = const Color(0xFFBFDBFE);
-          textColor = const Color(0xFF1D4ED8);
+          bgColor = AppTheme.accent.withAlpha(20);
+          borderColor = AppTheme.accent.withAlpha(80);
+          textColor = AppTheme.accent;
           leadingIcon = const SizedBox(
             width: 18,
             height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2.2, color: Color(0xFF2563EB)),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: AppTheme.accent),
           );
           title = 'جاري مزامنة الإجراءات مع الخادم السحابي...';
           subtitle = 'يتم رفع العمليات المنفذة محلياً وجلب أحدث البيانات بالترتيب الزمني.';
         } else if (isOffline) {
-          bgColor = const Color(0xFFFFFBEB);
-          borderColor = const Color(0xFFFDE68A);
-          textColor = const Color(0xFFB45309);
-          leadingIcon = const Icon(Icons.cloud_off_rounded, color: Color(0xFFD97706), size: 20);
+          bgColor = AppTheme.amber.withAlpha(20);
+          borderColor = AppTheme.amber.withAlpha(80);
+          textColor = AppTheme.amber;
+          leadingIcon = const Icon(Icons.cloud_off_rounded, color: AppTheme.amber, size: 20);
           title = engine.isManualOffline
               ? 'وضع العمل دون اتصال (تم التفعيل يدوياً)'
               : 'أنت تعمل الآن في وضع عدم الاتصال (Offline Mode)';
@@ -50,10 +51,10 @@ class SyncStatusBanner extends StatelessWidget {
               : 'يمكنك قراءة وتوجيه المعاملات واعتماد الردود؛ كافة الإجراءات تُحفظ محلياً.';
         } else {
           // أونلاين ولكن يوجد عناصر معلقة تنتظر المزامنة
-          bgColor = const Color(0xFFF0FDF4);
-          borderColor = const Color(0xFFBBF7D0);
-          textColor = const Color(0xFF15803D);
-          leadingIcon = const Icon(Icons.cloud_queue_rounded, color: Color(0xFF16A34A), size: 20);
+          bgColor = AppTheme.emerald.withAlpha(20);
+          borderColor = AppTheme.emerald.withAlpha(80);
+          textColor = AppTheme.emerald;
+          leadingIcon = const Icon(Icons.cloud_queue_rounded, color: AppTheme.emerald, size: 20);
           title = 'تم استعادة الاتصال بالشبكة';
           subtitle = 'يوجد ($pending) إجراء معلق جاهز للمزامنة الفورية مع الخادم.';
         }

@@ -25,22 +25,22 @@ class MetaBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: AppTheme.backgroundLight,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: AppTheme.borderLight),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 15, color: color ?? const Color(0xFF64748B)),
+            Icon(icon, size: 15, color: color ?? AppTheme.textMuted),
             const SizedBox(width: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(fontSize: 9.5, color: Color(0xFF94A3B8))),
+                  Text(label, style: const TextStyle(fontSize: 9.5, color: AppTheme.textOnLight)),
                   Text(
                     value,
-                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: color ?? const Color(0xFF0F172A)),
+                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: color ?? AppTheme.primary),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -101,7 +101,7 @@ class ProgressTracker extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 2.5,
-                      color: index == stages.length - 1 ? Colors.transparent : (index < currentIndex ? const Color(0xFF10B981) : const Color(0xFFE2E8F0)),
+                      color: index == stages.length - 1 ? Colors.transparent : (index < currentIndex ? AppTheme.emerald : AppTheme.borderLight),
                     ),
                   ),
                 ],
@@ -112,7 +112,7 @@ class ProgressTracker extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 9.5,
                   fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                  color: isCurrent ? AppTheme.primary : (isDone ? const Color(0xFF0F172A) : const Color(0xFF94A3B8)),
+                  color: isCurrent ? AppTheme.primary : (isDone ? AppTheme.primary : AppTheme.textOnLight),
                 ),
               ),
             ],
@@ -135,18 +135,18 @@ class ReferralsBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.swap_horiz_rounded, size: 17, color: Color(0xFF7C3AED)),
+              const Icon(Icons.swap_horiz_rounded, size: 17, color: AppTheme.purple),
               const SizedBox(width: 8),
               Text(
                 'سجل الإحالات والتوجيهات (${referrals.length})',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
               ),
             ],
           ),
@@ -161,13 +161,13 @@ class ReferralsBox extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 6),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AppTheme.backgroundLight,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: AppTheme.borderLight),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.arrow_forward_rounded, size: 15, color: Color(0xFF7C3AED)),
+                  const Icon(Icons.arrow_forward_rounded, size: 15, color: AppTheme.purple),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -179,12 +179,12 @@ class ReferralsBox extends StatelessWidget {
                           children: [
                             Text(
                               'إلى: $toName',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
                             ),
                             if (fromName != null && fromName.isNotEmpty)
                               Text(
                                 '(من: $fromName)',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                               ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
@@ -204,14 +204,14 @@ class ReferralsBox extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             'التوجيه: ${r.note!.trim()}',
-                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155)),
+                            style: const TextStyle(fontSize: 11.5, color: AppTheme.secondary),
                           ),
                         ],
                         if (r.dueDate != null) ...[
                           const SizedBox(height: 2),
                           Text(
                             'الموعد النهائي: ${AppDateFormatter.formatListDate(r.dueDate!)}',
-                            style: const TextStyle(fontSize: 10, color: Color(0xFFD97706), fontWeight: FontWeight.w500),
+                            style: const TextStyle(fontSize: 10, color: AppTheme.amber, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ],
@@ -219,7 +219,7 @@ class ReferralsBox extends StatelessWidget {
                   ),
                   Text(
                     AppDateFormatter.formatListDate(r.createdAt),
-                    style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontSize: 10, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -243,18 +243,18 @@ class TasksBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.assignment_ind_rounded, size: 17, color: Color(0xFFD97706)),
+              const Icon(Icons.assignment_ind_rounded, size: 17, color: AppTheme.amber),
               const SizedBox(width: 8),
               Text(
                 'المهام والتكليفات الصادرة (${tasks.length})',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
               ),
             ],
           ),
@@ -263,9 +263,9 @@ class TasksBox extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: t.isDone ? const Color(0xFFF8FAFC) : t.slaBgColor,
+                  color: t.isDone ? AppTheme.backgroundLight : t.slaBgColor,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: t.isDone ? const Color(0xFFE2E8F0) : t.slaColor.withAlpha(60)),
+                  border: Border.all(color: t.isDone ? AppTheme.borderLight : t.slaColor.withAlpha(60)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +277,7 @@ class TasksBox extends StatelessWidget {
                         Expanded(
                           child: Text(
                             t.title,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                         ),
                         Container(
@@ -301,7 +301,7 @@ class TasksBox extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'المكلف: ${t.assignedTo?.fullName ?? "-"} · الحالة: ${t.isDone ? "منجزة" : (t.status == "IN_PROGRESS" ? "قيد التنفيذ" : "معلقة")}',
-                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                            style: const TextStyle(fontSize: 10.5, color: AppTheme.textMuted),
                           ),
                         ),
                       ],

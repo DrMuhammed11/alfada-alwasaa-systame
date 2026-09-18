@@ -81,7 +81,7 @@ class WorkDossierDialog extends StatelessWidget {
                             Text(
                               'رقم الطلبية الموحد: ${item.serialNumber}',
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: AppTheme.textOnLight,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -94,7 +94,7 @@ class WorkDossierDialog extends StatelessWidget {
                                   const SnackBar(content: Text('تم نسخ رقم الطلبية')),
                                 );
                               },
-                              child: const Icon(Icons.copy_rounded, size: 13, color: Color(0xFF94A3B8)),
+                              child: const Icon(Icons.copy_rounded, size: 13, color: AppTheme.textOnLight),
                             ),
                           ],
                         ),
@@ -299,7 +299,7 @@ class WorkDossierDialog extends StatelessWidget {
                 children: [
                   const Text(
                     'وثيقة عمل رسمية موثقة بسجل التدقيق لنظام شركة الفضاء الواسع.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                    style: TextStyle(fontSize: 11, color: AppTheme.textOnLight),
                   ),
                   const Spacer(),
                   TextButton(
@@ -394,7 +394,7 @@ class WorkDossierDialog extends StatelessWidget {
               Icon(
                 isDone ? Icons.check_circle_rounded : Icons.pending_actions_rounded,
                 size: 18,
-                color: isDone ? const Color(0xFF16A34A) : const Color(0xFFD97706),
+                color: isDone ? AppTheme.emerald : AppTheme.amber,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -550,7 +550,7 @@ class WorkDossierDialog extends StatelessWidget {
                 ),
                 Text(
                   'الحجم: ${(att.size / 1024).toStringAsFixed(1)} KB',
-                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                  style: const TextStyle(fontSize: 10.5, color: AppTheme.textOnLight),
                 ),
               ],
             ),

@@ -254,7 +254,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF94A3B8),
+                  color: AppTheme.textOnLight,
                   height: 1.5,
                 ),
               ),
@@ -270,7 +270,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
+                    backgroundColor: AppTheme.emerald,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -290,7 +290,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                 child: const Text(
                   'تسجيل الخروج والعودة لشاشة الدخول',
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: AppTheme.textMuted,
                     fontSize: 13,
                   ),
                 ),

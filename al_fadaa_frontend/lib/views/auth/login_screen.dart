@@ -190,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text(
                           'نظام إدارة المراسلات والمعاملات المؤسسي',
                           style: TextStyle(
-                            color: Color(0xFF64748B),
+                            color: AppTheme.textMuted,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -278,13 +278,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Expanded(child: Divider()),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
                                 child: Text(
                                   'تسجيل دخول تجريبي سريع بحسب الدور',
-                                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 11, color: AppTheme.textOnLight, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Expanded(child: Divider()),
+                              const Expanded(child: Divider()),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -296,10 +296,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: WrapAlignment.center,
                             children: [
                               _QuickRoleChip(label: 'المدير العام', email: 'gm@al-fadaa.com', icon: Icons.account_balance_rounded, color: const Color(0xFF0284C7), onSelect: _quickSwitch),
-                              _QuickRoleChip(label: 'نائب المدير', email: 'deputy@al-fadaa.com', icon: Icons.military_tech_rounded, color: const Color(0xFF2563EB), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'نائب المدير', email: 'deputy@al-fadaa.com', icon: Icons.military_tech_rounded, color: AppTheme.accent, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'مدير إدارة', email: 'eng.manager@al-fadaa.com', icon: Icons.business_center_rounded, color: const Color(0xFF0D9488), onSelect: _quickSwitch),
-                              _QuickRoleChip(label: 'المالية', email: 'fin.manager@al-fadaa.com', icon: Icons.payments_outlined, color: const Color(0xFF059669), onSelect: _quickSwitch),
-                              _QuickRoleChip(label: 'الاستقبال', email: 'reception@al-fadaa.com', icon: Icons.desk_rounded, color: const Color(0xFFD97706), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'المالية', email: 'fin.manager@al-fadaa.com', icon: Icons.payments_outlined, color: AppTheme.emerald, onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'الاستقبال', email: 'reception@al-fadaa.com', icon: Icons.desk_rounded, color: AppTheme.amber, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'خدمة العملاء', email: 'cs.manager@al-fadaa.com', icon: Icons.support_agent_rounded, color: const Color(0xFFEA580C), onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'موظف تنفيذي', email: 'eng.employee1@al-fadaa.com', icon: Icons.badge_outlined, color: const Color(0xFF475569), onSelect: _quickSwitch),
                             ],
