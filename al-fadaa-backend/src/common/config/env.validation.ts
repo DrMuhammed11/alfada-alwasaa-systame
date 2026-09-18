@@ -19,6 +19,14 @@ export class EnvironmentVariables {
   JWT_EXPIRES_IN: string;
 
   @IsOptional()
+  @IsString({ message: 'JWT_ACCESS_EXPIRES_IN يجب أن يكون نصًا صالحًا' })
+  JWT_ACCESS_EXPIRES_IN?: string = '15m';
+
+  @IsOptional()
+  @IsString({ message: 'JWT_REFRESH_EXPIRES_IN_DAYS يجب أن يكون نصًا صالحًا' })
+  JWT_REFRESH_EXPIRES_IN_DAYS?: string = '30';
+
+  @IsOptional()
   @IsString({ message: 'JWT_ISSUER يجب أن يكون نصًا صالحًا' })
   JWT_ISSUER?: string = 'alfadaa-api';
 

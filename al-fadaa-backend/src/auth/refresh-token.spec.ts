@@ -40,6 +40,7 @@ describe('AuthService - Refresh Token & Blacklist (P0-2)', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
+      deleteMany: jest.fn(),
     },
   };
 
@@ -239,6 +240,26 @@ describe('AuthService - Refresh Token & Blacklist (P0-2)', () => {
         where: { userId: 'user-123', revokedAt: null },
         data: { revokedAt: expect.any(Date) },
       });
+    });
+  });
+
+  describe('cleanupExpiredTokens (Cron Job)', () => {
+    it('يحذف رموز التحديث المنتهية أو المبطلة ويعيد عدد الرموز المحذوفة', async () => {
+      prismaMock.refreshToken.deleteMany.mockResolvedValue({ count: 5 });
+
+      const deletedCount = await service.cleanupExpiredTokens();
+
+      expect(deletedCount).toBe(5);
+      expect(prismaMock.refreshToken.deleteMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              expect.objectContaining({ expiresAt: expect.any(Object) }),
+              expect.objectContaining({ revokedAt: expect.any(Object) }),
+            ]),
+          }),
+        }),
+      );
     });
   });
 });

@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { AuditAction } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes, createHash } from 'crypto';
@@ -74,6 +75,7 @@ export class AuthService {
       throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
 
+    const accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '15m') as any;
     const accessToken = await this.jwt.signAsync(
       {
         sub: user.id,
@@ -82,7 +84,7 @@ export class AuthService {
         role: user.role,
         departmentId: user.departmentId,
       },
-      { expiresIn: '15m' }, // قصّر access إلى 15 دقيقة
+      { expiresIn: accessExpiresIn },
     );
 
     const refreshToken = await this.generateRefreshToken(user.id, meta);
@@ -111,6 +113,7 @@ export class AuthService {
   ): Promise<string> {
     const rawToken = randomBytes(48).toString('hex');
     const hashedToken = createHash('sha256').update(rawToken).digest('hex');
+    const days = parseInt(process.env.JWT_REFRESH_EXPIRES_IN_DAYS || '30', 10);
 
     await this.prisma.refreshToken.create({
       data: {
@@ -118,7 +121,7 @@ export class AuthService {
         userId,
         userAgent: meta?.userAgent,
         ipAddress: meta?.ipAddress,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 يوم
+        expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
       },
     });
 
@@ -157,6 +160,7 @@ export class AuthService {
       },
     });
 
+    const accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '15m') as any;
     const accessToken = await this.jwt.signAsync(
       {
         sub: stored.user.id,
@@ -165,10 +169,25 @@ export class AuthService {
         role: stored.user.role,
         departmentId: stored.user.departmentId,
       },
-      { expiresIn: '15m' },
+      { expiresIn: accessExpiresIn },
     );
 
     return { accessToken, refreshToken: newRawToken };
+  }
+
+  /** مهمة مجدولة (Cron Job): تنظيف رموز التحديث المنتهية الصلاحية أو المبطلة كل 24 ساعة */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async cleanupExpiredTokens(): Promise<number> {
+    const now = new Date();
+    const result = await this.prisma.refreshToken.deleteMany({
+      where: {
+        OR: [
+          { expiresAt: { lt: now } },
+          { revokedAt: { not: null } },
+        ],
+      },
+    });
+    return result.count;
   }
 
   /** تسجيل خروج — إبطال refresh token محدد */

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({ description: 'البريد الإلكتروني للموظف', example: 'gm@al-fadaa.com' })
@@ -12,7 +12,8 @@ export class LoginDto {
 }
 
 export class RefreshTokenDto {
-  @ApiProperty({ description: 'رمز التحديث (Refresh Token)' })
+  @ApiProperty({ description: 'رمز التحديث' })
+  @IsString({ message: 'رمز التحديث يجب أن يكون نصًا' })
   @IsNotEmpty({ message: 'رمز التحديث مطلوب' })
   refreshToken!: string;
 }
