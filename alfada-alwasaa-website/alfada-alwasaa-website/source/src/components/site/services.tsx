@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   Building2,
   Route,
@@ -62,13 +63,18 @@ export function Services() {
                 </div>
 
                 <div className="relative mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gold-light/80">منظومة معتمدة</span>
+                  <Link
+                    href={`/services/${service.slug}`}
+                    className="text-xs font-bold text-gold-light hover:text-white transition flex items-center gap-1"
+                  >
+                    <span>تفاصيل الخدمة</span>
+                    <span>←</span>
+                  </Link>
                   <a 
                     href="#contact" 
-                    className="text-xs font-bold text-white/80 hover:text-gold transition flex items-center gap-1"
+                    className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold text-white/90 hover:bg-gold hover:text-navy-darker transition"
                   >
                     <span>طلب الخدمة</span>
-                    <span>←</span>
                   </a>
                 </div>
               </article>

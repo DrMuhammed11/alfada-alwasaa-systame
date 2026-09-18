@@ -166,6 +166,56 @@ const jsonLd = {
       },
     },
     {
+      "@type": "GeneralContractor",
+      "@id": "https://www.alfadaalwasaa.com/#business",
+      name: SITE_CONFIG.company.fullName,
+      image: `https://www.alfadaalwasaa.com${SITE_CONFIG.assets.logoMark}`,
+      url: "https://www.alfadaalwasaa.com",
+      telephone: SITE_CONFIG.contacts.general.raw,
+      email: SITE_CONFIG.contacts.email.address,
+      priceRange: "$$",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SITE_CONFIG.contacts.location.fullAddress,
+        addressLocality: SITE_CONFIG.contacts.location.city,
+        addressRegion: "صنعاء",
+        addressCountry: "YE",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: "15.3694",
+        longitude: "44.1910",
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Saturday",
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+          ],
+          opens: "08:00",
+          closes: "18:00",
+        },
+      ],
+      areaServed: {
+        "@type": "Country",
+        name: "Yemen",
+      },
+      knowsAbout: [
+        "المقاولات العامة والإنشاءات",
+        "إنشاء وصيانة الطرق والجسور",
+        "أعمال الحفريات وتسوية المواقع",
+        "التوريدات والتموينات البترولية",
+        "خدمات الاتصالات والحلول التقنية",
+        "الشحن والتخليص الجمركي",
+        "التسويق الإلكتروني",
+      ],
+    },
+    {
       "@type": "WebSite",
       "@id": "https://www.alfadaalwasaa.com/#website",
       url: "https://www.alfadaalwasaa.com",
@@ -183,6 +233,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
@@ -190,6 +242,24 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {gaId && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${gaId}');
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body
         className={`${cairo.variable} font-cairo antialiased bg-background text-foreground`}

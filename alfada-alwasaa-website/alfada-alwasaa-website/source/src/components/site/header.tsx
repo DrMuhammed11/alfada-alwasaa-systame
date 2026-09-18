@@ -15,7 +15,16 @@ export function SiteHeader() {
   const [active, setActive] = useState("#home");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 24);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -39,17 +48,14 @@ export function SiteHeader() {
     return () => observer.disconnect();
   }, []);
 
-  // معالج النقر على روابط التنقل لحل مشكلة عدم تمرير قائمة الجوال وضمان التمرير السلس
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
-      e.preventDefault();
-      setOpen(false);
       const targetId = href.slice(1);
-
-      // تأخير طفيف للسماح للقائمة ببدء الإغلاق ثم التمرير بدقة مع خصم ارتفاع الهيدر
-      setTimeout(() => {
-        const el = document.getElementById(targetId);
-        if (el) {
+      const el = document.getElementById(targetId);
+      if (el) {
+        e.preventDefault();
+        setOpen(false);
+        setTimeout(() => {
           const headerOffset = 80;
           const elementPosition = el.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
@@ -59,8 +65,13 @@ export function SiteHeader() {
           });
           window.history.pushState(null, "", href);
           setActive(href);
-        }
-      }, 100);
+        }, 100);
+      } else {
+        setOpen(false);
+        window.location.href = `/${href}`;
+      }
+    } else {
+      setOpen(false);
     }
   };
 
