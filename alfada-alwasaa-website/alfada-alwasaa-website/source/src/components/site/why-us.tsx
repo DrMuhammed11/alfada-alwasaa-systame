@@ -4,8 +4,8 @@ import { SITE_CONFIG } from "@/config/site";
 export function WhyUs() {
 
   return (
-    <section id="why" className="relative overflow-hidden bg-white dark:bg-navy-darker py-16 sm:py-20 transition-colors duration-300">
-      <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-8">
+    <section id="why" className="relative overflow-hidden bg-white dark:bg-navy-darker py-12 sm:py-16 transition-colors duration-300">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14 lg:px-8">
         {/* "لماذا نحن؟" visual echoing the profile page */}
         <Reveal>
           <div className="relative mx-auto flex aspect-square w-full max-w-md items-center justify-center rounded-[2.5rem] bg-mist dark:bg-navy border border-navy/10 dark:border-white/10">
@@ -47,7 +47,7 @@ export function WhyUs() {
           </Reveal>
 
           <Reveal delay={0.24}>
-            <div className="mt-9 grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 sm:mt-8 grid gap-4 sm:grid-cols-3">
               {SITE_CONFIG.values.map((item) => (
                 <div
                   key={item.title}

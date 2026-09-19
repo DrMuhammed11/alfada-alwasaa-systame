@@ -99,7 +99,7 @@ export function Sectors() {
     : SECTORS.filter(s => s.num === activeFilter);
 
   return (
-    <section id="sectors" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
+    <section id="sectors" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <SectionHeading center kicker="قطاعاتنا" title="حلول متكاملة ضمن منظومة واحدة" />
@@ -145,7 +145,7 @@ export function Sectors() {
         </Reveal>
 
         {/* Modern Showcase Cards Grid */}
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredSectors.map((sector, idx) => (
             <Reveal key={sector.num} delay={idx * 0.05}>
               <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_25px_50px_-20px_rgba(10,52,83,0.35)]">

@@ -4,13 +4,13 @@ import { SectionHeading } from "./section-heading";
 
 export function Position() {
   return (
-    <section id="position" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
+    <section id="position" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
         <SectionHeading center kicker="مكانتنا" title="مكانة راسخة" />
 
         {/* Diamond emblem echoing the profile page */}
         <Reveal delay={0.1}>
-          <div className="relative mx-auto mb-12 flex w-fit flex-col items-center">
+          <div className="relative mx-auto mb-8 flex w-fit flex-col items-center">
             {/* gold arc */}
             <span
               aria-hidden

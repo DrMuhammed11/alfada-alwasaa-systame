@@ -287,7 +287,7 @@ export function Contact() {
   );
 
   return (
-    <section id="contact" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 pt-10 pb-16 sm:pt-14 sm:pb-20 transition-colors duration-300">
+    <section id="contact" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading 
           center 
@@ -301,7 +301,7 @@ export function Contact() {
           </p>
         </Reveal>
 
-        <div className="mt-10 sm:mt-12 grid gap-8 lg:grid-cols-[1.1fr_1.3fr] items-start">
+        <div className="mt-8 sm:mt-10 grid gap-8 lg:grid-cols-[1.1fr_1.3fr] items-start">
           {/* Contact Details & Highlights */}
           <Reveal delay={0.15}>
             <div className="space-y-6">

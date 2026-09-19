@@ -96,7 +96,7 @@ export function TrackRecord() {
   };
 
   return (
-    <section id="track" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
+    <section id="track" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <SectionHeading kicker="سابقة الأعمال" title="سابقة تُعتمد" />
@@ -118,7 +118,7 @@ export function TrackRecord() {
         </div>
 
         {/* Case Study Cards Grid — 5 documented fields in balanced layout */}
-        <div className="mt-14 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-6">
+        <div className="mt-8 sm:mt-10 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-6">
           {TRACK_CASE_STUDIES.map((item, idx) => {
             const colSpanClass =
               idx < 3
@@ -210,7 +210,7 @@ export function TrackRecord() {
 
         {/* High-Trust Closing Banner */}
         <Reveal delay={0.15}>
-          <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-3xl border border-gold/30 bg-gradient-to-r from-navy to-navy-darker p-7 sm:p-9 text-white shadow-[0_20px_50px_-20px_rgba(10,52,83,0.5)]">
+          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-3xl border border-gold/30 bg-gradient-to-r from-navy to-navy-darker p-7 sm:p-9 text-white shadow-[0_20px_50px_-20px_rgba(10,52,83,0.5)]">
             <div className="text-center sm:text-start">
               <div className="flex items-center justify-center sm:justify-start gap-2 text-gold-light text-sm font-black mb-1">
                 <ShieldCheck className="h-5 w-5 text-gold" />

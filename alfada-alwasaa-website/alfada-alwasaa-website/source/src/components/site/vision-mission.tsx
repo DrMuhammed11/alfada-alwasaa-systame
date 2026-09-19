@@ -3,18 +3,18 @@ import { Reveal } from "./reveal";
 
 export function VisionMission() {
   return (
-    <section id="vision" className="relative overflow-hidden bg-white dark:bg-navy-darker py-24 transition-colors duration-300">
+    <section id="vision" className="relative overflow-hidden bg-white dark:bg-navy-darker py-12 sm:py-16 transition-colors duration-300">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <Reveal className="mb-16 text-center">
+        <Reveal className="mb-10 sm:mb-12 text-center">
           <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
             رؤيتنا ورسالتنا
           </h2>
         </Reveal>
 
-        <div className="grid gap-16 md:grid-cols-2 md:gap-10 lg:gap-14">
+        <div className="grid gap-10 md:grid-cols-2 md:gap-8 lg:gap-10">
           {/* رسالتنا */}
           <Reveal delay={0.1}>
-            <div className="relative pt-16">
+            <div className="relative pt-12">
               <div className="group relative rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 pt-12 shadow-[0_20px_55px_-30px_rgba(10,52,83,0.3)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-30px_rgba(10,52,83,0.4)] sm:p-10 sm:pt-14">
                 <div className="absolute -top-12 start-1/2 flex -translate-x-1/2 flex-col items-center">
                   {/* gold arc like the profile cards */}
@@ -44,7 +44,7 @@ export function VisionMission() {
 
           {/* رؤيتنا */}
           <Reveal delay={0.22}>
-            <div className="relative pt-16">
+            <div className="relative pt-12">
               <div className="group relative rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 pt-12 shadow-[0_20px_55px_-30px_rgba(10,52,83,0.3)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-30px_rgba(10,52,83,0.4)] sm:p-10 sm:pt-14">
                 <div className="absolute -top-12 start-1/2 flex -translate-x-1/2 flex-col items-center">
                   <span

@@ -3,9 +3,9 @@ import { Reveal } from "./reveal";
 
 export function Conclusion() {
   return (
-    <section id="conclusion" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 pt-14 pb-6 sm:pt-16 sm:pb-8 transition-colors duration-300">
+    <section id="conclusion" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-10 sm:py-12 transition-colors duration-300">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <Reveal className="mb-8 sm:mb-10 text-center">
+        <Reveal className="mb-6 sm:mb-8 text-center">
           <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
             خاتمة تعريفية
           </h2>

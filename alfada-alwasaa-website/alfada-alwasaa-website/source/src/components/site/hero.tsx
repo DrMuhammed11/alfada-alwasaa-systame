@@ -15,7 +15,7 @@ export function Hero() {
   });
 
   return (
-    <section id="home" className="relative min-h-[92vh] flex items-center overflow-hidden bg-navy-darker pt-24 pb-16 lg:py-28">
+    <section id="home" className="relative flex items-center overflow-hidden bg-navy-darker pt-24 pb-14 sm:pb-16 lg:pt-28 lg:pb-20">
       {/* Anchor for About to support both #home and #about smoothly */}
       <span id="about" className="absolute -top-24" />
 

@@ -11,7 +11,7 @@ type SectionHeadingProps = {
 /** Section heading that mirrors the profile's title + gold underline style. */
 export function SectionHeading({ kicker, title, center, light }: SectionHeadingProps) {
   return (
-    <Reveal className={cn("mb-14", center && "text-center")}>
+    <Reveal className={cn("mb-8 sm:mb-10", center && "text-center")}>
       {kicker && (
         <span
           className={cn(

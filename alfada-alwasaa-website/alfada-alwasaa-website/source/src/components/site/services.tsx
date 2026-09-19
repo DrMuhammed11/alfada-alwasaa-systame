@@ -44,12 +44,12 @@ export function Services() {
   const activeService = SERVICES.find((s) => s.slug === activeSlug) || SERVICES[0];
 
   return (
-    <section id="services" className="relative overflow-hidden bg-white dark:bg-navy-darker py-16 sm:py-20 transition-colors duration-300">
+    <section id="services" className="relative overflow-hidden bg-white dark:bg-navy-darker py-12 sm:py-16 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading center kicker="منظومة عمل واحدة" title="خدماتنا" />
 
         {/* Tab Selector Header - Fully visible 7-grid on desktop, smooth start-aligned scroll on mobile */}
-        <Reveal delay={0.05} className="mb-8">
+        <Reveal delay={0.05} className="mb-6 sm:mb-8">
           <div className="relative w-full">
             <div className="flex items-center gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none justify-start lg:grid lg:grid-cols-7 lg:gap-2 lg:overflow-visible">
               {SERVICES.map((service) => {
