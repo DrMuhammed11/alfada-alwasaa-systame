@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
-import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SITE_CONFIG } from "@/config/site";
@@ -21,7 +20,7 @@ export const viewport: Viewport = {
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["500", "600", "700", "800", "900"],
   display: "swap",
   preload: true,
   adjustFontFallback: true,
@@ -247,6 +246,13 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* تحميل مسبق لصورة الخلفية البطولية لتحسين LCP */}
+        <link
+          rel="preload"
+          as="image"
+          href="/profile/hero_bg.webp"
+          fetchPriority="high"
+        />
         {gaId && (
           <>
             <script
@@ -269,20 +275,25 @@ export default function RootLayout({
       <body
         className={`${cairo.variable} font-cairo antialiased bg-background text-foreground`}
       >
-        <QueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <LenisProvider>
-              {children}
-              <Toaster />
-              <SonnerToaster richColors position="top-center" dir="rtl" />
-            </LenisProvider>
-          </ThemeProvider>
-        </QueryProvider>
+        {/* رابط تجاوز المحتوى للوصولية — يظهر عند التركيز بلوحة المفاتيح فقط */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[9999] focus:rounded-md focus:bg-gold focus:px-4 focus:py-2 focus:text-navy-dark focus:font-bold focus:shadow-lg focus:outline-none"
+        >
+          تجاوز إلى المحتوى الرئيسي
+        </a>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LenisProvider>
+            {children}
+            <Toaster />
+            <SonnerToaster richColors position="top-center" dir="rtl" />
+          </LenisProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

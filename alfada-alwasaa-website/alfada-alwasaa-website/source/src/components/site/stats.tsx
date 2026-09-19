@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { Award, Layers, Clock, ShieldCheck } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
@@ -9,8 +13,81 @@ const STATS = SITE_CONFIG.stats.map((item, idx) => ({
   Icon: STAT_ICONS[idx],
 }));
 
-export function Stats() {
+/** دالة تفكيك الرقم واللاحقة لمعالجة الأرقام المركبة مثل 5+ و 24/7 */
+function parseStat(raw: string) {
+  const match = raw.match(/^(\d+)(.*)$/);
+  if (!match) return { target: 0, suffix: raw };
+  return {
+    target: parseInt(match[1], 10),
+    suffix: match[2] || "",
+  };
+}
 
+/** مكوّن العدّاد الرقمي الانسيابي برصد مجال الرؤية ودعم tabular-nums */
+function AnimatedCounter({ rawNum }: { rawNum: string }) {
+  const reduce = useReducedMotion();
+  const { target, suffix } = parseStat(rawNum);
+  const [count, setCount] = useState(reduce ? target : 0);
+  const containerRef = useRef<HTMLSpanElement>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    if (reduce) {
+      setCount(target);
+      return;
+    }
+
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasStarted(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [reduce, target]);
+
+  useEffect(() => {
+    if (!hasStarted || reduce) return;
+
+    const duration = 1200; // 1.2s animation duration
+    let startTime: number | null = null;
+    let animId: number;
+
+    const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
+
+    const step = (now: number) => {
+      if (!startTime) startTime = now;
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOutCubic(progress);
+      setCount(Math.round(eased * target));
+
+      if (progress < 1) {
+        animId = requestAnimationFrame(step);
+      }
+    };
+
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [hasStarted, reduce, target]);
+
+  return (
+    <span ref={containerRef} className="tabular-nums">
+      {count}
+      {suffix}
+    </span>
+  );
+}
+
+export function Stats() {
   return (
     <section className="relative -mt-10 z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <Reveal>
@@ -28,7 +105,7 @@ export function Stats() {
                 </div>
                 <span className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
                   <span className="bg-gradient-to-l from-gold-light via-gold to-white bg-clip-text text-transparent">
-                    {stat.num}
+                    <AnimatedCounter rawNum={stat.num} />
                   </span>
                 </span>
                 <span className="mt-2 text-sm font-bold text-white/95 sm:text-base">

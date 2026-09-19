@@ -17,6 +17,7 @@ import { SITE_CONFIG } from "@/config/site";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
 import { FloatingContact } from "./floating-contact";
+import { ReadingProgress } from "./reading-progress";
 
 export function ServicePageView({ service }: { service: ServiceDetail }) {
   const otherServices = Object.values(SERVICES_DATA).filter(
@@ -38,7 +39,8 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-navy-darker text-slate-900 dark:text-slate-100 transition-colors">
+      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

@@ -15,6 +15,7 @@ import { BLOG_POSTS } from "@/config/blog-data";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { FloatingContact } from "@/components/site/floating-contact";
+import { ReadingProgress } from "@/components/site/reading-progress";
 
 export function generateStaticParams() {
   return Object.keys(BLOG_POSTS).map((slug) => ({ slug }));
@@ -84,6 +85,7 @@ export default async function SingleBlogPostPage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
+      <ReadingProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}

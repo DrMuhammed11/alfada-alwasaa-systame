@@ -133,7 +133,7 @@ export function TrackRecord() {
               >
                 <article 
                   onClick={() => handleOpenLightbox(item)}
-                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_24px_55px_-15px_rgba(10,52,83,0.22)]"
+                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-400 ease-out hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_20px_45px_-15px_rgba(198,149,74,0.25)]"
                 >
                   {/* Card Media Header with interactive hover zoom and Lightbox trigger */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
@@ -143,9 +143,9 @@ export function TrackRecord() {
                       fill
                       loading="lazy"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/85 via-navy-darker/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/85 via-navy-darker/20 to-transparent transition-opacity duration-400" />
 
                     {/* Top Floating Badge & Icon */}
                     <div className="absolute inset-x-4 top-4 flex items-center justify-between z-10">

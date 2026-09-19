@@ -191,7 +191,7 @@ export function Services() {
 
                 {/* Media Image Column (5 cols) */}
                 <div className="relative lg:col-span-5">
-                  <div className="relative aspect-[16/11] max-h-[380px] w-full overflow-hidden rounded-2xl border-2 border-gold/30 shadow-2xl bg-navy-darker">
+                  <div className="group relative aspect-[16/11] max-h-[380px] w-full overflow-hidden rounded-2xl border-2 border-gold/30 shadow-2xl bg-navy-darker transition-all duration-400 ease-out hover:-translate-y-0.5 hover:border-gold/60">
                     {activeService.detail?.image ? (
                       <Image
                         src={activeService.detail.image}
@@ -199,7 +199,7 @@ export function Services() {
                         fill
                         priority
                         sizes="(max-width: 1024px) 100vw, 40vw"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        className="object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-navy-deep">

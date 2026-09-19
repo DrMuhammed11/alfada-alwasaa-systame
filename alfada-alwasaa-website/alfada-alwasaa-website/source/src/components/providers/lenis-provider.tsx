@@ -13,6 +13,10 @@ export function LenisProvider({ children }: { children?: ReactNode }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
+    // تعطيل التمرير السلس على أجهزة اللمس (الهواتف والأجهزة اللوحية)
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
 
     const lenis = new Lenis({
       duration: 1.2,

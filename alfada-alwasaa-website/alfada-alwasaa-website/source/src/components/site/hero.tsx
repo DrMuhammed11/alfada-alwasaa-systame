@@ -1,12 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
 
+import { MagneticButton } from "@/components/ui/magnetic-button";
+
 export function Hero() {
   const reduce = useReducedMotion();
+  const { scrollY } = useScroll();
+  const yParallax = useTransform(scrollY, [0, 800], [0, 800 * 0.12]);
 
   const fadeUp = (delay: number) => ({
     initial: reduce ? false : { opacity: 0, y: 12 },
@@ -19,8 +23,11 @@ export function Hero() {
       {/* Anchor for About to support both #home and #about smoothly */}
       <span id="about" className="absolute -top-24" />
 
-      {/* Background artwork with elegant overlay */}
-      <div className="absolute inset-0">
+      {/* Background artwork with elegant overlay and subtle parallax */}
+      <motion.div 
+        style={{ y: reduce ? 0 : yParallax }}
+        className="absolute -top-12 -bottom-12 inset-x-0"
+      >
         <Image
           src={SITE_CONFIG.assets.heroBg}
           alt="أعمال ومشاريع شركة الفضاء الواسع"
@@ -31,7 +38,7 @@ export function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy-darker/95 via-navy/90 to-navy-darker/98" />
         <div className="dot-grid absolute inset-0 opacity-25" />
-      </div>
+      </motion.div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main 2-Column Responsive Layout: Unified Home & About */}
@@ -95,13 +102,15 @@ export function Hero() {
 
             {/* Quick Action Buttons */}
             <motion.div {...fadeUp(0.35)} className="mt-8 flex flex-wrap items-center gap-3.5">
-              <a
-                href="#contact"
-                className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-gold px-7 text-xs sm:text-sm font-black text-navy-darker shadow-[0_10px_25px_rgba(198,149,74,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold-light hover:shadow-[0_15px_35px_rgba(198,149,74,0.65)]"
-              >
-                <span>طلب استشارة أو تسعير</span>
-                <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-              </a>
+              <MagneticButton>
+                <a
+                  href="#contact"
+                  className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-gold px-7 text-xs sm:text-sm font-black text-navy-darker shadow-[0_10px_25px_rgba(198,149,74,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold-light hover:shadow-[0_15px_35px_rgba(198,149,74,0.65)]"
+                >
+                  <span>طلب استشارة أو تسعير</span>
+                  <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
+                </a>
+              </MagneticButton>
 
               <a
                 href="#sectors"

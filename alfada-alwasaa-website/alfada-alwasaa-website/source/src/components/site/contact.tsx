@@ -3,7 +3,6 @@
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { 
   Phone, 
@@ -221,29 +220,38 @@ export function Contact() {
     } catch {}
   }, []);
 
-  const {
-    data: trackingResult,
-    isLoading: isTrackLoading,
-    isFetching: isTrackFetching,
-    error: trackQueryError,
-    refetch: refetchTrack,
-  } = useQuery({
-    queryKey: ["inquiry-tracking", trackQueryRef, trackQueryToken],
-    queryFn: async () => {
-      if (!trackQueryRef) return null;
-      const res = await trackInquiry(trackQueryRef, trackQueryToken || undefined);
-      if (!res.success || !res.data) {
-        throw new Error(res.error || "لم يتم العثور على معاملة بهذا الرقم المرجعي أو رمز التتبع غير صحيح");
-      }
-      return res.data;
-    },
-    enabled: !!trackQueryRef,
-    staleTime: 1000 * 60 * 5, // تخزين مؤقت لمدة 5 دقائق
-    retry: 1,
-  });
+  // حالة تتبع المعاملات — بديل عن useQuery بدون مكتبة react-query
+  const [trackingResult, setTrackingResult] = useState<Awaited<ReturnType<typeof trackInquiry>>["data"] | null>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [trackErrorMessage, setTrackErrorMessage] = useState<string | null>(null);
 
-  const isTracking = isTrackLoading || isTrackFetching;
-  const trackErrorMessage = trackQueryError instanceof Error ? trackQueryError.message : null;
+  const runTrackInquiry = async (ref: string, token: string | null) => {
+    if (!ref) return;
+    setIsTracking(true);
+    setTrackErrorMessage(null);
+    setTrackingResult(null);
+    try {
+      const res = await trackInquiry(ref, token || undefined);
+      if (!res.success || !res.data) {
+        setTrackErrorMessage(res.error || "لم يتم العثور على معاملة بهذا الرقم المرجعي أو رمز التتبع غير صحيح");
+      } else {
+        setTrackingResult(res.data);
+      }
+    } catch (err) {
+      setTrackErrorMessage(err instanceof Error ? err.message : "حدث خطأ أثناء التتبع");
+    } finally {
+      setIsTracking(false);
+    }
+  };
+
+  useEffect(() => {
+    if (trackQueryRef) {
+      runTrackInquiry(trackQueryRef, trackQueryToken);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trackQueryRef, trackQueryToken]);
+
+
 
   const handleTrackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,7 +260,8 @@ export function Contact() {
     if (!cleanRef) return;
 
     if (cleanRef === trackQueryRef && cleanToken === trackQueryToken) {
-      refetchTrack();
+      // إعادة التتبع بنفس القيم مباشرة
+      runTrackInquiry(cleanRef, cleanToken || null);
     } else {
       setTrackQueryRef(cleanRef);
       setTrackQueryToken(cleanToken);
