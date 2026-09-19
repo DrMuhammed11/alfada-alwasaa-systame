@@ -61,7 +61,7 @@ export function Services() {
                     type="button"
                     onClick={() => setActiveSlug(service.slug)}
                     className={cn(
-                      "group relative flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-300 lg:w-full lg:px-2 lg:py-3",
+                      "group relative flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-300 lg:w-full lg:px-1.5 lg:py-2.5 lg:text-[11.5px] xl:text-xs xl:px-2",
                       isActive
                         ? "bg-gold text-navy-darker shadow-lg shadow-gold/25 ring-1 ring-gold scale-[1.02] z-10 font-black"
                         : "bg-mist text-slate-700 hover:bg-slate-200/80 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"

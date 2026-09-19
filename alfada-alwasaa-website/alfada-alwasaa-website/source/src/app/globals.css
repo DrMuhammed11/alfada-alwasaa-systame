@@ -5,6 +5,7 @@
 
 /* ===== Brand identity — extracted literally from the company profile PDF ===== */
 @theme inline {
+  --breakpoint-lg: 960px;
   --color-navy: #0a3453;
   --color-navy-deep: #072a44;
   --color-navy-darker: #051e31;
@@ -13,6 +14,10 @@
   --color-gold-soft: #f3e5cf;
   --color-mist: #f2f6f9;
   --font-cairo: var(--font-cairo);
+}
+
+html, body {
+  overflow-x: clip;
 }
 
 html.lenis, html.lenis body {

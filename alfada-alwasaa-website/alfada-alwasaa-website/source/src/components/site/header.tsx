@@ -128,7 +128,7 @@ export function SiteHeader() {
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
               className={cn(
-                "relative rounded-full px-2.5 py-1.5 text-[12px] font-bold transition-colors duration-300 xl:px-3.5 xl:text-[13.5px]",
+                "relative rounded-full px-2 py-1 text-[11.5px] font-bold transition-colors duration-300 xl:px-3.5 xl:text-[13.5px] whitespace-nowrap",
                 active === item.href
                   ? "text-gold-light"
                   : "text-white/85 hover:text-white"
