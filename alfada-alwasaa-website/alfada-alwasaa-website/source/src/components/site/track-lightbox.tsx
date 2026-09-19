@@ -161,6 +161,10 @@ export function TrackLightbox({
                         <Dialog.Title className="text-xl sm:text-2xl font-black text-white leading-snug">
                           {item.title}
                         </Dialog.Title>
+                        {/* وصف مخفي لقارئات الشاشة — وصولية a11y */}
+                        <Dialog.Description className="sr-only">
+                          {`مشروع ${item.title} — ${item.tag} — ${item.scope}`}
+                        </Dialog.Description>
 
                         <div className="mt-4">
                           <span className="text-xs font-black uppercase tracking-wider text-gold-light">

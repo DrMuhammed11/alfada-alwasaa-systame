@@ -1,4 +1,10 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
+// يُفعَّل تحليل الحزمة فقط عند تشغيل: npm run analyze
+const analyze = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   /**
@@ -60,4 +66,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default analyze(nextConfig);

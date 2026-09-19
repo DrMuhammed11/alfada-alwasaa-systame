@@ -1,0 +1,26 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:3001/"],
+      "numberOfRuns": 3,
+      "startServerCommand": "npx serve out -l 3001",
+      "startServerReadyPattern": "Accepting connections"
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "first-contentful-paint": ["warn", { "maxNumericValue": 1800 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.05 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 200 }],
+        "interactive": ["warn", { "maxNumericValue": 3800 }],
+        "uses-optimized-images": "off",
+        "uses-responsive-images": "off",
+        "uses-rel-preconnect": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
