@@ -3,10 +3,10 @@ import { Reveal } from "./reveal";
 
 export function Conclusion() {
   return (
-    <section id="conclusion" className="relative overflow-hidden bg-mist pt-14 pb-6 sm:pt-16 sm:pb-8">
+    <section id="conclusion" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 pt-14 pb-6 sm:pt-16 sm:pb-8 transition-colors duration-300">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <Reveal className="mb-8 sm:mb-10 text-center">
-          <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy sm:text-4xl lg:text-[2.75rem]">
+          <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
             خاتمة تعريفية
           </h2>
         </Reveal>
@@ -14,9 +14,9 @@ export function Conclusion() {
         <Reveal delay={0.12}>
           <div className="relative pt-8">
             {/* Navy card with the handshake emblem, echoing the profile closing page */}
-            <div className="relative rounded-[2rem] bg-navy px-7 py-10 text-center shadow-[0_35px_90px_-35px_rgba(5,30,49,0.8)] sm:px-12 sm:py-12">
+            <div className="relative rounded-[2rem] bg-navy px-7 py-10 text-center shadow-[0_35px_90px_-35px_rgba(5,30,49,0.8)] sm:px-12 sm:py-12 border border-white/10">
               <div className="absolute -top-12 start-1/2 -translate-x-1/2">
-                <span className="flex h-24 w-24 items-center justify-center rounded-full border-[5px] border-mist bg-navy text-gold-light shadow-lg">
+                <span className="flex h-24 w-24 items-center justify-center rounded-full border-[5px] border-mist dark:border-navy-darker bg-navy text-gold-light shadow-lg">
                   <Handshake className="h-11 w-11" strokeWidth={1.6} />
                 </span>
               </div>

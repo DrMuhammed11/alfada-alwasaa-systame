@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { 
   Quote, 
@@ -8,23 +11,14 @@ import {
   Truck, 
   CheckCircle2, 
   ShieldCheck, 
-  ArrowLeft 
+  ArrowLeft,
+  Maximize2
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
+import { TrackLightbox, type TrackItem } from "./track-lightbox";
 
-type TrackCaseStudy = {
-  id: string;
-  title: string;
-  tag: string;
-  scope: string;
-  metrics: string[];
-  src: string;
-  alt: string;
-  Icon: React.ElementType;
-};
-
-const TRACK_CASE_STUDIES: TrackCaseStudy[] = [
+const TRACK_CASE_STUDIES: TrackItem[] = [
   {
     id: "roads",
     title: "مشاريع شق وتعبيد الطرق وتسوية المسارات",
@@ -93,20 +87,28 @@ const TRACK_CASE_STUDIES: TrackCaseStudy[] = [
 ];
 
 export function TrackRecord() {
+  const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const handleOpenLightbox = (item: TrackItem) => {
+    setSelectedItem(item);
+    setLightboxOpen(true);
+  };
+
   return (
-    <section id="track" className="relative overflow-hidden bg-mist py-24">
+    <section id="track" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <SectionHeading kicker="سابقة الأعمال" title="سابقة تُعتمد" />
           <Reveal delay={0.1}>
-            <div className="mb-2 flex items-start gap-3 rounded-2xl border border-gold/30 bg-white/70 p-4 shadow-sm backdrop-blur-sm">
+            <div className="mb-2 flex items-start gap-3 rounded-2xl border border-gold/30 bg-white/70 dark:bg-navy/70 p-4 shadow-sm backdrop-blur-sm">
               <Quote className="mt-1 h-6 w-6 shrink-0 text-gold" strokeWidth={2} />
-              <p className="text-lg font-extrabold text-navy">
+              <p className="text-lg font-extrabold text-navy dark:text-gold-light">
                 شواهد على الثقة والإنجاز
               </p>
             </div>
             {/* Exact paragraph from the profile */}
-            <p className="mt-4 text-justify text-[1.05rem] leading-9 text-slate-700">
+            <p className="mt-4 text-justify text-[1.05rem] leading-9 text-slate-700 dark:text-slate-200">
               نفذت شركة الفضاء الواسع لخدمات الاتصالات والمقاولات عددًا من المشاريع
               المتنوعة التي شملت أعمال الطرق والحفريات، والتوريدات، والخدمات اللوجستية،
               والشحن، والتخليص الجمركي، إضافة إلى خدمات الاتصالات والدعم الفني، بما يعكس
@@ -118,7 +120,6 @@ export function TrackRecord() {
         {/* Case Study Cards Grid — 5 documented fields in balanced layout */}
         <div className="mt-14 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-6">
           {TRACK_CASE_STUDIES.map((item, idx) => {
-            // Span 2 columns in a 6-col grid for the first 3 cards, and 3 columns for the bottom 2 cards
             const colSpanClass =
               idx < 3
                 ? "lg:col-span-2"
@@ -130,8 +131,11 @@ export function TrackRecord() {
                 delay={idx * 0.08}
                 className={`${colSpanClass} w-full`}
               >
-                <article className="group flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 bg-white shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_24px_55px_-15px_rgba(10,52,83,0.22)]">
-                  {/* Card Media Header */}
+                <article 
+                  onClick={() => handleOpenLightbox(item)}
+                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-500 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_24px_55px_-15px_rgba(10,52,83,0.22)]"
+                >
+                  {/* Card Media Header with interactive hover zoom and Lightbox trigger */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
                     <Image
                       src={item.src}
@@ -153,6 +157,14 @@ export function TrackRecord() {
                       </span>
                     </div>
 
+                    {/* Hover indicator: Lightbox prompt */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-navy-darker/50 opacity-0 backdrop-blur-xs transition-opacity duration-300 group-hover:opacity-100 z-10">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-xs font-black text-navy-darker shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <Maximize2 className="h-3.5 w-3.5" />
+                        <span>عرض التفاصيل والصورة</span>
+                      </span>
+                    </div>
+
                     {/* Bottom overlay highlight title */}
                     <div className="absolute bottom-3 start-4 end-4 z-10">
                       <span className="text-[0.7rem] font-bold uppercase tracking-wider text-gold-light">
@@ -164,16 +176,16 @@ export function TrackRecord() {
                   {/* Card Body & Scope of Work */}
                   <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
                     <div>
-                      <h3 className="text-lg sm:text-xl font-black text-navy transition-colors duration-300 group-hover:text-gold leading-snug">
+                      <h3 className="text-lg sm:text-xl font-black text-navy dark:text-white transition-colors duration-300 group-hover:text-gold leading-snug">
                         {item.title}
                       </h3>
-                      <p className="mt-3 text-sm leading-7 text-slate-600 text-justify">
+                      <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 text-justify">
                         {item.scope}
                       </p>
                     </div>
 
                     {/* Metrics / Quality Benchmarks */}
-                    <div className="mt-6 border-t border-slate-100 pt-5">
+                    <div className="mt-6 border-t border-slate-100 dark:border-white/10 pt-5">
                       <span className="text-[0.72rem] font-black uppercase tracking-wider text-gold">
                         شواهد الجودة والمعايير:
                       </span>
@@ -181,7 +193,7 @@ export function TrackRecord() {
                         {item.metrics.map((metric, mIdx) => (
                           <li 
                             key={mIdx} 
-                            className="flex items-start gap-2 text-xs leading-5 text-slate-700 font-semibold"
+                            className="flex items-start gap-2 text-xs leading-5 text-slate-700 dark:text-slate-200 font-semibold"
                           >
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
                             <span>{metric}</span>
@@ -218,6 +230,15 @@ export function TrackRecord() {
           </div>
         </Reveal>
       </div>
+
+      {/* Lightbox Modal */}
+      <TrackLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        item={selectedItem}
+        items={TRACK_CASE_STUDIES}
+        onSelect={(item) => setSelectedItem(item)}
+      />
     </section>
   );
 }

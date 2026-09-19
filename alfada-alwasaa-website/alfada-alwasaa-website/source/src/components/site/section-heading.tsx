@@ -17,7 +17,7 @@ export function SectionHeading({ kicker, title, center, light }: SectionHeadingP
           className={cn(
             "mb-3 block w-fit rounded-full px-4 py-1.5 text-xs font-bold tracking-wide",
             center && "mx-auto",
-            light ? "bg-white/10 text-gold-light" : "bg-gold-soft text-gold"
+            light ? "bg-white/10 text-gold-light" : "bg-gold-soft text-gold dark:bg-gold/20 dark:text-gold-light"
           )}
         >
           {kicker}
@@ -27,7 +27,7 @@ export function SectionHeading({ kicker, title, center, light }: SectionHeadingP
         className={cn(
           "gold-rule inline-block pb-2 text-3xl font-extrabold sm:text-4xl lg:text-[2.75rem]",
           center && "center",
-          light ? "text-white" : "text-navy"
+          light ? "text-white" : "text-navy dark:text-white"
         )}
       >
         {title}

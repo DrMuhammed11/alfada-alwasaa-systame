@@ -99,12 +99,12 @@ export function Sectors() {
     : SECTORS.filter(s => s.num === activeFilter);
 
   return (
-    <section id="sectors" className="relative overflow-hidden bg-mist py-24">
+    <section id="sectors" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <SectionHeading center kicker="قطاعاتنا" title="حلول متكاملة ضمن منظومة واحدة" />
           <Reveal delay={0.1}>
-            <p className="-mt-6 text-base sm:text-lg leading-8 text-slate-600">
+            <p className="-mt-6 text-base sm:text-lg leading-8 text-slate-600 dark:text-slate-300">
               نعمل في قطاعات متعددة ومجالات واسعة من خلال خبرتنا وكوادرنا لتقديم حلول
               متكاملة ضمن منظومة واحدة، بما يختصر الوقت، ويرفع كفاءة التنفيذ، ويعزز جودة
               النتائج النهائية.
@@ -134,7 +134,7 @@ export function Sectors() {
                 className={`flex items-center gap-2 rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
                   activeFilter === s.num
                     ? "bg-navy text-gold-light shadow-md ring-1 ring-gold/40 scale-105"
-                    : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy"
+                    : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"
                 }`}
               >
                 <s.Icon className="h-4 w-4 text-gold" />
@@ -148,7 +148,7 @@ export function Sectors() {
         <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredSectors.map((sector, idx) => (
             <Reveal key={sector.num} delay={idx * 0.05}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 bg-white shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_25px_50px_-20px_rgba(10,52,83,0.35)]">
+              <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_25px_50px_-20px_rgba(10,52,83,0.35)]">
                 {/* عرض الصورتين جنباً لجنب بنسبة 50/50 */}
                 <div className="relative flex aspect-[16/10] w-full overflow-hidden bg-navy-darker">
                   {/* الصورة الأولى */}
@@ -208,7 +208,7 @@ export function Sectors() {
                       {sector.services.map((service, sIdx) => (
                         <li
                           key={sIdx}
-                          className="flex items-start gap-2.5 text-sm leading-6 text-slate-700"
+                          className="flex items-start gap-2.5 text-sm leading-6 text-slate-700 dark:text-slate-200"
                         >
                           <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-gold" />
                           <span>{service}</span>
@@ -218,10 +218,10 @@ export function Sectors() {
                   </div>
 
                   {/* Card Action Footer */}
-                  <div className="mt-6 pt-4 border-t border-slate-100">
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10">
                     <a
                       href="#contact"
-                      className="group/btn flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5 text-xs font-bold text-navy transition-all duration-300 hover:bg-gold hover:text-navy-darker"
+                      className="group/btn flex items-center justify-between rounded-xl bg-slate-50 dark:bg-white/10 px-4 py-2.5 text-xs font-bold text-navy dark:text-white transition-all duration-300 hover:bg-gold hover:text-navy-darker dark:hover:bg-gold dark:hover:text-navy-darker"
                     >
                       <span>طلب تسعير أو استشارة</span>
                       <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:-translate-x-1" />

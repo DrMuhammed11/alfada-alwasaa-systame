@@ -14,7 +14,7 @@ import { FloatingContact } from "@/components/site/floating-contact";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-navy-darker transition-colors duration-300">
       <SiteHeader />
       <main>
         <Hero />

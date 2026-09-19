@@ -4,7 +4,7 @@ import { SectionHeading } from "./section-heading";
 
 export function Position() {
   return (
-    <section id="position" className="relative overflow-hidden bg-mist py-24">
+    <section id="position" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-24 transition-colors duration-300">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
         <SectionHeading center kicker="مكانتنا" title="مكانة راسخة" />
 
@@ -26,7 +26,7 @@ export function Position() {
 
         {/* Exact paragraphs from the profile */}
         <Reveal delay={0.16}>
-          <p className="text-justify text-lg leading-9 text-slate-700 sm:text-[1.15rem] sm:leading-10">
+          <p className="text-justify text-lg leading-9 text-slate-700 dark:text-slate-200 sm:text-[1.15rem] sm:leading-10">
             انطلقت الشركة من قناعة راسخة بأن الشركات الكبرى لا تبحث فقط عن منفذ خدمة، بل
             عن شريك يعتمد عليه. ولذلك، نولي اهتمامًا بالغًا بالتفاصيل الفنية، وسلامة
             الإجراءات، ودقة المتابعة، ووضوح التواصل في جميع مراحل العمل، بدءًا من التخطيط
@@ -34,7 +34,7 @@ export function Position() {
           </p>
         </Reveal>
         <Reveal delay={0.24}>
-          <p className="mt-6 text-justify text-lg leading-9 text-slate-700 sm:text-[1.15rem] sm:leading-10">
+          <p className="mt-6 text-justify text-lg leading-9 text-slate-700 dark:text-slate-200 sm:text-[1.15rem] sm:leading-10">
             ونحرص على أن تعكس جميع أعمالنا صورة مؤسسية راقية تجمع بين الجدية والمرونة،
             وبين الجودة والسرعة، وبين الكفاءة الفنية والالتزام الكامل تجاه العميل. ومن هنا،
             أصبحت الشركة خيارًا مناسبًا للجهات التي تتطلع إلى تنفيذ أعمالها عبر فريق يفهم

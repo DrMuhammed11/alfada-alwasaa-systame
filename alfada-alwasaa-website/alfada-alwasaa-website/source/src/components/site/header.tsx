@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
+import { ThemeToggle } from "./theme-toggle";
 
 const NAV_ITEMS = SITE_CONFIG.navItems;
 
@@ -144,8 +145,9 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
+        {/* Desktop CTA & Theme Toggle */}
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <a
             href="#contact"
             onClick={(e) => handleNavClick(e, "#contact")}
@@ -155,16 +157,19 @@ export function SiteHeader() {
           </a>
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-label="فتح قائمة التنقل"
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15 lg:hidden"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {/* Mobile menu button and Theme Toggle */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label="فتح قائمة التنقل"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}

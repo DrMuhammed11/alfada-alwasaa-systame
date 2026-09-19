@@ -287,7 +287,7 @@ export function Contact() {
   );
 
   return (
-    <section id="contact" className="relative overflow-hidden bg-mist pt-10 pb-16 sm:pt-14 sm:pb-20">
+    <section id="contact" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 pt-10 pb-16 sm:pt-14 sm:pb-20 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading 
           center 
@@ -296,7 +296,7 @@ export function Contact() {
         />
         
         <Reveal delay={0.1}>
-          <p className="mx-auto -mt-6 max-w-2xl text-center text-lg leading-8 text-slate-600">
+          <p className="mx-auto -mt-6 max-w-2xl text-center text-lg leading-8 text-slate-600 dark:text-slate-300">
             فريقنا جاهز لمناقشة متطلبات مشروعك وتقديم عروض أسعار متكاملة تجمع بين السرعة والدقة وأعلى معايير الجودة.
           </p>
         </Reveal>
@@ -429,9 +429,9 @@ export function Contact() {
 
           {/* Interactive Request / Quote Form */}
           <Reveal delay={0.2}>
-            <div className="rounded-3xl border border-navy/10 bg-white p-8 shadow-[0_20px_60px_-30px_rgba(10,52,83,0.3)] sm:p-10">
+            <div className="rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 shadow-[0_20px_60px_-30px_rgba(10,52,83,0.3)] sm:p-10">
               {/* تبديل التبويبات بين تقديم طلب جديد وتتبع معاملة */}
-              <div className="flex rounded-2xl bg-slate-100 p-1.5 mb-8">
+              <div className="flex rounded-2xl bg-slate-100 dark:bg-white/5 p-1.5 mb-8 ring-1 ring-slate-200/50 dark:ring-white/10">
                 <button
                   type="button"
                   onClick={() => {
@@ -439,8 +439,8 @@ export function Contact() {
                   }}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition ${
                     activeTab === "form"
-                      ? "bg-navy text-white shadow-sm"
-                      : "text-slate-600 hover:text-navy"
+                      ? "bg-navy dark:bg-gold text-white dark:text-navy-darker shadow-sm"
+                      : "text-slate-600 hover:text-navy dark:text-white/70 dark:hover:text-white"
                   }`}
                 >
                   <Send className="h-4 w-4" />
@@ -451,8 +451,8 @@ export function Contact() {
                   onClick={() => setActiveTab("track")}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition ${
                     activeTab === "track"
-                      ? "bg-navy text-white shadow-sm"
-                      : "text-slate-600 hover:text-navy"
+                      ? "bg-navy dark:bg-gold text-white dark:text-navy-darker shadow-sm"
+                      : "text-slate-600 hover:text-navy dark:text-white/70 dark:hover:text-white"
                   }`}
                 >
                   <Search className="h-4 w-4" />
@@ -462,10 +462,10 @@ export function Contact() {
 
               {activeTab === "form" ? (
                 <>
-                  <h3 className="text-2xl font-black text-navy sm:text-3xl">
+                  <h3 className="text-2xl font-black text-navy dark:text-white sm:text-3xl">
                     طلب عرض سعر أو استشارة
                   </h3>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                     أدخل تفاصيل مشروعك وسيقوم فريقنا المختص بالتواصل معك في أقرب وقت.
                   </p>
 

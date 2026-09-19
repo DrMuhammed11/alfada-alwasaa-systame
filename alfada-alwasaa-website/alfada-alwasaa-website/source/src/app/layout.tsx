@@ -4,11 +4,16 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SITE_CONFIG } from "@/config/site";
 
 export const viewport: Viewport = {
-  themeColor: "#0a3453",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0a3453" },
+    { media: "(prefers-color-scheme: dark)", color: "#051e31" },
+  ],
+  colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
 };
@@ -265,9 +270,18 @@ export default function RootLayout({
         className={`${cairo.variable} font-cairo antialiased bg-background text-foreground`}
       >
         <QueryProvider>
-          {children}
-          <Toaster />
-          <SonnerToaster richColors position="top-center" dir="rtl" />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <LenisProvider>
+              {children}
+              <Toaster />
+              <SonnerToaster richColors position="top-center" dir="rtl" />
+            </LenisProvider>
+          </ThemeProvider>
         </QueryProvider>
       </body>
     </html>

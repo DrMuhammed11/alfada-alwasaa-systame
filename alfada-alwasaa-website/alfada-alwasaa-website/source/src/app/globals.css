@@ -15,8 +15,24 @@
   --font-cairo: var(--font-cairo);
 }
 
-html {
-  scroll-behavior: smooth;
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {
@@ -47,6 +63,13 @@ section[id] {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #c6954a;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #051e31;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #c6954a;
+  border: 2px solid #051e31;
 }
 
 /* Gold underline accent used under section titles (echoes the profile design) */
@@ -151,11 +174,12 @@ section[id] {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  color-scheme: dark;
+  --background: #051e31;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: #072a44;
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: #072a44;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
