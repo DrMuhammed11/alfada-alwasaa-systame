@@ -60,6 +60,15 @@ const Contact = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
+const PartnersMarquee = dynamic(
+  () => import("@/components/site/partners-marquee").then((m) => ({ default: m.PartnersMarquee })),
+  { loading: SectionSkeleton, ssr: true }
+);
+const Faq = dynamic(
+  () => import("@/components/site/faq").then((m) => ({ default: m.Faq })),
+  { loading: SectionSkeleton, ssr: true }
+);
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-navy-darker transition-colors duration-300">
@@ -67,12 +76,14 @@ export default function Home() {
       <main id="main-content">
         <Hero />
         <Stats />
+        <PartnersMarquee />
         <Sectors />
         <Services />
         <Position />
         <VisionMission />
         <TrackRecord />
         <WhyUs />
+        <Faq />
         <Conclusion />
         <Contact />
       </main>

@@ -70,6 +70,9 @@ export function SiteFooter() {
                   {item.label}
                 </a>
               ))}
+              <a href="#faq" className="hover:text-gold-light transition">
+                الأسئلة الشائعة
+              </a>
             </div>
           </Reveal>
 
