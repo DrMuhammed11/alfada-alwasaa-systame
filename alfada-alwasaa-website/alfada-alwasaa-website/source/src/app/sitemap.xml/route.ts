@@ -1,6 +1,8 @@
 import { SERVICES_DATA } from "@/config/services-data";
 import { BLOG_POSTS } from "@/config/blog-data";
 
+export const dynamic = "force-static";
+
 export async function GET() {
   const today = new Date().toISOString().split("T")[0];
   const baseUrl = "https://www.alfadaalwasaa.com";

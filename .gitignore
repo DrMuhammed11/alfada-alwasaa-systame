@@ -1,5 +1,13 @@
+# حزم الاعتماديات ومخرجات البناء
+node_modules/
+.next/
+out/
+build/
+dist/
+
 # بيئة العمل والأدوات المحلية
 .gemini/
+.vercel
 
 # ملفات النظام والتسجيل المؤقتة
 *.log
@@ -7,7 +15,8 @@
 .DS_Store
 Thumbs.db
 
-# Local environment files
-.env
-.env.*
+# ملفات البيئة والمتغيرات الحساسة
+.env*
 *.env
+!.env.example
+

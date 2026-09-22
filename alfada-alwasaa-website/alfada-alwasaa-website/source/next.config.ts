@@ -8,6 +8,12 @@ const analyze = withBundleAnalyzer({
 
 const nextConfig: NextConfig = {
   /**
+   * التصدير الثابت الكامل (Static HTML/CSS/JS Export)
+   * يولّد موقعاً ساكناً في مجلد out/ صالحاً للنشر المباشر على خوادم الويب وCDNs
+   */
+  output: "export",
+
+  /**
    * الإبقاء على unoptimized: true ضروري لأن الموقع يُقدّم كثابت (Static Export عبر npx serve أو بيئات CDN الثابتة).
    * إزالة هذه الخاصية تجعل Next.js يوجّه طلبات الصور إلى نقطة نهاية ديناميكية (/_next/image)
    * غير متوفرة في بيئة التقديم الثابت المستقلة عن خادم Node.
@@ -24,46 +30,6 @@ const nextConfig: NextConfig = {
    * إخفاء مؤشرات التطوير العائمة في الواجهة
    */
   devIndicators: false,
-
-  /**
-   * ترويسات التخزين المؤقت الطويل (Cache-Control) للصور والأصول الثابتة
-   */
-  async headers() {
-    return [
-      {
-        source: "/profile/:all*(svg|jpg|png|webp)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/projects/:all*(svg|jpg|png|webp)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-    ];
-  },
-
-  /**
-   * التوجيه الدائم المباشر 301 من النطاق الجذري إلى https://www.alfadaalwasaa.com لمنع القفزة المزدوجة
-   */
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "alfadaalwasaa.com" }],
-        destination: "https://www.alfadaalwasaa.com/:path*",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default analyze(nextConfig);

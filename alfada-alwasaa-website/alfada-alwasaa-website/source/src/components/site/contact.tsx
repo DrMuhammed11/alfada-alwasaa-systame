@@ -134,48 +134,22 @@ export function Contact() {
     },
   });
 
-  // حالة الملف المرفق الاختياري
-  const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("حجم الملف يتجاوز الحد المسموح (10 ميجابايت)");
-      return;
-    }
-    setAttachedFileName(file.name);
-    toast.success(`تم اختيار الملف: ${file.name}`);
-  };
-
-  const clearAttachedFile = () => {
-    setAttachedFileName(null);
-  };
-
   // إرسال النموذج ومعالجة الحالات
   const onSubmit = async (values: InquiryFormValues) => {
     setSubmitError(null);
     try {
-      let finalMessage = values.message?.trim() || undefined;
-      if (attachedFileName) {
-        finalMessage = finalMessage
-          ? `${finalMessage}\n\n[ملف مرفق مع الطلب: ${attachedFileName}]`
-          : `[ملف مرفق مع الطلب: ${attachedFileName}]`;
-      }
-
       const res = await submitInquiry({
         name: values.name.trim(),
         phone: values.phone.trim(),
         email: values.email?.trim() || undefined,
         service: values.service,
-        message: finalMessage,
+        message: values.message?.trim() || undefined,
       });
 
       if (res.success && res.refNumber) {
         setGeneratedRef(res.refNumber);
         setSubmitted(true);
         setSubmittedRef(res.refNumber);
-        setAttachedFileName(null);
         try {
           localStorage.setItem("lastInquiryRef", res.refNumber);
           if (res.trackingToken) {
@@ -248,7 +222,6 @@ export function Contact() {
     if (trackQueryRef) {
       runTrackInquiry(trackQueryRef, trackQueryToken);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackQueryRef, trackQueryToken]);
 
 
@@ -685,35 +658,51 @@ export function Contact() {
                         )}
                       </div>
 
-                      {/* حقل إرفاق ملف اختياري (مخطط / كراسة شروط / جدول كميات) */}
-                      <div>
-                        <label className="block text-sm font-bold text-navy mb-2">
-                          إرفاق ملف أو مخطط اختياري (PDF أو صور حتى 10MB)
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-4 py-3 text-xs font-semibold text-slate-600 transition hover:border-gold hover:bg-gold/5">
-                            <Paperclip className="h-4 w-4 text-gold shrink-0" />
-                            <span className="truncate">
-                              {attachedFileName ? attachedFileName : "اختر ملفاً لإرفاقه مع طلب التسعير (اختياري)"}
-                            </span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
-                              onChange={handleFileChange}
-                              className="hidden"
-                            />
-                          </label>
-                          {attachedFileName && (
-                            <button
-                              type="button"
-                              onClick={clearAttachedFile}
-                              className="rounded-xl bg-rose-50 px-3 py-3 text-xs font-bold text-rose-600 ring-1 ring-rose-200 hover:bg-rose-100 transition"
-                            >
-                              إلغاء
-                            </button>
-                          )}
+                      {/* توجيه صادق وشفاف لإرسال المخططات والمستندات الهندسية عبر القنوات الرسمية */}
+                      <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 text-xs">
+                        <div className="flex items-start gap-2.5">
+                          <Paperclip className="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                          <div className="space-y-1.5 flex-1">
+                            <p className="font-bold text-navy dark:text-white">
+                              هل لديك مخططات هندسية، جداول كميات، أو كراسة شروط؟
+                            </p>
+                            <p className="text-slate-600 dark:text-white/70 leading-relaxed text-[11px]">
+                              نظراً للأهمية والسرية الفنية للمخططات، نرحب باستلام المستندات والمرفقات مباشرة عبر القنوات الرسمية المعتمدة:
+                            </p>
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              <a
+                                href={SITE_CONFIG.contacts.general.waHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                              >
+                                <span>واتساب الإدارة العامة</span>
+                              </a>
+                              <a
+                                href={SITE_CONFIG.contacts.email.mailHref}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-navy dark:bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-navy-dark transition"
+                              >
+                                <span>البريد الإلكتروني الرسمي</span>
+                              </a>
+                            </div>
+                          </div>
                         </div>
                       </div>
+
+                      {/* رسالة الخطأ الصريحة تظهر في واجهة النموذج مباشرة */}
+                      {submitError && (
+                        <div
+                          role="alert"
+                          aria-live="polite"
+                          className="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50/90 p-3.5 text-xs font-semibold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+                        >
+                          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-bold">تعذر إرسال الطلب</p>
+                            <p className="mt-0.5 text-[11px] leading-relaxed">{submitError}</p>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="pt-2">
                         <button

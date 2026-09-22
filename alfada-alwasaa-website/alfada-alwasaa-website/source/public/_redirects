@@ -1,0 +1,3 @@
+# توجيه النطاق الجذري (Apex Domain) دائمًا إلى النطاق الفرعي الرسمي www
+https://alfadaalwasaa.com/* https://www.alfadaalwasaa.com/:splat 301!
+http://alfadaalwasaa.com/* https://www.alfadaalwasaa.com/:splat 301!
