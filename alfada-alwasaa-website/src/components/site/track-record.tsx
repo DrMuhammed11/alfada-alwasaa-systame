@@ -128,12 +128,12 @@ export function TrackRecord() {
             return (
               <Reveal 
                 key={item.id} 
-                delay={idx * 0.08}
+                index={idx}
                 className={`${colSpanClass} w-full`}
               >
                 <article 
                   onClick={() => handleOpenLightbox(item)}
-                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-400 ease-out hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_20px_45px_-15px_rgba(198,149,74,0.25)]"
+                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-[0_25px_50px_-15px_rgba(198,149,74,0.3)]"
                 >
                   {/* Card Media Header with interactive hover zoom and Lightbox trigger */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">

@@ -19,11 +19,14 @@ export function LenisProvider({ children }: { children?: ReactNode }) {
     }
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
+      // easing انسيابي يمنح شعور "الطوافية" مع توقف سلس
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.085,
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
+      wheelMultiplier: 0.9,
       touchMultiplier: 1.5,
     });
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 
@@ -8,8 +11,27 @@ type SectionHeadingProps = {
   light?: boolean;
 };
 
-/** Section heading that mirrors the profile's title + gold underline style. */
+/** عنوان القسم مع الخط الذهبي المتحرك الذي يمتد عند دخول مجال الرؤية */
 export function SectionHeading({ kicker, title, center, light }: SectionHeadingProps) {
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+
+  // IntersectionObserver: يُضيف كلاس in-view مرة واحدة لتشغيل gold-rule animation
+  useEffect(() => {
+    const node = h2Ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          node.classList.add("in-view");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Reveal className={cn("mb-8 sm:mb-10", center && "text-center")}>
       {kicker && (
@@ -24,6 +46,7 @@ export function SectionHeading({ kicker, title, center, light }: SectionHeadingP
         </span>
       )}
       <h2
+        ref={h2Ref}
         className={cn(
           "gold-rule inline-block pb-2 text-3xl font-extrabold sm:text-4xl lg:text-[2.75rem]",
           center && "center",

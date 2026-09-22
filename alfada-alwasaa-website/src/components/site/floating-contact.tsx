@@ -27,12 +27,15 @@ export function FloatingContact() {
       <AnimatePresence>
         {showTopBtn && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            initial={{ opacity: 0, scale: 0.7, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            exit={{ opacity: 0, scale: 0.7, y: 10 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            whileHover={{ scale: 1.1, backgroundColor: "#c6954a" }}
+            whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
             aria-label="العودة لأعلى الصفحة"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-navy/90 text-white shadow-lg backdrop-blur-md ring-1 ring-white/20 transition hover:bg-gold hover:text-navy-darker hover:scale-105"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-navy/90 text-white shadow-lg backdrop-blur-md ring-1 ring-white/20 transition-colors hover:text-navy-darker"
           >
             <ArrowUp className="h-5 w-5" />
           </motion.button>

@@ -91,7 +91,7 @@ export function Stats() {
   return (
     <section className="relative -mt-10 z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <Reveal>
-        <div className="rounded-3xl border border-gold/30 bg-gradient-to-br from-navy-deep via-navy to-navy-darker p-6 shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)] backdrop-blur-lg sm:p-10">
+        <div className="shimmer-card rounded-3xl border border-gold/30 bg-gradient-to-br from-navy-deep via-navy to-navy-darker p-6 shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)] backdrop-blur-lg sm:p-10">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8 divide-y-2 divide-white/10 md:divide-y-0 md:divide-x-2 md:divide-x-reverse">
             {STATS.map((stat, idx) => (
               <div

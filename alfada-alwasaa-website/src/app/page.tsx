@@ -5,13 +5,22 @@ import { Stats } from "@/components/site/stats";
 import { SiteFooter } from "@/components/site/footer";
 import { FloatingContact } from "@/components/site/floating-contact";
 
-// Skeleton بسيط للأقسام أثناء التحميل
+// Skeleton بارتفاع ثابت لمنع CLS عند تحميل الأقسام الديناميكية
 function SectionSkeleton() {
   return (
-    <div className="w-full py-20 animate-pulse">
+    <div
+      className="w-full min-h-[420px] py-20 animate-pulse"
+      aria-hidden="true"
+    >
       <div className="mx-auto max-w-7xl px-6 space-y-4">
-        <div className="h-8 w-48 rounded-lg bg-navy/10 dark:bg-white/10 mx-auto" />
-        <div className="h-4 w-96 rounded-lg bg-navy/8 dark:bg-white/8 mx-auto" />
+        <div className="h-5 w-20 rounded-full bg-gold/20 mx-auto" />
+        <div className="h-8 w-52 rounded-lg bg-navy/10 dark:bg-white/10 mx-auto" />
+        <div className="h-4 w-80 rounded-lg bg-navy/8 dark:bg-white/8 mx-auto" />
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 max-w-3xl mx-auto">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-2xl bg-navy/6 dark:bg-white/6" />
+          ))}
+        </div>
       </div>
     </div>
   );

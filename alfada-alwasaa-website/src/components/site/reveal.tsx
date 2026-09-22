@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 type RevealProps = {
   children: ReactNode;
   delay?: number;
+  /** رقم ترتيب البطاقة — يُحسب منه تأخير stagger تلقائياً (0.08s × index) */
+  index?: number;
   y?: number;
   className?: string;
   once?: boolean;
@@ -21,12 +23,17 @@ type RevealProps = {
 export function Reveal({
   children,
   delay = 0,
+  index,
   y = 14,
   className,
   once = true,
 }: RevealProps) {
   const reduce = useReducedMotion();
   const isMobile = useIsMobile();
+
+  // stagger: 0.08s بين كل عنصر، محدود بـ 0.32s حداً أقصى لمنع تأخر واضح
+  const staggerDelay = index !== undefined ? Math.min(index * 0.08, 0.32) : 0;
+  const totalDelay = Math.min(delay + staggerDelay, 0.4);
 
   return (
     <motion.div
@@ -37,7 +44,7 @@ export function Reveal({
       viewport={{ once, margin: "-15px" }}
       transition={{
         duration: isMobile ? 0.35 : 0.42,
-        delay: Math.min(delay, 0.15),
+        delay: reduce ? 0 : totalDelay,
         ease: [0.16, 1, 0.3, 1],
       }}
     >

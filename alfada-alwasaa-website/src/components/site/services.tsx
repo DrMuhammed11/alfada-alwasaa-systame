@@ -197,7 +197,7 @@ export function Services() {
                         src={activeService.detail.image}
                         alt={activeService.title}
                         fill
-                        priority
+                        loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 40vw"
                         className="object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
                       />

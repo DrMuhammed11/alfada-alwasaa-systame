@@ -135,12 +135,14 @@ export function SiteHeader() {
               )}
             >
               {item.label}
-              <span
-                className={cn(
-                  "absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gold transition-all duration-300",
-                  active === item.href ? "opacity-100" : "opacity-0"
-                )}
-              />
+              {/* مؤشر الرابط النشط — يتحرك بسلاسة بين الروابط عبر layoutId */}
+              {active === item.href && (
+                <motion.span
+                  layoutId="nav-active-indicator"
+                  className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gold"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
             </a>
           ))}
         </nav>

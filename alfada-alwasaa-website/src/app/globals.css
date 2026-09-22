@@ -86,21 +86,61 @@ section[id] {
   position: absolute;
   bottom: -10px;
   inset-inline-start: 0;
-  width: 72px;
+  width: 0;
   height: 4px;
   border-radius: 4px;
   background: linear-gradient(to left, #c6954a, #dcb26b);
+  /* الـ animation تنطلق عند رؤية العنصر عبر كلاس .in-view */
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gold-rule.in-view::after {
+  width: 72px;
 }
 .gold-rule.center::after {
   inset-inline-start: 50%;
   transform: translateX(50%);
 }
-
+.gold-rule.center.in-view::after {
+  width: 72px;
+}
 
 /* Fine dotted pattern used on hero overlays */
 .dot-grid {
   background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+/* content-visibility: الأقسام خارج الـ viewport الأول — تسريع الرندر الأولي */
+section[id]:not(#home):not(#about) {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* shimmer animation للبطاقات المميزة */
+@keyframes shimmer-slide {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(198, 149, 74, 0.08) 50%,
+    transparent 80%
+  );
+  transform: translateX(100%);
+  pointer-events: none;
+  transition: none;
+}
+.shimmer-card:hover::before {
+  animation: shimmer-slide 0.7s ease-in-out;
 }
 
 @theme inline {

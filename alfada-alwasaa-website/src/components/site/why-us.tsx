@@ -48,19 +48,20 @@ export function WhyUs() {
 
           <Reveal delay={0.24}>
             <div className="mt-6 sm:mt-8 grid gap-4 sm:grid-cols-3">
-              {SITE_CONFIG.values.map((item) => (
-                <div
-                  key={item.title}
-                  className="group rounded-2xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-5 shadow-[0_10px_30px_-15px_rgba(10,52,83,0.3)] transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 hover:shadow-[0_15px_35px_-15px_rgba(198,149,74,0.4)]"
-                >
-                  <span className="inline-block h-2 w-8 rounded-full bg-gold transition-all duration-300 group-hover:w-12" />
-                  <h4 className="mt-3 text-base font-extrabold text-navy dark:text-white">
-                    {item.title}
-                  </h4>
-                  <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300">
-                    {item.desc}
-                  </p>
-                </div>
+              {SITE_CONFIG.values.map((item, idx) => (
+                <Reveal key={item.title} index={idx} delay={0.24}>
+                  <div
+                    className="group rounded-2xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-5 shadow-[0_10px_30px_-15px_rgba(10,52,83,0.3)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-[0_20px_40px_-10px_rgba(198,149,74,0.25)]"
+                  >
+                    <span className="inline-block h-2 w-8 rounded-full bg-gold transition-all duration-300 group-hover:w-14" />
+                    <h4 className="mt-3 text-base font-extrabold text-navy dark:text-white">
+                      {item.title}
+                    </h4>
+                    <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300">
+                      {item.desc}
+                    </p>
+                  </div>
+                </Reveal>
               ))}
             </div>
           </Reveal>

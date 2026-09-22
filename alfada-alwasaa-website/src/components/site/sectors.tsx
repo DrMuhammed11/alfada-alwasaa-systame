@@ -147,8 +147,8 @@ export function Sectors() {
         {/* Modern Showcase Cards Grid */}
         <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredSectors.map((sector, idx) => (
-            <Reveal key={sector.num} delay={idx * 0.05}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-1.5 hover:border-gold/50 hover:shadow-[0_25px_50px_-20px_rgba(10,52,83,0.35)]">
+            <Reveal key={sector.num} index={idx}>
+              <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-2 hover:border-gold/60 hover:shadow-[0_30px_60px_-15px_rgba(10,52,83,0.4)] dark:hover:shadow-[0_30px_60px_-15px_rgba(198,149,74,0.15)]">
                 {/* عرض الصورتين جنباً لجنب بنسبة 50/50 */}
                 <div className="relative flex aspect-[16/10] w-full overflow-hidden bg-navy-darker">
                   {/* الصورة الأولى */}
