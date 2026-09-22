@@ -4,11 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, Globe } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "./theme-toggle";
 import { CommandSearch } from "./command-search";
+import { LanguageSwitcher } from "./language-switcher";
 
 const NAV_ITEMS = SITE_CONFIG.navItems;
 
@@ -165,15 +166,8 @@ export function SiteHeader() {
             </kbd>
           </button>
 
-          {/* Language Switcher to English */}
-          <Link
-            href="/en"
-            className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20 hover:text-gold-light transition"
-            aria-label="Switch to English version"
-          >
-            <Globe className="h-3.5 w-3.5 text-gold-light" />
-            <span>EN</span>
-          </Link>
+          {/* Language Switcher */}
+          <LanguageSwitcher variant="pill" />
 
           <ThemeToggle />
           <a
@@ -195,13 +189,7 @@ export function SiteHeader() {
           >
             <Search className="h-4 w-4 text-gold-light" />
           </button>
-          <Link
-            href="/en"
-            aria-label="Switch to English"
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xs font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
-          >
-            EN
-          </Link>
+          <LanguageSwitcher variant="button" />
           <ThemeToggle />
           <button
             type="button"
@@ -246,6 +234,9 @@ export function SiteHeader() {
                   </a>
                 </li>
               ))}
+              <li className="pt-2">
+                <LanguageSwitcher variant="menu" />
+              </li>
               <li className="pt-2 space-y-2">
                 <a
                   href="#contact"

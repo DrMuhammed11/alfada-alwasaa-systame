@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function SiteFooter() {
   return (
@@ -81,9 +81,7 @@ export function SiteFooter() {
               >
                 تحميل البروفايل (PDF)
               </a>
-              <Link href="/en" className="text-gold-light font-bold hover:underline transition">
-                English (EN)
-              </Link>
+              <LanguageSwitcher variant="pill" />
             </div>
           </Reveal>
 

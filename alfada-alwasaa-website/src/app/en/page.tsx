@@ -22,15 +22,15 @@ import {
   Clock, 
   Layers, 
   ChevronDown,
-  Globe,
-  Menu,
-  X,
-  Mail,
-  MapPin
+  Menu, 
+  X, 
+  Mail, 
+  MapPin 
 } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "@/components/site/theme-toggle";
+import { LanguageSwitcher } from "@/components/site/language-switcher";
 
 const SERVICE_ICONS = [
   Building2,
@@ -94,14 +94,8 @@ export default function EnglishHomePage() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Language Switcher to Arabic */}
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 hover:text-gold-light transition"
-            >
-              <Globe className="h-3.5 w-3.5 text-gold" />
-              <span>العربية</span>
-            </Link>
+            {/* Language Switcher */}
+            <LanguageSwitcher variant="pill" />
 
             <ThemeToggle />
 
@@ -115,13 +109,7 @@ export default function EnglishHomePage() {
 
           {/* Mobile buttons */}
           <div className="flex items-center gap-2 lg:hidden">
-            <Link
-              href="/"
-              className="flex items-center gap-1 rounded-xl bg-white/10 px-2.5 py-2 text-xs font-bold text-white"
-            >
-              <Globe className="h-3.5 w-3.5 text-gold" />
-              <span>AR</span>
-            </Link>
+            <LanguageSwitcher variant="button" />
             <ThemeToggle />
             <button
               type="button"
@@ -154,6 +142,9 @@ export default function EnglishHomePage() {
                     {item.label}
                   </a>
                 ))}
+                <div className="pt-2">
+                  <LanguageSwitcher variant="menu" />
+                </div>
                 <a
                   href="#contact"
                   onClick={() => setMobileMenuOpen(false)}
@@ -673,9 +664,7 @@ export default function EnglishHomePage() {
                 {item.label}
               </a>
             ))}
-            <Link href="/" className="text-gold-light font-bold hover:underline">
-              العربية (Arabic)
-            </Link>
+            <LanguageSwitcher variant="pill" />
           </div>
 
           <p className="mt-8 text-[11px] text-white/50 border-t border-white/10 pt-6">
