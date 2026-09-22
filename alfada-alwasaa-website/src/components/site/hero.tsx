@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone } from "lucide-react";
+import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone, FileDown } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
 
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -52,7 +52,7 @@ export function Hero() {
                 <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
                 <span>كيان مهني متعدد الخدمات</span>
                 <span className="text-white/40">|</span>
-                <span>حلول متكاملة ضمن منظومة واحدة</span>
+                <span>شريككم الهندسي والتنفيذي المعتمد</span>
               </span>
             </motion.div>
 
@@ -69,7 +69,7 @@ export function Hero() {
               <div className="mt-3 flex items-center gap-3">
                 <span className="h-0.5 w-8 rounded-full bg-gold hidden sm:block" />
                 <p className="text-base sm:text-lg font-black tracking-wide text-gold-light">
-                  حلول متكاملة ضمن منظومة واحدة
+                  كفاءة هندسية، دقة تنفيذية، وموثوقية في إدارة أضخم المشاريع
                 </p>
               </div>
             </motion.div>
@@ -113,15 +113,24 @@ export function Hero() {
               </MagneticButton>
 
               <a
+                href="/profile/alfada-alwasaa-profile.pdf"
+                download="alfada-alwasaa-profile.pdf"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-5 text-xs sm:text-sm font-bold text-gold-light backdrop-blur-sm transition hover:bg-gold hover:text-navy-darker shadow-sm"
+              >
+                <FileDown className="h-4 w-4" />
+                <span>تحميل بروفايل الشركة (PDF)</span>
+              </a>
+
+              <a
                 href="#sectors"
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition hover:border-gold/60 hover:text-gold-light"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition hover:border-gold/60 hover:text-gold-light"
               >
                 استكشف قطاعاتنا
               </a>
 
               <a
                 href={SITE_CONFIG.contacts.general.telHref}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-5 text-xs sm:text-sm font-bold text-white/90 ring-1 ring-white/15 transition hover:bg-white/15"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-xs sm:text-sm font-bold text-white/90 ring-1 ring-white/15 transition hover:bg-white/15"
               >
                 <Phone className="h-3.5 w-3.5 text-gold-light" />
                 <span dir="ltr">{SITE_CONFIG.contacts.general.display}</span>

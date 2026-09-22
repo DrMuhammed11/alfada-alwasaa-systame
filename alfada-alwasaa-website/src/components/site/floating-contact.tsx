@@ -120,29 +120,33 @@ export function FloatingContact() {
         )}
       </AnimatePresence>
 
-      {/* Main Trigger Action Button */}
-      <motion.button
+      {/* Speed dial toggle button for numbers */}
+      <button
         type="button"
         onClick={() => setMenuOpen((v) => !v)}
-        aria-label="خيارات الاتصال والواتساب السريعة"
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.95 }}
-        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.5)] transition hover:bg-emerald-600"
+        aria-label="قائمة أرقام الإدارة والمسؤولين"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-navy/90 text-gold-light shadow-md ring-1 ring-white/20 transition hover:bg-navy hover:text-white text-xs font-bold"
+        title="أرقام الإدارة والمشاريع"
       >
-        <span className="absolute -inset-1 rounded-full bg-emerald-400/30 blur-sm group-hover:bg-emerald-400/50 transition-colors duration-300" />
-        {menuOpen ? (
-          <X className="relative h-6 w-6" />
-        ) : (
-          <MessageSquare className="relative h-7 w-7" />
-        )}
+        <Phone className="h-4 w-4" />
+      </button>
+
+      {/* Main One-Click WhatsApp Action Button */}
+      <a
+        href={SITE_CONFIG.contacts.general.waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="محادثة واتساب فورية مباشرة مع الإدارة العامة"
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.5)] transition hover:bg-emerald-600 hover:scale-105 active:scale-95"
+      >
+        <span className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-sm animate-pulse" />
+        <MessageSquare className="relative h-7 w-7" />
 
         {/* Tooltip hint on hover (desktop) */}
-        {!menuOpen && (
-          <span className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-xl bg-navy-darker px-3 py-1.5 text-xs font-bold text-white shadow-md ring-1 ring-white/10 md:group-hover:block">
-            تواصل فوري (الإدارة ونائب المدير)
-          </span>
-        )}
-      </motion.button>
+        <span className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-xl bg-navy-darker px-3 py-1.5 text-xs font-bold text-white shadow-md ring-1 ring-white/10 md:group-hover:block">
+          محادثة واتساب فورية (الإدارة العامة)
+        </span>
+      </a>
     </div>
   );
 }

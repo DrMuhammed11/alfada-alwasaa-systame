@@ -46,7 +46,7 @@ export function Services() {
   return (
     <section id="services" className="relative overflow-hidden bg-white dark:bg-navy-darker py-12 sm:py-16 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading center kicker="منظومة عمل واحدة" title="خدماتنا" />
+        <SectionHeading center kicker="قدراتنا التنفيذية" title="حلول تخصصية تلبي معايير المشاريع الحيوية" />
 
         {/* Tab Selector Header - Fully visible 7-grid on desktop, smooth start-aligned scroll on mobile */}
         <Reveal delay={0.05} className="mb-6 sm:mb-8">

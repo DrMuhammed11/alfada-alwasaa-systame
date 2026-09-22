@@ -534,7 +534,7 @@ export function Contact() {
                               message: "",
                             });
                           }}
-                          className="inline-flex items-center gap-2 rounded-xl bg-navy px-6 py-2.5 text-sm font-bold text-white transition hover:bg-navy-deep"
+                          className="inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-navy-deep"
                         >
                           إرسال طلب آخر
                         </button>
@@ -546,11 +546,24 @@ export function Contact() {
                               handleQuickTrack(generatedRef);
                             }
                           }}
-                          className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 text-sm font-bold text-navy-darker transition hover:bg-gold-light"
+                          className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs sm:text-sm font-bold text-navy-darker transition hover:bg-gold-light"
                         >
                           <Search className="h-4 w-4" />
-                          <span>متابعة حالة هذا الطلب</span>
+                          <span>تتبع المعاملة فورياً</span>
                         </button>
+                        {generatedRef && (
+                          <a
+                            href={`https://wa.me/967776999942?text=${encodeURIComponent(
+                              `السلام عليكم ورحمة الله، أود متابعة طلبي برقم مرجعي: ${generatedRef}`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-emerald-700 shadow-sm"
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                            <span>متابعة فورية عبر واتساب الإدارة</span>
+                          </a>
+                        )}
                       </div>
                     </div>
                   ) : (

@@ -42,7 +42,7 @@ export function SiteFooter() {
           {/* Live Tagline (Scalable typography) */}
           <Reveal delay={0.06}>
             <p className="-mt-1 text-sm sm:text-base font-extrabold tracking-wide text-gold-light">
-              {SITE_CONFIG.company.tagline}
+              الانضباط المؤسسي والريادة الميدانية في اليمن
             </p>
           </Reveal>
 
@@ -73,6 +73,13 @@ export function SiteFooter() {
               ))}
               <a href="#faq" className="hover:text-gold-light transition">
                 الأسئلة الشائعة
+              </a>
+              <a
+                href="/profile/alfada-alwasaa-profile.pdf"
+                download="alfada-alwasaa-profile.pdf"
+                className="text-gold font-bold hover:text-gold-light transition underline"
+              >
+                تحميل البروفايل (PDF)
               </a>
               <Link href="/en" className="text-gold-light font-bold hover:underline transition">
                 English (EN)

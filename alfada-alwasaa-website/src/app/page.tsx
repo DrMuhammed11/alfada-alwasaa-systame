@@ -69,6 +69,19 @@ const Faq = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
+const TrustBadges = dynamic(
+  () => import("@/components/site/trust-badges").then((m) => ({ default: m.TrustBadges })),
+  { loading: SectionSkeleton, ssr: true }
+);
+const Testimonials = dynamic(
+  () => import("@/components/site/testimonials").then((m) => ({ default: m.Testimonials })),
+  { loading: SectionSkeleton, ssr: true }
+);
+const BlogPreview = dynamic(
+  () => import("@/components/site/blog-preview").then((m) => ({ default: m.BlogPreview })),
+  { loading: SectionSkeleton, ssr: true }
+);
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-navy-darker transition-colors duration-300">
@@ -77,13 +90,16 @@ export default function Home() {
         <Hero />
         <Stats />
         <PartnersMarquee />
+        <TrustBadges />
         <Sectors />
         <Services />
         <Position />
         <VisionMission />
         <TrackRecord />
+        <Testimonials />
         <WhyUs />
         <Faq />
+        <BlogPreview />
         <Conclusion />
         <Contact />
       </main>

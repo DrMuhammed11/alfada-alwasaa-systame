@@ -102,12 +102,10 @@ export function Sectors() {
     <section id="sectors" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
-          <SectionHeading center kicker="قطاعاتنا" title="حلول متكاملة ضمن منظومة واحدة" />
+          <SectionHeading center kicker="قطاعات الأعمال" title="قطاعات استراتيجية تديرها كفاءات متخصصة" />
           <Reveal delay={0.1}>
             <p className="-mt-6 text-base sm:text-lg leading-8 text-slate-600 dark:text-slate-300">
-              نعمل في قطاعات متعددة ومجالات واسعة من خلال خبرتنا وكوادرنا لتقديم حلول
-              متكاملة ضمن منظومة واحدة، بما يختصر الوقت، ويرفع كفاءة التنفيذ، ويعزز جودة
-              النتائج النهائية.
+              نعمل في قطاعات استراتيجية متعددة من خلال خبرتنا الميدانية وكوادرنا الهندسية المتخصصة، بما يختصر دورة الإنجاز، ويرفع كفاءة التنفيذ، ويعزز موثوقية النتائج النهائية للمشاريع الحيوية.
             </p>
           </Reveal>
         </div>
