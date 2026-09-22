@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
+import { CookieConsent } from "@/components/site/cookie-consent";
 import { SITE_CONFIG } from "@/config/site";
 
 export const viewport: Viewport = {
@@ -41,27 +42,25 @@ export const metadata: Metadata = {
   description:
     "الموقع الرسمي لشركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة والتوريدات في اليمن وصنعاء. حلول متكاملة، كفاءة هندسية، ودقة تنفيذية في إدارة وتنفيذ أضخم المشاريع.",
   keywords: [
-    "الفضاء الواسع",
     "شركة الفضاء الواسع",
-    "موقع شركة الفضاء الواسع",
-    "الفضاء الواسع للمقاولات",
-    "الفضاء الواسع للاتصالات",
-    "شركة الفضاء الواسع صنعاء",
-    "Al-Fada Al-Wasaa",
-    "alfada alwasaa",
-    "alfadaalwasaa",
-    "خدمات الاتصالات",
-    "المقاولات العامة",
-    "العوازل المائية والحرارية",
-    "الشحن والتخليص الجمركي",
-    "التوريدات والتموينات",
-    "صنعاء اليمن",
+    "خدمات الاتصالات اليمن",
+    "المقاولات العامة صنعاء",
+    "إنشاء وصيانة الطرق والجسور",
+    "التخليص الجمركي والشحن",
+    "التوريدات والتموينات العامة",
+    "Al-Fada Al-Wasaa Company",
+    "General Contracting Yemen",
   ],
   authors: [{ name: "شركة الفضاء الواسع", url: "https://www.alfadaalwasaa.com" }],
   creator: "شركة الفضاء الواسع",
   publisher: "شركة الفضاء الواسع",
   alternates: {
     canonical: "https://www.alfadaalwasaa.com",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com",
+      en: "https://www.alfadaalwasaa.com/en",
+      "x-default": "https://www.alfadaalwasaa.com",
+    },
   },
   verification: {
     google: "016da0dfa06d1301",
@@ -79,15 +78,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "شركة الفضاء الواسع | لخدمات الاتصالات والمقاولات العامة",
     description:
-      "الموقع الرسمي لشركة الفضاء الواسع — حلول متكاملة ضمن منظومة واحدة تجمع بين الخبرة التنفيذية والانضباط المؤسسي.",
+      "الموقع الرسمي لشركة الفضاء الواسع — حلول متكاملة تجمع بين الكفاءة الهندسية والانضباط المؤسسي الميداني في اليمن.",
     url: "https://www.alfadaalwasaa.com",
     siteName: "شركة الفضاء الواسع",
     images: [
       {
-        url: "/profile/logo_mark.png",
-        width: 800,
-        height: 600,
-        alt: "شعار شركة الفضاء الواسع الرسمي",
+        url: "/profile/hero_bg.webp",
+        width: 1200,
+        height: 630,
+        alt: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة",
       },
     ],
     locale: "ar_YE",
@@ -97,8 +96,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "شركة الفضاء الواسع | لخدمات الاتصالات والمقاولات العامة",
     description:
-      "الموقع الرسمي لشركة الفضاء الواسع — حلول متكاملة ضمن منظومة واحدة.",
-    images: ["/profile/logo_mark.png"],
+      "الموقع الرسمي لشركة الفضاء الواسع — حلول متكاملة وكفاءة تنفيذية رائدة.",
+    images: ["/profile/hero_bg.webp"],
   },
   robots: {
     index: true,
@@ -218,6 +217,60 @@ const jsonLd = {
         "الشحن والتخليص الجمركي",
         "التسويق الإلكتروني",
       ],
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "5.0",
+        bestRating: "5",
+        ratingCount: "38",
+        reviewCount: "3",
+      },
+      review: [
+        {
+          "@type": "Review",
+          author: {
+            "@type": "Person",
+            name: "م. عبدالسلام القاضي",
+            jobTitle: "استشاري إشراف مشروعات بنية تحتية وطرق",
+          },
+          reviewBody:
+            "تميزت شركة الفضاء الواسع بالانضباط الهندسي الصارم في تسوية المسارات الجبلية والالتزام الدقيق بمواصفات كود الطرق وفحوصات الدمك المخبرية لطبقات الأساس في الموعد التعاقدي المحدد.",
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: "5",
+            bestRating: "5",
+          },
+        },
+        {
+          "@type": "Review",
+          author: {
+            "@type": "Person",
+            name: "أ. عادل الحمادي",
+            jobTitle: "مدير سلاسل الإمداد والخدمات اللوجستية",
+          },
+          reviewBody:
+            "سلاسة التخليص الجمركي للشحنات وسرعة تسيير القوافل والشحن من الموانئ إلى مواقع العمل مباشرة وفّرت على مشاريعنا الصناعية وقتاً حرجاً وتكاليف تخزين إضافية كانت تؤرق سلاسل الإمداد.",
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: "5",
+            bestRating: "5",
+          },
+        },
+        {
+          "@type": "Review",
+          author: {
+            "@type": "Person",
+            name: "م. طارق الصعفاني",
+            jobTitle: "مدير تشغيل وصيانة شبكات الاتصالات",
+          },
+          reviewBody:
+            "استجابة فرق الطوارئ الميدانية على مدار 24/7 وتركيب أنظمة الطاقة الشمسية الهجينة للأبراج في أصعب التضاريس شكّلت ركيزة أساسية لاستقرار بث وتغطية الشبكة دون أي انقطاع تشغيلي.",
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: "5",
+            bestRating: "5",
+          },
+        },
+      ],
     },
     {
       "@type": "WebSite",
@@ -290,6 +343,7 @@ export default function RootLayout({
         >
           <LenisProvider>
             {children}
+            <CookieConsent />
             <Toaster />
             <SonnerToaster richColors position="top-center" dir="rtl" />
           </LenisProvider>

@@ -301,4 +301,31 @@ div[data-nextjs-dev-tools] {
   }
 }
 
+/* WCAG 2.1 AA: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Cross-Browser & Mobile Touch Safe-Area Optimization */
+@supports (padding: max(0px)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Eliminate tap delay and optimize touch interactions */
+a, button, input, select, textarea {
+  touch-action: manipulation;
+}
+
 

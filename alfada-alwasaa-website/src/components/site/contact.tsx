@@ -453,7 +453,7 @@ export function Contact() {
 
                   {/* رسالة الخطأ مع زر إعادة المحاولة */}
                   {submitError && (
-                    <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200">
+                    <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200" role="alert" aria-live="assertive">
                       <div className="flex items-center gap-3">
                         <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
                         <span>{submitError}</span>
@@ -470,7 +470,7 @@ export function Contact() {
                   )}
 
                   {submitted ? (
-                    <div className="mt-8 rounded-2xl bg-emerald-50 p-8 text-center ring-1 ring-emerald-200">
+                    <div className="mt-8 rounded-2xl bg-emerald-50 p-8 text-center ring-1 ring-emerald-200" role="status" aria-live="polite">
                       <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-600" />
                       <h4 className="mt-4 text-2xl font-black text-navy">
                         تم استلام وتوثيق طلبكم بنجاح!
@@ -826,7 +826,7 @@ export function Contact() {
 
                   {/* رسالة الخطأ في التتبع */}
                   {trackErrorMessage && (
-                    <div className="flex items-center gap-3 rounded-xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200">
+                    <div className="flex items-center gap-3 rounded-xl bg-rose-50 p-4 text-sm text-rose-700 ring-1 ring-rose-200" role="alert" aria-live="assertive">
                       <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
                       <span>{trackErrorMessage}</span>
                     </div>
@@ -834,7 +834,7 @@ export function Contact() {
 
                   {/* بطاقة عرض تفاصيل المعاملة */}
                   {trackingResult && (
-                    <div className="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 space-y-4 shadow-sm">
+                    <div className="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 space-y-4 shadow-sm" role="region" aria-live="polite">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <span className="text-xs font-bold text-slate-500">رقم المعاملة:</span>
                         <span className="font-mono text-base font-black text-navy" dir="ltr">

@@ -83,6 +83,32 @@ export default async function SingleBlogPostPage({ params }: Props) {
     },
   };
 
+  // BreadcrumbList Schema for Google Search
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: "https://www.alfadaalwasaa.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "مدونة الفضاء الواسع",
+        item: "https://www.alfadaalwasaa.com/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://www.alfadaalwasaa.com/blog/${slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <ReadingProgress />
@@ -90,9 +116,13 @@ export default async function SingleBlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SiteHeader />
 
-      <main className="flex-1 pt-[76px]">
+      <main id="main-content" className="flex-1 pt-[76px]">
         {/* Header section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-navy-darker via-navy to-navy py-14 text-white sm:py-20">
           <div className="dot-grid absolute inset-0 opacity-15 pointer-events-none" />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { 
   RadioTower, 
   Building2, 
@@ -17,6 +18,7 @@ import { SectionHeading } from "./section-heading";
 type Sector = {
   num: string;
   title: string;
+  href: string;
   Icon: React.ElementType;
   services: string[];
   photos: { src: string; alt: string }[];
@@ -27,6 +29,7 @@ const SECTORS: Sector[] = [
   {
     num: "01",
     title: "الاتصالات والإنترنت",
+    href: "/services/telecom",
     Icon: RadioTower,
     services: [
       "تقديم حلول داعمة للاتصال والتواصل التقني وفق متطلبات الأعمال الحديثة.",
@@ -39,6 +42,7 @@ const SECTORS: Sector[] = [
   {
     num: "02",
     title: "المقاولات العامة",
+    href: "/services/contracting",
     Icon: Building2,
     services: [
       "إنشاء وصيانة الطرق والجسور.",
@@ -53,6 +57,7 @@ const SECTORS: Sector[] = [
   {
     num: "03",
     title: "خدمات النفط",
+    href: "/services/supplies",
     Icon: Flame,
     services: [
       "التوريدات النفطية المعتمدة.",
@@ -66,6 +71,7 @@ const SECTORS: Sector[] = [
   {
     num: "04",
     title: "الخدمات اللوجستية",
+    href: "/services/shipping",
     Icon: Truck,
     services: [
       "الشحن والتفريغ متعدد الوسائط.",
@@ -79,6 +85,7 @@ const SECTORS: Sector[] = [
   {
     num: "05",
     title: "خدمات التسويق",
+    href: "/services/marketing",
     Icon: TrendingUp,
     services: [
       "التسويق الإلكتروني وبناء الحضور الرقمي.",
@@ -216,13 +223,19 @@ export function Sectors() {
                   </div>
 
                   {/* Card Action Footer */}
-                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10">
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center gap-2">
+                    <Link
+                      href={sector.href}
+                      className="group/link flex-1 flex items-center justify-between rounded-xl bg-slate-100 dark:bg-white/10 px-3.5 py-2.5 text-xs font-bold text-navy dark:text-white transition-all duration-300 hover:bg-gold hover:text-navy-darker dark:hover:bg-gold dark:hover:text-navy-darker"
+                    >
+                      <span>تفاصيل القطاع</span>
+                      <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:-translate-x-1" />
+                    </Link>
                     <a
                       href="#contact"
-                      className="group/btn flex items-center justify-between rounded-xl bg-slate-50 dark:bg-white/10 px-4 py-2.5 text-xs font-bold text-navy dark:text-white transition-all duration-300 hover:bg-gold hover:text-navy-darker dark:hover:bg-gold dark:hover:text-navy-darker"
+                      className="rounded-xl border border-gold/40 px-3 py-2.5 text-xs font-extrabold text-navy dark:text-gold-light hover:bg-gold hover:text-navy-darker hover:border-gold transition-colors"
                     >
-                      <span>طلب تسعير أو استشارة</span>
-                      <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:-translate-x-1" />
+                      تسعير
                     </a>
                   </div>
                 </div>

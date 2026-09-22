@@ -57,6 +57,7 @@ export function FloatingContact() {
               <button
                 type="button"
                 onClick={() => setMenuOpen(false)}
+                aria-label="إغلاق قائمة الاتصال السريع"
                 className="rounded-lg p-1 text-white/60 hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />

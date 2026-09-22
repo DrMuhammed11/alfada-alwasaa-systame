@@ -54,6 +54,49 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
     })),
   };
 
+  // BreadcrumbList Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: "https://www.alfadaalwasaa.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "منظومة الخدمات والقطاعات",
+        item: "https://www.alfadaalwasaa.com/#services",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: service.title,
+        item: `https://www.alfadaalwasaa.com/services/${service.slug}`,
+      },
+    ],
+  };
+
+  // Service Schema
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.subtitle,
+    provider: {
+      "@type": "Organization",
+      name: SITE_CONFIG.company.fullName,
+      url: "https://www.alfadaalwasaa.com",
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "Yemen",
+    },
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-navy-darker text-slate-900 dark:text-slate-100 transition-colors">
       <ReadingProgress />
@@ -61,9 +104,17 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
       <SiteHeader />
 
-      <main className="flex-1 pt-[76px]">
+      <main id="main-content" className="flex-1 pt-[76px]">
         {/* Hero Banner */}
         <section className="relative overflow-hidden bg-gradient-to-b from-navy-darker via-navy to-navy py-16 text-white sm:py-24">
           <div className="dot-grid absolute inset-0 opacity-15 pointer-events-none" />

@@ -658,12 +658,18 @@ export default function EnglishHomePage() {
           <h2 className="text-lg font-bold text-white">AL-FADA AL-WASAA COMPANY</h2>
           <p className="text-xs text-gold-light mt-1">{EN_SITE_CONFIG.company.tagline}</p>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-6 text-xs text-white/70">
+          <div className="mt-6 flex flex-wrap justify-center items-center gap-6 text-xs text-white/70">
             {EN_SITE_CONFIG.navItems.map((item) => (
               <a key={item.href} href={item.href} className="hover:text-gold-light transition">
                 {item.label}
               </a>
             ))}
+            <Link href="/privacy" className="hover:text-gold-light transition">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-gold-light transition">
+              Terms of Service
+            </Link>
             <LanguageSwitcher variant="pill" />
           </div>
 

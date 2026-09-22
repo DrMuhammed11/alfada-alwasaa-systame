@@ -31,18 +31,41 @@ export const metadata: Metadata = {
     title: "تواصل معنا | شركة الفضاء الواسع للمقاولات والاتصالات",
     description: "قنوات التواصل الرسمية والمباشرة مع إدارة شركة الفضاء الواسع في صنعاء.",
     url: "https://www.alfadaalwasaa.com/contact",
-    images: [{ url: "/profile/logo_mark.png", width: 800, height: 600, alt: "تواصل معنا - الفضاء الواسع" }],
+    images: [{ url: "/profile/hero_bg.webp", width: 1200, height: 630, alt: "تواصل معنا - الفضاء الواسع" }],
     locale: "ar_YE",
     type: "website",
   },
 };
 
 export default function ContactPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: "https://www.alfadaalwasaa.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "تواصل معنا",
+        item: "https://www.alfadaalwasaa.com/contact",
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SiteHeader />
 
-      <main className="flex-1 pt-[76px]">
+      <main id="main-content" className="flex-1 pt-[76px]">
         {/* Hero Banner */}
         <section className="relative overflow-hidden bg-gradient-to-b from-navy-darker via-navy to-navy py-16 text-white sm:py-20">
           <div className="dot-grid absolute inset-0 opacity-15 pointer-events-none" />

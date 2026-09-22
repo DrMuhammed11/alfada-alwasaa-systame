@@ -131,6 +131,7 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
+              aria-current={active === item.href ? "page" : undefined}
               className={cn(
                 "relative rounded-full px-2 py-1 text-[11.5px] font-bold transition-colors duration-300 xl:px-3.5 xl:text-[13.5px] whitespace-nowrap",
                 active === item.href
@@ -223,6 +224,7 @@ export function SiteHeader() {
                   <a
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
+                    aria-current={active === item.href ? "page" : undefined}
                     className={cn(
                       "block rounded-lg px-4 py-3 text-sm font-semibold transition",
                       active === item.href

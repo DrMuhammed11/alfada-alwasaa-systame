@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
 import { LanguageSwitcher } from "./language-switcher";
@@ -74,6 +75,12 @@ export function SiteFooter() {
               <a href="#faq" className="hover:text-gold-light transition">
                 الأسئلة الشائعة
               </a>
+              <Link href="/privacy" className="hover:text-gold-light transition">
+                سياسة الخصوصية
+              </Link>
+              <Link href="/terms" className="hover:text-gold-light transition">
+                الشروط والأحكام
+              </Link>
               <a
                 href="/profile/alfada-alwasaa-profile.pdf"
                 download="alfada-alwasaa-profile.pdf"

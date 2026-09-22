@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title: "مدونة الفضاء الواسع | مقالات هندسية وتقنية",
     description: "أحدث المقالات والدراسات الفنية في قطاعات المقاولات والاتصالات في اليمن.",
     url: "https://www.alfadaalwasaa.com/blog",
-    images: [{ url: "/profile/logo_mark.png", width: 800, height: 600, alt: "مدونة الفضاء الواسع" }],
+    images: [{ url: "/profile/hero_bg.webp", width: 1200, height: 630, alt: "مدونة الفضاء الواسع" }],
     locale: "ar_YE",
     type: "website",
   },
@@ -38,11 +38,54 @@ export const metadata: Metadata = {
 export default function BlogListPage() {
   const posts = Object.values(BLOG_POSTS);
 
+  const blogListSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "مدونة الفضاء الواسع الهندسية والتقنية",
+    description: "مقالات، دراسات حالة، وإرشادات هندسية وتقنية متخصصة باليمن.",
+    url: "https://www.alfadaalwasaa.com/blog",
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.description,
+      datePublished: post.date,
+      url: `https://www.alfadaalwasaa.com/blog/${post.slug}`,
+      image: `https://www.alfadaalwasaa.com${post.image}`,
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: "https://www.alfadaalwasaa.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "المدونة الهندسية",
+        item: "https://www.alfadaalwasaa.com/blog",
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SiteHeader />
 
-      <main className="flex-1 pt-[76px]">
+      <main id="main-content" className="flex-1 pt-[76px]">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-navy-darker via-navy to-navy py-16 text-white sm:py-20">
           <div className="dot-grid absolute inset-0 opacity-15 pointer-events-none" />
