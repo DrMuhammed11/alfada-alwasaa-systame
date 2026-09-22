@@ -273,3 +273,32 @@ div[data-nextjs-dev-tools] {
   pointer-events: none !important;
 }
 
+/* Official Print & PDF Export Formatting */
+@media print {
+  header,
+  footer,
+  .fixed,
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #051e31 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  section {
+    break-inside: avoid;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .gold-rule::after {
+    width: 72px !important;
+  }
+}
+
+

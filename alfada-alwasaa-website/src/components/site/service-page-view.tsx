@@ -10,8 +10,11 @@ import {
   MessageSquare,
   ShieldCheck,
   Building2,
-  ChevronLeft
+  ChevronLeft,
+  Printer,
+  Share2
 } from "lucide-react";
+import { toast } from "sonner";
 import { ServiceDetail, SERVICES_DATA } from "@/config/services-data";
 import { SITE_CONFIG } from "@/config/site";
 import { SiteHeader } from "./header";
@@ -23,6 +26,19 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
   const otherServices = Object.values(SERVICES_DATA).filter(
     (s) => s.slug !== service.slug
   );
+
+  const handleShare = () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({
+        title: `${service.title} | شركة الفضاء الواسع`,
+        text: service.subtitle,
+        url: window.location.href,
+      }).catch(() => {});
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("تم نسخ رابط الخدمة إلى الحافظة بنجاح");
+    }
+  };
 
   // FAQ Schema for Google Rich Snippets
   const faqSchema = {
@@ -81,12 +97,12 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
                 </p>
 
                 {/* Direct Action Buttons */}
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-8 flex flex-wrap items-center gap-3">
                   <a
                     href={SITE_CONFIG.contacts.general.waHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-gold px-7 py-3.5 text-sm font-black text-navy-darker shadow-lg transition-all duration-300 hover:bg-gold-light hover:scale-105 active:scale-95"
+                    className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-xs sm:text-sm font-black text-navy-darker shadow-lg transition-all duration-300 hover:bg-gold-light hover:scale-105 active:scale-95 print:hidden"
                   >
                     <MessageSquare className="h-4 w-4" />
                     <span>طلب دراسة أو تسعير</span>
@@ -94,11 +110,31 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
 
                   <a
                     href={SITE_CONFIG.contacts.general.telHref}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20 print:hidden"
                   >
                     <PhoneCall className="h-4 w-4 text-gold-light" />
                     <span dir="ltr">{SITE_CONFIG.contacts.general.display}</span>
                   </a>
+
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:text-gold-light print:hidden"
+                    title="طباعة المواصفات الفنية أو الحفظ كـ PDF"
+                  >
+                    <Printer className="h-4 w-4 text-gold-light" />
+                    <span>طباعة المواصفات (PDF)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:text-gold-light print:hidden"
+                    title="مشاركة تفاصيل الخدمة"
+                  >
+                    <Share2 className="h-4 w-4 text-gold-light" />
+                    <span>مشاركة</span>
+                  </button>
                 </div>
               </div>
 

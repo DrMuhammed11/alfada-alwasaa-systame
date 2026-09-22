@@ -3,10 +3,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "./theme-toggle";
+import { CommandSearch } from "./command-search";
 
 const NAV_ITEMS = SITE_CONFIG.navItems;
 
@@ -14,6 +15,7 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#home");
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -147,8 +149,20 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Desktop CTA & Theme Toggle */}
-        <div className="hidden items-center gap-3 lg:flex">
+        {/* Desktop CTA, Search & Theme Toggle */}
+        <div className="hidden items-center gap-2.5 lg:flex">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="البحث السريع (Ctrl+K)"
+            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition hover:bg-white/20 hover:text-white"
+          >
+            <Search className="h-3.5 w-3.5 text-gold-light" />
+            <span className="hidden xl:inline">بحث...</span>
+            <kbd className="inline-flex items-center rounded bg-white/10 px-1.5 text-[10px] font-mono text-gold-light">
+              Ctrl+K
+            </kbd>
+          </button>
           <ThemeToggle />
           <a
             href="#contact"
@@ -159,8 +173,16 @@ export function SiteHeader() {
           </a>
         </div>
 
-        {/* Mobile menu button and Theme Toggle */}
+        {/* Mobile: Search, Theme Toggle, and Menu button */}
         <div className="flex items-center gap-2 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="البحث السريع"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+          >
+            <Search className="h-4 w-4 text-gold-light" />
+          </button>
           <ThemeToggle />
           <button
             type="button"
@@ -173,6 +195,9 @@ export function SiteHeader() {
           </button>
         </div>
       </div>
+
+      {/* Command Search Palette */}
+      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Mobile dropdown */}
       <AnimatePresence>
