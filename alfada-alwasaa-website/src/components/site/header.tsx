@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search } from "lucide-react";
+import { Menu, Search, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "./theme-toggle";
@@ -149,7 +150,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Desktop CTA, Search & Theme Toggle */}
+        {/* Desktop CTA, Search, Language & Theme Toggle */}
         <div className="hidden items-center gap-2.5 lg:flex">
           <button
             type="button"
@@ -163,6 +164,17 @@ export function SiteHeader() {
               Ctrl+K
             </kbd>
           </button>
+
+          {/* Language Switcher to English */}
+          <Link
+            href="/en"
+            className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20 hover:text-gold-light transition"
+            aria-label="Switch to English version"
+          >
+            <Globe className="h-3.5 w-3.5 text-gold-light" />
+            <span>EN</span>
+          </Link>
+
           <ThemeToggle />
           <a
             href="#contact"
@@ -173,7 +185,7 @@ export function SiteHeader() {
           </a>
         </div>
 
-        {/* Mobile: Search, Theme Toggle, and Menu button */}
+        {/* Mobile: Search, Language, Theme Toggle, and Menu button */}
         <div className="flex items-center gap-2 lg:hidden">
           <button
             type="button"
@@ -183,6 +195,13 @@ export function SiteHeader() {
           >
             <Search className="h-4 w-4 text-gold-light" />
           </button>
+          <Link
+            href="/en"
+            aria-label="Switch to English"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xs font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+          >
+            EN
+          </Link>
           <ThemeToggle />
           <button
             type="button"

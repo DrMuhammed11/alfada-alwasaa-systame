@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
 
@@ -73,6 +74,9 @@ export function SiteFooter() {
               <a href="#faq" className="hover:text-gold-light transition">
                 الأسئلة الشائعة
               </a>
+              <Link href="/en" className="text-gold-light font-bold hover:underline transition">
+                English (EN)
+              </Link>
             </div>
           </Reveal>
 
