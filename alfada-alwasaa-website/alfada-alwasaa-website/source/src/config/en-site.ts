@@ -1,9 +1,11 @@
 /**
  * English Content & Translations for Al-Fada Al-Wasaa Corporate Website
- * Derived literally and professionally from the corporate profile
+ * Derived literally, professionally, and comprehensively from the corporate profile
+ * Single Source of Truth for English Content
  */
 
 export const EN_SITE_CONFIG = {
+  // Corporate Identity
   company: {
     fullName: "Al-Fada Al-Wasaa Company for Telecom Services & General Contracting",
     shortName: "Al-Fada Al-Wasaa",
@@ -12,19 +14,80 @@ export const EN_SITE_CONFIG = {
     brief:
       "A multi-service professional entity founded on a clear vision: delivering integrated solutions that unite executive experience, institutional discipline, and the capacity to achieve high standards of quality and professionalism.",
     subBrief:
-      "A trusted partner for organizations seeking solid performance, meticulous execution, and outcomes befitting major enterprise initiatives.",
+      "Since its inception, the company has been committed to being a reliable partner for organizations seeking solid performance, meticulous execution, and outcomes befitting major enterprise initiatives.",
   },
 
+  // Official Contact Channels & Directory
+  contacts: {
+    general: {
+      label: "General Management",
+      sublabel: "Unified & Direct Line",
+      display: "+967 776 999 942",
+      raw: "+967776999942",
+      telHref: "tel:+967776999942",
+      waNumber: "967776999942",
+      waHref:
+        "https://wa.me/967776999942?text=" +
+        encodeURIComponent(
+          "Hello, I would like to inquire about Al-Fada Al-Wasaa Company services."
+        ),
+    },
+
+    deputy: {
+      label: "Deputy General Manager",
+      sublabel: "Projects & Commercial Follow-up",
+      display: "+967 777 666 073",
+      raw: "+967777666073",
+      telHref: "tel:+967777666073",
+      waNumber: "967777666073",
+      waHref:
+        "https://wa.me/967777666073?text=" +
+        encodeURIComponent(
+          "Hello, I would like to connect regarding Al-Fada Al-Wasaa projects and services."
+        ),
+    },
+
+    location: {
+      city: "Sana'a",
+      fullAddress: "Sana'a — Beside Shamlan Factory, Republic of Yemen",
+      label: "Corporate Headquarters",
+      coverage: "Nationwide operational coverage across all Yemeni governorates and ports",
+    },
+
+    email: {
+      address: "info@alfadaalwasaa.com",
+      mailHref: "mailto:info@alfadaalwasaa.com",
+      label: "Official Corporate Email",
+    },
+
+    workingHours: "Saturday – Thursday: 8:00 AM – 6:00 PM (24/7 Emergency Field Support)",
+  },
+
+  // Main Navigation Links
   navItems: [
     { label: "Home", href: "/en#home" },
     { label: "Sectors", href: "/en#sectors" },
     { label: "Services", href: "/en#services" },
+    { label: "Position", href: "/en#position" },
     { label: "Track Record", href: "/en#track" },
     { label: "Why Us", href: "/en#why" },
     { label: "FAQ", href: "/en#faq" },
     { label: "Contact Us", href: "/en#contact" },
   ],
 
+  // Sector Options for Quotation Form
+  sectorOptions: [
+    "General Contracting & Construction",
+    "Roads & Bridges Construction & Maintenance",
+    "Excavation & Site Grading Works",
+    "Petroleum Services & Fuel Supplies",
+    "Telecommunications & Tech Solutions",
+    "Logistics, Shipping & Customs Clearance",
+    "Digital Marketing & Consulting",
+    "General Inquiry or Technical Consultation",
+  ],
+
+  // Core Pillars
   pillars: [
     {
       title: "Executive Experience",
@@ -40,29 +103,31 @@ export const EN_SITE_CONFIG = {
     },
   ],
 
+  // Operational Indicators & Field Statistics (Matching Arabic exactly)
   stats: [
     {
-      num: "5+",
-      label: "Strategic Sectors",
-      sub: "Comprehensive & interconnected coverage",
+      num: "10+",
+      label: "Years of Accumulated Experience",
+      sub: "Seasoned field practice in the Yemeni market",
     },
     {
-      num: "7+",
-      label: "Integrated Service Systems",
-      sub: "From planning through handover",
+      num: "65+",
+      label: "Vital Completed Projects",
+      sub: "Across contracting, telecom networks, and supplies",
     },
     {
-      num: "100%",
-      label: "Standards & Specs Commitment",
-      sub: "Rigorous execution discipline",
+      num: "45+",
+      label: "Specialized Engineers & Experts",
+      sub: "Dedicated field engineering, technical, and survey teams",
     },
     {
-      num: "24/7",
-      label: "Readiness & Response",
-      sub: "Continuous on-site supervision",
+      num: "15+",
+      label: "Governorates & Ports Covered",
+      sub: "Operational readiness across Yemen's provinces and seaports",
     },
   ],
 
+  // Strategic Sectors
   sectors: [
     {
       num: "01",
@@ -126,6 +191,7 @@ export const EN_SITE_CONFIG = {
     },
   ],
 
+  // Comprehensive Detailed Services List (7 services)
   servicesList: [
     {
       num: "01",
@@ -171,6 +237,7 @@ export const EN_SITE_CONFIG = {
     },
   ],
 
+  // Track Record Project Case Studies
   trackRecord: [
     {
       id: "roads",
@@ -214,6 +281,7 @@ export const EN_SITE_CONFIG = {
     },
   ],
 
+  // Core Working Methodology / Why Us
   values: [
     {
       title: "Results-Driven Mindset",
@@ -229,6 +297,100 @@ export const EN_SITE_CONFIG = {
     },
   ],
 
+  // Strategic Position (from Profile)
+  position: {
+    kicker: "Our Standing",
+    title: "Established Market Stature",
+    p1: "The company was founded on the firm conviction that major enterprises seek more than a mere vendor—they require a dependable partner. Consequently, we accord utmost attention to engineering precision, procedural integrity, rigorous monitoring, and transparent communication across all operational stages, from initial design to final commissioning.",
+    p2: "We are committed to ensuring our deliverables reflect an elevated corporate stature that harmonizes seriousness with agility, high quality with speed, and technical prowess with unwavering client dedication. Today, the company stands as the premier choice for organizations seeking project delivery through seasoned teams that master market dynamics and tackle complex, multi-tiered initiatives.",
+  },
+
+  // Vision & Mission (from Profile)
+  visionMission: {
+    title: "Vision & Mission",
+    mission: {
+      title: "Our Mission",
+      text: "We strive to deliver reliable, integrated services centered on quality, transparency, discipline, and execution excellence, maintaining complete fidelity to client requirements and achieving top tiers of satisfaction and confidence.",
+    },
+    vision: {
+      title: "Our Vision",
+      text: "To lead as a regional benchmark in multi-sector contracting, telecommunications, and support logistics by building enduring strategic alliances with our partners and generating tangible value in every endeavor we undertake.",
+    },
+  },
+
+  // Corporate Epilogue / Conclusion (from Profile)
+  conclusion: {
+    kicker: "Corporate Epilogue",
+    title: "Executive Closing Statement",
+    text: "Al-Fada Al-Wasaa Company for Telecom Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.",
+  },
+
+  // Compliance & Institutional Certifications
+  compliance: [
+    {
+      title: "Comprehensive Quality Management ISO 9001",
+      subtitle: "Continuous Technical Auditing & Compliance",
+      desc: "Applying international quality benchmarks across planning, materials testing, and staged milestone handover across all projects.",
+      badge: "ISO 9001:2015",
+    },
+    {
+      title: "Occupational Health & Safety ISO 45001",
+      subtitle: "Strict Environmental & Preventive Protocols",
+      desc: "Full adherence to HSE field safety procedures and personnel protection in challenging remote, mountainous, and rugged terrains.",
+      badge: "HSE / ISO 45001",
+    },
+    {
+      title: "Official Registrations & Sovereign Accreditations",
+      subtitle: "Formal Certification Recognized by National Authorities",
+      desc: "Holding valid general contracting classifications, commercial registry, customs clearance permits, and energy & telecom supply licenses.",
+      badge: "Licensed & Accredited",
+    },
+    {
+      title: "Building Code & Technical Standards Compliance",
+      subtitle: "Continuous Laboratory Verification & Engineering Oversight",
+      desc: "Executing civil, road, and telecom works in accordance with Yemeni and international engineering codes with documented lab tests.",
+      badge: "Code Compliant",
+    },
+  ],
+
+  // Client Testimonials
+  testimonials: [
+    {
+      quote:
+        "Al-Fada Al-Wasaa stood out for its rigorous engineering discipline in grading mountainous routes, strict adherence to highway code specifications, and timely lab compaction testing for subbase layers within the contracted milestone schedule.",
+      name: "Eng. Abdulsalam Al-Qadi",
+      role: "Infrastructure & Highway Projects Supervision Consultant",
+      sector: "Civil & Infrastructure Sector",
+    },
+    {
+      quote:
+        "The speed of seaport customs clearance and direct convoy transport from docks to project sites saved our industrial initiatives critical time and substantial demurrage storage fees that previously burdened our supply chains.",
+      name: "Adel Al-Hammadi",
+      role: "Supply Chain & Logistics Director",
+      sector: "Supplies & Port Logistics Sector",
+    },
+    {
+      quote:
+        "The 24/7 rapid deployment of field emergency crews and installation of off-grid hybrid solar power systems in remote, rugged topographies proved vital for maintaining broadcast uptime without operational interruption.",
+      name: "Eng. Tareq Al-Sa'afani",
+      role: "Telecom Operations & Maintenance Director",
+      sector: "Telecom & Internet Sector",
+    },
+  ],
+
+  // Partner Categories
+  partnerCategories: [
+    "Telecom & Internet Operators",
+    "Oil & Energy Supply Sector",
+    "Infrastructure & Road Contractors",
+    "Port Logistics & Supply Chains",
+    "Heavy Multimodal Fleet Transport",
+    "Industrial & Equipment Importers",
+    "Development & Enterprise Projects",
+    "Certified Quality & Safety Systems",
+  ],
+
+  // Frequently Asked Questions
   faq: [
     {
       question: "What geographic areas does Al-Fada Al-Wasaa cover for project execution?",
@@ -256,4 +418,6 @@ export const EN_SITE_CONFIG = {
         "Yes, our specialized field maintenance teams operate around the clock (24/7) for preventive and emergency interventions, microwave link alignment, and hybrid power supply maintenance.",
     },
   ],
-};
+} as const;
+
+export type EnSiteConfig = typeof EN_SITE_CONFIG;
