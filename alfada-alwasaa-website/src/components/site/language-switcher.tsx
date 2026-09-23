@@ -62,20 +62,22 @@ export function LanguageSwitcher({
     );
   }
 
-  // 2. نمط الزر الانسيابي المدمج (Compact Action Button)
+  // 2. نمط الزر الانسيابي المدمج (Compact Action Button — يطابق زر الوضع الليلي تماماً)
   if (variant === "button") {
     return (
       <Link
         href={targetHref}
         className={cn(
-          "group inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-2.5 py-2 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-gold hover:text-navy-darker hover:border-gold hover:shadow-[0_0_15px_rgba(198,149,74,0.4)]",
+          "group relative flex h-9 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold transition-all duration-300",
+          "bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/20 hover:text-gold-light hover:ring-gold/40 active:scale-95 backdrop-blur-md",
           className
         )}
-        title={isEnglish ? "التبديل إلى النسخة العربية" : "Switch to English version"}
+        title={isEnglish ? "التبديل إلى النسخة العربية" : "Switch to English version / التبديل للإنجليزية"}
         aria-label={isEnglish ? "التبديل إلى النسخة العربية" : "Switch to English version"}
       >
-        <Globe className="h-3.5 w-3.5 text-gold-light group-hover:text-navy-darker transition-colors duration-300" />
-        <span className="font-extrabold">{isEnglish ? "العربية" : "EN"}</span>
+        <Globe className="h-4 w-4 text-gold-light transition-transform duration-300 group-hover:rotate-12" />
+        <span className="font-extrabold hidden sm:inline">{isEnglish ? "العربية" : "English"}</span>
+        <span className="font-extrabold sm:hidden">{isEnglish ? "ع" : "EN"}</span>
       </Link>
     );
   }

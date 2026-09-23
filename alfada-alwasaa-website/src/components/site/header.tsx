@@ -167,9 +167,10 @@ export function SiteHeader() {
             </kbd>
           </button>
 
-          {/* Language Switcher */}
-          <LanguageSwitcher variant="pill" />
+          {/* زر تبديل اللغة بجانب أيقونة الوضع الليلي مباشرة */}
+          <LanguageSwitcher variant="button" />
 
+          {/* أيقونة الوضع الليلي */}
           <ThemeToggle />
           <a
             href="#contact"

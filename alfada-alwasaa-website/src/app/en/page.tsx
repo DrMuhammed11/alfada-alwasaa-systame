@@ -94,8 +94,8 @@ export default function EnglishHomePage() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Language Switcher */}
-            <LanguageSwitcher variant="pill" />
+            {/* Language Switcher Button next to Theme Toggle */}
+            <LanguageSwitcher variant="button" />
 
             <ThemeToggle />
 
