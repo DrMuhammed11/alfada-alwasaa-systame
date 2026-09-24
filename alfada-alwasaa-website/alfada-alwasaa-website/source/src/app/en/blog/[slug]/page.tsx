@@ -70,7 +70,7 @@ export default async function EnSingleBlogPostPage({ params }: Props) {
     dateModified: post.date,
     author: {
       "@type": "Organization",
-      name: "Al-Fada Al-Wasaa Company for Telecom Services & General Contracting",
+      name: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
       url: "https://www.alfadaalwasaa.com/en",
     },
     publisher: {

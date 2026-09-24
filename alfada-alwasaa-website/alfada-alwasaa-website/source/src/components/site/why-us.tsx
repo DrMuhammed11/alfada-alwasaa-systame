@@ -33,7 +33,7 @@ export function WhyUs() {
         {/* Exact paragraph from the profile */}
         <div>
           <Reveal delay={0.1}>
-            <span className="mb-3 inline-block rounded-full bg-gold-soft dark:bg-gold/20 px-4 py-1.5 text-xs font-bold tracking-wide text-gold dark:text-gold-light">
+            <span className="mb-3 inline-block rounded-full bg-gold-soft dark:bg-gold/20 px-4 py-1.5 text-xs font-bold tracking-wide text-navy dark:text-gold-light">
               قيمنا في العمل
             </span>
           </Reveal>

@@ -6,9 +6,9 @@
 export const SITE_CONFIG = {
   // الهوية المؤسسية الرسمية
   company: {
-    fullName: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
+    fullName: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة",
     shortName: "شركة الفضاء الواسع",
-    enName: "AL-FADA AL-WASAA",
+    enName: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
     tagline: "حلول متكاملة ضمن منظومة واحدة",
     brief:
       "كيان مهني متعدد الخدمات، تأسس على رؤية واضحة تقوم على تقديم حلول متكاملة تجمع بين الخبرة التنفيذية، والانضباط المؤسسي، والقدرة على الإنجاز بمعايير عالية من الجودة والاحتراف.",
@@ -195,8 +195,8 @@ export const SITE_CONFIG = {
   // الأصول الرسمية المعتمدة
   assets: {
     logoTransparent: "/profile/logo_transparent.png",
-    logoMark: "/profile/logo_mark.png",
-    sectorIconsStrip: "/profile/sector_icons_strip.png",
+    logoMark: "/profile/logo_mark.webp",
+    sectorIconsStrip: "/profile/sector_icons_strip.webp",
     heroBg: "/profile/hero_bg.webp",
   },
 } as const;

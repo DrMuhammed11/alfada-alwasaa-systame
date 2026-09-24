@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "./reveal";
+import { CopyrightYear } from "./copyright-year";
 import { SITE_CONFIG } from "@/config/site";
 import { LanguageSwitcher } from "./language-switcher";
 
@@ -134,8 +135,8 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 sm:flex-row">
-          <p className="text-xs font-semibold text-white/50">
-            جميع الحقوق محفوظة © {new Date().getFullYear()} — {SITE_CONFIG.company.fullName}
+          <p className="text-xs font-semibold text-white/70">
+            جميع الحقوق محفوظة © <CopyrightYear /> — {SITE_CONFIG.company.fullName}
           </p>
           <p className="text-[11px] font-bold tracking-[0.3em] text-gold-light/80">
             {SITE_CONFIG.company.enName}

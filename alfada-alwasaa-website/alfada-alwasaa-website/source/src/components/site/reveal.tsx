@@ -14,6 +14,55 @@ type RevealProps = {
   once?: boolean;
 };
 
+/* ===== قياس مجمّع: طابور واحد + rAF واحد لكل دفعة mount =====
+   كل نسخ Reveal تضيف عقدها للطابور فقط، وrAF مشترك واحد يقرأ
+   getBoundingClientRect لكل العقد في نفس الإطار (reflow واحد بدل N)
+   ثم يسجّل العقد تحت الطية لدى مراقب IntersectionObserver مشترك واحد */
+
+type QueuedNode = {
+  node: HTMLDivElement;
+  y: number;
+  delay: number;
+  once: boolean;
+};
+
+const queue = new Map<HTMLDivElement, QueuedNode>();
+let rafScheduled = false;
+
+const prefersReduced = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ===== مراقب مشترك واحد لكل نسخ Reveal في الصفحة ===== */
+const targets = new Map<Element, { once: boolean }>();
+let sharedObserver: IntersectionObserver | null = null;
+
+function getObserver(): IntersectionObserver {
+  if (sharedObserver) return sharedObserver;
+  sharedObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const handle = targets.get(entry.target);
+        if (!handle) continue;
+        const node = entry.target as HTMLElement;
+        if (entry.isIntersecting) {
+          node.classList.remove("reveal-hidden");
+          node.classList.add("reveal-visible");
+          if (handle.once) {
+            targets.delete(entry.target);
+            sharedObserver?.unobserve(entry.target);
+          }
+        } else if (!handle.once) {
+          node.classList.remove("reveal-visible");
+          node.classList.add("reveal-hidden");
+        }
+      }
+    },
+    { rootMargin: "-80px" }
+  );
+  return sharedObserver;
+}
+
 /**
  * غلاف انسيابي خفيف لحركات الظهور مع التمرير (Scroll-Reveal)
  * تحسين تدريجي صحيح: الـ SSR يُرسِّر العنصر مرئياً دائماً (للزواحف ومستخدمي no-JS)،
@@ -39,32 +88,57 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
 
-    // احترام تفضيل تقليل الحركة: العنصر يبقى مرئياً كما رُسِّم في الـ SSR
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReduced()) return;
 
-    // العنصر داخل نافذة العرض أصلاً: يبقى مرئياً بلا إخفاء ولا مراقبة
-    if (node.getBoundingClientRect().top <= window.innerHeight) return;
+    queue.set(node, { node, y, delay: totalDelay, once });
 
-    node.style.setProperty("--reveal-y", `${y}px`);
-    node.style.setProperty("--reveal-delay", `${totalDelay}s`);
-    node.classList.add("reveal-hidden");
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          node.classList.remove("reveal-hidden");
-          node.classList.add("reveal-visible");
-          if (once) observer.disconnect();
-        } else if (!once) {
-          node.classList.remove("reveal-visible");
-          node.classList.add("reveal-hidden");
+    if (!rafScheduled) {
+      rafScheduled = true;
+      requestAnimationFrame(() => {
+        rafScheduled = false;
+        if (prefersReduced()) {
+          queue.clear();
+          return;
         }
-      },
-      { rootMargin: "-80px" }
-    );
 
-    observer.observe(node);
-    return () => observer.disconnect();
+        const batch = Array.from(queue.values());
+        queue.clear();
+
+        const vh = window.innerHeight;
+
+        // 1. دفعة القراءة المجمّعة بالكامل (فصل تام بين القراءة والكتابة لمنع عاصفة reflow)
+        const toHide: QueuedNode[] = [];
+        for (let i = 0; i < batch.length; i++) {
+          const item = batch[i];
+          if (item.node.getBoundingClientRect().top > vh) {
+            toHide.push(item);
+          }
+        }
+
+        // 2. دفعة الكتابة المجمّعة وتفعيل المراقبة دفعة واحدة
+        const observer = getObserver();
+        for (let i = 0; i < toHide.length; i++) {
+          const item = toHide[i];
+          if (item.y !== 14) {
+            item.node.style.setProperty("--reveal-y", `${item.y}px`);
+          }
+          if (item.delay > 0) {
+            item.node.style.setProperty("--reveal-delay", `${item.delay}s`);
+          }
+          item.node.classList.add("reveal-hidden");
+          targets.set(item.node, { once: item.once });
+          observer.observe(item.node);
+        }
+      });
+    }
+
+    return () => {
+      queue.delete(node);
+      if (targets.has(node)) {
+        targets.delete(node);
+        sharedObserver?.unobserve(node);
+      }
+    };
   }, [once, totalDelay, y]);
 
   return (

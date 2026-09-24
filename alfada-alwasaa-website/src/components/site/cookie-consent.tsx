@@ -33,7 +33,7 @@ export function CookieConsent() {
       const consent = localStorage.getItem("cookieConsent");
       if (!consent) {
         // تأخير خفيف بعد تحميل الصفحة لعدم إزعاج المستخدم فوراً
-        const timer = setTimeout(() => setVisible(true), 1500);
+        const timer = setTimeout(() => setVisible(true), 3500);
         return () => clearTimeout(timer);
       }
     } catch {

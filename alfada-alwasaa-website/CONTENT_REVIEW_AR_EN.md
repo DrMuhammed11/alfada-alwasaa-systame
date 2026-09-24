@@ -1,6 +1,6 @@
 # ملف المراجعة اللغوية الشامل (عربي / English)
 ## شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة
-## Al-Fada Al-Wasaa Company for Telecom Services & General Contracting
+## Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting
 
 ---
 
@@ -13,7 +13,7 @@
 
 | العنصر | النسخة العربية | English Version |
 |---|---|---|
-| **الاسم الكامل** | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات | Al-Fada Al-Wasaa Company for Telecom Services & General Contracting |
+| **الاسم الكامل** | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة | Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting |
 | **الاسم المختصر** | شركة الفضاء الواسع | Al-Fada Al-Wasaa |
 | **الشعار اللفظي (Slogan)** | حلول متكاملة ضمن منظومة واحدة | Integrated Solutions Within One Ecosystem |
 | **النبذة التعريفية الرئيسية** | كيان مهني متعدد الخدمات، تأسس على رؤية واضحة تقوم على تقديم حلول متكاملة تجمع بين الخبرة التنفيذية، والانضباط المؤسسي، والقدرة على الإنجاز بمعايير عالية من الجودة والاحتراف. | A multi-service professional entity founded on a clear vision: delivering integrated solutions that unite executive experience, institutional discipline, and the capacity to achieve high standards of quality and professionalism. |
@@ -49,18 +49,7 @@
 
 ---
 
-## 4. الإحصائيات والمؤشرات التشغيلية (Operational Stats)
-
-| الرقم | المؤشر بالعربية | التفاصيل بالعربية | English Label | English Subtitle |
-|---|---|---|---|---|
-| **10+** | سنوات من الخبرة المتراكمة | ممارسة ميدانية متمرسة في السوق اليمني | Years of Accumulated Experience | Seasoned field practice in the Yemeni market |
-| **65+** | مشروعاً حيوياً منجزاً | في المقاولات، شبكات الاتصالات، والتوريدات | Vital Completed Projects | Across contracting, telecom networks, and supplies |
-| **45+** | مهندساً وكادراً تخصصياً | فرق هندسية وفنية ومساحية متفرغة بالميدان | Specialized Engineers & Experts | Dedicated field engineering, technical, and survey teams |
-| **15+** | محافظة تشملها التغطية | جاهزية تشغيلية على امتداد محافظات وموانئ اليمن | Governorates & Ports Covered | Operational readiness across Yemen's provinces and seaports |
-
----
-
-## 5. الرؤية، الرسالة، والتموضع في السوق (Vision, Mission & Market Position)
+## 4. الرؤية، الرسالة، والتموضع في السوق (Vision, Mission & Market Position)
 
 ### أ. الرؤية والرسالة (Vision & Mission)
 - **عنوان القسم بالعربية:** الرؤية والرسالة
@@ -90,11 +79,11 @@
 - **العنوان بالعربية:** خاتمة وتطلعات
 - **العنوان بالإنجليزية:** Executive Closing Statement (Corporate Epilogue)
 - **النص بالعربية:** إن شركة الفضاء الواسع ليست مجرد اسم في سوق المقاولات والاتصالات، بل هي منصة متكاملة للعمل الجاد، والسلوك المهني الرفيع، والإنجاز الموثوق. اليوم، نضع خبراتنا وإمكاناتنا في خدمة عملائنا، مستعدين للمضي معهم نحو آفاق أوسع وأهداف أكبر.
-- **النص بالإنجليزية:** Al-Fada Al-Wasaa Company for Telecom Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.
+- **النص بالإنجليزية:** Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.
 
 ---
 
-## 6. منهجية العمل والقيم (Core Values / Why Us)
+## 5. منهجية العمل والقيم (Core Values / Why Us)
 
 | القيمة | الشرح بالعربية | English Title | English Description |
 |---|---|---|---|
@@ -104,18 +93,7 @@
 
 ---
 
-## 7. شهادات الامتثال ومعايير الجودة (Compliance & Certifications)
-
-| الشارة | العنوان بالعربية | الوصف بالعربية | English Title | English Description |
-|---|---|---|---|---|
-| **ISO 9001:2015** | Comprehensive Quality Management ISO 9001 | Applying international quality benchmarks across planning, materials testing, and staged milestone handover across all projects. | **Comprehensive Quality Management ISO 9001** (Continuous Technical Auditing & Compliance) | Applying international quality benchmarks across planning, materials testing, and staged milestone handover across all projects. |
-| **HSE / ISO 45001** | Occupational Health & Safety ISO 45001 | Full adherence to HSE field safety procedures and personnel protection in challenging remote, mountainous, and rugged terrains. | **Occupational Health & Safety ISO 45001** (Strict Environmental & Preventive Protocols) | Full adherence to HSE field safety procedures and personnel protection in challenging remote, mountainous, and rugged terrains. |
-| **Licensed & Accredited** | Official Registrations & Sovereign Accreditations | Holding valid general contracting classifications, commercial registry, customs clearance permits, and energy & telecom supply licenses. | **Official Registrations & Sovereign Accreditations** (Formal Certification Recognized by National Authorities) | Holding valid general contracting classifications, commercial registry, customs clearance permits, and energy & telecom supply licenses. |
-| **Code Compliant** | Building Code & Technical Standards Compliance | Executing civil, road, and telecom works in accordance with Yemeni and international engineering codes with documented lab tests. | **Building Code & Technical Standards Compliance** (Continuous Laboratory Verification & Engineering Oversight) | Executing civil, road, and telecom works in accordance with Yemeni and international engineering codes with documented lab tests. |
-
----
-
-## 8. القطاعات الاستراتيجية الخمسة (Strategic Sectors)
+## 6. القطاعات الاستراتيجية الخمسة (Strategic Sectors)
 
 ### قطاع 01: Telecommunications & Internet
 - **الخدمات المندرجة (Services):**
@@ -144,7 +122,7 @@
 
 ---
 
-## 9. سابقة الأعمال ودراسات الحالة (Track Record Case Studies)
+## 7. سابقة الأعمال ودراسات الحالة (Track Record Case Studies)
 
 | المعرّف | التصنيف | العنوان بالعربية / الإنجليزية | نطاق التنفيذ والشواهد (العربية / English) |
 |---|---|---|---|
@@ -156,17 +134,7 @@
 
 ---
 
-## 10. آراء العملاء والشركاء (Client Testimonials)
-
-| الاسم والمنصب | القطاع | نص التقييم (English Quote) |
-|---|---|---|
-| **Eng. Abdulsalam Al-Qadi**<br/>Infrastructure & Highway Projects Supervision Consultant | Civil & Infrastructure Sector | "Al-Fada Al-Wasaa stood out for its rigorous engineering discipline in grading mountainous routes, strict adherence to highway code specifications, and timely lab compaction testing for subbase layers within the contracted milestone schedule." |
-| **Adel Al-Hammadi**<br/>Supply Chain & Logistics Director | Supplies & Port Logistics Sector | "The speed of seaport customs clearance and direct convoy transport from docks to project sites saved our industrial initiatives critical time and substantial demurrage storage fees that previously burdened our supply chains." |
-| **Eng. Tareq Al-Sa'afani**<br/>Telecom Operations & Maintenance Director | Telecom & Internet Sector | "The 24/7 rapid deployment of field emergency crews and installation of off-grid hybrid solar power systems in remote, rugged topographies proved vital for maintaining broadcast uptime without operational interruption." |
-
----
-
-## 11. الأسئلة الشائعة (Frequently Asked Questions - FAQ)
+## 8. الأسئلة الشائعة (Frequently Asked Questions - FAQ)
 
 ### س 1: What geographic areas does Al-Fada Al-Wasaa cover for project execution?
 **الإجابة:** We operate across all governorates of the Republic of Yemen, with proven capability in demanding mountainous terrains, remote installations, and strategic ports including Sana'a, Hodeidah, Aden, and border trade crossings.
@@ -185,7 +153,7 @@
 
 ---
 
-## 12. ملف الخدمات التخصصية السبع (Detailed Services Data)
+## 9. ملف الخدمات التخصصية السبع (Detailed Services Data)
 
 ### الخدمة: المقاولات العامة والإنشاءات الهندسية / General Contracting and Engineering Construction
 - **العنوان المختصر:** المقاولات العامة / General Contracting
@@ -304,11 +272,11 @@
 #### نبذة عامة (Overview):
 **العربية:**
 - تعتبر المرحلة التأسيسية لأي مشروع إنشائي هي الأساس المتين لنجاحه، لذا توفر شركة الفضاء الواسع منظومة متكاملة من أعمال الحفر الدقيق، تكسير الصخور، والتسوية الطبوغرافية للمشاريع الكبرى والصغرى.
-- بفضل الحفارات ذات المطارق الهيدروليكية والشاحنات القلابة ذات الحمولات الكبيرة، نضمن تجهيز موقعك في أقصر مدة زمنية وبأعلى درجات الأمان الإنشائي للمباني المجاورة.
+- بفضل الحفارات ذات المطارق الهيدروليكية والشاحنات القلابة ذات الحمولات الكبيرة، نسعى إلى تجهيز الموقع بكفاءة وفي أقصر مدة ممكنة، مع إعطاء الأولوية لسلامة المنشآت المجاورة.
 
 **English:**
 - The foundation phase of any construction project is the bedrock of its success; accordingly, Al-Fada Al-Wasaa provides an integrated system of precise excavation, rock breaking, and topographic leveling for projects large and small.
-- Thanks to excavators fitted with hydraulic breakers and high-capacity dump trucks, we guarantee your site is prepared in the shortest possible time and with the highest degree of structural safety for neighboring buildings.
+- With excavators fitted with hydraulic breakers and high-capacity dump trucks, we strive to prepare sites efficiently and in the shortest possible timeframe while prioritizing the safety of neighboring structures.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
@@ -416,7 +384,7 @@
 | **الأعمال المدنية وتركيب الأبراج** | حفر القواعد الخرسانية، نصب الأبراج الشبكية والأحادية (Monopoles)، وتركيب خطوط التأريض. | **Civil Works and Tower Erection** | Excavating concrete foundations, erecting lattice and monopole towers, and installing earthing and grounding lines. |
 | **تركيب وصيانة الهوائيات والموجات الدقيقة** | تثبيت وضبط اتجاهات هوائيات المايكروويف (Microwave) وهوائيات الـ RF باحترافية عالية. | **Antenna and Microwave Installation and Maintenance** | Professional mounting and alignment of microwave and RF antennas to the highest standards. |
 | **أنظمة الطاقة الشمسية ومولدات الديزل** | تصميم وتنفيذ محطات الطاقة الكهروضوئية والبطاريات الليثيوم لتشغيل أبراج الاتصالات بدون انقطاع. | **Solar Power Systems and Diesel Generators** | Designing and building photovoltaic power stations with lithium battery banks to run telecom towers without interruption. |
-| **تمديد شبكات الألياف الضوئية (FTTH)** | أعمال حفر وتمديد الكابلات الضوئية الهوائية والأرضية ولحام الشعيرات بأجهزة فيوجن متطورة. | **Fiber Optic Network Deployment (FTTH)** | Trenching and deploying aerial and underground fiber optic cables, and splicing fibers with advanced fusion splicers. |
+| **تمديد شبكات الألياف الضوئية** | أعمال حفر وتمديد الكابلات الضوئية الهوائية والأرضية ولحام الشعيرات بأجهزة فيوجن متطورة. | **Fiber Optic Network Deployment** | Trenching and deploying aerial and underground fiber optic cables, and splicing fibers with advanced fusion splicers. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
@@ -544,7 +512,7 @@
 
 ---
 
-## 13. مقالات المدونة الهندسية (Blog Articles)
+## 10. مقالات المدونة الهندسية (Blog Articles)
 
 ### مقال: كيف تختار أفضل شركة مقاولات في صنعاء واليمن؟ 7 معايير هندسية حاسمة
 ### Article: How to Choose the Best Contracting Company in Sana'a and Yemen? 7 Decisive Engineering Criteria
@@ -591,19 +559,19 @@ The fundamental difference between an experienced contracting company and an ind
 At Al-Fada Al-Wasaa, every project is accompanied by a certified site engineer to guarantee full conformity with the approved structural and architectural drawings.
 
 
-##### المحور 3: 3. امتلاك المعدات والآليات الثقيلة
-##### Section 3: 3. Owning Heavy Equipment & Machinery
+##### المحور 3: 3. إمكانيات وتوفر المعدات والآليات الثقيلة
+##### Section 3: 3. Heavy Equipment & Machinery Capabilities
 
 **فقرات المحور (عربي):**
-اعتماد الشركة على معداتها الذاتية (حفارات، مداحل، خلاطات، شاحنات نقل) يوفر ما بين 20% إلى 30% من الوقت المهدور في انتظار استئجار المعدات من السوق الخارجي.
+توفر أسطول متكامل من المعدات والآليات الثقيلة وجاهزيتها للتنفيذ يوفر الوقت المهدور في انتظار استئجار المعدات من السوق الخارجي.
 
-كما أن ذلك ينعكس بشكل مباشر على استقرار أسعار التعاقد وثبات التكلفة على العميل دون مفاجآت.
+كما أن ذلك ينعكس بشكل مباشر على استقرار أسعار التعاقد وثبات التكلفة وسرعة إنجاز المشروع للعميل دون مفاجآت.
 
 
 **Paragraphs (English):**
-A company relying on its own equipment (excavators, rollers, mixers, transport trucks) saves 20% to 30% of the time wasted waiting to rent equipment from the external market.
+Having access to a comprehensive fleet of heavy equipment and machinery ready for deployment eliminates project delays associated with external rental availability.
 
-This also directly reflects on stable contract pricing and consistent cost for the client without surprises.
+This also directly reflects on stable contract pricing, consistent costs, and prompt project delivery without unexpected setbacks.
 
 
 ##### المحور 4: 4. وضوح وتفصيل جداول الكميات (BOQ)
@@ -655,7 +623,7 @@ Sana'a is characterized by varied soil layers, from expansive clay to harsh basa
 ##### Section 1: 1. Operational Challenges of Mountain & Remote Sites
 
 **فقرات المحور (عربي):**
-تقع معظم محطات وأبراج البث الإذاعي والخلوي على قمم الجبال الشاهقة لتأمين أوسع نطاق تغطية جغرافي، مما يجعل إيصال الديزل صيانة المولدات أمراً بالغ الصعوبة ومكلفاً للغاية.
+تقع معظم محطات وأبراج البث الإذاعي والخلوي على قمم الجبال الشاهقة لتأمين أوسع نطاق تغطية جغرافي، مما يجعل إيصال الديزل وصيانة المولدات أمرًا بالغ الصعوبة ومكلفًا للغاية.
 
 الانقطاعات المتكررة للتيار الكهربائي تؤدي إلى فقدان الإشارة وتأثر آلاف المشتركين في المديريات والقرى المجاورة.
 
@@ -672,13 +640,13 @@ Repeated power outages lead to signal loss affecting thousands of subscribers in
 **فقرات المحور (عربي):**
 توفر محطات الطاقة الشمسية المصممة خصيصاً لأبراج الاتصالات توليداً مستقراً للطاقة طوال ساعات النهار المشمسة في اليمن، مع شحن بنوك بطاريات الليثيوم المتقدمة ذات العمر الافتراضي الطويل.
 
-يقتصر عمل مولد الديزل على ساعات محدودة كاحتياطي طوارئ، ما يخفض استهلاك الوقود بنسبة تتجاوز 75% ويقلل الانبعاثات وتكاليف الصيانة الدورية.
+يقتصر عمل مولد الديزل على ساعات محدودة كاحتياطي طوارئ، ما يخفض استهلاك الوقود بشكل ملحوظ ويقلل الانبعاثات وتكاليف الصيانة الدورية.
 
 
 **Paragraphs (English):**
 Solar power stations designed specifically for telecom towers provide stable energy generation throughout Yemen's sunny daylight hours, charging advanced lithium battery banks with long service life.
 
-The diesel generator runs only limited hours as an emergency reserve, cutting fuel consumption by more than 75% and reducing emissions and routine maintenance costs.
+The diesel generator runs only limited hours as an emergency reserve, significantly reducing fuel consumption while also lowering emissions and routine maintenance costs.
 
 
 ##### المحور 3: 3. دور شركة الفضاء الواسع في البنية التحتية للاتصالات

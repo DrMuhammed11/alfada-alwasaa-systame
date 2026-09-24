@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic";
 import { SiteHeader } from "@/components/site/header";
 import { Hero } from "@/components/site/hero";
-import { Stats } from "@/components/site/stats";
 import { SiteFooter } from "@/components/site/footer";
 import { FloatingContact } from "@/components/site/floating-contact";
 
@@ -69,14 +68,6 @@ const Faq = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
-const TrustBadges = dynamic(
-  () => import("@/components/site/trust-badges").then((m) => ({ default: m.TrustBadges })),
-  { loading: SectionSkeleton, ssr: true }
-);
-const Testimonials = dynamic(
-  () => import("@/components/site/testimonials").then((m) => ({ default: m.Testimonials })),
-  { loading: SectionSkeleton, ssr: true }
-);
 const BlogPreview = dynamic(
   () => import("@/components/site/blog-preview").then((m) => ({ default: m.BlogPreview })),
   { loading: SectionSkeleton, ssr: true }
@@ -88,15 +79,12 @@ export default function Home() {
       <SiteHeader />
       <main id="main-content">
         <Hero />
-        <Stats />
         <PartnersMarquee />
-        <TrustBadges />
         <Sectors />
         <Services />
         <Position />
         <VisionMission />
         <TrackRecord />
-        <Testimonials />
         <WhyUs />
         <Faq />
         <BlogPreview />

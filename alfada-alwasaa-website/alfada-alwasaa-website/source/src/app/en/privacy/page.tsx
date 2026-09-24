@@ -8,7 +8,7 @@ import { EnFloatingContact } from "@/components/site/en-floating-contact";
 
 export const metadata: Metadata = {
   title: "Privacy Policy & Data Confidentiality | Al-Fada Al-Wasaa",
-  description: "Privacy policy and protection and confidentiality of commercial and engineering data for clients and partners of Al-Fada Al-Wasaa for Telecom Services & General Contracting.",
+  description: "Privacy policy and protection and confidentiality of commercial and engineering data for clients and partners of Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting.",
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/en/privacy",
     languages: {

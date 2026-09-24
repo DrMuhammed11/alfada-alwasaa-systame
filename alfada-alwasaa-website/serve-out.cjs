@@ -1,7 +1,8 @@
-// خادم ثابت بسيط لدليل out/ مع دعم الروابط النظيفة (clean URLs) للفحص المحلي فقط
+// خادم ثابت بسيط لدليل out/ مع دعم الروابط النظيفة (clean URLs) وضغط gzip للفحص المحلي
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 
 const ROOT = path.join(__dirname, "out");
 const PORT = 4173;
@@ -20,6 +21,16 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
+const COMPRESSIBLE = new Set([
+  ".html",
+  ".js",
+  ".css",
+  ".json",
+  ".svg",
+  ".xml",
+  ".txt",
+]);
+
 http
   .createServer((req, res) => {
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
@@ -29,13 +40,31 @@ http
       path.join(ROOT, urlPath),
       path.join(ROOT, urlPath + ".html"),
       path.join(ROOT, urlPath, "index.html"),
+      path.join(ROOT, urlPath.replace(/\.__PAGE__\.txt$/, "/__PAGE__.txt")),
     ];
 
     for (const file of candidates) {
       if (fs.existsSync(file) && fs.statSync(file).isFile()) {
         const ext = path.extname(file).toLowerCase();
-        res.writeHead(200, { "Content-Type": MIME[ext] || "application/octet-stream" });
-        fs.createReadStream(file).pipe(res);
+        const contentType = MIME[ext] || "application/octet-stream";
+        const headers = { "Content-Type": contentType };
+
+        const acceptEncoding = req.headers["accept-encoding"] || "";
+        const shouldGzip = COMPRESSIBLE.has(ext) && acceptEncoding.includes("gzip");
+
+        if (urlPath.includes("/_next/static/")) {
+          headers["Cache-Control"] = "public, max-age=31536000, immutable";
+        }
+
+        if (shouldGzip) {
+          headers["Content-Encoding"] = "gzip";
+          headers["Vary"] = "Accept-Encoding";
+          res.writeHead(200, headers);
+          fs.createReadStream(file).pipe(zlib.createGzip({ level: 6 })).pipe(res);
+        } else {
+          res.writeHead(200, headers);
+          fs.createReadStream(file).pipe(res);
+        }
         return;
       }
     }

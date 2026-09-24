@@ -43,7 +43,7 @@ export function EnTrackRecord() {
                 <div className="p-5">
                   <h3 className="text-base font-bold text-navy dark:text-white">{tr.title}</h3>
                   <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{tr.desc}</p>
-                  <p className="mt-3 text-[11px] font-semibold text-gold dark:text-gold-light border-t border-slate-100 dark:border-white/10 pt-2">
+                  <p className="mt-3 text-[11px] font-semibold text-navy dark:text-gold-light border-t border-slate-100 dark:border-white/10 pt-2">
                     {tr.metrics}
                   </p>
                 </div>

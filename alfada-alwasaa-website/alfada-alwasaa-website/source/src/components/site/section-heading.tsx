@@ -39,7 +39,7 @@ export function SectionHeading({ kicker, title, center, light }: SectionHeadingP
           className={cn(
             "mb-3 block w-fit rounded-full px-4 py-1.5 text-xs font-bold tracking-wide",
             center && "mx-auto",
-            light ? "bg-white/10 text-gold-light" : "bg-gold-soft text-gold dark:bg-gold/20 dark:text-gold-light"
+            light ? "bg-white/10 text-gold-light" : "bg-gold-soft text-navy dark:bg-gold/20 dark:text-gold-light"
           )}
         >
           {kicker}

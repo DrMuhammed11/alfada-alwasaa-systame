@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next out",
     "start": "npx serve out -l 3001",
-    "lint": "eslint ."
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "preview": "node serve-out.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -27,7 +29,6 @@
     "react-hook-form": "^7.60.0",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7",
     "zod": "^4.0.2"
   },
   "devDependencies": {
@@ -39,6 +40,7 @@
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"

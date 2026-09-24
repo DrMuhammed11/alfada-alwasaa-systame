@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
@@ -13,8 +14,13 @@ import { EN_SITE_CONFIG } from "@/config/en-site";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { LanguageSwitcher } from "@/components/site/language-switcher";
-import { CommandSearch } from "@/components/site/command-search";
 import { cn } from "@/lib/utils";
+
+// Search palette loads on first open only — keeps cmdk out of the critical path
+const CommandSearch = dynamic(
+  () => import("./command-search").then((m) => ({ default: m.CommandSearch })),
+  { ssr: false }
+);
 
 export function EnHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -168,8 +174,10 @@ export function EnHeader() {
         </div>
       </header>
 
-      {/* Command Search Palette */}
-      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      {/* Command Search Palette — mounted only when open */}
+      {searchOpen && (
+        <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      )}
     </>
   );
 }

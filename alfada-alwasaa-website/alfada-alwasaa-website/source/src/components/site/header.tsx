@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -7,8 +8,13 @@ import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "./theme-toggle";
-import { CommandSearch } from "./command-search";
 import { LanguageSwitcher } from "./language-switcher";
+
+// لوحة البحث تُحمَّل فقط عند أول فتح — باقة cmdk خارج المسار الحرج
+const CommandSearch = dynamic(
+  () => import("./command-search").then((m) => ({ default: m.CommandSearch })),
+  { ssr: false }
+);
 
 const NAV_ITEMS = SITE_CONFIG.navItems;
 
@@ -29,27 +35,42 @@ export function SiteHeader() {
         ticking = true;
       }
     };
-    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Track the section currently in view to highlight its nav link.
+  // Track the section currently in view to highlight its nav link (deferred to idle).
   useEffect(() => {
-    const ids = NAV_ITEMS.map((i) => i.href.slice(1));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(`#${entry.target.id}`);
-        }
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+    const hasIdle = typeof window !== "undefined" && "requestIdleCallback" in window;
+    const idleId = hasIdle
+      ? window.requestIdleCallback(() => setupObserver())
+      : window.setTimeout(() => setupObserver(), 200);
+
+    function setupObserver() {
+      const ids = NAV_ITEMS.map((i) => i.href.slice(1));
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+          }
+        },
+        { rootMargin: "-40% 0px -55% 0px" }
+      );
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer?.observe(el);
+      });
+    }
+
+    return () => {
+      if (hasIdle && typeof idleId === "number") {
+        window.cancelIdleCallback(idleId);
+      } else {
+        window.clearTimeout(idleId as number);
+      }
+      observer?.disconnect();
+    };
   }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -200,8 +221,10 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Command Search Palette */}
-      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      {/* Command Search Palette — يُركَّب فقط عند الفتح */}
+      {searchOpen && (
+        <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      )}
 
       {/* Mobile dropdown — أكورديون CSS خالص بتقنية grid-rows (بديل AnimatePresence)،
           invisible عند الإغلاق تُبقي الروابط خارج ترتيب التبويب وشجرة الوصولية */}

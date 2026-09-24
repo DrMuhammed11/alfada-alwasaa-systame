@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Home, Briefcase, Phone, MessageSquare, ArrowRight } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
 import { EN_SITE_CONFIG } from "@/config/en-site";
+import { CopyrightYear } from "@/components/site/copyright-year";
 
 /** الحقول المشتركة المستخدمة من إعدادات الموقع باللغتين */
 interface SiteConfigLike {
@@ -182,7 +183,7 @@ function renderVariant(
       {/* التذييل البسيط */}
       <footer className="relative z-10 mx-auto w-full max-w-7xl px-6 py-6 text-center text-xs text-white/50 sm:px-8">
         <p>
-          © {new Date().getFullYear()} {config.company.fullName}. {t.rights}
+          © <CopyrightYear /> {config.company.fullName}. {t.rights}
         </p>
       </footer>
     </div>

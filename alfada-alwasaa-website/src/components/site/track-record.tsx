@@ -109,7 +109,7 @@ export function TrackRecord() {
             </div>
             {/* Exact paragraph from the profile */}
             <p className="mt-4 text-justify text-[1.05rem] leading-9 text-slate-700 dark:text-slate-200">
-              نفذت شركة الفضاء الواسع لخدمات الاتصالات والمقاولات عددًا من المشاريع
+              نفذت شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة عددًا من المشاريع
               المتنوعة التي شملت أعمال الطرق والحفريات، والتوريدات، والخدمات اللوجستية،
               والشحن، والتخليص الجمركي، إضافة إلى خدمات الاتصالات والدعم الفني، بما يعكس
               خبرتها المتعددة وقدرتها على تنفيذ الأعمال وفق أعلى معايير الجودة والالتزام.
@@ -117,95 +117,88 @@ export function TrackRecord() {
           </Reveal>
         </div>
 
-        {/* Case Study Cards Grid — 5 documented fields in balanced layout */}
-        <div className="mt-8 sm:mt-10 grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-6">
-          {TRACK_CASE_STUDIES.map((item, idx) => {
-            const colSpanClass =
-              idx < 3
-                ? "lg:col-span-2"
-                : "lg:col-span-3 md:col-span-1";
-
-            return (
-              <Reveal 
-                key={item.id} 
-                index={idx}
-                className={`${colSpanClass} w-full`}
+        {/* Case Study Cards Grid — Balanced uniform grid matching English standard */}
+        <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {TRACK_CASE_STUDIES.map((item, idx) => (
+            <Reveal 
+              key={item.id} 
+              index={idx}
+              className="w-full"
+            >
+              <article 
+                onClick={() => handleOpenLightbox(item)}
+                className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-[0_25px_50px_-15px_rgba(198,149,74,0.3)]"
               >
-                <article 
-                  onClick={() => handleOpenLightbox(item)}
-                  className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_12px_35px_-15px_rgba(10,52,83,0.12)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gold/60 hover:shadow-[0_25px_50px_-15px_rgba(198,149,74,0.3)]"
-                >
-                  {/* Card Media Header with interactive hover zoom and Lightbox trigger */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/85 via-navy-darker/20 to-transparent transition-opacity duration-400" />
+                {/* Card Media Header with interactive hover zoom and Lightbox trigger */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-navy-darker">
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/85 via-navy-darker/20 to-transparent transition-opacity duration-400" />
 
-                    {/* Top Floating Badge & Icon */}
-                    <div className="absolute inset-x-4 top-4 flex items-center justify-between z-10">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/90 text-gold-light shadow-md ring-1 ring-gold/30 backdrop-blur-md transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker">
-                        <item.Icon className="h-5 w-5" strokeWidth={1.8} />
-                      </span>
-                      <span className="rounded-full border border-gold/40 bg-navy-deep/85 px-3.5 py-1 text-xs font-bold text-gold-light shadow-md backdrop-blur-md">
-                        {item.tag}
-                      </span>
-                    </div>
-
-                    {/* Hover indicator: Lightbox prompt */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-navy-darker/50 opacity-0 backdrop-blur-xs transition-opacity duration-300 group-hover:opacity-100 z-10">
-                      <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-xs font-black text-navy-darker shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        <Maximize2 className="h-3.5 w-3.5" />
-                        <span>عرض التفاصيل والصورة</span>
-                      </span>
-                    </div>
-
-                    {/* Bottom overlay highlight title */}
-                    <div className="absolute bottom-3 start-4 end-4 z-10">
-                      <span className="text-[0.7rem] font-bold uppercase tracking-wider text-gold-light">
-                        مجال الإنجاز {idx + 1}
-                      </span>
-                    </div>
+                  {/* Top Floating Badge & Icon */}
+                  <div className="absolute inset-x-4 top-4 flex items-center justify-between z-10">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/90 text-gold-light shadow-md ring-1 ring-gold/30 backdrop-blur-md transition-colors duration-500 group-hover:bg-gold group-hover:text-navy-darker">
+                      <item.Icon className="h-5 w-5" strokeWidth={1.8} />
+                    </span>
+                    <span className="rounded-full border border-gold/40 bg-navy-deep/85 px-3.5 py-1 text-xs font-bold text-gold-light shadow-md backdrop-blur-md">
+                      {item.tag}
+                    </span>
                   </div>
 
-                  {/* Card Body & Scope of Work */}
-                  <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-navy dark:text-white transition-colors duration-300 group-hover:text-gold leading-snug">
-                        {item.title}
-                      </h3>
-                      <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 text-justify">
-                        {item.scope}
-                      </p>
-                    </div>
-
-                    {/* Metrics / Quality Benchmarks */}
-                    <div className="mt-6 border-t border-slate-100 dark:border-white/10 pt-5">
-                      <span className="text-[0.72rem] font-black uppercase tracking-wider text-gold">
-                        شواهد الجودة والمعايير:
-                      </span>
-                      <ul className="mt-2.5 space-y-2">
-                        {item.metrics.map((metric, mIdx) => (
-                          <li 
-                            key={mIdx} 
-                            className="flex items-start gap-2 text-xs leading-5 text-slate-700 dark:text-slate-200 font-semibold"
-                          >
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                            <span>{metric}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {/* Hover indicator: Lightbox prompt */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-navy-darker/50 opacity-0 backdrop-blur-xs transition-opacity duration-300 group-hover:opacity-100 z-10">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-xs font-black text-navy-darker shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <Maximize2 className="h-3.5 w-3.5" />
+                      <span>عرض التفاصيل والصورة</span>
+                    </span>
                   </div>
-                </article>
-              </Reveal>
-            );
-          })}
+
+                  {/* Bottom overlay highlight title */}
+                  <div className="absolute bottom-3 start-4 end-4 z-10">
+                    <span className="text-[0.7rem] font-bold uppercase tracking-wider text-gold-light">
+                      مجال الإنجاز {idx + 1}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Body & Scope of Work */}
+                <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-black text-navy dark:text-white transition-colors duration-300 group-hover:text-gold leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 text-justify">
+                      {item.scope}
+                    </p>
+                  </div>
+
+                  {/* Metrics / Quality Benchmarks */}
+                  <div className="mt-6 border-t border-slate-100 dark:border-white/10 pt-5">
+                    <span className="text-[0.72rem] font-black uppercase tracking-wider text-navy dark:text-gold-light">
+                      شواهد الجودة والمعايير:
+                    </span>
+                    <ul className="mt-2.5 space-y-2">
+                      {item.metrics.map((metric, mIdx) => (
+                        <li 
+                          key={mIdx} 
+                          className="flex items-start gap-2 text-xs leading-5 text-slate-700 dark:text-slate-200 font-semibold"
+                        >
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                          <span>{metric}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </article>
+            </Reveal>
+          ))}
         </div>
 
         {/* High-Trust Closing Banner */}

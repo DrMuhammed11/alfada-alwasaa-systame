@@ -17,6 +17,8 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
+  // ضروري لتفعيل env(safe-area-inset-*) في globals.css على أجهزة النوتش
+  viewportFit: "cover",
 };
 
 const cairo = Cairo({
@@ -304,13 +306,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* تحميل مسبق لصورة الخلفية البطولية لتحسين LCP */}
-        <link
-          rel="preload"
-          as="image"
-          href="/profile/hero_bg.webp"
-          fetchPriority="high"
-        />
+        {/* preload لصورة الهيرو يولّدها Next تلقائياً من Image priority في hero.tsx
+            (الوسم اليدوي السابق كان يضاعفه ويحمّل الصورة في صفحات بلا هيرو) */}
         {gaId && (
           <>
             <script

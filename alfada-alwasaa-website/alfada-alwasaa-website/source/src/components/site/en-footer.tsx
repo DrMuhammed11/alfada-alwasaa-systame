@@ -110,7 +110,7 @@ export function EnFooter() {
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-white/50">
           <p>
-            &copy; {new Date().getFullYear()} Al-Fada Al-Wasaa Company for Telecom Services & General Contracting. All rights reserved.
+            &copy; {new Date().getFullYear()} {EN_SITE_CONFIG.company.fullName}. All rights reserved.
           </p>
           <p>
             Yemeni Commercial Registry & Sovereign Classifications Verified.

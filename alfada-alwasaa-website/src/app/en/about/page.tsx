@@ -15,7 +15,7 @@ import { EnFooter } from "@/components/site/en-footer";
 import { EnFloatingContact } from "@/components/site/en-floating-contact";
 
 export const metadata: Metadata = {
-  title: "About Us | Al-Fada Al-Wasaa for Telecom Services & Contracting in Yemen",
+  title: "About Us | Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting in Yemen",
   description: "Learn about Al-Fada Al-Wasaa — our history, vision, and mission in delivering integrated solutions spanning general contracting, telecom, supplies, and logistics services across Yemen.",
   keywords: [
     "about Al-Fada Al-Wasaa",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "About Us | Al-Fada Al-Wasaa for Telecom Services & Contracting",
+    title: "About Us | Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
     description: "A multi-service professional entity delivering integrated solutions that unite executive experience and institutional discipline across Yemen.",
     url: "https://www.alfadaalwasaa.com/en/about",
     images: [{ url: "/profile/hero_bg.webp", width: 1200, height: 630, alt: "Al-Fada Al-Wasaa" }],
@@ -89,7 +89,7 @@ export default function EnAboutPage() {
               </span>
 
               <h1 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
-                Al-Fada Al-Wasaa for Telecom Services & General Contracting
+                Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting
               </h1>
 
               <p className="mt-5 text-base leading-8 text-white/80 sm:text-lg sm:leading-9">
@@ -145,24 +145,6 @@ export default function EnAboutPage() {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="relative -mt-10 z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-4">
-          <div className="rounded-3xl border border-gold/30 bg-gradient-to-br from-navy-deep via-navy to-navy-darker p-6 shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)] backdrop-blur-lg sm:p-10">
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8 divide-y-2 divide-white/10 md:divide-y-0 md:divide-x-2">
-              {EN_SITE_CONFIG.stats.map((stat) => (
-                <div key={stat.label} className="flex flex-col items-center text-center pt-6 md:pt-0">
-                  <span className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
-                    <span className="bg-gradient-to-l from-white via-gold-light to-gold bg-clip-text text-transparent">
-                      {stat.num}
-                    </span>
-                  </span>
-                  <span className="mt-2 text-sm font-bold text-white/95 sm:text-base">{stat.label}</span>
-                  <span className="mt-1 text-xs text-white/60">{stat.sub}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Vision & Mission */}
         <section className="py-16 sm:py-20 bg-slate-50">

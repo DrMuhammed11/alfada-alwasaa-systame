@@ -354,7 +354,6 @@ a, button, input, select, textarea {
 .reveal-hidden {
   opacity: 0;
   transform: translateY(var(--reveal-y, 14px));
-  will-change: opacity, transform;
 }
 
 .reveal-visible {

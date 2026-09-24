@@ -216,7 +216,7 @@ export function EnServicePageView({ service }: { service: EnServiceDetail }) {
         <section className="py-16 sm:py-20 bg-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-gold">Overview</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-navy">Overview</span>
               <h2 className="mt-2 text-2xl font-black text-navy sm:text-3xl">
                 Leading the Field in {service.shortTitle}
               </h2>
@@ -255,7 +255,7 @@ export function EnServicePageView({ service }: { service: EnServiceDetail }) {
           <section className="py-16 bg-slate-100 border-y border-slate-200">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-gold">Field Gallery</span>
+                <span className="text-xs font-bold text-navy">Field Gallery</span>
                 <h2 className="text-2xl font-black text-navy sm:text-3xl mt-1">
                   Equipment & On-Site Execution
                 </h2>
@@ -309,7 +309,7 @@ export function EnServicePageView({ service }: { service: EnServiceDetail }) {
         <section className="py-16 sm:py-20 bg-slate-50">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <span className="text-xs font-bold text-gold">Frequently Asked Questions</span>
+              <span className="text-xs font-bold text-navy">Frequently Asked Questions</span>
               <h2 className="text-2xl font-black text-navy sm:text-3xl mt-1">
                 Common Questions About {service.shortTitle}
               </h2>
@@ -339,7 +339,7 @@ export function EnServicePageView({ service }: { service: EnServiceDetail }) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
               <div>
-                <span className="text-xs font-bold text-gold">One Integrated Ecosystem</span>
+                <span className="text-xs font-bold text-navy">One Integrated Ecosystem</span>
                 <h2 className="text-2xl font-black text-navy sm:text-3xl mt-1">
                   Explore Our Other Services & Sectors
                 </h2>

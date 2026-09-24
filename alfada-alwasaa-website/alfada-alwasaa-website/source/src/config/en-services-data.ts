@@ -174,7 +174,7 @@ export const EN_SERVICES_DATA: Record<string, ServiceDetail> = {
     ],
     overview: [
       "The foundation phase of any construction project is the bedrock of its success; accordingly, Al-Fada Al-Wasaa provides an integrated system of precise excavation, rock breaking, and topographic leveling for projects large and small.",
-      "Thanks to excavators fitted with hydraulic breakers and high-capacity dump trucks, we guarantee your site is prepared in the shortest possible time and with the highest degree of structural safety for neighboring buildings."
+      "With excavators fitted with hydraulic breakers and high-capacity dump trucks, we strive to prepare sites efficiently and in the shortest possible timeframe while prioritizing the safety of neighboring structures."
     ],
     features: [
       {
@@ -311,7 +311,7 @@ export const EN_SERVICES_DATA: Record<string, ServiceDetail> = {
         desc: "Designing and building photovoltaic power stations with lithium battery banks to run telecom towers without interruption."
       },
       {
-        title: "Fiber Optic Network Deployment (FTTH)",
+        title: "Fiber Optic Network Deployment",
         desc: "Trenching and deploying aerial and underground fiber optic cables, and splicing fibers with advanced fusion splicers."
       }
     ],

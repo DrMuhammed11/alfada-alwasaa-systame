@@ -149,97 +149,88 @@ export function Sectors() {
           </div>
         </Reveal>
 
-        {/* Modern Showcase Cards Grid */}
-        <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {/* Modern Showcase Cards - Spacious horizontal layout matching English standard */}
+        <div className="mt-8 sm:mt-10 space-y-8 sm:space-y-10">
           {filteredSectors.map((sector, idx) => (
             <Reveal key={sector.num} index={idx}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-[0_15px_40px_-20px_rgba(10,52,83,0.2)] transition-all duration-300 hover:-translate-y-2 hover:border-gold/60 hover:shadow-[0_30px_60px_-15px_rgba(10,52,83,0.4)] dark:hover:shadow-[0_30px_60px_-15px_rgba(198,149,74,0.15)]">
-                {/* عرض الصورتين جنباً لجنب بنسبة 50/50 */}
-                <div className="relative flex aspect-[16/10] w-full overflow-hidden bg-navy-darker">
-                  {/* الصورة الأولى */}
-                  <div className="relative w-1/2 overflow-hidden">
-                    <Image
-                      src={sector.photos[0].src}
-                      alt={sector.photos[0].alt}
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  {/* فاصل رفيع بين الصورتين */}
-                  <div aria-hidden className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-px bg-white/40 z-10" />
-                  {/* الصورة الثانية */}
-                  <div className="relative w-1/2 overflow-hidden">
-                    <Image
-                      src={sector.photos[1].src}
-                      alt={sector.photos[1].alt}
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 190px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  {/* تدرج سفلي لإظهار العنوان */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/80 via-navy-darker/10 to-transparent" />
+              <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 lg:p-10 shadow-md hover:shadow-xl hover:border-gold/40 transition-all duration-300">
+                <div className="grid gap-8 lg:grid-cols-12 items-center">
+                  {/* Content Column (6 cols) */}
+                  <div className="lg:col-span-6 space-y-5">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 dark:bg-gold/20 text-navy dark:text-gold-light border border-gold/30 shadow-xs">
+                        <sector.Icon className="h-5 w-5 text-gold" />
+                      </span>
+                      <span className="inline-block rounded-full bg-gold/10 px-3.5 py-1 text-xs font-black text-navy dark:text-gold-light border border-gold/30 font-mono">
+                        القطاع {sector.num}
+                      </span>
+                    </div>
 
-                  {/* الشارات العلوية */}
-                  <div className="absolute top-4 inset-x-4 flex items-center justify-between z-10">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy/90 text-gold-light shadow-md ring-1 ring-gold/30 backdrop-blur-md">
-                      <sector.Icon className="h-5 w-5" />
-                    </span>
-                    <span className="rounded-full bg-gold px-3.5 py-1 text-xs font-black text-navy-darker shadow-md">
-                      قطاع {sector.num}
-                    </span>
-                  </div>
-
-                  {/* اسم القطاع في الأسفل */}
-                  <div className="absolute bottom-3 start-4 z-10">
-                    <h3 className="text-xl font-black text-white drop-shadow-md">
+                    <h3 className="text-2xl sm:text-3xl font-black text-navy dark:text-white leading-tight">
                       {sector.title}
                     </h3>
-                  </div>
-                </div>
 
-                {/* Content Body */}
-                <div className="flex flex-1 flex-col justify-between p-6">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-gold">
-                      نطاق الخدمات والحلول:
-                    </span>
-                    <ul className="mt-3 space-y-2.5">
-                      {sector.services.map((service, sIdx) => (
-                        <li
-                          key={sIdx}
-                          className="flex items-start gap-2.5 text-sm leading-6 text-slate-700 dark:text-slate-200"
+                    <div className="pt-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gold">
+                        نطاق الخدمات والحلول:
+                      </span>
+                      <ul className="mt-3 space-y-2.5">
+                        {sector.services.map((service, sIdx) => (
+                          <li
+                            key={sIdx}
+                            className="flex items-start gap-2.5 text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-200"
+                          >
+                            <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-gold" />
+                            <span>{service}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-3 flex flex-wrap items-center gap-3">
+                      <Link
+                        href={sector.href}
+                        className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs sm:text-sm font-black text-navy-darker hover:bg-gold-light transition-all shadow-sm hover:scale-[1.02] active:scale-98"
+                      >
+                        <span>استعراض خدمات القطاع</span>
+                        <ArrowLeft className="h-4 w-4" />
+                      </Link>
+                      <a
+                        href="#contact"
+                        className="inline-flex items-center gap-2 rounded-xl border border-gold/40 px-4 py-2.5 text-xs sm:text-sm font-bold text-navy dark:text-gold-light hover:bg-gold hover:text-navy-darker hover:border-gold transition-colors"
+                      >
+                        <span>طلب دراسة أو تسعير</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Media / Photos Column (6 cols) */}
+                  <div className="lg:col-span-6">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      {sector.photos.map((ph, pIdx) => (
+                        <div
+                          key={pIdx}
+                          className="group/photo relative aspect-[4/3] overflow-hidden rounded-2xl bg-navy-darker shadow-sm ring-1 ring-navy/10 dark:ring-white/10"
                         >
-                          <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-gold" />
-                          <span>{service}</span>
-                        </li>
+                          <Image
+                            src={ph.src}
+                            alt={ph.alt}
+                            fill
+                            loading="lazy"
+                            decoding="async"
+                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            className="object-cover transition-transform duration-500 group-hover/photo:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/photo:opacity-100" />
+                          <span className="absolute bottom-2.5 start-2.5 end-2.5 text-[11px] font-bold text-white opacity-0 transition-opacity duration-300 group-hover/photo:opacity-100 line-clamp-1 drop-shadow-md">
+                            {ph.alt}
+                          </span>
+                        </div>
                       ))}
-                    </ul>
-                  </div>
-
-                  {/* Card Action Footer */}
-                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center gap-2">
-                    <Link
-                      href={sector.href}
-                      className="group/link flex-1 flex items-center justify-between rounded-xl bg-slate-100 dark:bg-white/10 px-3.5 py-2.5 text-xs font-bold text-navy dark:text-white transition-all duration-300 hover:bg-gold hover:text-navy-darker dark:hover:bg-gold dark:hover:text-navy-darker"
-                    >
-                      <span>تفاصيل القطاع</span>
-                      <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:-translate-x-1" />
-                    </Link>
-                    <a
-                      href="#contact"
-                      className="rounded-xl border border-gold/40 px-3 py-2.5 text-xs font-extrabold text-navy dark:text-gold-light hover:bg-gold hover:text-navy-darker hover:border-gold transition-colors"
-                    >
-                      تسعير
-                    </a>
+                    </div>
                   </div>
                 </div>
-              </article>
+              </div>
             </Reveal>
           ))}
         </div>

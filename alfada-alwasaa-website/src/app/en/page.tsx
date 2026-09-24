@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic";
 import { EnHeader } from "@/components/site/EnHeader";
 import { EnHero } from "@/components/site/EnHero";
-import { EnStatsStrip } from "@/components/site/EnStatsStrip";
 import { EnFooter } from "@/components/site/EnFooter";
 import { EnFloatingContact } from "@/components/site/EnFloatingContact";
 
@@ -32,11 +31,6 @@ const EnPartnersMarquee = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
-const EnCompliance = dynamic(
-  () => import("@/components/site/EnCompliance").then((m) => ({ default: m.EnCompliance })),
-  { loading: SectionSkeleton, ssr: true }
-);
-
 const EnSectors = dynamic(
   () => import("@/components/site/EnSectors").then((m) => ({ default: m.EnSectors })),
   { loading: SectionSkeleton, ssr: true }
@@ -62,10 +56,6 @@ const EnTrackRecord = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
-const EnTestimonials = dynamic(
-  () => import("@/components/site/EnTestimonials").then((m) => ({ default: m.EnTestimonials })),
-  { loading: SectionSkeleton, ssr: true }
-);
 
 const EnWhyUs = dynamic(
   () => import("@/components/site/EnWhyUs").then((m) => ({ default: m.EnWhyUs })),
@@ -96,15 +86,12 @@ export default function EnglishHomePage() {
       <EnHeader />
       <main id="main-content">
         <EnHero />
-        <EnStatsStrip />
         <EnPartnersMarquee />
-        <EnCompliance />
         <EnSectors />
         <EnServicesTabs />
         <EnPosition />
         <EnVisionMission />
         <EnTrackRecord />
-        <EnTestimonials />
         <EnWhyUs />
         <EnFaq />
         <EnConclusion />

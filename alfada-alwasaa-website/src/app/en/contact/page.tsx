@@ -15,7 +15,7 @@ import { EnContactSection } from "@/components/site/en-contact-section";
 
 export const metadata: Metadata = {
   title: "Contact Us | Al-Fada Al-Wasaa in Sana'a and Yemen",
-  description: "Contact Al-Fada Al-Wasaa for Telecom Services & Contracting in Sana'a. Phone numbers, WhatsApp, official email, and direct address beside Shamlan Factory. Phone: +967776999942",
+  description: "Contact Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting in Sana'a. Phone numbers, WhatsApp, official email, and direct address beside Shamlan Factory. Phone: +967776999942",
   keywords: [
     "contact Al-Fada Al-Wasaa",
     "Al-Fada Al-Wasaa phone number",

@@ -7,8 +7,14 @@
   "theme_color": "#0a3453",
   "icons": [
     {
+      "src": "/profile/logo_mark.webp",
+      "sizes": "415x378",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
       "src": "/profile/logo_mark.png",
-      "sizes": "512x512",
+      "sizes": "415x378",
       "type": "image/png"
     }
   ]

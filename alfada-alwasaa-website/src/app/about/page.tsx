@@ -15,10 +15,9 @@ import { SITE_CONFIG } from "@/config/site";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { FloatingContact } from "@/components/site/floating-contact";
-import { Stats } from "@/components/site/stats";
 
 export const metadata: Metadata = {
-  title: "من نحن | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات في اليمن",
+  title: "من نحن | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة في اليمن",
   description: "تعرف على شركة الفضاء الواسع — تاريخنا، رؤيتنا، ورسالتنا في تقديم حلول متكاملة تجمع بين المقاولات العامة، الاتصالات، التوريدات، والخدمات اللوجستية باليمن.",
   keywords: [
     "من نحن الفضاء الواسع",
@@ -35,7 +34,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "من نحن | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
+    title: "من نحن | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة",
     description: "كيان مهني متعدد الخدمات يقدم حلولاً متكاملة تجمع بين الخبرة التنفيذية والانضباط المؤسسي باليمن.",
     url: "https://www.alfadaalwasaa.com/about",
     images: [{ url: "/profile/hero_bg.webp", width: 1200, height: 630, alt: "شركة الفضاء الواسع" }],
@@ -92,7 +91,7 @@ export default function AboutPage() {
               </span>
 
               <h1 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
-                شركة الفضاء الواسع لخدمات الاتصالات والمقاولات
+                شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة
               </h1>
 
               <p className="mt-5 text-base leading-8 text-white/80 sm:text-lg sm:leading-9">
@@ -148,8 +147,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Stats */}
-        <Stats />
 
         {/* Vision & Mission */}
         <section className="py-16 sm:py-20 bg-slate-50">

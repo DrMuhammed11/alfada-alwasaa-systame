@@ -70,7 +70,7 @@ export default async function SingleBlogPostPage({ params }: Props) {
     dateModified: post.date,
     author: {
       "@type": "Organization",
-      name: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
+      name: "شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة",
       url: "https://www.alfadaalwasaa.com",
     },
     publisher: {

@@ -59,10 +59,10 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
           ]
         },
         {
-          heading: "3. Owning Heavy Equipment & Machinery",
+          heading: "3. Heavy Equipment & Machinery Capabilities",
           paragraphs: [
-            "A company relying on its own equipment (excavators, rollers, mixers, transport trucks) saves 20% to 30% of the time wasted waiting to rent equipment from the external market.",
-            "This also directly reflects on stable contract pricing and consistent cost for the client without surprises."
+            "Having access to a comprehensive fleet of heavy equipment and machinery ready for deployment eliminates project delays associated with external rental availability.",
+            "This also directly reflects on stable contract pricing, consistent costs, and prompt project delivery without unexpected setbacks."
           ]
         },
         {
@@ -112,7 +112,7 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
           heading: "2. Hybrid Solutions: Integrating Solar Panels with Lithium Banks",
           paragraphs: [
             "Solar power stations designed specifically for telecom towers provide stable energy generation throughout Yemen's sunny daylight hours, charging advanced lithium battery banks with long service life.",
-            "The diesel generator runs only limited hours as an emergency reserve, cutting fuel consumption by more than 75% and reducing emissions and routine maintenance costs."
+            "The diesel generator runs only limited hours as an emergency reserve, significantly reducing fuel consumption while also lowering emissions and routine maintenance costs."
           ]
         },
         {

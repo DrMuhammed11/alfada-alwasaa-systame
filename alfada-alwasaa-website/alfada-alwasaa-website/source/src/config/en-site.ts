@@ -7,9 +7,9 @@
 export const EN_SITE_CONFIG = {
   // Corporate Identity
   company: {
-    fullName: "Al-Fada Al-Wasaa Company for Telecom Services & General Contracting",
+    fullName: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
     shortName: "Al-Fada Al-Wasaa",
-    enName: "AL-FADA AL-WASAA",
+    enName: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
     tagline: "Integrated Solutions Within One Ecosystem",
     brief:
       "A multi-service professional entity founded on a clear vision: delivering integrated solutions that unite executive experience, institutional discipline, and the capacity to achieve high standards of quality and professionalism.",
@@ -322,7 +322,7 @@ export const EN_SITE_CONFIG = {
   conclusion: {
     kicker: "Corporate Epilogue",
     title: "Executive Closing Statement",
-    text: "Al-Fada Al-Wasaa Company for Telecom Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.",
+    text: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.",
   },
 
   // Compliance & Institutional Certifications

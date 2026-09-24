@@ -29,60 +29,53 @@ function AnimatedCounter({ rawNum }: { rawNum: string }) {
   const reduce = useReducedMotion();
   const { target, suffix } = parseStat(rawNum);
   const containerRef = useRef<HTMLSpanElement>(null);
-  const [inView, setInView] = useState(false);
-  // الحالة الابتدائية = القيمة النهائية: الـ SSR والزواحف و no-JS يرون الرقم الحقيقي،
-  // وأنيميشن العد من الصفر يُشغَّل بعد الـ mount ودخول مجال الرؤية فقط
-  const [count, setCount] = useState(target);
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node) return;
+    if (!node || reduce) return;
+
+    let animId: number;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+
+        // أنيميشن عد مباشر على DOM دون إعادة رندر React لكل إطار — ينهي LCP سريعاً وخالياً من الـ reflow
+        const duration = 250;
+        let startTime: number | null = null;
+        const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
+
+        const step = (now: number) => {
+          if (!startTime) startTime = now;
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeOutCubic(progress);
+          const currentVal = Math.round(eased * target);
+          if (node) {
+            node.textContent = `${currentVal}${suffix}`;
+          }
+
+          if (progress < 1) {
+            animId = requestAnimationFrame(step);
+          }
+        };
+
+        animId = requestAnimationFrame(step);
       },
       { threshold: 0.25 }
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!inView || reduce) {
-      setCount(target);
-      return;
-    }
-
-    const duration = 1200; // 1.2s animation duration
-    let startTime: number | null = null;
-    let animId: number;
-
-    const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
-
-    const step = (now: number) => {
-      if (!startTime) startTime = now;
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = easeOutCubic(progress);
-      setCount(Math.round(eased * target));
-
-      if (progress < 1) {
-        animId = requestAnimationFrame(step);
-      }
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(animId);
     };
-
-    animId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animId);
-  }, [inView, reduce, target]);
+  }, [reduce, suffix, target]);
 
   return (
     <span ref={containerRef} className="tabular-nums">
-      {count}
+      {target}
       {suffix}
     </span>
   );
@@ -105,10 +98,9 @@ export function Stats() {
                 <div className="mb-3 flex h-13 w-13 items-center justify-center rounded-2xl bg-gold/15 text-gold-light ring-1 ring-gold/30">
                   <stat.Icon className="h-6 w-6" strokeWidth={2} />
                 </div>
-                <span className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
-                  <span className="bg-gradient-to-l from-gold-light via-gold to-white bg-clip-text text-transparent">
-                    <AnimatedCounter rawNum={stat.num} />
-                  </span>
+                {/* لون صلب بدل bg-clip-text: يُرسم فوراً عند تبديل الخط ويُسرِّع LCP */}
+                <span className="text-3xl font-black tracking-tight text-gold-light sm:text-4xl lg:text-5xl">
+                  <AnimatedCounter rawNum={stat.num} />
                 </span>
                 <span className="mt-2 text-sm font-bold text-white/95 sm:text-base">
                   {stat.label}

@@ -211,7 +211,7 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
         <section className="py-16 sm:py-20 bg-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-gold">نظرة عامة</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-navy">نظرة عامة</span>
               <h2 className="mt-2 text-2xl font-black text-navy sm:text-3xl">
                 الريادة في تقديم {service.shortTitle}
               </h2>
@@ -250,7 +250,7 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
           <section className="py-16 bg-slate-100 border-y border-slate-200">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-gold">معرض الميدان</span>
+                <span className="text-xs font-bold text-navy">معرض الميدان</span>
                 <h2 className="text-2xl font-black text-navy sm:text-3xl mt-1">
                   المعدات والتنفيذ الميداني
                 </h2>
@@ -304,7 +304,7 @@ export function ServicePageView({ service }: { service: ServiceDetail }) {
         <section className="py-16 sm:py-20 bg-slate-50">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <span className="text-xs font-bold text-gold">الأسئلة الشائعة</span>
+              <span className="text-xs font-bold text-navy">الأسئلة الشائعة</span>
               <h2 className="text-2xl font-black text-navy sm:text-3xl mt-1">
                 استفسارات متكررة حول {service.shortTitle}
               </h2>

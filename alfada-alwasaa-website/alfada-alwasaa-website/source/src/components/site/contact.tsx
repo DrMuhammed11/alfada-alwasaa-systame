@@ -290,7 +290,7 @@ export function Contact() {
               <div className="overflow-hidden rounded-3xl bg-navy p-8 text-white shadow-[0_20px_50px_-20px_rgba(10,52,83,0.5)] sm:p-10">
                 <div className="inline-flex items-center gap-2 rounded-full bg-gold/20 px-4 py-1.5 text-xs font-bold text-gold-light ring-1 ring-gold/30">
                   <Building2 className="h-4 w-4" />
-                  <span>شركة الفضاء الواسع لخدمات الاتصالات والمقاولات</span>
+                  <span>شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة</span>
                 </div>
 
                 <h3 className="mt-6 text-2xl font-black text-white sm:text-3xl">
@@ -380,7 +380,7 @@ export function Contact() {
                       <Mail className="h-5 w-5" />
                     </span>
                     <div>
-                      <span className="block text-xs font-medium text-white/60">{SITE_CONFIG.contacts.email.label}</span>
+                      <span className="block text-xs font-medium text-white/70">{SITE_CONFIG.contacts.email.label}</span>
                       <span className="block text-sm font-bold text-white">
                         {SITE_CONFIG.contacts.email.address}
                       </span>
@@ -393,7 +393,7 @@ export function Contact() {
                       <MapPin className="h-6 w-6" />
                     </span>
                     <div>
-                      <span className="block text-xs font-medium text-white/60">المقر الرئيسي ونطاق العمل</span>
+                      <span className="block text-xs font-medium text-white/70">المقر الرئيسي ونطاق العمل</span>
                       <span className="block text-sm font-bold text-white">
                         {SITE_CONFIG.contacts.location.fullAddress}
                       </span>
@@ -403,7 +403,7 @@ export function Contact() {
 
                 <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-6 text-xs font-semibold text-white/60">
                   <Clock className="h-4 w-4 text-gold" />
-                  <span>أوقات الدوام: السبت - الخميس (8:00 صباحاً - 5:00 مساءً) مع دعم طوارئ ميداني 24/7</span>
+                  <span>أوقات الدوام: {SITE_CONFIG.contacts.workingHours} مع دعم طوارئ ميداني 24/7</span>
                 </div>
               </div>
             </div>
@@ -851,7 +851,7 @@ export function Contact() {
                         <span className="text-xs font-bold text-slate-500">تاريخ التسجيل:</span>
                         <span className="text-sm text-slate-700">
                           {trackingResult.receivedAt
-                            ? new Date(trackingResult.receivedAt).toLocaleDateString("ar-SA", {
+                            ? new Date(trackingResult.receivedAt).toLocaleDateString("ar-YE-u-ca-gregory", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
@@ -956,7 +956,7 @@ export function Contact() {
                               </div>
                               {trackingResult.reply.sentAt && (
                                 <span className="text-[11px] font-medium text-slate-500">
-                                  {new Date(trackingResult.reply.sentAt).toLocaleDateString("ar-SA", {
+                                  {new Date(trackingResult.reply.sentAt).toLocaleDateString("ar-YE-u-ca-gregory", {
                                     year: "numeric",
                                     month: "short",
                                     day: "numeric",
