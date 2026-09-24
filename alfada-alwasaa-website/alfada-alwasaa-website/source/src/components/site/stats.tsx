@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion, useInView } from "framer-motion";
 import { Award, Layers, Clock, ShieldCheck } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
@@ -11,6 +11,7 @@ const STAT_ICONS = [Layers, ShieldCheck, Award, Clock];
 const STATS = SITE_CONFIG.stats.map((item, idx) => ({
   ...item,
   Icon: STAT_ICONS[idx],
+  ...parseStat(item.num),
 }));
 
 /** دالة تفكيك الرقم واللاحقة لمعالجة الأرقام المركبة مثل 5+ و 24/7 */
@@ -27,35 +28,17 @@ function parseStat(raw: string) {
 function AnimatedCounter({ rawNum }: { rawNum: string }) {
   const reduce = useReducedMotion();
   const { target, suffix } = parseStat(rawNum);
-  const [count, setCount] = useState(reduce ? target : 0);
   const containerRef = useRef<HTMLSpanElement>(null);
-  const [hasStarted, setHasStarted] = useState(false);
+  const inView = useInView(containerRef, { once: true, amount: 0.25 });
+  // الحالة الابتدائية = القيمة النهائية: الـ SSR والزواحف و no-JS يرون الرقم الحقيقي،
+  // وأنيميشن العد من الصفر يُشغَّل بعد الـ mount ودخول مجال الرؤية فقط
+  const [count, setCount] = useState(target);
 
   useEffect(() => {
-    if (reduce) {
+    if (!inView || reduce) {
       setCount(target);
       return;
     }
-
-    const node = containerRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHasStarted(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.25 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [reduce, target]);
-
-  useEffect(() => {
-    if (!hasStarted || reduce) return;
 
     const duration = 1200; // 1.2s animation duration
     let startTime: number | null = null;
@@ -77,7 +60,7 @@ function AnimatedCounter({ rawNum }: { rawNum: string }) {
 
     animId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animId);
-  }, [hasStarted, reduce, target]);
+  }, [inView, reduce, target]);
 
   return (
     <span ref={containerRef} className="tabular-nums">
@@ -92,13 +75,14 @@ export function Stats() {
     <section className="relative -mt-10 z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <Reveal>
         <div className="shimmer-card rounded-3xl border border-gold/30 bg-gradient-to-br from-navy-deep via-navy to-navy-darker p-6 shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)] backdrop-blur-lg sm:p-10">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8 divide-y-2 divide-white/10 md:divide-y-0 md:divide-x-2 md:divide-x-reverse">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8 divide-y-2 divide-white/10 md:divide-y-0 md:divide-x-2">
             {STATS.map((stat, idx) => (
               <div
                 key={stat.label}
+                aria-label={`${stat.target}${stat.suffix}`}
                 className={`flex flex-col items-center text-center ${
                   idx > 1 ? "pt-6 md:pt-0" : ""
-                } ${idx % 2 === 1 && idx === 1 ? "pt-0" : ""}`}
+                }`}
               >
                 <div className="mb-3 flex h-13 w-13 items-center justify-center rounded-2xl bg-gold/15 text-gold-light ring-1 ring-gold/30">
                   <stat.Icon className="h-6 w-6" strokeWidth={2} />
@@ -122,4 +106,3 @@ export function Stats() {
     </section>
   );
 }
-

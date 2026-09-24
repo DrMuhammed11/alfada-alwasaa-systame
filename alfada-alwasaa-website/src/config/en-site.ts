@@ -63,16 +63,15 @@ export const EN_SITE_CONFIG = {
     workingHours: "Saturday – Thursday: 8:00 AM – 6:00 PM (24/7 Emergency Field Support)",
   },
 
-  // Main Navigation Links
+  // Main Navigation Links (mirrors the Arabic nav structure: pages + homepage anchors)
   navItems: [
-    { label: "Home", href: "/en#home" },
+    { label: "Home", href: "/en" },
     { label: "Sectors", href: "/en#sectors" },
     { label: "Services", href: "/en#services" },
-    { label: "Position", href: "/en#position" },
+    { label: "About Us", href: "/en/about" },
     { label: "Track Record", href: "/en#track" },
-    { label: "Why Us", href: "/en#why" },
-    { label: "FAQ", href: "/en#faq" },
-    { label: "Contact Us", href: "/en#contact" },
+    { label: "Blog", href: "/en/blog" },
+    { label: "Contact Us", href: "/en/contact" },
   ],
 
   // Sector Options for Quotation Form

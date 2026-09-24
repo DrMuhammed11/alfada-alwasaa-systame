@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type RevealProps = {
@@ -17,8 +16,10 @@ type RevealProps = {
 
 /**
  * غلاف انسيابي خفيف لحركات الظهور مع التمرير (Scroll-Reveal)
- * يعتمد حصرياً على opacity و transform لضمان المعالجة على كرت الشاشة (GPU)
- * ومضبوط لتسريع الحركة على أجهزة الجوال مع تثبيت العرض لمرة واحدة (once: true) لمنع إعادة التشغيل العكسي.
+ * تحسين تدريجي صحيح: الـ SSR يُرسِّر العنصر مرئياً دائماً (للزواحف ومستخدمي no-JS)،
+ * وبعد الـ mount فقط تُخفى العناصر خارج نافذة العرض (كلاس reveal-hidden)
+ * ثم يكشفها IntersectionObserver بانتقال CSS 0.6s ease (كلاس reveal-visible).
+ * يعتمد حصرياً على opacity و transform لضمان المعالجة على كرت الشاشة (GPU).
  */
 export function Reveal({
   children,
@@ -28,28 +29,47 @@ export function Reveal({
   className,
   once = true,
 }: RevealProps) {
-  const reduce = useReducedMotion();
-  const isMobile = useIsMobile();
+  const ref = useRef<HTMLDivElement>(null);
 
   // stagger: 0.08s بين كل عنصر، محدود بـ 0.32s حداً أقصى لمنع تأخر واضح
   const staggerDelay = index !== undefined ? Math.min(index * 0.08, 0.32) : 0;
   const totalDelay = Math.min(delay + staggerDelay, 0.4);
 
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    // احترام تفضيل تقليل الحركة: العنصر يبقى مرئياً كما رُسِّم في الـ SSR
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // العنصر داخل نافذة العرض أصلاً: يبقى مرئياً بلا إخفاء ولا مراقبة
+    if (node.getBoundingClientRect().top <= window.innerHeight) return;
+
+    node.style.setProperty("--reveal-y", `${y}px`);
+    node.style.setProperty("--reveal-delay", `${totalDelay}s`);
+    node.classList.add("reveal-hidden");
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          node.classList.remove("reveal-hidden");
+          node.classList.add("reveal-visible");
+          if (once) observer.disconnect();
+        } else if (!once) {
+          node.classList.remove("reveal-visible");
+          node.classList.add("reveal-hidden");
+        }
+      },
+      { rootMargin: "-80px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [once, totalDelay, y]);
+
   return (
-    <motion.div
-      className={cn("transform-gpu", className)}
-      style={{ willChange: "opacity, transform" }}
-      initial={reduce ? false : { opacity: 0, y: isMobile ? Math.min(y, 10) : y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: "-15px" }}
-      transition={{
-        duration: isMobile ? 0.35 : 0.42,
-        delay: reduce ? 0 : totalDelay,
-        ease: [0.16, 1, 0.3, 1],
-      }}
-    >
+    <div ref={ref} className={cn("transform-gpu", className)}>
       {children}
-    </motion.div>
+    </div>
   );
 }
-

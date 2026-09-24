@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   keywords: service.keywords,
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/services/telecom",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/services/telecom",
+      en: "https://www.alfadaalwasaa.com/en/services/telecom",
+    },
   },
   openGraph: {
     title: service.seoTitle,

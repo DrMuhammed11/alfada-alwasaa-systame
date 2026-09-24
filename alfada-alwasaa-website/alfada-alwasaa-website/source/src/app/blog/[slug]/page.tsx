@@ -36,6 +36,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: post.keywords,
     alternates: {
       canonical: `https://www.alfadaalwasaa.com/blog/${slug}`,
+      languages: {
+        ar: `https://www.alfadaalwasaa.com/blog/${slug}`,
+        en: `https://www.alfadaalwasaa.com/en/blog/${slug}`,
+      },
     },
     openGraph: {
       title: post.title,

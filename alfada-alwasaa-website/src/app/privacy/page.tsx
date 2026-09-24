@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description: "سياسة الخصوصية وحماية وسرية البيانات التجارية والهندسية لعملاء وشركاء شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة.",
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/privacy",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/privacy",
+      en: "https://www.alfadaalwasaa.com/en/privacy",
+    },
   },
   openGraph: {
     title: "سياسة الخصوصية وسرية البيانات | شركة الفضاء الواسع",

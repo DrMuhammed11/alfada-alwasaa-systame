@@ -6,6 +6,7 @@ import { Toaster as SonnerToaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CookieConsent } from "@/components/site/cookie-consent";
+import { SkipLink } from "@/components/site/skip-link";
 import { SITE_CONFIG } from "@/config/site";
 
 export const viewport: Viewport = {
@@ -328,13 +329,8 @@ export default function RootLayout({
       <body
         className={`${cairo.variable} font-cairo antialiased bg-background text-foreground`}
       >
-        {/* رابط تجاوز المحتوى للوصولية — يظهر عند التركيز بلوحة المفاتيح فقط */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[9999] focus:rounded-md focus:bg-gold focus:px-4 focus:py-2 focus:text-navy-dark focus:font-bold focus:shadow-lg focus:outline-none"
-        >
-          تجاوز إلى المحتوى الرئيسي
-        </a>
+        {/* رابط تجاوز المحتوى للوصولية — يظهر عند التركيز بلوحة المفاتيح فقط (يتبع لغة الصفحة) */}
+        <SkipLink />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

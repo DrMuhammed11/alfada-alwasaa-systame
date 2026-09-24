@@ -1,22 +1,44 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone, FileDown } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
+/**
+ * تأخير الدخول المتدرج للعناصر (ثواني) — يُستخدم مع كلاس hero-fade-up
+ * (أنيميشن CSS فقط في globals.css): الـ SSR يُرسِّر العناصر مرئية في HTML الثابت
+ * بلا opacity:0 مضمّنة ولا انتظار للـ hydration، والدخول المتدرج يعمل عبر CSS فوراً
+ */
+const fadeUpDelay = (delay: number): CSSProperties =>
+  ({ "--hero-delay": `${(delay * 0.35).toFixed(3)}s` }) as CSSProperties;
+
 export function Hero() {
   const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 800], [0, 800 * 0.12]);
+  const bgRef = useRef<HTMLDivElement>(null);
 
-  const fadeUp = (delay: number) => ({
-    initial: reduce ? false : { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, delay: delay * 0.35, ease: [0.16, 1, 0.3, 1] as const },
-  });
+  // بارالاكس خفيف للخلفية عبر rAF مباشر على الـ DOM (بديل useScroll/useTransform من framer-motion)
+  // بدون إعادة رندر React لكل إطار — نفس أداء الحل السابق أو أفضل
+  useEffect(() => {
+    if (reduce) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (bgRef.current) {
+          bgRef.current.style.transform = `translate3d(0, ${window.scrollY * 0.12}px, 0)`;
+        }
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [reduce]);
 
   return (
     <section id="home" className="relative flex items-center overflow-hidden bg-navy-darker pt-24 pb-14 sm:pb-16 lg:pt-28 lg:pb-20">
@@ -24,9 +46,9 @@ export function Hero() {
       <span id="about" className="absolute -top-24" />
 
       {/* Background artwork with elegant overlay and subtle parallax */}
-      <motion.div 
-        style={{ y: reduce ? 0 : yParallax }}
-        className="absolute -top-12 -bottom-12 inset-x-0"
+      <div
+        ref={bgRef}
+        className="absolute -top-12 -bottom-12 inset-x-0 will-change-transform"
       >
         <Image
           src={SITE_CONFIG.assets.heroBg}
@@ -38,26 +60,26 @@ export function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy-darker/95 via-navy/90 to-navy-darker/98" />
         <div className="dot-grid absolute inset-0 opacity-25" />
-      </motion.div>
+      </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main 2-Column Responsive Layout: Unified Home & About */}
         <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
-          
+
           {/* Column 1: Narrative, Identity, Pillars & CTAs */}
           <div className="text-right">
             {/* Trust badge */}
-            <motion.div {...fadeUp(0.05)} className="flex items-center">
+            <div className="hero-fade-up flex items-center" style={fadeUpDelay(0.05)}>
               <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-navy-deep/80 px-4 py-1.5 text-xs font-bold text-gold-light shadow-md backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
                 <span>كيان مهني متعدد الخدمات</span>
                 <span className="text-white/40">|</span>
                 <span>شريككم الهندسي والتنفيذي المعتمد</span>
               </span>
-            </motion.div>
+            </div>
 
             {/* Main Headline */}
-            <motion.div {...fadeUp(0.12)} className="mt-4">
+            <div className="hero-fade-up mt-4" style={fadeUpDelay(0.12)}>
               <h1 className="text-3xl font-black text-white sm:text-4xl lg:text-5xl leading-tight">
                 شركة الفضاء الواسع
                 <span className="block mt-1 text-2xl sm:text-3xl lg:text-4xl font-extrabold bg-gradient-to-l from-gold via-gold-light to-white bg-clip-text text-transparent">
@@ -72,19 +94,19 @@ export function Hero() {
                   كفاءة هندسية، دقة تنفيذية، وموثوقية في إدارة أضخم المشاريع
                 </p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Official Narrative text from Profile */}
-            <motion.p {...fadeUp(0.2)} className="mt-5 text-justify text-sm sm:text-base leading-7 sm:leading-8 text-slate-200/95 max-w-2xl">
+            <p className="hero-fade-up mt-5 text-justify text-sm sm:text-base leading-7 sm:leading-8 text-slate-200/95 max-w-2xl" style={fadeUpDelay(0.2)}>
               كيان مهني متعدد الخدمات، تأسس على رؤية واضحة تقوم على تقديم حلول متكاملة
               تجمع بين الخبرة التنفيذية، والانضباط المؤسسي، والقدرة على الإنجاز بمعايير
               عالية من الجودة والاحتراف. ومنذ انطلاقتها، حرصت الشركة على أن تكون شريكًا
               موثوقًا للجهات التي تبحث عن أداء رصين، وتنفيذ دقيق، ونتائج تليق بتطلعات
               المشاريع الكبرى.
-            </motion.p>
+            </p>
 
             {/* The 3 Core Pillars in Compact Responsive Badges */}
-            <motion.div {...fadeUp(0.28)} className="mt-6 grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl">
+            <div className="hero-fade-up mt-6 grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl" style={fadeUpDelay(0.28)}>
               {SITE_CONFIG.pillars.map((pillar, idx) => {
                 const PillarIcon = [Briefcase, ShieldCheck, Award][idx];
                 return (
@@ -98,10 +120,10 @@ export function Hero() {
                   </div>
                 );
               })}
-            </motion.div>
+            </div>
 
             {/* Quick Action Buttons */}
-            <motion.div {...fadeUp(0.35)} className="mt-8 flex flex-wrap items-center gap-3.5">
+            <div className="hero-fade-up mt-8 flex flex-wrap items-center gap-3.5" style={fadeUpDelay(0.35)}>
               <MagneticButton>
                 <a
                   href="#contact"
@@ -135,11 +157,11 @@ export function Hero() {
                 <Phone className="h-3.5 w-3.5 text-gold-light" />
                 <span dir="ltr">{SITE_CONFIG.contacts.general.display}</span>
               </a>
-            </motion.div>
+            </div>
           </div>
 
           {/* Column 2: Visual Identity Card & Sector Preview */}
-          <motion.div {...fadeUp(0.22)} className="flex justify-center">
+          <div className="hero-fade-up flex justify-center" style={fadeUpDelay(0.22)}>
             <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-b from-white/10 to-white/5 p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
               {/* Decorative gold corner accent */}
               <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
@@ -200,11 +222,10 @@ export function Hero() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>
     </section>
   );
 }
-

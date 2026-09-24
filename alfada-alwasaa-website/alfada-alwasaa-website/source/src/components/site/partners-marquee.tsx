@@ -1,6 +1,5 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
 import { 
   RadioTower, 
   Flame, 
@@ -12,6 +11,7 @@ import {
   Globe2 
 } from "lucide-react";
 import { Reveal } from "./reveal";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const SECTOR_PARTNERS = [
   {
@@ -77,25 +77,10 @@ export function PartnersMarquee() {
 
       {/* Marquee Wrapper with soft lateral fades */}
       <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-        <motion.div
-          className="flex w-max gap-4 py-2"
-          animate={
-            reduce
-              ? undefined
-              : {
-                  x: ["0%", "-50%"],
-                }
-          }
-          transition={
-            reduce
-              ? undefined
-              : {
-                  duration: 35,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
-        >
+        {/* CSS animation خالص — بديل motion.div من framer-motion
+            كلاس marquee-track معرَّف في globals.css: translateX(0→-50%) 35s linear infinite
+            يُعطَّل تلقائياً عند prefers-reduced-motion عبر globals.css */}
+        <div className={`flex w-max gap-4 py-2${reduce ? "" : " marquee-track"}`}>
           {marqueeItems.map((item, idx) => (
             <div
               key={`${item.name}-${idx}`}
@@ -114,7 +99,7 @@ export function PartnersMarquee() {
               </div>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

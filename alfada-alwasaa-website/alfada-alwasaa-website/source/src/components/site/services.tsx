@@ -93,7 +93,8 @@ export function Services() {
 
         {/* Active Tab Content Display with Framer Motion AnimatePresence */}
         <div className="relative">
-          <AnimatePresence mode="wait">
+          {/* initial={false}: أول تبويب يُرسَّر مرئياً في HTML الثابت (بلا opacity:0) والتبديل يبقى متحركاً */}
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeService.slug}
               initial={{ opacity: 0, y: 15 }}

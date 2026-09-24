@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import React, { useRef, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -12,6 +12,8 @@ interface MagneticButtonProps {
 /**
  * زر بتأثير جاذبية مغناطيسية خفيف باتجاه مؤشر الفأرة على أجهزة سطح المكتب فقط
  * يُعطَّل تلقائياً على الشاشات اللمسية ومستخدمي prefers-reduced-motion
+ * التنفيذ بمعالجة DOM مباشرة (بلا إعادة رندر ولا framer-motion): تتبع فوري أثناء الحركة
+ * وعودة مرنة (spring-like) عبر انتقال CSS عند مغادرة المؤشر
  */
 export function MagneticButton({
   children,
@@ -19,51 +21,44 @@ export function MagneticButton({
   maxOffset = 6,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isFinePointer, setIsFinePointer] = useState(false);
   const reduce = useReducedMotion();
 
   useEffect(() => {
-    // Check if pointer is fine (mouse) and not touch
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    setIsFinePointer(fine);
-  }, []);
+    const el = ref.current;
+    if (!el || reduce || !window.matchMedia("(pointer: fine)").matches) return;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isFinePointer || reduce || !ref.current) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
 
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+      const distanceX = (e.clientX - centerX) * 0.18;
+      const distanceY = (e.clientY - centerY) * 0.18;
 
-    const distanceX = (e.clientX - centerX) * 0.18;
-    const distanceY = (e.clientY - centerY) * 0.18;
+      // Clamp to maxOffset (default <= 6px)
+      const clampedX = Math.max(-maxOffset, Math.min(maxOffset, distanceX));
+      const clampedY = Math.max(-maxOffset, Math.min(maxOffset, distanceY));
 
-    // Clamp to maxOffset (default <= 6px)
-    const clampedX = Math.max(-maxOffset, Math.min(maxOffset, distanceX));
-    const clampedY = Math.max(-maxOffset, Math.min(maxOffset, distanceY));
+      el.style.transition = "transform 0.08s ease-out";
+      el.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+    };
 
-    setPosition({ x: clampedX, y: clampedY });
-  };
+    const handleMouseLeave = () => {
+      el.style.transition = "transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)";
+      el.style.transform = "translate(0px, 0px)";
+    };
 
-  const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
-
-  if (!isFinePointer || reduce) {
-    return <div className={className}>{children}</div>;
-  }
+    el.addEventListener("mousemove", handleMouseMove);
+    el.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      el.removeEventListener("mousemove", handleMouseMove);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [reduce, maxOffset]);
 
   return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      animate={{ x: position.x, y: position.y }}
-      transition={{ type: "spring", stiffness: 350, damping: 25, mass: 0.5 }}
-      className={className}
-    >
+    <div ref={ref} className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }

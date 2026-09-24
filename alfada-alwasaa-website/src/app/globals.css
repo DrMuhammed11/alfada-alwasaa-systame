@@ -328,4 +328,115 @@ a, button, input, select, textarea {
   touch-action: manipulation;
 }
 
+/* Page Transition (CSS-only): يُرسَّر مرئياً في HTML الثابت — لا وميض أبيض ولا انتظار للـ hydration */
+.page-template {
+  animation: page-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-template {
+    animation: none;
+  }
+}
+
+/* Scroll-Reveal (تحسين تدريجي): الـ SSR مرئي دائماً؛ الإخفاء يحدث بعد الـ mount فقط */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 14px));
+  will-change: opacity, transform;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s ease var(--reveal-delay, 0s),
+    transform 0.6s ease var(--reveal-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-hidden {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Hero Staggered Entrance (CSS-only): يُرسَّر مرئياً في HTML الثابت — الدخول المتدرج يعمل فوراً بلا انتظار للـ hydration */
+.hero-fade-up {
+  animation: hero-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--hero-delay, 0s);
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up {
+    animation: none;
+  }
+}
+
+/* حركات عناصر وقت التشغيل فقط (قوائم، نوافذ، ودجات) — بديل framer-motion
+   تُركَّب بعد الـ mount فقط فلا تظهر أبداً في HTML الثابت */
+.fade-pop-enter {
+  animation: fade-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-pop-fast {
+  animation: fade-pop 0.2s ease-out;
+}
+
+@keyframes fade-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* شريط الشراكات المتحرك (Marquee) — CSS خالص بديل framer-motion */
+.marquee-track {
+  animation: marquee-scroll 35s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-pop-enter,
+  .fade-pop-fast,
+  .marquee-track {
+    animation: none;
+  }
+}
+
 

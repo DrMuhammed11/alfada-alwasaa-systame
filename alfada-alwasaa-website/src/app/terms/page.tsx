@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description: "الشروط والأحكام المنظمة للتعاملات التجارية وعروض الأسعار والخدمات الهندسية والميدانية لشركة الفضاء الواسع.",
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/terms",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/terms",
+      en: "https://www.alfadaalwasaa.com/en/terms",
+    },
   },
   openGraph: {
     title: "الشروط والأحكام | شركة الفضاء الواسع",

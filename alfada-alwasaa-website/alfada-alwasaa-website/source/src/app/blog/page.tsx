@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/blog",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/blog",
+      en: "https://www.alfadaalwasaa.com/en/blog",
+    },
   },
   openGraph: {
     title: "مدونة الفضاء الواسع | مقالات هندسية وتقنية",

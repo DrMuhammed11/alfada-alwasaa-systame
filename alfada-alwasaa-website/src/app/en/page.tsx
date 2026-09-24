@@ -1671,19 +1671,19 @@ export default function EnglishHomePage() {
               <h3 className="text-sm font-bold uppercase tracking-wider text-gold-light">Legal & Language</h3>
               <ul className="space-y-2 text-xs text-white/80">
                 <li>
-                  <Link href="/privacy" className="hover:text-gold-light transition flex items-center gap-1.5">
+                  <Link href="/en/privacy" className="hover:text-gold-light transition flex items-center gap-1.5">
                     <span className="h-1 w-1 rounded-full bg-gold" />
                     <span>Privacy Policy</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="hover:text-gold-light transition flex items-center gap-1.5">
+                  <Link href="/en/terms" className="hover:text-gold-light transition flex items-center gap-1.5">
                     <span className="h-1 w-1 rounded-full bg-gold" />
                     <span>Terms of Service</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className="hover:text-gold-light transition flex items-center gap-1.5">
+                  <Link href="/en/blog" className="hover:text-gold-light transition flex items-center gap-1.5">
                     <span className="h-1 w-1 rounded-full bg-gold" />
                     <span>Corporate Blog & Insights</span>
                   </Link>

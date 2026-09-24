@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   keywords: service.keywords,
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/services/shipping",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/services/shipping",
+      en: "https://www.alfadaalwasaa.com/en/services/shipping",
+    },
   },
   openGraph: {
     title: service.seoTitle,

@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   keywords: service.keywords,
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/services/excavation",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/services/excavation",
+      en: "https://www.alfadaalwasaa.com/en/services/excavation",
+    },
   },
   openGraph: {
     title: service.seoTitle,

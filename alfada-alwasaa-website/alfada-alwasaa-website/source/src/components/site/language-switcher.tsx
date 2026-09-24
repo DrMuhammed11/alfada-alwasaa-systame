@@ -10,15 +10,28 @@ interface LanguageSwitcherProps {
   className?: string;
 }
 
+/**
+ * مبدّل اللغة بتعيين المسارات المتقابلة بين النسختين:
+ * /en/about ↔ /about، /en/services/telecom ↔ /services/telecom، /en/blog/[slug] ↔ /blog/[slug...
+ * والمسارات غير المعروفة ترجع للصفحة الرئيسية للنسخة المقابلة.
+ */
+function useLocaleHrefs() {
+  const pathname = usePathname() || "";
+  const isEnglish = pathname.startsWith("/en");
+  const barePath = isEnglish ? pathname.slice(3) || "/" : pathname || "/";
+
+  // مسار عربي متقابل (يكفي وجود نفس المقطع في النسختين لأن الشجرة متطابقة)
+  const arHref = barePath;
+  const enHref = barePath === "/" ? "/en" : `/en${barePath}`;
+
+  return { isEnglish, arHref, enHref };
+}
+
 export function LanguageSwitcher({
   variant = "pill",
   className,
 }: LanguageSwitcherProps) {
-  const pathname = usePathname() || "";
-  const isEnglish = pathname.startsWith("/en");
-
-  // التبديل بين النسخة العربية والإنجليزية
-  const targetHref = isEnglish ? "/" : "/en";
+  const { isEnglish, arHref, enHref } = useLocaleHrefs();
 
   // 1. نمط القائمة المنسدلة للجوال (Mobile Drawer Full Block)
   if (variant === "menu") {
@@ -29,7 +42,7 @@ export function LanguageSwitcher({
         </span>
         <div className="grid grid-cols-2 gap-2">
           <Link
-            href="/"
+            href={arHref}
             className={cn(
               "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition",
               !isEnglish
@@ -44,7 +57,7 @@ export function LanguageSwitcher({
           </Link>
 
           <Link
-            href="/en"
+            href={enHref}
             className={cn(
               "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition",
               isEnglish
@@ -66,7 +79,7 @@ export function LanguageSwitcher({
   if (variant === "button") {
     return (
       <Link
-        href={targetHref}
+        href={isEnglish ? arHref : enHref}
         className={cn(
           "group relative flex h-9 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-bold transition-all duration-300",
           "bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/20 hover:text-gold-light hover:ring-gold/40 active:scale-95 backdrop-blur-md",
@@ -93,7 +106,7 @@ export function LanguageSwitcher({
       aria-label="Language selection"
     >
       <Link
-        href="/"
+        href={arHref}
         className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all duration-300",
           !isEnglish
@@ -105,7 +118,7 @@ export function LanguageSwitcher({
       </Link>
 
       <Link
-        href="/en"
+        href={enHref}
         className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all duration-300",
           isEnglish

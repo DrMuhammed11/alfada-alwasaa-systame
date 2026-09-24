@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "https://www.alfadaalwasaa.com/about",
+    languages: {
+      ar: "https://www.alfadaalwasaa.com/about",
+      en: "https://www.alfadaalwasaa.com/en/about",
+    },
   },
   openGraph: {
     title: "من نحن | شركة الفضاء الواسع لخدمات الاتصالات والمقاولات",
