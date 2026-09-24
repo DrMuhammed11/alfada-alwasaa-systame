@@ -278,13 +278,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Expanded(child: Divider()),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: EdgeInsets.symmetric(horizontal: 12),
                                 child: Text(
                                   'تسجيل دخول تجريبي سريع بحسب الدور',
                                   style: TextStyle(fontSize: 11, color: AppTheme.textOnLight, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Expanded(child: Divider()),
+                              Expanded(child: Divider()),
                             ],
                           ),
                           const SizedBox(height: 16),

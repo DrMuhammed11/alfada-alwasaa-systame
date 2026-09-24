@@ -41,6 +41,8 @@ class Correspondence {
   final bool isOverdue;
   final int overdueDays;
 
+  String get refNumber => serialNumber;
+
   Correspondence({
     required this.id,
     required this.serialNumber,

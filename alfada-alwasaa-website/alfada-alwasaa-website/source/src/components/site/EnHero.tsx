@@ -40,7 +40,9 @@ export function EnHero() {
               className="hero-fade-up mt-4 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight"
             >
               Al-Fada Al-Wasaa <br />
-              <span className="text-gold">Telecom & Contracting</span>
+              <span className="bg-gradient-to-r from-gold via-gold-light to-white bg-clip-text text-transparent">
+                Telecom & General Contracting
+              </span>
             </h1>
 
             <p
@@ -90,32 +92,41 @@ export function EnHero() {
             style={fadeUpDelay(3)}
             className="hero-fade-up lg:col-span-5 flex justify-center"
           >
-            <div className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl shadow-2xl">
-              <div className="relative mx-auto aspect-square w-48 overflow-hidden rounded-2xl bg-navy-darker/60 p-4 border border-gold/30">
-                <Image
-                  src={SITE_CONFIG.assets.logoTransparent}
-                  alt="Al-Fada Al-Wasaa"
-                  fill
-                  sizes="(max-width: 640px) 192px, 240px"
-                  className="object-contain p-2"
-                />
-              </div>
-              <div className="mt-6 text-center">
-                <h3 className="text-lg font-extrabold text-white">AL-FADA AL-WASAA</h3>
-                <p className="text-xs text-gold-light">Telecom & Contracting Corporate Entity</p>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
-                <div>
-                  <span className="block text-xs font-bold text-white">10+ Years</span>
-                  <span className="text-[10px] text-white/60">Field Practice</span>
+            <div className="relative w-full max-w-sm">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-3xl bg-gradient-to-r from-gold/25 via-gold-light/15 to-transparent blur-xl opacity-60"
+              />
+              <div className="relative rounded-3xl border border-white/20 bg-gradient-to-b from-white/[0.12] to-white/[0.04] p-6 backdrop-blur-2xl shadow-2xl">
+                <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
+                <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
+
+                <div className="relative mx-auto aspect-square w-48 overflow-hidden rounded-2xl bg-navy-darker/60 p-4 border border-gold/30 shadow-inner">
+                  <Image
+                    src={SITE_CONFIG.assets.logoTransparent}
+                    alt="Al-Fada Al-Wasaa"
+                    fill
+                    sizes="(max-width: 640px) 192px, 240px"
+                    className="object-contain p-2"
+                  />
                 </div>
-                <div>
-                  <span className="block text-xs font-bold text-white">65+ Sites</span>
-                  <span className="text-[10px] text-white/60">Completed</span>
+                <div className="mt-5 text-center">
+                  <h3 className="text-lg font-extrabold text-white">AL-FADA AL-WASAA</h3>
+                  <p className="text-xs text-gold-light font-medium">Telecom & General Contracting Corporate Entity</p>
                 </div>
-                <div>
-                  <span className="block text-xs font-bold text-white">100%</span>
-                  <span className="text-[10px] text-white/60">Compliance</span>
+                <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
+                  <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
+                    <span className="block text-xs font-black text-gold-light">10+ Years</span>
+                    <span className="text-[10px] text-white/70">Field Practice</span>
+                  </div>
+                  <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
+                    <span className="block text-xs font-black text-gold-light">65+ Sites</span>
+                    <span className="text-[10px] text-white/70">Completed</span>
+                  </div>
+                  <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
+                    <span className="block text-xs font-black text-gold-light">100%</span>
+                    <span className="text-[10px] text-white/70">Compliance</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -130,9 +141,9 @@ export function EnHero() {
           {EN_SITE_CONFIG.pillars.map((pillar, i) => (
             <div
               key={i}
-              className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md hover:border-gold/50 transition"
+              className="group flex items-center gap-4 rounded-2xl border border-gold/30 bg-white/[0.07] p-4 backdrop-blur-md hover:border-gold hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-lg"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold text-navy-darker font-black">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-gold-light font-black transition-transform duration-300 group-hover:scale-110">
                 {i === 0 ? <Briefcase className="h-5 w-5" /> : i === 1 ? <ShieldCheck className="h-5 w-5" /> : <Award className="h-5 w-5" />}
               </div>
               <div>

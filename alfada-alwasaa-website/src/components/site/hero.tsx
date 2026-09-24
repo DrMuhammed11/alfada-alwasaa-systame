@@ -83,12 +83,12 @@ export function Hero() {
               <h1 className="text-3xl font-black text-white sm:text-4xl lg:text-5xl leading-tight">
                 شركة الفضاء الواسع
                 <span className="block mt-1 text-2xl sm:text-3xl lg:text-4xl font-extrabold bg-gradient-to-l from-gold via-gold-light to-white bg-clip-text text-transparent">
-                  لخدمات الاتصالات والمقاولات
+                  لخدمات الاتصالات والمقاولات العامة
                 </span>
               </h1>
 
               {/* Responsive Slogan (Never cuts off) */}
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-3.5 flex items-center gap-3">
                 <span className="h-0.5 w-8 rounded-full bg-gold hidden sm:block" />
                 <p className="text-base sm:text-lg font-black tracking-wide text-gold-light">
                   كفاءة هندسية، دقة تنفيذية، وموثوقية في إدارة أضخم المشاريع
@@ -106,16 +106,18 @@ export function Hero() {
             </p>
 
             {/* The 3 Core Pillars in Compact Responsive Badges */}
-            <div className="hero-fade-up mt-6 grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl" style={fadeUpDelay(0.28)}>
+            <div className="hero-fade-up mt-6 grid grid-cols-3 gap-2.5 sm:gap-3.5 max-w-xl" style={fadeUpDelay(0.28)}>
               {SITE_CONFIG.pillars.map((pillar, idx) => {
                 const PillarIcon = [Briefcase, ShieldCheck, Award][idx];
                 return (
                   <div
                     key={pillar.title}
-                    className="rounded-2xl border border-gold/30 bg-white/5 p-3 text-center backdrop-blur-sm transition hover:border-gold hover:bg-white/10"
+                    className="group rounded-2xl border border-gold/30 bg-white/[0.07] p-3 sm:p-3.5 text-center backdrop-blur-md transition-all duration-300 hover:border-gold hover:bg-white/[0.12] hover:-translate-y-1 shadow-sm hover:shadow-lg"
                   >
-                    <PillarIcon className="mx-auto h-5 w-5 text-gold-light" />
-                    <h3 className="mt-1.5 text-xs sm:text-sm font-black text-white">{pillar.title}</h3>
+                    <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-gold/20 text-gold-light transition-transform duration-300 group-hover:scale-110">
+                      <PillarIcon className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-2 text-xs sm:text-sm font-black text-white">{pillar.title}</h3>
                     <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">{pillar.subtitle}</p>
                   </div>
                 );
@@ -162,63 +164,69 @@ export function Hero() {
 
           {/* Column 2: Visual Identity Card & Sector Preview */}
           <div className="hero-fade-up flex justify-center" style={fadeUpDelay(0.22)}>
-            <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-gradient-to-b from-white/10 to-white/5 p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-              {/* Decorative gold corner accent */}
-              <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
-              <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
+            <div className="relative w-full max-w-md">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-3xl bg-gradient-to-r from-gold/25 via-gold-light/15 to-transparent blur-xl opacity-60"
+              />
+              <div className="relative rounded-3xl border border-white/20 bg-gradient-to-b from-white/[0.12] to-white/[0.04] p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
+                {/* Decorative gold corner accent */}
+                <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
+                <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
 
-              {/* Logo Presentation (Complete, Pristine, Never cropped) */}
-              <div className="flex flex-col items-center text-center">
-                <div className="relative h-24 w-24 sm:h-32 sm:w-32 drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
-                  <Image
-                    src={SITE_CONFIG.assets.logoMark}
-                    alt="شعار شركة الفضاء الواسع"
-                    fill
-                    priority
-                    sizes="(max-width: 640px) 96px, 128px"
-                    className="object-contain"
-                  />
-                </div>
-                <div className="mt-3">
-                  <span className="block text-2xl sm:text-3xl font-black text-white">
-                    الفضاء الواسع
-                  </span>
-                  <div className="mt-1 flex items-center justify-center gap-2.5">
-                    <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
-                    <span className="text-[11px] sm:text-xs font-black tracking-[0.25em] text-gold-light">
-                      AL-FADA AL-WASAA
+                {/* Logo Presentation (Complete, Pristine, Never cropped) */}
+                <div className="flex flex-col items-center text-center">
+                  <div className="relative h-24 w-24 sm:h-32 sm:w-32 drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+                    <Image
+                      src={SITE_CONFIG.assets.logoMark}
+                      alt="شعار شركة الفضاء الواسع"
+                      fill
+                      priority
+                      sizes="(max-width: 640px) 96px, 128px"
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <span className="block text-2xl sm:text-3xl font-black text-white">
+                      الفضاء الواسع
                     </span>
-                    <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
+                    <div className="mt-1 flex items-center justify-center gap-2.5">
+                      <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
+                      <span className="text-[11px] sm:text-xs font-black tracking-[0.25em] text-gold-light">
+                        AL-FADA AL-WASAA
+                      </span>
+                      <span className="h-[1.5px] w-6 sm:w-8 bg-gold rounded-full" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Sector Icons Strip (Completely visible, pristine, never cuts off) */}
-              <div className="mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
-                <span className="text-[11px] font-bold text-white/60 mb-2.5">
-                  مجالات عمل الشركة الرئيسية
-                </span>
-                <div className="relative h-13 sm:h-14 w-full max-w-[320px] px-1">
-                  <Image
-                    src={SITE_CONFIG.assets.sectorIconsStrip}
-                    alt="المقاولات، الطرق، النفط، الاتصالات، التسويق"
-                    fill
-                    priority
-                    sizes="(max-width: 640px) 280px, 320px"
-                    className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-                  />
+                {/* Sector Icons Strip (Completely visible, pristine, never cuts off) */}
+                <div className="mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
+                  <span className="text-[11px] font-bold text-white/60 mb-2.5">
+                    مجالات عمل الشركة الرئيسية
+                  </span>
+                  <div className="relative h-13 sm:h-14 w-full max-w-[320px] px-1">
+                    <Image
+                      src={SITE_CONFIG.assets.sectorIconsStrip}
+                      alt="المقاولات، الطرق، النفط، الاتصالات، التسويق"
+                      fill
+                      priority
+                      sizes="(max-width: 640px) 280px, 320px"
+                      className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Quick Summary Badges */}
-              <div className="mt-5 grid grid-cols-2 gap-2 pt-4 border-t border-white/10 text-center">
-                <div className="rounded-xl bg-navy-darker/60 py-2 px-3 border border-white/5">
-                  <span className="block font-mono text-sm font-black text-gold">5+ قطاعات</span>
-                  <span className="block text-[10px] text-white/70">متكاملة في منظومة واحدة</span>
-                </div>
-                <div className="rounded-xl bg-navy-darker/60 py-2 px-3 border border-white/5">
-                  <span className="block font-mono text-sm font-black text-gold">100% التزام</span>
-                  <span className="block text-[10px] text-white/70">بالمواصفات والمعايير</span>
+                {/* Quick Summary Badges */}
+                <div className="mt-5 grid grid-cols-2 gap-2.5 pt-4 border-t border-white/10 text-center">
+                  <div className="rounded-xl bg-navy-darker/70 py-2.5 px-3 border border-gold/20 shadow-xs">
+                    <span className="block font-mono text-sm font-black text-gold-light">5+ قطاعات</span>
+                    <span className="block text-[10px] text-white/70">متكاملة في منظومة واحدة</span>
+                  </div>
+                  <div className="rounded-xl bg-navy-darker/70 py-2.5 px-3 border border-gold/20 shadow-xs">
+                    <span className="block font-mono text-sm font-black text-gold-light">100% التزام</span>
+                    <span className="block text-[10px] text-white/70">بالمواصفات والمعايير</span>
+                  </div>
                 </div>
               </div>
             </div>

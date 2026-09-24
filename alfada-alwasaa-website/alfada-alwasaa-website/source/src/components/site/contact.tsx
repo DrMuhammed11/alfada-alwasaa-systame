@@ -570,7 +570,7 @@ export function Contact() {
                     <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-bold text-navy mb-2">
+                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                             الاسم الكامل / اسم الجهة <span className="text-rose-500">*</span>
                           </label>
                           <input
@@ -580,8 +580,8 @@ export function Contact() {
                             aria-required="true"
                             placeholder="مثال: م. فهد العتيبي"
                             className={`w-full rounded-xl border ${
-                              errors.name ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
-                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30`}
+                              errors.name ? "border-rose-300 bg-rose-50/30" : "border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker"
+                            } px-4 py-3 text-sm text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30`}
                           />
                           {errors.name && (
                             <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.name.message}</p>
@@ -589,7 +589,7 @@ export function Contact() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-bold text-navy mb-2">
+                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                             رقم الجوال <span className="text-rose-500">*</span>
                           </label>
                           <input
@@ -599,8 +599,8 @@ export function Contact() {
                             aria-required="true"
                             placeholder="776XXXXXX أو +967..."
                             className={`w-full rounded-xl border ${
-                              errors.phone ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
-                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
+                              errors.phone ? "border-rose-300 bg-rose-50/30" : "border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker"
+                            } px-4 py-3 text-sm text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
                           />
                           {errors.phone && (
                             <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.phone.message}</p>
@@ -610,7 +610,7 @@ export function Contact() {
 
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-bold text-navy mb-2">
+                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                             البريد الإلكتروني
                           </label>
                           <input
@@ -618,8 +618,8 @@ export function Contact() {
                             {...register("email")}
                             placeholder="example@domain.com"
                             className={`w-full rounded-xl border ${
-                              errors.email ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
-                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
+                              errors.email ? "border-rose-300 bg-rose-50/30" : "border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker"
+                            } px-4 py-3 text-sm text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right`}
                           />
                           {errors.email && (
                             <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.email.message}</p>
@@ -627,7 +627,7 @@ export function Contact() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-bold text-navy mb-2">
+                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                             المجال أو الخدمة المطلوبة <span className="text-rose-500">*</span>
                           </label>
                           <select
@@ -639,11 +639,11 @@ export function Contact() {
                               setSelectedService(e.target.value);
                             }}
                             className={`w-full rounded-xl border ${
-                              errors.service ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
-                            } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30`}
+                              errors.service ? "border-rose-300 bg-rose-50/30" : "border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker"
+                            } px-4 py-3 text-sm text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30`}
                           >
                             {SECTORS_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>
+                              <option key={opt} value={opt} className="bg-white dark:bg-navy text-slate-900 dark:text-white">
                                 {opt}
                               </option>
                             ))}
@@ -655,7 +655,7 @@ export function Contact() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-bold text-navy mb-2">
+                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                           تفاصيل المشروع أو الاستفسار
                         </label>
                         <textarea
@@ -663,8 +663,8 @@ export function Contact() {
                           {...register("message")}
                           placeholder="اذكر بإيجاز طبيعة المشروع، الموقع، والجدول الزمني المتوقع إن وجد..."
                           className={`w-full rounded-xl border ${
-                            errors.message ? "border-rose-300 bg-rose-50/30" : "border-slate-200 bg-slate-50/60"
-                          } px-4 py-3 text-sm text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none`}
+                            errors.message ? "border-rose-300 bg-rose-50/30" : "border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker"
+                          } px-4 py-3 text-sm text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none`}
                         />
                         {errors.message && (
                           <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.message.message}</p>
@@ -774,7 +774,7 @@ export function Contact() {
                   <form onSubmit={handleTrackSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-navy mb-2">
+                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                           الرقم المرجعي للمعاملة
                         </label>
                         <input
@@ -783,11 +783,11 @@ export function Contact() {
                           value={trackInput}
                           onChange={(e) => setTrackInput(e.target.value)}
                           placeholder="مثال: INC-2026-000001"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm font-mono uppercase text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                          className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm font-mono uppercase text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-navy mb-2">
+                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
                           رمز التتبع الآمن (Token)
                         </label>
                         <input
@@ -796,7 +796,7 @@ export function Contact() {
                           value={trackTokenInput}
                           onChange={(e) => setTrackTokenInput(e.target.value)}
                           placeholder="رمز التتبع السري"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm font-mono text-slate-900 transition focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
+                          className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm font-mono text-slate-900 dark:text-white transition focus:border-gold focus:bg-white dark:focus:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/30 dir-ltr text-right"
                         />
                       </div>
                     </div>
@@ -834,22 +834,22 @@ export function Contact() {
 
                   {/* بطاقة عرض تفاصيل المعاملة */}
                   {trackingResult && (
-                    <div className="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 space-y-4 shadow-sm" role="region" aria-live="polite">
-                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                        <span className="text-xs font-bold text-slate-500">رقم المعاملة:</span>
-                        <span className="font-mono text-base font-black text-navy" dir="ltr">
+                    <div className="rounded-2xl bg-slate-50 dark:bg-navy-darker/80 p-6 ring-1 ring-slate-200 dark:ring-white/10 space-y-4 shadow-sm" role="region" aria-live="polite">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">رقم المعاملة:</span>
+                        <span className="font-mono text-base font-black text-navy dark:text-gold" dir="ltr">
                           {trackingResult.refNumber}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                        <span className="text-xs font-bold text-slate-500">موضوع الطلب:</span>
-                        <span className="text-sm font-bold text-slate-800">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">موضوع الطلب:</span>
+                        <span className="text-sm font-bold text-slate-800 dark:text-white">
                           {trackingResult.subject}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                        <span className="text-xs font-bold text-slate-500">تاريخ التسجيل:</span>
-                        <span className="text-sm text-slate-700">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">تاريخ التسجيل:</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-300">
                           {trackingResult.receivedAt
                             ? new Date(trackingResult.receivedAt).toLocaleDateString("ar-YE-u-ca-gregory", {
                                 year: "numeric",
@@ -860,7 +860,7 @@ export function Contact() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between pt-1">
-                        <span className="text-xs font-bold text-slate-500">الحالة الراهنة:</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">الحالة الراهنة:</span>
                         {(() => {
                           const badge = getStatusBadge(trackingResult.status, trackingResult.statusArabic);
                           return (

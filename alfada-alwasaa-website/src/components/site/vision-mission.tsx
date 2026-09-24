@@ -3,71 +3,68 @@ import { Reveal } from "./reveal";
 
 export function VisionMission() {
   return (
-    <section id="vision" className="relative overflow-hidden bg-white dark:bg-navy-darker py-12 sm:py-16 transition-colors duration-300">
+    <section id="vision" className="relative overflow-hidden bg-white dark:bg-navy-darker py-14 sm:py-20 transition-colors duration-300">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <Reveal className="mb-10 sm:mb-12 text-center">
-          <h2 className="gold-rule center inline-block pb-2 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
+        <Reveal className="mb-12 sm:mb-16 text-center">
+          <span className="inline-block rounded-full bg-gold/15 px-4 py-1 text-xs font-bold text-navy dark:text-gold-light border border-gold/30">
+            الهوية والتوجه المؤسسي
+          </span>
+          <h2 className="mt-3 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
             رؤيتنا ورسالتنا
           </h2>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            منظومة قيم ومبادئ تنفيذية توجه كافة عملياتنا لضمان استدامة الجودة وبناء شراكات وثيقة وموثوقة.
+          </p>
         </Reveal>
 
-        <div className="grid gap-10 md:grid-cols-2 md:gap-8 lg:gap-10">
+        <div className="grid gap-8 md:grid-cols-2 lg:gap-10">
           {/* رسالتنا */}
           <Reveal delay={0.1}>
-            <div className="relative pt-12">
-              <div className="group relative rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 pt-12 shadow-[0_20px_55px_-30px_rgba(10,52,83,0.3)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-30px_rgba(10,52,83,0.4)] sm:p-10 sm:pt-14">
-                <div className="absolute -top-12 start-1/2 flex -translate-x-1/2 flex-col items-center">
-                  {/* gold arc like the profile cards */}
-                  <span
-                    aria-hidden
-                    className="absolute -top-7 h-16 w-40 rounded-t-full border-[3px] border-b-0 border-gold/80"
-                  />
-                  <span aria-hidden className="absolute -top-8.5 start-0 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gold" />
-                  <span aria-hidden className="absolute -top-8.5 end-0 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gold" />
-                  <span className="flex h-24 w-24 items-center justify-center rounded-full bg-white dark:bg-navy-darker text-navy dark:text-gold-light shadow-[0_12px_35px_-10px_rgba(10,52,83,0.35)] ring-1 ring-navy/10 dark:ring-white/10 transition-colors duration-500 group-hover:bg-navy group-hover:text-gold-light">
-                    <HandHeart className="h-11 w-11" strokeWidth={1.6} />
-                  </span>
+            <div className="group relative h-full overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-slate-50 dark:bg-navy p-8 sm:p-10 shadow-md hover:shadow-2xl hover:border-gold/50 transition-all duration-300 hover:-translate-y-1.5">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20 text-gold-dark dark:text-gold-light border border-gold/40 shadow-xs transition-transform duration-300 group-hover:scale-110">
+                  <HandHeart className="h-7 w-7 text-gold" strokeWidth={1.8} />
                 </div>
-
-                <h3 className="mt-4 text-center text-3xl font-black text-navy dark:text-white">
-                  رسالتنا
-                </h3>
-                <span aria-hidden className="mx-auto mt-3 block h-1 w-24 rounded-full bg-gold" />
-                <p className="mt-6 text-justify text-[1.05rem] leading-9 text-slate-700 dark:text-slate-200">
-                  نسعى إلى تقديم خدمات موثوقة ومتكاملة تركز على الجودة، والشفافية،
-                  والانضباط، والاحترافية في التنفيذ، مع الالتزام الكامل بمتطلبات العميل،
-                  وتحقيق أعلى مستويات الرضا والثقة.
-                </p>
+                <span className="font-mono text-xs font-black text-gold-dark dark:text-gold-light bg-gold/10 px-3 py-1 rounded-full border border-gold/25">
+                  MISSION
+                </span>
               </div>
+
+              <span className="h-1.5 w-14 rounded-full bg-gradient-to-r from-gold to-gold-light block mb-4 transition-all duration-300 group-hover:w-24" />
+
+              <h3 className="text-2xl sm:text-3xl font-black text-navy dark:text-white">
+                رسالتنا
+              </h3>
+              <p className="mt-4 text-justify text-base sm:text-lg leading-8 sm:leading-9 text-slate-700 dark:text-slate-200">
+                نسعى إلى تقديم خدمات موثوقة ومتكاملة تركز على الجودة، والشفافية،
+                والانضباط، والاحترافية في التنفيذ، مع الالتزام الكامل بمتطلبات العميل،
+                وتحقيق أعلى مستويات الرضا والثقة.
+              </p>
             </div>
           </Reveal>
 
           {/* رؤيتنا */}
-          <Reveal delay={0.22}>
-            <div className="relative pt-12">
-              <div className="group relative rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 pt-12 shadow-[0_20px_55px_-30px_rgba(10,52,83,0.3)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-30px_rgba(10,52,83,0.4)] sm:p-10 sm:pt-14">
-                <div className="absolute -top-12 start-1/2 flex -translate-x-1/2 flex-col items-center">
-                  <span
-                    aria-hidden
-                    className="absolute -top-7 h-16 w-40 rounded-t-full border-[3px] border-b-0 border-gold/80"
-                  />
-                  <span aria-hidden className="absolute -top-8.5 start-0 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gold" />
-                  <span aria-hidden className="absolute -top-8.5 end-0 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-gold" />
-                  <span className="flex h-24 w-24 items-center justify-center rounded-full bg-white dark:bg-navy-darker text-navy dark:text-gold-light shadow-[0_12px_35px_-10px_rgba(10,52,83,0.35)] ring-1 ring-navy/10 dark:ring-white/10 transition-colors duration-500 group-hover:bg-navy group-hover:text-gold-light">
-                    <Eye className="h-11 w-11" strokeWidth={1.6} />
-                  </span>
+          <Reveal delay={0.2}>
+            <div className="group relative h-full overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-slate-50 dark:bg-navy p-8 sm:p-10 shadow-md hover:shadow-2xl hover:border-gold/50 transition-all duration-300 hover:-translate-y-1.5">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20 text-gold-dark dark:text-gold-light border border-gold/40 shadow-xs transition-transform duration-300 group-hover:scale-110">
+                  <Eye className="h-7 w-7 text-gold" strokeWidth={1.8} />
                 </div>
-
-                <h3 className="mt-4 text-center text-3xl font-black text-navy dark:text-white">
-                  رؤيتنا
-                </h3>
-                <span aria-hidden className="mx-auto mt-3 block h-1 w-24 rounded-full bg-gold" />
-                <p className="mt-6 text-justify text-[1.05rem] leading-9 text-slate-700 dark:text-slate-200">
-                  أن نكون من الشركات الرائدة في تقديم الخدمات المتكاملة في مجالات
-                  المقاولات والاتصالات والخدمات المساندة، من خلال بناء علاقات استراتيجية
-                  طويلة الأمد مع عملائنا، وتحقيق قيمة مضافة حقيقية في كل مشروع نتولاه.
-                </p>
+                <span className="font-mono text-xs font-black text-gold-dark dark:text-gold-light bg-gold/10 px-3 py-1 rounded-full border border-gold/25">
+                  VISION
+                </span>
               </div>
+
+              <span className="h-1.5 w-14 rounded-full bg-gradient-to-r from-gold to-gold-light block mb-4 transition-all duration-300 group-hover:w-24" />
+
+              <h3 className="text-2xl sm:text-3xl font-black text-navy dark:text-white">
+                رؤيتنا
+              </h3>
+              <p className="mt-4 text-justify text-base sm:text-lg leading-8 sm:leading-9 text-slate-700 dark:text-slate-200">
+                أن نكون من الشركات الرائدة في تقديم الخدمات المتكاملة في مجالات
+                المقاولات والاتصالات والخدمات المساندة، من خلال بناء علاقات استراتيجية
+                طويلة الأمد مع عملائنا، وتحقيق قيمة مضافة حقيقية في كل مشروع نتولاه.
+              </p>
             </div>
           </Reveal>
         </div>
@@ -75,3 +72,5 @@ export function VisionMission() {
     </section>
   );
 }
+
+export default VisionMission;

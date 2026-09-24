@@ -45,7 +45,7 @@ class MobileDetailScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  currentItem.refNumber,
+                  currentItem.serialNumber,
                   style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 Text(
