@@ -56,16 +56,16 @@ const SECTORS: Sector[] = [
   },
   {
     num: "03",
-    title: "خدمات النفط",
+    title: "التوريدات العامة والتجهيزات",
     href: "/services/supplies",
     Icon: Flame,
     services: [
-      "التوريدات النفطية المعتمدة.",
-      "التموينات والمساندة التشغيلية.",
+      "استيراد وتوريد المواد الإنشائية والكابلات.",
+      "المعدات الثقيلة وقطع الغيار الأصلية والتموينات الميدانية.",
     ],
     photos: [
-      { src: "/profile/oil_tanks_truck.webp", alt: "صهاريج توريدات نفطية" },
-      { src: "/profile/oil_valve_flare.webp", alt: "محطات وتموينات نفطية" },
+      { src: "/profile/track_forklift.webp", alt: "تجهيزات وتموينات ميدانية بالرافعات الشوكية" },
+      { src: "/profile/track_truck.webp", alt: "شاحنات نقل المعدات والتوريدات" },
     ],
   },
   {
@@ -84,16 +84,16 @@ const SECTORS: Sector[] = [
   },
   {
     num: "05",
-    title: "خدمات التسويق",
+    title: "التسويق العقاري والفرص الاستثمارية",
     href: "/services/marketing",
     Icon: TrendingUp,
     services: [
-      "التسويق الإلكتروني وبناء الحضور الرقمي.",
-      "الاستشارات التسويقية والترويج المتخصص.",
+      "دراسات الجدوى وتسويق الأراضي والمجمعات.",
+      "التطوير العقاري وإدارة الأصول والاستشارات الاستثمارية.",
     ],
     photos: [
-      { src: "/profile/marketing_laptop.webp", alt: "تحليلات الحملات التسويقية" },
-      { src: "/profile/social_media.webp", alt: "منصات التواصل الاجتماعي" },
+      { src: "/profile/site_hadramout_building.webp", alt: "مشاريع عقارية سكنية مطورة" },
+      { src: "/profile/construction_building.webp", alt: "مواقع تطوير عقاري" },
     ],
   },
 ];

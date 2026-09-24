@@ -10,7 +10,7 @@ import {
   Shovel,
   Package,
   RadioTower,
-  MonitorSmartphone,
+  TrendingUp,
   Ship,
   FileText,
   Phone,
@@ -35,7 +35,7 @@ const SERVICE_ICONS: Record<string, React.ElementType> = {
   excavation: Shovel,
   supplies: Package,
   telecom: RadioTower,
-  marketing: MonitorSmartphone,
+  marketing: TrendingUp,
   shipping: Ship,
 };
 

@@ -4,13 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Building2,
-  Route,
-  Shovel,
-  Package,
-  RadioTower,
-  MonitorSmartphone,
-  Ship,
   CheckCircle2,
   ArrowLeft,
   Sparkles,
@@ -18,23 +11,14 @@ import {
 } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
+import { SERVICE_SLUG_ICONS } from "./service-detail-view";
 import { SITE_CONFIG } from "@/config/site";
 import { SERVICES_DATA } from "@/config/services-data";
 import { cn } from "@/lib/utils";
 
-const SERVICE_ICONS = [
-  Building2,
-  Route,
-  Shovel,
-  Package,
-  RadioTower,
-  MonitorSmartphone,
-  Ship,
-];
-
-const SERVICES = SITE_CONFIG.servicesList.map((service, idx) => ({
+const SERVICES = SITE_CONFIG.servicesList.map((service) => ({
   ...service,
-  Icon: SERVICE_ICONS[idx],
+  Icon: SERVICE_SLUG_ICONS[service.slug],
   detail: SERVICES_DATA[service.slug] || null,
 }));
 

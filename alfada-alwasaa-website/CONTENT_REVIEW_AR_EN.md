@@ -105,20 +105,20 @@
   - Excavation and site grading works.
   - Construction supplies and provisioning.
 
-### قطاع 03: Petroleum & Energy Services
+### قطاع 03: General Supplies & Equipment
 - **الخدمات المندرجة (Services):**
-  - Certified petroleum product supplies.
-  - Operational support and fueling logistics.
+  - Import and supply of construction materials.
+  - Cables, heavy equipment, and genuine spare parts.
 
 ### قطاع 04: Logistics & Customs Clearance
 - **الخدمات المندرجة (Services):**
   - Multimodal shipping and port stevedoring.
   - Customs clearance and supply chain management.
 
-### قطاع 05: Marketing & Digital Consulting
+### قطاع 05: Real Estate Marketing & Investment
 - **الخدمات المندرجة (Services):**
-  - Digital marketing and digital footprint architecture.
-  - Specialized promotional and growth consulting.
+  - Feasibility studies and real estate asset marketing.
+  - Development supervision and asset management.
 
 ---
 
@@ -155,86 +155,99 @@
 
 ## 9. ملف الخدمات التخصصية السبع (Detailed Services Data)
 
-### الخدمة: المقاولات العامة والإنشاءات الهندسية / General Contracting and Engineering Construction
+### الخدمة: المقاولات العامة والإنشاءات / General Contracting & Construction
 - **العنوان المختصر:** المقاولات العامة / General Contracting
-- **الوصف التمهيدي (العربية):** تنفيذ المشاريع الإنشائية والتجارية والسكنية في صنعاء وعموم اليمن بأعلى معايير الجودة والانضباط الهندسي.
-- **الوصف التمهيدي (English):** Delivering construction, commercial, and residential projects across Sana'a and greater Yemen to the highest standards of quality and engineering discipline.
-- **عنوان الـ SEO (عربي):** شركة مقاولات عامة في صنعاء | الفضاء الواسع للمقاولات باليمن
-- **عنوان الـ SEO (English):** General Contracting Company in Sana'a | Al-Fada Al-Wasaa Yemen
-- **وصف الـ SEO (عربي):** شركة الفضاء الواسع — أفضل مقاولات عامة وإنشاءات في صنعاء واليمن. تنفيذ الأبراج، المباني السكنية والتجارية، أعمال الخرسانة والتشطيبات. اتصل بنا: +967776999942
-- **وصف الـ SEO (English):** Al-Fada Al-Wasaa — a leading general contracting and construction company in Sana'a and Yemen. Towers, residential and commercial buildings, concrete works, and finishing. Call us: +967776999942
+- **الوصف التمهيدي (العربية):** تنفيذ المباني السكنية والتجارية، الهياكل الخرسانية، التشطيبات، والمنشآت الحكومية.
+- **الوصف التمهيدي (English):** Residential and commercial buildings, concrete structures, finishing works, and government facilities.
+- **عنوان الـ SEO (عربي):** شركة مقاولات عامة وإنشاءات في صنعاء | الفضاء الواسع باليمن
+- **عنوان الـ SEO (English):** General Contracting & Construction Company in Sana'a | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** شركة الفضاء الواسع للمقاولات العامة والإنشاءات في صنعاء واليمن. تنفيذ المباني السكنية والتجارية، الهياكل الخرسانية، التشطيبات، والمنشآت الحكومية. اتصل: +967776999942
+- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for general contracting and construction in Sana'a, Yemen. Residential and commercial buildings, concrete structures, finishing works, and government facilities. Call: +967776999942
 
 #### نبذة عامة (Overview):
 **العربية:**
-- تُعد شركة الفضاء الواسع من الكيانات الرائدة في قطاع المقاولات العامة في الجمهورية اليمنية، حيث نجمع بين الممارسة الميدانية المتمرسة، وأحدث الأساليب الهندسية في إدارة وتنفيذ المشاريع الكبرى.
-- نلتزم في كافة مشاريعنا في صنعاء ومختلف المحافظات اليمنية بالمطابقة الصارمة للمواصفات والمقاييس الدولية، وجداول التسليم الزمنية، مع تقديم حلول متكاملة تبدأ من دراسة المخططات حتى التسليم المفتاح.
+- تُعد شركة الفضاء الواسع من الكيانات الرائدة في قطاع المقاولات العامة والإنشاءات بالجمهورية اليمنية، حيث نجمع بين الممارسة الميدانية المتمرسة وأحدث الأساليب الهندسية في إدارة وتنفيذ المشاريع السكنية والتجارية والمنشآت الحكومية الكبرى.
+- نلتزم في كافة أعمالنا — من الهياكل الخرسانية إلى التشطيبات النهائية — بالمطابقة الصارمة للمواصفات والمقاييس الدولية وجداول التسليم الزمنية، مع تقديم حلول متكاملة تبدأ من دراسة المخططات وحتى التسليم المفتاح.
 
 **English:**
-- Al-Fada Al-Wasaa stands among the leading firms in the general contracting sector of the Republic of Yemen, combining seasoned hands-on field experience with the latest engineering methodologies in the management and execution of major projects.
-- Across all of our projects in Sana'a and throughout the Yemeni governorates, we adhere strictly to international specifications and standards and to agreed delivery schedules, providing turnkey solutions that run from drawing studies all the way to final handover.
+- Al-Fada Al-Wasaa stands among the leading firms in the general contracting and construction sector in the Republic of Yemen, combining seasoned hands-on field experience with the latest engineering methodologies in the delivery of major residential, commercial, and government projects.
+- Across every scope of our work — from concrete structures to final finishing — we adhere strictly to international specifications and standards and to agreed delivery schedules, providing turnkey solutions that run from drawing studies all the way to final handover.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
 |---|---|---|---|
-| **الإنشاءات السكنية والتجارية** | تنفيذ الأبراج، العمائر السكنية، المراكز التجارية، والمنشآت الخدمية باحترافية وتخطيط هيكلي دقيق. | **Residential and Commercial Construction** | Execution of towers, residential blocks, commercial centers, and service facilities with true professionalism and precise structural planning. |
-| **الأعمال الخرسانية والهياكل المعدنية** | صب القواعد، الأعمدة، الأسقف، وتركيب الهياكل المعدنية للمستودعات والهناجر بأحدث المعدات. | **Concrete Works and Steel Structures** | Pouring of foundations, columns, and slabs, and erection of steel structures for warehouses and hangars using state-of-the-art equipment. |
-| **التشطيبات المعمارية المتكاملة** | أعمال اللياسة، الدهانات، العوازل الحرارية والمائية، وتركيبات الواجهات الزجاجية والكلادينج. | **Integrated Architectural Finishing** | Plastering, painting, thermal and waterproof insulation, and installation of glass facades and cladding. |
-| **الترميم وإعادة التأهيل الإنشائي** | تقييم السلامة الإنشائية، تدعيم الأعمدة والأسقف، وتحديث المباني القديمة وفق معايير السلامة الهندسية. | **Structural Restoration and Rehabilitation** | Structural safety assessment, reinforcement of columns and slabs, and upgrading of older buildings in line with engineering safety codes. |
+| **المباني السكنية والتجارية** | تنفيذ العمائر السكنية، الأبراج، والمراكز التجارية بتخطيط هيكلي دقيق وإدارة موقع منضبطة. | **Residential & Commercial Buildings** | Delivering residential blocks, towers, and commercial centers with precise structural planning and disciplined site management. |
+| **الهياكل الخرسانية والأعمال المعدنية** | صب القواعد والأعمدة والأسقف، وتركيب الهياكل المعدنية للمستودعات والهناجر بأحدث المعدات. | **Concrete & Steel Structures** | Pouring foundations, columns, and slabs, and erecting steel structures for warehouses and hangars with state-of-the-art equipment. |
+| **التشطيبات والعوازل والواجهات** | أعمال اللياسة والدهانات، العوازل الحرارية والمائية، وتركيب الواجهات الزجاجية والكلادينج. | **Finishing, Insulation & Facades** | Plastering and painting works, thermal and waterproof insulation, and installation of glass facades and cladding. |
+| **المنشآت الحكومية والخدمية** | تنفيذ المباني الحكومية والمرافق العامة والمنشآت الخدمية وفق اشتراطات الجهات الرسمية. | **Government & Public Facilities** | Delivering government buildings and public service facilities in full compliance with official authorities' requirements. |
+| **الترميم وإعادة التأهيل الإنشائي** | تقييم السلامة الإنشائية، تدعيم الأعمدة والأسقف، وتحديث المباني القديمة وفق معايير السلامة. | **Restoration & Structural Rehabilitation** | Structural safety assessment, reinforcement of columns and slabs, and upgrading of older buildings to modern safety codes. |
+| **الإشراف الهندسي وضبط الجودة** | إشراف مستقل، اختبارات تربة وخرسانة معملية، وشهادات مطابقة موثقة لكل مرحلة تنفيذ. | **Engineering Supervision & QC** | Independent supervision, laboratory soil and concrete testing, and documented conformity certificates for every execution stage. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
   - فريق هندسي وإشرافي مؤهل بخبرات ميدانية طويلة في السوق اليمني.
   - أسطول متكامل من المعدات والآليات الثقيلة لضمان سرعة الإنجاز.
   - التزام دقيق بالميزانيات المعتمدة دون تكاليف خفية أو تأخير.
-  - سجل أعمال موثق وناجح مع كبرى المؤسسات والجهات في اليمن.
+  - سجل أعمال موثق وناجح مع كبرى المؤسسات والجهات الحكومية في اليمن.
+  - عقود واضحة بمراحل دفع منظمة وجداول كميات مفصلة.
+  - تنسيق مؤسسي مع باقي قطاعات الشركة: الطرق، الحفريات، والتوريدات.
 - **English:**
   - A qualified engineering and supervision team with long field experience in the Yemeni market.
   - A complete fleet of equipment and heavy machinery to guarantee speed of delivery.
   - Strict commitment to approved budgets with no hidden costs or delays.
-  - A documented track record of successful works with major institutions and organizations across Yemen.
+  - A documented track record of successful works with major institutions and government bodies in Yemen.
+  - Clear contracts with structured payment milestones and detailed bills of quantities.
+  - Institutional coordination with the company's other sectors: roads, excavation, and supplies.
 
 #### الأسئلة الشائعة للخدمة (Service FAQs):
 
 **س 1 (عربي):** ما هي النطاقات الجغرافية التي تغطيها خدمات المقاولات لديكم؟  
-**ج (عربي):** نقدم خدماتنا في أمانة العاصمة صنعاء، وعموم محافظات الجمهورية اليمنية مع القدرة على إدارة المواقع الميدانية والنائية.  
+**ج (عربي):** نقدم خدماتنا في أمانة العاصمة صنعاء وعموم محافظات الجمهورية اليمنية، مع القدرة على إدارة المواقع الميدانية والنائية بفرق إقامة دائمة.  
 **Q 1 (English):** Which geographic areas do your contracting services cover?  
-**A (English):** We deliver our services in the capital city of Sana'a and across all governorates of the Republic of Yemen, with the capacity to manage both established and remote field sites.  
+**A (English):** We deliver our services in the capital Sana'a and across all governorates of the Republic of Yemen, with resident crews capable of managing remote field sites.  
 
 **س 2 (عربي):** كيف يتم تسعير المشاريع الإنشائية؟  
-**ج (عربي):** يتم التسعير بناءً على دراسة تفصيلية لجداول الكميات والمخططات الهندسية مع تقديم تحليل أسعار تنافسي وشفاف يلبي متطلبات العميل.  
+**ج (عربي):** يتم التسعير بناءً على دراسة تفصيلية لجداول الكميات والمخططات الهندسية، مع تقديم تحليل أسعار تنافسي وشفاف يلبي متطلبات العميل.  
 **Q 2 (English):** How are construction projects priced?  
 **A (English):** Pricing is based on a detailed study of the bills of quantities and engineering drawings, supported by a competitive and transparent cost analysis tailored to the client's requirements.  
 
-**س 3 (عربي):** هل توفرون خدمة الإشراف الهندسي المستقل؟  
+**س 3 (عربي):** هل تنفذون منشآت حكومية وفق اشتراطات الجهات الرسمية؟  
+**ج (عربي):** نعم، لدينا سجل موثق في تنفيذ المنشآت الحكومية والخدمية والالتزام الكامل بكتيبات الشروط والاشتراطات الفنية للجهات الرسمية.  
+**Q 3 (English):** Do you execute government facilities under official specifications?  
+**A (English):** Yes, we hold a documented record of delivering government and service facilities in full compliance with official conditions and technical requirements.  
+
+**س 4 (عربي):** هل توفرون خدمة الإشراف الهندسي المستقل؟  
 **ج (عربي):** نعم، نقدم خدمات الإشراف الهندسي وضبط الجودة واختبارات التربة والخرسانة عبر مهندسين معتمدين.  
-**Q 3 (English):** Do you provide independent engineering supervision?  
+**Q 4 (English):** Do you provide independent engineering supervision?  
 **A (English):** Yes, we offer engineering supervision, quality control, and soil and concrete testing services carried out by certified engineers.  
 
-### الخدمة: إنشاء وصيانة الطرق والجسور / Road and Bridge Construction and Maintenance
-- **العنوان المختصر:** الطرق والجسور / Roads & Bridges
-- **الوصف التمهيدي (العربية):** تطوير البنية التحتية، رصف وسفلتة الطرق، وإنشاء الجسور والعبّارات بكفاءة ومعدات ثقيلة متطورة في اليمن.
-- **الوصف التمهيدي (English):** Developing infrastructure, paving and asphalting roads, and constructing bridges and culverts with efficiency and advanced heavy equipment across Yemen.
-- **عنوان الـ SEO (عربي):** إنشاء وصيانة الطرق والجسور في اليمن | الفضاء الواسع
-- **عنوان الـ SEO (English):** Road and Bridge Construction and Maintenance in Yemen | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** شركة الفضاء الواسع لتنفيذ أعمال الطرق والجسور باليمن. سفلتة، رصف حجري، دك تربة، صيانة وتعبيد الشوارع والممرات الحيوية. هاتف: +967776999942
-- **وصف الـ SEO (English):** Al-Fada Al-Wasaa executes road and bridge works across Yemen. Asphalting, stone paving, soil compaction, and maintenance of streets and vital corridors. Phone: +967776999942
+### الخدمة: شق وتعبيد الطرق / Road Cutting & Paving
+- **العنوان المختصر:** شق وتعبيد الطرق / Road Cutting & Paving
+- **الوصف التمهيدي (العربية):** مسارات الطرق الجبلية والحضرية، السفلتة، العبارات الخرسانية، وتصريف مياه السيول.
+- **الوصف التمهيدي (English):** Mountain and urban road corridors, asphalt paving, concrete culverts, and floodwater drainage.
+- **عنوان الـ SEO (عربي):** شق وتعبيد الطرق والسفلتة في اليمن | الفضاء الواسع صنعاء
+- **عنوان الـ SEO (English):** Road Cutting, Paving & Asphalting in Yemen | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** أعمال شق وتعبيد الطرق في صنعاء واليمن: مسارات جبلية وحضرية، سفلتة، رصف حجري، عبارات خرسانية، وتصريف مياه السيول. هاتف: +967776999942
+- **وصف الـ SEO (English):** Road cutting and paving works in Sana'a and Yemen: mountain and urban corridors, asphalt paving, stone paving, concrete culverts, and floodwater drainage. Call: +967776999942
 
 #### نبذة عامة (Overview):
 **العربية:**
-- تمثل شبكات الطرق والجسور شريان الحياة الاقتصادية في اليمن، لذلك تضع شركة الفضاء الواسع خبراتها وإمكانياتها الميكانيكية لإنشاء وتطوير وصيانة المسارات الحيوية وفق أعلى مواصفات التحمل والسلامة المرورية.
-- نمتلك خلاطات إسفلت، مداحل حديثة، قشارات، وفرّاشات أسفلت تضمن دقة الميول، استواء السطح، وتحمل الحمولات المحورية العالية للسيارات والشاحنات.
+- تمثل شبكات الطرق شريان الحياة الاقتصادية في اليمن، لذلك تضع شركة الفضاء الواسع خبراتها وإمكانياتها الميكانيكية في شق وتعبيد المسارات الجبلية والحضرية وفق أعلى مواصفات التحمل والسلامة المرورية.
+- نمتلك خلاطات إسفلت ومداحل حديثة وقشارات وفرّاشات أسفلت تضمن دقة الميول، استواء السطح، وتحمل الحمولات المحورية العالية، مع تنفيذ العبارات الخرسانية وأنظمة تصريف مياه السيول لحماية الطرق من الانجرافات الموسمية.
 
 **English:**
-- Road and bridge networks are the economic lifeline of Yemen; for this reason, Al-Fada Al-Wasaa places its expertise and mechanical capabilities at the service of constructing, developing, and maintaining vital corridors to the highest load-bearing and traffic safety specifications.
-- We operate asphalt plants, modern rollers, milling machines, and asphalt pavers that ensure precise gradients, an even riding surface, and tolerance of the high axle loads imposed by cars and trucks.
+- Road networks are the economic lifeline of Yemen; Al-Fada Al-Wasaa therefore places its expertise and mechanical capabilities at the service of cutting and paving mountain and urban corridors to the highest load-bearing and traffic-safety specifications.
+- We operate asphalt plants, modern rollers, milling machines, and pavers that ensure precise gradients, an even riding surface, and tolerance of heavy axle loads — alongside concrete culverts and floodwater drainage systems that protect roads from seasonal washouts.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
 |---|---|---|---|
-| **السفلتة والتعبيد الساخن** | فرش الطبقات الإسفلتية وفق خلطات قياسية معتمدة تراعي درجات الحرارة وعوامل المناخ في اليمن. | **Hot-Mix Asphalting and Paving** | Laying asphalt courses to approved standard mixes engineered for Yemen's temperatures and climatic conditions. |
-| **الرصف الحجري وتثبيت الميول** | رصف الشوارع بالحجر الطبيعي والبلاط المتداخل (إنترلوك)، وبناء الجدران الساندة لحماية الطرق الجبلية. | **Stone Paving and Slope Stabilization** | Paving streets with natural stone and interlocking tiles, and building retaining walls to protect mountain roads. |
-| **الجسور وتصريف مياه السيول** | إنشاء العبّارات الصندوقية والأنبوبية والجسور السطحية لحماية الطرق من الانجرافات الموسمية. | **Bridges and Flood Water Drainage** | Constructing box and pipe culverts and surface bridges to protect roads against seasonal flood damage. |
-| **الصيانة وإعادة التأهيل** | معالجة التشققات والحفر، كشط الإسفلت التالف، وإعادة السفلتة لرفع كفاءة الطرق القديمة. | **Maintenance and Rehabilitation** | Treating cracks and potholes, milling deteriorated asphalt, and re-asphalting to restore the serviceability of aging roads. |
+| **شق الطرق وفتح المسارات** | شق الطرق الجبلية والحضرية، تسوية المقاطع، وتثبيت المنحدرات بالجدران الساندة. | **Road Cutting & Corridor Opening** | Cutting mountain and urban roads, grading sections, and stabilizing slopes with retaining walls. |
+| **السفلتة والتعبيد الساخن** | فرش الطبقات الإسفلتية وفق خلطات قياسية معتمدة تراعي مناخ اليمن ودرجات الحرارة. | **Hot-Mix Asphalting & Paving** | Laying asphalt courses to approved standard mixes engineered for Yemen's climate and temperatures. |
+| **الرصف الحجري والإنترلوك** | رصف الشوارع بالحجر الطبيعي والبلاط المتداخل مع بناء الأرصفة وتنسيق الميول. | **Stone Paving & Interlock** | Paving streets with natural stone and interlocking tiles, building sidewalks, and finishing gradients. |
+| **العبارات والجسور الخرسانية** | إنشاء العبارات الصندوقية والأنبوبية والجسور السطحية بمواصفات خرسانية معتمدة. | **Concrete Culverts & Bridges** | Constructing box and pipe culverts and surface bridges to approved concrete specifications. |
+| **تصريف مياه السيول** | حفر المجاري، تركيب القنوات، وبناء الممرات المائية لحماية الطرق من الانجراف الموسمي. | **Floodwater Drainage** | Excavating channels, installing ducts, and building waterways that protect roads from seasonal erosion. |
+| **الصيانة وإعادة التأهيل** | معالجة التشققات والحفر، كشط الإسفلت التالف، وإعادة السفلتة لرفع كفاءة الطرق القديمة. | **Maintenance & Rehabilitation** | Treating cracks and potholes, milling deteriorated asphalt, and re-asphalting to restore aging roads. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
@@ -242,149 +255,133 @@
   - فحص مخبري دوري لعينات الأسفلت والبيوتومين وكثافة الدك.
   - تطبيق مواصفات السلامة المرورية واللوحات الإرشادية وخطوط السير.
   - سرعة استجابة لصيانة الطرق المتضررة وفتح المسارات الحيوية.
+  - تكامل مباشر مع قطاع الحفريات والردميات داخل الشركة.
+  - أسطول مداحل وقشارات وفرّاشات مملوك للشركة بالكامل.
 - **English:**
   - High readiness to operate in mountainous and rugged terrain with complete efficiency.
   - Regular laboratory testing of asphalt and bitumen samples as well as compaction density.
-  - Application of traffic safety specifications, directional signage, and lane markings.
+  - Application of traffic-safety specifications, directional signage, and lane markings.
   - Rapid response for repairing damaged roads and reopening vital corridors.
+  - Direct integration with the company's excavation and backfill sector.
+  - A fleet of rollers, milling machines, and pavers fully owned by the company.
 
 #### الأسئلة الشائعة للخدمة (Service FAQs):
 
-**س 1 (عربي):** هل تنفذون مشاريع الطرق في المناطق الوعرة أو الجبلية؟  
-**ج (عربي):** نعم، لدينا خبرة واسعة في التغلب على تضاريس اليمن الصعبة، مع فتح المسارات في المنحدرات وتثبيت الجوانب بالجدران الساندة.  
+**س 1 (عربي):** هل تنفذون أعمال الطرق في المناطق الوعرة أو الجبلية؟  
+**ج (عربي):** نعم، لدينا خبرة واسعة في التغلب على تضاريس اليمن الصعبة، مع شق المسارات في المنحدرات وتثبيت الجوانب بالجدران الساندة.  
 **Q 1 (English):** Do you execute road projects in rugged or mountainous areas?  
-**A (English):** Yes, we have extensive experience in overcoming Yemen's challenging terrain, opening alignments across slopes and stabilizing embankments with retaining walls.  
+**A (English):** Yes, we have extensive experience overcoming Yemen's challenging terrain — cutting alignments across slopes and stabilizing embankments with retaining walls.  
 
 **س 2 (عربي):** ما هي المعايير المتبعة في اختبارات دك التربة والأسفلت؟  
 **ج (عربي):** نعتمد اختبارات بروكتور القياسية لكثافة التربة، وفحوصات مارشال للخلطات الإسفلتية لضمان استدامة الطريق لسنوات طويلة.  
 **Q 2 (English):** What standards do you follow for soil compaction and asphalt testing?  
 **A (English):** We rely on standard Proctor testing for soil density and Marshall testing for asphalt mixes, ensuring the road remains serviceable for many years.  
 
-### الخدمة: أعمال الحفريات وتسوية المواقع / Excavation Works and Site Leveling
-- **العنوان المختصر:** أعمال الحفريات / Excavation Works
-- **الوصف التمهيدي (العربية):** تجهيز المواقع الإنشائية، تكسير الصخور، الدك والردم والترحيل باستخدام أحدث الآليات الثقيلة في صنعاء واليمن.
-- **الوصف التمهيدي (English):** Preparing construction sites, breaking rock, backfilling, compacting, and hauling with the latest heavy machinery in Sana'a and across Yemen.
-- **عنوان الـ SEO (عربي):** أعمال حفريات وتسوية مواقع في صنعاء | الفضاء الواسع
-- **عنوان الـ SEO (English):** Excavation and Site Leveling Services in Sana'a | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** خدمات الحفريات والردم وتجهيز المواقع في صنعاء واليمن. حفر قواعد، تكسير صخور، تسوية أراضي، وترحيل المخلفات بكفاءة وسرعة. تواصل معنا الآن.
-- **وصف الـ SEO (English):** Excavation, backfilling, and site preparation services in Sana'a and Yemen. Foundation excavation, rock breaking, land leveling, and debris hauling delivered efficiently and fast. Contact us now.
+**س 3 (عربي):** هل تشمل أعمالكم العبارات وتصريف مياه السيول؟  
+**ج (عربي):** نعم، ننفذ العبارات الصندوقية والأنبوبية وأنظمة تصريف السيول كجزء متكامل من مشاريع الطرق أو كأعمال مستقلة.  
+**Q 3 (English):** Do your works include culverts and floodwater drainage?  
+**A (English):** Yes, we build box and pipe culverts and floodwater drainage systems as an integral part of road projects or as standalone works.  
+
+**س 4 (عربي):** هل تقدمون عقود صيانة دورية للطرق؟  
+**ج (عربي):** نعم، نبرم عقود صيانة سنوية تشمل المعالجة الدورية للتشققات والحفر وإعادة السفلتة حسب خطة زمنية متفق عليها.  
+**Q 4 (English):** Do you offer periodic road maintenance contracts?  
+**A (English):** Yes, we conclude annual maintenance contracts covering scheduled treatment of cracks and potholes and re-asphalting according to an agreed plan.  
+
+### الخدمة: الحفريات والردميات الهندسية / Excavation & Engineering Backfill
+- **العنوان المختصر:** الحفريات والردميات / Excavation & Backfill
+- **الوصف التمهيدي (العربية):** التسوية الطبوغرافية، الحفر الصخري، إعداد المخططات، والدك والاختبارات الجيوتقنية.
+- **الوصف التمهيدي (English):** Topographic leveling, rock excavation, plot preparation, compaction, and geotechnical testing.
+- **عنوان الـ SEO (عربي):** أعمال حفريات وردميات هندسية في صنعاء | الفضاء الواسع
+- **عنوان الـ SEO (English):** Excavation & Engineering Backfill Works in Sana'a | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** خدمات الحفريات والردميات الهندسية في صنعاء واليمن: تسوية طبوغرافية، حفر صخري، إعداد مخططات، دك واختبارات جيوتقنية معتمدة. تواصل: +967776999942
+- **وصف الـ SEO (English):** Excavation and engineering backfill services in Sana'a and Yemen: topographic leveling, rock excavation, plot preparation, compaction, and certified geotechnical testing. Contact: +967776999942
 
 #### نبذة عامة (Overview):
 **العربية:**
-- تعتبر المرحلة التأسيسية لأي مشروع إنشائي هي الأساس المتين لنجاحه، لذا توفر شركة الفضاء الواسع منظومة متكاملة من أعمال الحفر الدقيق، تكسير الصخور، والتسوية الطبوغرافية للمشاريع الكبرى والصغرى.
-- بفضل الحفارات ذات المطارق الهيدروليكية والشاحنات القلابة ذات الحمولات الكبيرة، نسعى إلى تجهيز الموقع بكفاءة وفي أقصر مدة ممكنة، مع إعطاء الأولوية لسلامة المنشآت المجاورة.
+- المرحلة التأسيسية هي الأساس المتين لنجاح أي مشروع إنشائي؛ لذا توفر شركة الفضاء الواسع منظومة متكاملة من أعمال الحفريات والردميات الهندسية: التسوية الطبوغرافية الدقيقة، الحفر الصخري، إعداد المخططات، والدك والاختبارات الجيوتقنية المعتمدة.
+- بفضل الحفارات ذات المطارق الهيدروليكية والشاحنات القلابة ذات الحمولات الكبيرة، نجهز المواقع بكفاءة وفي أقصر مدة ممكنة، مع إعطاء الأولوية لسلامة المنشآت المجاورة وتوثيق الكثافات لكل طبقة.
 
 **English:**
-- The foundation phase of any construction project is the bedrock of its success; accordingly, Al-Fada Al-Wasaa provides an integrated system of precise excavation, rock breaking, and topographic leveling for projects large and small.
-- With excavators fitted with hydraulic breakers and high-capacity dump trucks, we strive to prepare sites efficiently and in the shortest possible timeframe while prioritizing the safety of neighboring structures.
+- The founding phase is the bedrock of any construction project's success; Al-Fada Al-Wasaa therefore provides an integrated system of excavation and engineering backfill works: precise topographic leveling, rock excavation, plot preparation, and certified compaction and geotechnical testing.
+- With hydraulic-breaker excavators and high-capacity dump trucks, we prepare sites efficiently and in the shortest possible timeframe — prioritizing the safety of neighboring structures and documenting the density of every layer.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
 |---|---|---|---|
-| **حفر البدرومات والقواعد العميقة** | تنفيذ حفريات المباني السكنية والتجارية مع تدعيم جوانب الحفر وحماية المنشآت الملاصقة. | **Basement and Deep Foundation Excavation** | Executing excavations for residential and commercial buildings, with shoring of excavation sides and protection of adjacent structures. |
-| **التكسير الهيدروليكي للصخور** | تفتيت الصخور الصلبة والطبقات البازلتية الشائعة في صنعاء والمناطق الجبلية دون إحداث تصدعات بالمجاورين. | **Hydraulic Rock Breaking** | Fragmenting solid rock and the basalt layers common in Sana'a and mountainous regions without causing cracking in neighboring properties. |
-| **أعمال الردم والدك الهندسي** | توريد مواد الردم المنتقاة (السب بيس) والدك على طبقات منتظمة مع قياس نسبة الرطوبة والكثافة. | **Backfilling and Engineering Compaction** | Supplying selected backfill material (sub-base) and compacting in uniform layers while measuring moisture content and density. |
-| **تسوية وتجهيز المخططات العمرانية** | تسوية الأراضي الشاسعة للمجمعات السكنية والمصانع والمزارع مع فتح الشوارع الداخلية. | **Leveling and Preparing Development Land** | Grading vast tracts of land for residential compounds, factories, and farms, including the opening of internal roadways. |
+| **التسوية الطبوغرافية للمواقع** | رفع مساحي وتسوية الأراضي بالمستويات المعتمدة مع ضبط الميول والمناسيب. | **Topographic Site Leveling** | Surveying and leveling land to approved levels while controlling gradients and elevations. |
+| **حفر القواعد والبدرومات** | تنفيذ حفريات المباني السكنية والتجارية مع تدعيم جوانب الحفر وحماية المجاورين. | **Foundation & Basement Excavation** | Executing excavations for residential and commercial buildings with shoring and protection of adjacent properties. |
+| **الحفر الصخري والتكسير الهيدروليكي** | تفتيت الصخور الصلبة والطبقات البازلتية بمطارق هيدروليكية دون تصدعات للمباني المجاورة. | **Rock Excavation & Hydraulic Breaking** | Fragmenting hard rock and basalt layers with hydraulic breakers — without cracking neighboring buildings. |
+| **الردميات والدك الهندسي** | توريد مواد الردم المنتقاة (السب بيس) والدك على طبقات منتظمة مع قياس الرطوبة والكثافة. | **Engineering Backfill & Compaction** | Supplying selected backfill material (sub-base) and compacting in uniform layers while measuring moisture and density. |
+| **إعداد المخططات العمرانية** | تسوية مخططات المجمعات السكنية والمصانع والمزارع وفتح الشوارع الداخلية. | **Development Plot Preparation** | Leveling land for residential compounds, factories, and farms, including opening internal roadways. |
+| **الاختبارات الجيوتقنية** | اختبارات بروكتور وكثافة الحقل وتوثيق النتائج بمعادلات معملية معتمدة. | **Geotechnical Testing** | Proctor and field-density testing with documented results against approved laboratory correlations. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
   - أسطول حفارات متنوع الأحجام للعمل في المساحات المفتوحة والضيقة.
   - فريق تشغيل وسائقين محترفين مع التزام تام بمعايير السلامة المهنية.
   - سرعة ترحيل المخلفات ونقل التربة إلى المقالب المعتمدة رسمياً.
+  - توثيق جيوتقني كامل يحمي العميل في مراحل البناء اللاحقة.
   - أسعار منافسة تعتمد على حجم الأعمال وسرعة التعاقد.
+  - تكامل مباشر مع قطاعي المقاولات وشق الطرق داخل الشركة.
 - **English:**
   - A fleet of excavators in a range of sizes for work in both open and confined spaces.
   - A professional operating crew and certified operators with full compliance with occupational safety standards.
   - Rapid hauling of debris and soil to officially approved disposal sites.
+  - Complete geotechnical documentation that protects the client through subsequent construction stages.
   - Competitive pricing based on the volume of works and contracting speed.
+  - Direct integration with the company's contracting and road-cutting sectors.
 
 #### الأسئلة الشائعة للخدمة (Service FAQs):
 
 **س 1 (عربي):** هل تقدمون خدمات تدعيم جوانب الحفر للمباني المجاورة؟  
 **ج (عربي):** نعم، نستخدم تقنيات السند والتدعيم المناسبة لضمان سلامة الجيران ومنع أي هبوط أرضي أثناء الحفر العميق.  
-**Q 1 (English):** Do you provide excavation-side shoring services for neighboring buildings?  
+**Q 1 (English):** Do you provide excavation-side shoring for neighboring buildings?  
 **A (English):** Yes, we apply appropriate shoring and support techniques to guarantee the safety of neighboring properties and prevent any ground subsidence during deep excavation.  
 
 **س 2 (عربي):** كيف تتعاملون مع الأراضي الصخرية شديدة الصلابة؟  
 **ج (عربي):** نستخدم حفارات ثقيلة مزودة برؤوس تكسير هيدروليكية متطورة ومناشير صخرية متخصصة تضمن دقة وسرعة الإنجاز.  
 **Q 2 (English):** How do you handle extremely hard rocky ground?  
-**A (English):** We deploy heavy excavators equipped with advanced hydraulic breaker attachments and specialized rock saws that ensure precision and speed of execution.  
+**A (English):** We deploy heavy excavators equipped with advanced hydraulic breakers and specialized rock saws that ensure precision and speed of execution.  
 
-### الخدمة: خدمات النفط والتوريدات البترولية والمعدات / Petroleum Services, Fuel Supply, and Equipment
-- **العنوان المختصر:** التوريدات البترولية / Petroleum Supplies
-- **الوصف التمهيدي (العربية):** توفير المحروقات، المشتقات النفطية، التموينات اللوجستية، والمعدات التخصصية للمواقع الميدانية والمشاريع الحيوية.
-- **الوصف التمهيدي (English):** Providing fuels, petroleum products, logistics provisioning, and specialized equipment for field sites and critical projects.
-- **عنوان الـ SEO (عربي):** توريدات بترولية وخدمات نفطية في اليمن | الفضاء الواسع
-- **عنوان الـ SEO (English):** Petroleum Supplies and Fuel Services in Yemen | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** شركة الفضاء الواسع لخدمات النفط والتوريدات البترولية في اليمن. توريد ديزل وبترول للمصانع والمشاريع، توفير الصهاريج والمعدات الميدانية المعتمدة.
-- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for petroleum services and fuel supplies in Yemen. Diesel and gasoline supply for factories and projects, plus certified tankers and field equipment.
+**س 3 (عربي):** هل تشمل أعمالكم الاختبارات الجيوتقنية؟  
+**ج (عربي):** نعم، ننفذ اختبارات بروكتور وكثافة الحقل لكل طبقة دك ونقدم تقريراً معتمداً يوثق جاهزية الموقع للبناء.  
+**Q 3 (English):** Do your works include geotechnical testing?  
+**A (English):** Yes, we run Proctor and field-density tests for every compacted layer and issue a certified report documenting the site's readiness for construction.  
+
+**س 4 (عربي):** ما هي مدة تجهيز الموقع النموذجية؟  
+**ج (عربي):** تتوقف على حجم الحفر ونوع التربة، وغالباً تبدأ المعدات العمل خلال 48 ساعة من إتمام التعاقد وتجهيز المخططات.  
+**Q 4 (English):** What is the typical site-preparation timeframe?  
+**A (English):** It depends on excavation volume and soil type; as a rule, our equipment starts working within 48 hours of contract completion and drawing readiness.  
+
+### الخدمة: أبراج وشبكات الاتصالات / Telecom Towers & Networks
+- **العنوان المختصر:** أبراج وشبكات الاتصالات / Telecom Towers & Networks
+- **الوصف التمهيدي (العربية):** تشييد أبراج الاتصالات، الألياف الضوئية، محطات الإرسال، وحلول الطاقة الشمسية للمواقع.
+- **الوصف التمهيدي (English):** Telecom tower construction, fiber optic networks, transmission stations, and solar power solutions for sites.
+- **عنوان الـ SEO (عربي):** تشييد أبراج وشبكات الاتصالات في اليمن | الفضاء الواسع
+- **عنوان الـ SEO (English):** Telecom Tower Construction & Networks in Yemen | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** شركة الفضاء الواسع لتشييد أبراج الاتصالات وشبكات الألياف الضوئية ومحطات الإرسال وحلول الطاقة الشمسية للمواقع في اليمن. هاتف: +967776999942
+- **وصف الـ SEO (English):** Al-Fada Al-Wasaa builds telecom towers, fiber optic networks, transmission stations, and solar power solutions for sites across Yemen. Call: +967776999942
 
 #### نبذة عامة (Overview):
 **العربية:**
-- تعتبر استمرارية إمداد الطاقة والمشتقات النفطية شرياناً أساسياً لتشغيل المصانع ومواقع المشاريع الإنشائية في اليمن. تقدم شركة الفضاء الواسع سلاسل إمداد موثوقة ومطابقة لأعلى مواصفات السلامة.
-- نوفر صهاريج نقل بترولية مجهزة بأنظمة تفريغ حديثة، مع التزام كامل بجودة المشتقات وخلوها من الشوائب لضمان عمل المولدات والمحركات بكفاءة قصوى.
+- يمتلك فريق الفضاء الواسع سجلاً استثنائياً في تشييد أبراج الاتصالات وبناء شبكات الاتصالات في اليمن، حيث نعمل مع كبرى شركات الاتصالات ومزودي خدمات الإنترنت منذ الأعمال المدنية وحتى رفع البث على الأبراج.
+- نقدم منظومة متكاملة تشمل: الأعمال المدنية للقواعد، نصب الأبراج الشبكية والأحادية، تمديد شبكات الألياف الضوئية، تشييد محطات الإرسال وأنظمة المايكروويف، وتوفير حلول الطاقة الشمسية الهجينة للمواقع الجبلية والنائية لضمان استمرار البث على مدار الساعة.
 
 **English:**
-- Continuity of energy and petroleum product supply is a fundamental lifeline for operating factories and construction project sites in Yemen. Al-Fada Al-Wasaa provides dependable supply chains that comply with the highest safety specifications.
-- We provide fuel transport tankers fitted with modern discharge systems, together with an uncompromising commitment to product quality and freedom from contaminants, ensuring generators and engines run at peak efficiency.
+- The Al-Fada Al-Wasaa team holds an exceptional record in constructing telecom towers and building network infrastructure across Yemen, working with the leading operators and internet service providers from civil works all the way to tower on-air activation.
+- We deliver an integrated system covering: civil works for foundations, erection of lattice and monopole towers, fiber optic network deployment, transmission-station and microwave builds, and hybrid solar power solutions for mountain and remote sites that keep transmissions running around the clock.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
 |---|---|---|---|
-| **توريد المحروقات للمواقع والمشاريع** | توصيل الديزل والبترول بكميات تجارية وصناعية للمصانع، المستشفيات، والمشاريع الميدانية. | **Fuel Supply to Sites and Projects** | Delivering diesel and gasoline in commercial and industrial volumes to factories, hospitals, and field projects. |
-| **تأجير وتشغيل صهاريج النقل** | أسطول صهاريج متنوع السعات مطابق لشروط السلامة ونقل المواد القابلة للاشتعال. | **Tanker Rental and Operation** | A tanker fleet with a range of capacities, fully compliant with safety codes for the transport of flammable materials. |
-| **توريد الزيوت والشحوم الصناعية** | توفير زيوت المحركات والمعدات الثقيلة من أفضل الماركات العالمية المعتمدة. | **Industrial Oils and Lubricants Supply** | Supplying engine oils and heavy-equipment lubricants from the finest certified international brands. |
-| **التجهيزات الميدانية للمواقع النفطية** | توريد خزانات التخزين المؤقتة، المضخات، وخراطيم التوزيع المقاومة للضغوط العالية. | **Field Equipment for Oil Sites** | Supplying temporary storage tanks, pumps, and high-pressure-rated distribution hoses. |
-
-#### المزايا التنافسية (Advantages):
-- **العربية:**
-  - دقة متناهية في مواعيد التوريد لتجنب توقف خطوط الإنتاج والعمل.
-  - فحوصات مخبرية دورية لنقاوة وكثافة المشتقات الموردة.
-  - سائقون مدربون على إجراءات مكافحة الحرائق والسلامة المهنية.
-  - تغطية جغرافية تصل لأصعب المواقع في كافة محافظات اليمن.
-- **English:**
-  - Meticulous adherence to delivery schedules to prevent any halt of production lines and operations.
-  - Regular laboratory testing of the purity and density of the products supplied.
-  - Drivers trained in firefighting procedures and occupational health and safety.
-  - Geographic coverage that reaches the most demanding sites across every governorate of Yemen.
-
-#### الأسئلة الشائعة للخدمة (Service FAQs):
-
-**س 1 (عربي):** هل يمكن التعاقد على توريد دوري منتظم للمصانع أو الشركات؟  
-**ج (عربي):** نعم، نقدم عقود توريد سنوية وشهرية ميسرة تضمن ثبات الإمداد وأولوية التوصيل تحت كافة الظروف.  
-**Q 1 (English):** Can we contract for regular periodic supply to factories or companies?  
-**A (English):** Yes, we offer convenient annual and monthly supply contracts that guarantee supply stability and priority delivery under all circumstances.  
-
-**س 2 (عربي):** ما هي اشتراطات السلامة المتبعة في نقل الوقود لديكم؟  
-**ج (عربي):** صهاريجنا مجهزة بمطافئ حريق آلية، مانعات صواعق وتفريغ كهربائي، وأنظمة تتبع لمراقبة مسار الشحنات.  
-**Q 2 (English):** What safety requirements do you follow when transporting fuel?  
-**A (English):** Our tankers are equipped with automatic fire-suppression systems, lightning and static-discharge protection, and tracking systems to monitor every shipment in transit.  
-
-### الخدمة: خدمات الاتصالات والحلول التقنية / Telecommunications Services and Technical Solutions
-- **العنوان المختصر:** خدمات الاتصالات / Telecommunications
-- **الوصف التمهيدي (العربية):** إنشاء وصيانة أبراج الاتصالات، تركيب الهوائيات، شبكات الألياف الضوئية، وحلول الطاقة الشمسية للمواقع النائية.
-- **الوصف التمهيدي (English):** Building and maintaining telecom towers, installing antennas, deploying fiber optic networks, and delivering solar power solutions for remote sites.
-- **عنوان الـ SEO (عربي):** خدمات وحلول الاتصالات وصيانة الأبراج في اليمن | الفضاء الواسع
-- **عنوان الـ SEO (English):** Telecom Services and Tower Maintenance in Yemen | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** شركة الفضاء الواسع لخدمات الاتصالات والشبكات في اليمن. تركيب وصيانة أبراج الهاتف النقال، الألياف الضوئية، محطات الطاقة الشمسية للاتصالات.
-- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for telecommunications and network services in Yemen. Mobile tower installation and maintenance, fiber optics, and solar power stations for telecom sites.
-
-#### نبذة عامة (Overview):
-**العربية:**
-- يمتلك فريق الفضاء الواسع سجلاً استثنائياً في دعم وتطوير البنية التحتية لقطاع الاتصالات في اليمن، حيث نعمل مع كبرى شركات الاتصالات ومزودي خدمات الإنترنت لمد وتثبيت الشبكات.
-- نقدم حلولاً متكاملة تشمل الأعمال المدنية للأبراج (Civil Works)، تركيب الهياكل المعدنية، صيانة الهوائيات، وتوفير أنظمة الطاقة الشمسية الهجينة للمواقع الجبلية والنائية لضمان استمرار البث 24/7.
-
-**English:**
-- The Al-Fada Al-Wasaa team holds an exceptional track record in supporting and developing the telecommunications infrastructure of Yemen, working with the major telecom operators and internet service providers to extend and install their networks.
-- We deliver end-to-end solutions covering tower civil works, steel structure erection, antenna maintenance, and hybrid solar power systems for mountain and remote sites, keeping transmissions running around the clock, 24/7.
-
-#### ركائز ومواصفات التنفيذ (Features):
-| الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
-|---|---|---|---|
-| **الأعمال المدنية وتركيب الأبراج** | حفر القواعد الخرسانية، نصب الأبراج الشبكية والأحادية (Monopoles)، وتركيب خطوط التأريض. | **Civil Works and Tower Erection** | Excavating concrete foundations, erecting lattice and monopole towers, and installing earthing and grounding lines. |
-| **تركيب وصيانة الهوائيات والموجات الدقيقة** | تثبيت وضبط اتجاهات هوائيات المايكروويف (Microwave) وهوائيات الـ RF باحترافية عالية. | **Antenna and Microwave Installation and Maintenance** | Professional mounting and alignment of microwave and RF antennas to the highest standards. |
-| **أنظمة الطاقة الشمسية ومولدات الديزل** | تصميم وتنفيذ محطات الطاقة الكهروضوئية والبطاريات الليثيوم لتشغيل أبراج الاتصالات بدون انقطاع. | **Solar Power Systems and Diesel Generators** | Designing and building photovoltaic power stations with lithium battery banks to run telecom towers without interruption. |
-| **تمديد شبكات الألياف الضوئية** | أعمال حفر وتمديد الكابلات الضوئية الهوائية والأرضية ولحام الشعيرات بأجهزة فيوجن متطورة. | **Fiber Optic Network Deployment** | Trenching and deploying aerial and underground fiber optic cables, and splicing fibers with advanced fusion splicers. |
+| **الأعمال المدنية وقواعد الأبراج** | حفر وصب القواعد الخرسانية بأبعاد هندسية معتمدة مع اختبارات مقاومة للخرسانة. | **Civil Works & Tower Foundations** | Excavating and pouring concrete foundations to approved engineering dimensions with concrete strength testing. |
+| **نصب الأبراج الشبكية والأحادية** | تركيب أبراج Lattice وMonopole بارتفاعات متفاوتة مع شد البراغي بعزم معتمد. | **Lattice & Monopole Tower Erection** | Installing lattice and monopole towers at varying heights with bolt torquing to certified values. |
+| **محطات الإرسال والمايكروويف** | تشييد محطات الإرسال، تركيب وضبط أجهزة المايكروويف ووصلات الـ RF بدقة توجيه عالية. | **Transmission Stations & Microwave** | Building transmission stations and mounting and aligning microwave links and RF connectors with high pointing accuracy. |
+| **شبكات الألياف الضوئية** | حفر وتمديد الكابلات الضوئية الهوائية والأرضية، ولحام الشعيرات بأجهزة فيوجن متطورة. | **Fiber Optic Networks** | Trenching and deploying aerial and underground fiber cables, and splicing fibers with advanced fusion splicers. |
+| **حلول الطاقة الشمسية للمواقع** | تصميم وتنفيذ محطات الطاقة الكهروضوئية والبطاريات الليثيوم لتشغيل المواقع النائية 24/7. | **Solar Power Solutions for Sites** | Designing and building photovoltaic stations with lithium battery banks to run remote sites 24/7. |
+| **تركيب وضبط الهوائيات** | تثبيت هوائيات الـ RF وضبط اتجاهاتها وأزواجها وفق مخططات التغطية المعتمدة. | **Antenna Installation & Alignment** | Mounting RF antennas and setting their orientations and pairings to approved coverage plans. |
+| **التأريض والحماية من الصواعق** | تنفيذ شبكات التأريض وقياس المقاومة وتركيب مانعات الصواعق وفق المواصفات العالمية. | **Earthing & Lightning Protection** | Building earthing networks, measuring resistance, and installing lightning protection to international specifications. |
+| **الصيانة الدورية والطارئة** | برامج صيانة وقائية وفرق استجابة سريعة لطوارئ الأبراج وإعادة البث في زمن قياسي. | **Preventive & Emergency Maintenance** | Preventive maintenance programs and rapid-response crews for tower emergencies and record-time on-air restoration. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
@@ -392,99 +389,65 @@
   - خبرة عميقة في بيئة العمل الجغرافية والمناخية المعقدة في اليمن.
   - قدرة على تنفيذ الصيانة الطارئة وإعادة البث في زمن قياسي.
   - شراكات استراتيجية موثوقة مع كبرى شركات الاتصالات المحلية.
+  - منظومة واحدة تشمل الأعمال المدنية والنصب والطاقة والصيانة.
+  - تنفيذ العشرات من محطات الطاقة الشمسية للمواقع النائية موثقاً في سابقة الأعمال.
 - **English:**
   - Rope-access climbing and maintenance teams trained and certified to the highest international safety standards.
   - Deep experience operating within Yemen's complex geographic and climatic environment.
   - The ability to carry out emergency maintenance and restore transmission in record time.
   - Trusted strategic partnerships with the leading local telecommunications operators.
+  - One integrated system covering civil works, erection, power, and maintenance.
+  - Dozens of solar power stations delivered for remote sites, documented in our portfolio.
 
 #### الأسئلة الشائعة للخدمة (Service FAQs):
 
-**س 1 (عربي):** هل تنفذون محطات الطاقة الشمسية الخاصة بأبراج الاتصالات؟  
+**س 1 (عربي):** هل تنفذون الأعمال المدنية للبرج والنصب معاً؟  
+**ج (عربي):** نعم، نعمل بمنظومة واحدة تشمل حفر وصب القواعد الخرسانية، نصب البرج، التركيبات العلوية، وأنظمة الطاقة والتأريض دون الحاجة لأكثر من مقاول.  
+**Q 1 (English):** Do you execute both the tower's civil works and its erection?  
+**A (English):** Yes, we operate as one system covering foundation excavation and pouring, tower erection, topside installations, power, and earthing — without needing more than one contractor.  
+
+**س 2 (عربي):** هل تنفذون محطات الطاقة الشمسية الخاصة بأبراج الاتصالات؟  
 **ج (عربي):** نعم، قمنا بتنفيذ العشرات من محطات الطاقة الشمسية الهجينة للمواقع النائية بنجاح كامل موثق في سابقة أعمالنا.  
-**Q 1 (English):** Do you build solar power stations for telecom towers?  
+**Q 2 (English):** Do you build solar power stations for telecom towers?  
 **A (English):** Yes, we have successfully delivered dozens of hybrid solar power stations for remote sites, a record fully documented in our project portfolio.  
 
-**س 2 (عربي):** ما هي خدمات الصيانة الوقائية التي تقدمونها للأبراج؟  
-**ج (عربي):** تشمل فحص شد البراغي، مقاومة الصدأ، فحص أنظمة التأريض والصواعق، وفحص كفاءة البطاريات ومولدات الطاقة.  
-**Q 2 (English):** What preventive maintenance services do you offer for towers?  
-**A (English):** They include bolt-torque inspection, corrosion protection checks, earthing and lightning system testing, and assessment of battery and generator performance.  
+**س 3 (عربي):** ما هي خدمات الصيانة الوقائية التي تقدمونها للأبراج؟  
+**ج (عربي):** تشمل فحص شد البراغي، مقاومة الصدأ، فحص أنظمة التأريض والصواعق، وقياس كفاءة البطاريات ومولدات الطاقة.  
+**Q 3 (English):** What preventive maintenance services do you offer for towers?  
+**A (English):** They include bolt-torque inspection, corrosion checks, earthing and lightning system testing, and assessment of battery and generator performance.  
 
-### الخدمة: التسويق الإلكتروني والاستشارات الرقمية / Digital Marketing and Digital Consulting
-- **العنوان المختصر:** التسويق الإلكتروني / Digital Marketing
-- **الوصف التمهيدي (العربية):** بناء الحضور الرقمي، إدارة الهوية المؤسسية، الحملات الإعلانية الممولة، وتحسين ظهور العلامات التجارية في اليمن والخليج.
-- **الوصف التمهيدي (English):** Building a digital presence, managing corporate identity, running paid advertising campaigns, and boosting brand visibility across Yemen and the Gulf.
-- **عنوان الـ SEO (عربي):** وكالة تسويق إلكتروني وإدارة حملات في صنعاء | الفضاء الواسع
-- **عنوان الـ SEO (English):** Digital Marketing and Campaign Management Agency in Sana'a | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** خدمات التسويق الرقمي وإدارة السوشيال ميديا في اليمن. بناء الهوية، إعلانات ممولة على فيسبوك وجوجل وإنستغرام، SEO، وتصميم المحتوى الإبداعي.
-- **وصف الـ SEO (English):** Digital marketing and social media management services in Yemen. Brand identity building, paid ads on Facebook, Google, and Instagram, SEO, and creative content design.
+**س 4 (عربي):** هل تنفذون شبكات الألياف الضوئية الحضرية؟  
+**ج (عربي):** نعم، ننفذ تمديدات الألياف الهوائية والأرضية مع لحام الشعيرات بأجهزة فيوجن واختبارات الفقد الضوئي.  
+**Q 4 (English):** Do you deploy urban fiber optic networks?  
+**A (English):** Yes, we deploy aerial and underground fiber extensions with fusion splicing and optical-loss testing.  
 
-#### نبذة عامة (Overview):
-**العربية:**
-- في عصر التحول الرقمي، لا يكفي تقديم خدمة ممتازة بدون الوصول إلى الجمهور المناسب. يوفر قسم التسويق الإلكتروني في الفضاء الواسع استراتيجيات نمو تسويقية متكاملة للشركات والأنشطة التجارية.
-- نبتكر محتوى إبداعي يلامس ثقافة وتطلعات الجمهور اليمني والعربي، مع إدارة دقيقة للحملات الإعلانية لضمان تحقيق أعلى عائد على الاستثمار (ROI).
-
-**English:**
-- In an era of digital transformation, an excellent service alone is not enough without reaching the right audience. The digital marketing division at Al-Fada Al-Wasaa delivers integrated marketing growth strategies for companies and businesses of every size.
-- We create creative content that speaks to the culture and aspirations of Yemeni and Arab audiences, combined with meticulous advertising campaign management to secure the highest possible return on investment (ROI).
-
-#### ركائز ومواصفات التنفيذ (Features):
-| الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
-|---|---|---|---|
-| **إدارة منصات التواصل الاجتماعي** | صناعة المحتوى، التصميم الجرافيكي، كتابة النصوص التسويقية، والتفاعل المستمر مع المتابعين. | **Social Media Management** | Content creation, graphic design, marketing copywriting, and continuous engagement with your followers. |
-| **الحملات الإعلانية الممولة (Paid Ads)** | استهداف دقيق على منصات Meta (Facebook & Instagram)، Google Ads، ومنصات التواصل الأخرى. | **Paid Advertising Campaigns (Paid Ads)** | Precision targeting across Meta platforms (Facebook & Instagram), Google Ads, and other social channels. |
-| **تحسين محركات البحث (SEO)** | تهيئة المواقع والمتاجر للظهور في الصفحة الأولى على Google واستقطاب عملاء بدون تكاليف إعلانية مستمرة. | **Search Engine Optimization (SEO)** | Optimizing websites and online stores to rank on the first page of Google and attract customers without ongoing ad spend. |
-| **بناء الهوية البصرية والعلامة التجارية** | تصميم الشعارات، البروفايلات التعريفية، والمواد الدعائية التي تعكس ثقل وتميز المؤسسة. | **Visual Identity and Brand Building** | Designing logos, company profiles, and promotional materials that reflect the standing and distinction of your organization. |
-
-#### المزايا التنافسية (Advantages):
-- **العربية:**
-  - فهم عميق لسلوك المستهلك المحلي في السوق اليمني والخليجي.
-  - تقارير أداء دورية وشفافة توضح نسب الوصول والتفاعل والمبيعات.
-  - فريق إبداعي يضم مصممين، كتاب محتوى، وخبراء إعلانات معتمدين.
-  - حلول مرنة تناسب الشركات الناشئة والمؤسسات الكبرى على حد سواء.
-- **English:**
-  - A deep understanding of local consumer behavior in the Yemeni and Gulf markets.
-  - Regular, transparent performance reports detailing reach, engagement, and sales metrics.
-  - A creative team of designers, content writers, and certified advertising specialists.
-  - Flexible solutions that suit startups and large enterprises alike.
-
-#### الأسئلة الشائعة للخدمة (Service FAQs):
-
-**س 1 (عربي):** هل يمكن إدارة الحملات الممولة لاستهداف مدن معينة في اليمن؟  
-**ج (عربي):** نعم، نقوم بضبط الاستهداف الجغرافي والديموغرافي بدقة حسب المدن (صنعاء، عدن، تعز، حضرموت...) والاهتمامات المطلوبة.  
-**Q 1 (English):** Can you manage paid campaigns targeting specific cities in Yemen?  
-**A (English):** Yes, we fine-tune geographic and demographic targeting by city (Sana'a, Aden, Taiz, Hadhramaut, and more) and by the interests you specify.  
-
-**س 2 (عربي):** كم يستغرق بناء هوية بصرية متكاملة للشركة؟  
-**ج (عربي):** يتراوح ذلك بين 10 إلى 15 يوم عمل تشمل دراسة الفكرة، تصميم النماذج، ودليل استخدام الهوية الكامل.  
-**Q 2 (English):** How long does it take to build a complete corporate visual identity?  
-**A (English):** It typically takes 10 to 15 working days, covering the concept study, mock-up design, and the complete brand identity usage guide.  
-
-### الخدمة: الخدمات اللوجستية والشحن والتخليص الجمركي / Logistics, Shipping, and Customs Clearance Services
-- **العنوان المختصر:** الشحن والتخليص الجمركي / Shipping & Customs Clearance
-- **الوصف التمهيدي (العربية):** إدارة حركة البضائع، الشحن البري والبحري، إنهاء الإجراءات الجمركية بكفاءة وامتثال قانوني كامل في المنافذ اليمنية.
-- **الوصف التمهيدي (English):** Managing freight movement, land and sea shipping, and completing customs procedures with efficiency and full legal compliance at Yemeni ports of entry.
-- **عنوان الـ SEO (عربي):** خدمات الشحن والتخليص الجمركي في اليمن | الفضاء الواسع
-- **عنوان الـ SEO (English):** Shipping and Customs Clearance Services in Yemen | Al-Fada Al-Wasaa
-- **وصف الـ SEO (عربي):** شركة الفضاء الواسع للتخليص الجمركي والشحن في اليمن. تخليص بضائع عبر ميناء الحديدة، عدن، والمنافذ البرية. نقل وتوزيع لوجستي آمن وموثوق.
-- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for customs clearance and shipping in Yemen. Goods clearance via the ports of Hodeidah and Aden and land crossings. Safe, reliable transport and logistics distribution.
+### الخدمة: الشحن والتخليص الجمركي / Shipping & Customs Clearance
+- **العنوان المختصر:** الشحن والتخليص / Shipping & Clearance
+- **الوصف التمهيدي (العربية):** النقل البري والبحري، الإفراج الجمركي في الموانئ والمنافذ، وإدارة سلاسل الإمداد.
+- **الوصف التمهيدي (English):** Land and sea freight, customs release at ports and crossings, and supply chain management.
+- **عنوان الـ SEO (عربي):** شركة شحن وتخليص جمركي في اليمن | الفضاء الواسع
+- **عنوان الـ SEO (English):** Shipping & Customs Clearance Company in Yemen | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** شركة الفضاء الواسع للشحن والتخليص الجمركي في اليمن: نقل بري وبحري، إفراج جمركي في الموانئ والمنافذ، وإدارة سلاسل الإمداد. هاتف: +967776999942
+- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for shipping and customs clearance in Yemen: land and sea freight, customs release at ports and crossings, and supply chain management. Call: +967776999942
 
 #### نبذة عامة (Overview):
 **العربية:**
-- تعد التجارة والشحن اللوجستي عصب التنمية، ولذلك تقدم الفضاء الواسع خدمات استيراد وتخليص جمركي متكاملة تضمن عبور بضائعكم ومعداتكم عبر كافة المنافذ البحرية والبرية بأسرع وقت.
+- تعد التجارة والشحن اللوجستي عصب التنمية؛ لذلك تقدم شركة الفضاء الواسع خدمات الشحن والتخليص الجمركي المتكاملة: نقل بري وبحري، إفراج جمركي في الموانئ والمنافذ، وإدارة سلاسل الإمداد حتى باب العميل.
 - نمتلك علاقات واسعة وفهماً دقيقاً لكافة اللوائح والتعريفات الجمركية والإعفاءات، ما يوفر على عملائنا الوقت والجهد وتكاليف الأرضيات وغرامات التأخير.
 
 **English:**
-- Trade and shipping logistics are the backbone of development; Al-Fada Al-Wasaa therefore provides integrated import and customs clearance services that ensure your goods and equipment pass through every sea and land crossing in the shortest possible time.
-- We bring wide-ranging relationships and a precise understanding of all customs regulations, tariffs, and exemption schemes, saving our clients time and effort as well as demurrage charges and late-payment penalties.
+- Trade and freight logistics are the backbone of development; Al-Fada Al-Wasaa therefore delivers integrated shipping and customs clearance services: land and sea freight, customs release at ports and crossings, and supply chain management through to the client's doorstep.
+- We bring wide-ranging relationships and a precise command of all customs regulations, tariffs, and exemption schemes — saving our clients time and effort as well as demurrage charges and late-penalty costs.
 
 #### ركائز ومواصفات التنفيذ (Features):
 | الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
 |---|---|---|---|
-| **التخليص الجمركي في كافة المنافذ** | إنهاء المعاملات في الموانئ (الحديدة، عدن) والمنافذ البرية الجمركية بدقة وامتثال قانوني. | **Customs Clearance at All Ports** | Completing procedures at the seaports (Hodeidah, Aden) and land customs crossings with precision and full legal compliance. |
-| **النقل والتوزيع الداخلي** | أسطول شاحنات مجهزة (تريلات، ديانات، سطحات) لنقل الحاويات والبضائع إلى مستودعات العميل. | **Inland Transport and Distribution** | A fleet of well-equipped trucks (trailers, flatbeds, and platform trucks) to haul containers and goods to your warehouses. |
-| **إصدار التصاريح وشهادات المطابقة** | متابعة هيئة المواصفات والمقاييس، الحجر الصحي والزراعي، واستخراج كافة أذونات الإفراج الرسمية. | **Permits and Conformity Certificates** | Liaising with the standards and metrology authority, plant and agricultural quarantine, and obtaining every official release permit. |
-| **التخزين والحلول اللوجستية الميدانية** | توفير مساحات تخزين مؤمنة ومجهزة لفرز وتحميل وتفريغ البضائع والمعدات الثقيلة. | **Storage and Field Logistics Solutions** | Providing secured, fully equipped storage space for the sorting, loading, and unloading of goods and heavy equipment. |
+| **النقل البحري ومتابعة الشحنات** | حجز المساحات البحرية، متابعة بوليصات الشحن، ومراقبة مواعيد الوصول للموانئ. | **Sea Freight & Shipment Tracking** | Booking sea space, following bills of lading, and monitoring arrival schedules at ports. |
+| **النقل البري والتوزيع الداخلي** | أسطول شاحنات مجهز (تريلات، ديانات، سطحات) لنقل الحاويات والبضائع لكل المحافظات. | **Land Freight & Inland Distribution** | A fleet of well-equipped trucks (trailers, flatbeds, platforms) hauling containers and goods to every governorate. |
+| **الإفراج الجمركي في الموانئ والمنافذ** | إنهاء إجراءات الإفراج في مينائي الحديدة وعدن والمنافذ البرية بدقة وامتثال قانوني كامل. | **Customs Release at Ports & Crossings** | Completing release procedures at Hodeidah and Aden seaports and land crossings with precision and full legal compliance. |
+| **المستندات والتصاريح والمطابقة** | متابعة هيئة المواصفات والمقاييس، الحجر الزراعي والصحي، واستخراج كافة الأذونات الرسمية. | **Documents, Permits & Conformity** | Liaising with the standards authority and agricultural/health quarantine, and obtaining every official permit. |
+| **التخزين والحلول اللوجستية** | مساحات تخزين مؤمنة ومجهزة لفرز وتحميل وتفريغ البضائع والمعدات الثقيلة. | **Storage & Logistics Solutions** | Secured, fully equipped storage space for the sorting, loading, and unloading of goods and heavy equipment. |
+| **إدارة سلاسل الإمداد** | تخطيط متكامل لحركة البضائع من المصدر حتى المستودع بتقارير متابعة دورية. | **Supply Chain Management** | End-to-end planning of goods movement from source to warehouse with periodic tracking reports. |
 
 #### المزايا التنافسية (Advantages):
 - **العربية:**
@@ -492,11 +455,15 @@
   - تأمين شامل ومتابعة حية لمسار الشحنات حتى وصولها إلى وجهتها النهائية.
   - تقليل زمن الانتظار وتجنب الغرامات ورسوم الأرضيات الإضافية.
   - قدرة عالية على التعامل مع الحمولات الخاصة والمعدات ذات الأبعاد الكبيرة.
+  - شبكة نقل بري تغطي كافة المحافظات من الموانئ والمطارات.
+  - شفافية كاملة في الأجور والرسوم الرسمية منذ البداية.
 - **English:**
   - Licensed customs brokers with extensive command of ever-changing regulations and procedures.
   - Comprehensive insurance and live tracking of your shipments until they reach their final destination.
   - Reduced waiting times and avoidance of penalties and additional ground-rent fees.
   - A high capacity to handle special cargo and oversized equipment.
+  - A land transport network covering every governorate from ports and airports.
+  - Complete transparency on fees and official charges from day one.
 
 #### الأسئلة الشائعة للخدمة (Service FAQs):
 
@@ -505,10 +472,152 @@
 **Q 1 (English):** What documents are required to start customs clearance procedures?  
 **A (English):** The Bill of Lading, the original commercial invoice, the certificate of origin, and the Packing List.  
 
-**س 2 (عربي):** كم يستغرق تخليص الحاوية عادة في الميناء؟  
+**س 2 (عربي):** كم يستغرق الإفراج الجمركي عادة في الميناء؟  
 **ج (عربي):** عند اكتمال المستندات، تستغرق الإجراءات الجمركية والفحص والمعاينة عادة من 3 إلى 5 أيام عمل حتى الإفراج.  
-**Q 2 (English):** How long does container clearance usually take at the port?  
+**Q 2 (English):** How long does customs release usually take at the port?  
 **A (English):** Once the documents are complete, customs procedures, inspection, and survey typically take 3 to 5 working days until release.  
+
+**س 3 (عربي):** هل تغطون المنافذ البرية إلى جانب الموانئ البحرية؟  
+**ج (عربي):** نعم، ننجز إجراءات الإفراج الجمركي في الموانئ البحرية والمنافذ البرية كافة بفرق معتمدة في كل موقع.  
+**Q 3 (English):** Do you cover land crossings in addition to seaports?  
+**A (English):** Yes, we complete customs release procedures at all seaports and land crossings with certified teams at each location.  
+
+**س 4 (عربي):** هل توفرون النقل البري من الميناء إلى المحافظات الداخلية؟  
+**ج (عربي):** نعم، نمتلك أسطول نقل بري مجهزاً (تريلات وسطحات) ينقل الحاويات والمعدات الثقيلة إلى كافة المحافظات.  
+**Q 4 (English):** Do you provide inland transport from the port to governorates?  
+**A (English):** Yes, we operate a well-equipped land fleet (trailers and flatbeds) that moves containers and heavy equipment to every governorate.  
+
+### الخدمة: التوريدات العامة والتجهيزات / General Supplies & Equipment
+- **العنوان المختصر:** التوريدات العامة / General Supplies
+- **الوصف التمهيدي (العربية):** استيراد وتوريد المواد الإنشائية، الكابلات، المعدات الثقيلة، وقطع الغيار الأصلية.
+- **الوصف التمهيدي (English):** Import and supply of construction materials, cables, heavy equipment, and genuine spare parts.
+- **عنوان الـ SEO (عربي):** توريدات عامة وتجهيزات ومعدات في اليمن | الفضاء الواسع صنعاء
+- **عنوان الـ SEO (English):** General Supplies, Equipment & Spare Parts in Yemen | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** شركة الفضاء الواسع للتوريدات العامة والتجهيزات في اليمن: استيراد وتوريد المواد الإنشائية، الكابلات، المعدات الثقيلة، وقطع الغيار الأصلية. هاتف: +967776999942
+- **وصف الـ SEO (English):** Al-Fada Al-Wasaa for general supplies and equipment in Yemen: importing and supplying construction materials, cables, heavy equipment, and genuine spare parts. Call: +967776999942
+
+#### نبذة عامة (Overview):
+**العربية:**
+- تشكل التوريدات الموثوقة شرياناً أساسياً لاستمرار المشاريع؛ لذا تقدم شركة الفضاء الواسع خدمات التوريدات العامة والتجهيزات: استيراد وتوريد المواد الإنشائية، الكابلات، المعدات الثقيلة، وقطع الغيار الأصلية من مصادر معتمدة.
+- ندير دورة التوريد كاملة — من التوريد الخارجي والجمارك حتى التسليم في موقع المشروع — مع فحص جودة صارم وشهادات مطابقة لكل شحنة، وسرعة استجابة تمنع توقف خطوط العمل.
+
+**English:**
+- Reliable supply is a fundamental lifeline for keeping projects running; Al-Fada Al-Wasaa therefore provides general supply and equipment services: importing and supplying construction materials, cables, heavy equipment, and genuine spare parts from approved sources.
+- We manage the entire supply cycle — from international procurement and customs through to delivery at the project site — with rigorous quality inspection and conformity certificates for every shipment, and a response speed that prevents work stoppages.
+
+#### ركائز ومواصفات التنفيذ (Features):
+| الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
+|---|---|---|---|
+| **المواد الإنشائية** | استيراد وتوريد الأسمنت والحديد والمواد الأساسية بكميات تجارية وفق المواصفات. | **Construction Materials** | Importing and supplying cement, steel, and essential materials in commercial volumes to specification. |
+| **الكابلات والتمديدات الكهربائية** | توريد الكابلات النحاسية والمتوسطة الجهد والأعطال الكهربائية بشهادات مطابقة. | **Cables & Electrical Supplies** | Supplying copper cables, medium-voltage lines, and electrical accessories with conformity certificates. |
+| **المعدات والآليات الثقيلة** | توريد المعدات الثقيلة والآليات الهندسية مع التجهيزات الملحقة والاختبارات التشغيلية. | **Heavy Equipment & Machinery** | Supplying heavy equipment and engineering machinery with their attachments and operational testing. |
+| **قطع الغيار الأصلية** | توفير قطع غيار أصلية للمعدات والمركبات من الوكلاء المعتمدين مع ضمان صحة المصدر. | **Genuine Spare Parts** | Providing genuine spare parts for equipment and vehicles from certified dealers with verified sourcing. |
+| **المحروقات والزيوت التشغيلية** | توريد المحروقات والزيوت الصناعية للمواقع والمولدات بصهاريج معتمدة للسلامة. | **Fuels & Operational Oils** | Supplying fuels and industrial oils to sites and generators via safety-certified tankers. |
+| **التموينات الميدانية واللوجستية** | تجهيز المواقع بالاحتياجات التشغيلية والميدانية بسرعة وموثوقية عالية. | **Field & Logistics Provisioning** | Equipping sites with operational and field requirements quickly and with high reliability. |
+
+#### المزايا التنافسية (Advantages):
+- **العربية:**
+  - شبكة موردين خارجية وداخلية معتمدة تضمن أصالة المنتج وشهادات المطابقة.
+  - إدارة كاملة لدورة الاستيراد والجمارك داخل الشركة عبر قطاع الشحن.
+  - فحص جودة عند الاستلام وتوثيق كل شحنة بتقارير مفصلة.
+  - أسعار تنافسية للكميات التجارية وعقود التوريد الدوري.
+  - سرعة استجابة عالية لطلبات التوريد الطارئة للمواقع.
+  - خبرة فنية تساعد العميل في اختيار المواصفات الصحيحة لكل بند.
+- **English:**
+  - A network of approved external and local suppliers guaranteeing product authenticity and conformity certificates.
+  - Full management of the import and customs cycle in-house through the shipping sector.
+  - Quality inspection upon receipt and detailed reports documenting every shipment.
+  - Competitive pricing for commercial volumes and periodic supply contracts.
+  - High-speed response to urgent site supply requests.
+  - Technical expertise that helps clients specify the correct requirements for every item.
+
+#### الأسئلة الشائعة للخدمة (Service FAQs):
+
+**س 1 (عربي):** هل تشمل خدماتكم استيراد المواد من الخارج؟  
+**ج (عربي):** نعم، ندير دورة الاستيراد كاملة من التوريد الخارجي وحتى الإفراج الجمركي والتسليم في موقع المشروع عبر قطاع الشحن والتخليص لدينا.  
+**Q 1 (English):** Do your services include importing materials from abroad?  
+**A (English):** Yes, we manage the full import cycle from international procurement through customs release and delivery at the project site via our shipping and clearance sector.  
+
+**س 2 (عربي):** هل تضمنون أصالة قطع الغيار الموردة؟  
+**ج (عربي):** نعم، نوفر قطع الغيار الأصلية من الوكلاء المعتمدين مع شهادات مصدر موثقة لكل شحنة.  
+**Q 2 (English):** Do you guarantee the authenticity of supplied spare parts?  
+**A (English):** Yes, we provide genuine spare parts from certified dealers with documented source certificates for every shipment.  
+
+**س 3 (عربي):** هل يمكن التعاقد على توريد دوري منتظم للمشاريع؟  
+**ج (عربي):** نعم، نقدم عقود توريد سنوية وشهرية تضمن ثبات الإمداد وأولوية التجهيز تحت كافة الظروف.  
+**Q 3 (English):** Can we contract for regular periodic supply to projects?  
+**A (English):** Yes, we offer annual and monthly supply contracts that guarantee supply stability and priority provisioning under all circumstances.  
+
+**س 4 (عربي):** هل توردون المعدات الثقيلة كاملة أو التجهيزات فقط؟  
+**ج (عربي):** نوفر كليهما: توريد المعدات الثقيلة كاملة مع الاختبارات التشغيلية، وتجهيزاتها وقطع غيارها بشكل منفصل حسب الحاجة.  
+**Q 4 (English):** Do you supply heavy equipment as well as attachments?  
+**A (English):** Both: we supply complete heavy equipment with operational testing, and separately provide attachments and spare parts as needed.  
+
+### الخدمة: التسويق العقاري والفرص الاستثمارية / Real Estate Marketing & Investment
+- **العنوان المختصر:** التسويق العقاري / Real Estate Marketing
+- **الوصف التمهيدي (العربية):** دراسات الجدوى، تسويق الأراضي والمجمعات، التطوير وإدارة الأصول العقارية.
+- **الوصف التمهيدي (English):** Feasibility studies, land and compound marketing, development, and real estate asset management.
+- **عنوان الـ SEO (عربي):** تسويق عقاري وفرص استثمارية في صنعاء | الفضاء الواسع اليمن
+- **عنوان الـ SEO (English):** Real Estate Marketing & Investment Opportunities in Sana'a | Al-Fada Al-Wasaa
+- **وصف الـ SEO (عربي):** خدمات التسويق العقاري والفرص الاستثمارية في اليمن: دراسات جدوى، تسويق الأراضي والمجمعات، التطوير العقاري، وإدارة الأصول العقارية. هاتف: +967776999942
+- **وصف الـ SEO (English):** Real estate marketing and investment services in Yemen: feasibility studies, land and compound marketing, property development, and real estate asset management. Call: +967776999942
+
+#### نبذة عامة (Overview):
+**العربية:**
+- يقدم قسم التسويق العقاري والفرص الاستثمارية في الفضاء الواسع منظومة متكاملة تربط أصحاب الأراضي والمطورين بالمستثمرين والمشترين الجديين، مدعومة بدراسات جدوى اقتصادية دقيقة ومعرفة عميقة بالسوق العقاري اليمني.
+- نشتغل على كامل دورة حياة الأصل العقاري: دراسة الجدوى، تسويق الأراضي والمخططات والمجمعات، الإشراف على التطوير، ثم إدارة الأصول العقارية وحفظ قيمتها السوقية ونموها على المدى الطويل.
+
+**English:**
+- The Real Estate Marketing & Investment division at Al-Fada Al-Wasaa delivers an integrated system that connects landowners and developers with serious investors and buyers, backed by precise economic feasibility studies and deep knowledge of the Yemeni property market.
+- We work across the full life cycle of the asset: feasibility study, marketing of land, plots, and compounds, supervising development, then managing the real estate assets to preserve and grow their market value over the long term.
+
+#### ركائز ومواصفات التنفيذ (Features):
+| الركيزة (عربي) | التفاصيل (عربي) | Feature (English) | Description (English) |
+|---|---|---|---|
+| **دراسات الجدوى الاقتصادية** | دراسات جدوى عقارية واستثمارية شاملة: تحليل السوق، التكاليف، العوائد، ونقاط التعادل. | **Economic Feasibility Studies** | Comprehensive real estate and investment feasibility studies: market analysis, costs, returns, and break-even points. |
+| **تسويق الأراضي والمخططات** | تسويق الأراضي والمخططات السكنية والتجارية بشبكة عملاء جديين وحملات ميدانية ورقمية. | **Land & Plot Marketing** | Marketing land and residential/commercial plots to a network of serious clients through field and digital campaigns. |
+| **تسويق المجمعات والوحدات العقارية** | إطلاق وتسويق المجمعات السكنية والتجارية والوحدات الجاهزة بخطط بيع احترافية. | **Compounds & Units Marketing** | Launching and marketing residential and commercial compounds and ready units with professional sales plans. |
+| **التطوير العقاري والإشراف** | إدارة مشاريع التطوير من الفكرة حتى التسليم بالتكامل مع قطاع المقاولات داخل الشركة. | **Development & Supervision** | Managing development projects from concept to handover in integration with the company's contracting sector. |
+| **إدارة الأصول العقارية** | إدارة وصيانة الأصول العقارية والتأجير وحفظ القيمة السوقية وتنميتها. | **Real Estate Asset Management** | Managing and maintaining real estate assets, leasing, and preserving and growing their market value. |
+| **الاستشارات الاستثمارية** | توجيه المستثمرين للفرص الملائمة وتقييم المخاطر وهيكلة الشراكات العقارية. | **Investment Advisory** | Guiding investors to suitable opportunities, assessing risks, and structuring real estate partnerships. |
+
+#### المزايا التنافسية (Advantages):
+- **العربية:**
+  - معرفة عميقة بالسوق العقاري في صنعاء والمحافظات الرئيسية وأسعاره الفعلية.
+  - تكامل فريد مع قطاعي المقاولات والحفريات داخل الشركة لتقييم الأصول تقنياً.
+  - شبكة مستثمرين ومشترين جديين مبنية على سنوات من العمل المؤسسي.
+  - دراسات جدوى واقعية بأرقام سوقية حقيقية لا تقديرات نظرية.
+  - شفافية كاملة في العمولات والاتفاقيات منذ أول اجتماع.
+  - متابعة قانونية لإجراءات البيع والشراكات مع مستشارين مختصين.
+- **English:**
+  - Deep knowledge of the property market in Sana'a and the key governorates, with real price references.
+  - Unique integration with the company's contracting and excavation sectors for technical asset assessment.
+  - A network of serious investors and buyers built on years of institutional work.
+  - Realistic feasibility studies grounded in actual market figures, not theoretical estimates.
+  - Full transparency on commissions and agreements from the first meeting.
+  - Legal follow-up of sale and partnership procedures with specialized counsel.
+
+#### الأسئلة الشائعة للخدمة (Service FAQs):
+
+**س 1 (عربي):** هل تشمل خدماتكم دراسات الجدوى لمشاريع الأراضي والمخططات؟  
+**ج (عربي):** نعم، نقدم دراسات جدوى عقارية واستثمارية شاملة تشمل تحليل السوق والتكاليف والعوائد وبدائل الاستخدام الأمثل للأصل.  
+**Q 1 (English):** Do your services include feasibility studies for land and plot projects?  
+**A (English):** Yes, we deliver comprehensive real estate and investment feasibility studies covering market analysis, costs, returns, and the best alternative uses of the asset.  
+
+**س 2 (عربي):** كيف تسوقون الأراضي والمجمعات السكنية؟  
+**ج (عربي):** نبنى خطة تسويق مخصصة تجمع الحملات الميدانية والرقمية وشبكة عملائنا الجديين، مع تقارير تفاعل دورية طوال الحملة.  
+**Q 2 (English):** How do you market land and residential compounds?  
+**A (English):** We build a tailored marketing plan combining field and digital campaigns with our network of serious clients, backed by periodic engagement reports throughout the campaign.  
+
+**س 3 (عربي):** هل تقدمون خدمات إدارة الأصول العقارية بعد البيع؟  
+**ج (عربي):** نعم، نوفر إدارة وصيانة الأصول العقارية والتأجير وحفظ القيمة السوقية عبر عقود إدارة سنوية واضحة.  
+**Q 3 (English):** Do you provide real estate asset management after sale?  
+**A (English):** Yes, we offer asset management, maintenance, and leasing to preserve market value through clear annual management contracts.  
+
+**س 4 (عربي):** ما الذي يميز تقييمكم العقاري عن غيره؟  
+**ج (عربي):** تكاملنا مع قطاعي المقاولات والحفريات داخل الشركة يتيح لنا تقييم الأصل تقنياً وإنشائياً وليس تسويقياً فقط، ما يمنح تقديرات أدق وأكثر واقعية.  
+**Q 4 (English):** What makes your property valuation different?  
+**A (English):** Our integration with the contracting and excavation sectors allows us to assess the asset technically and structurally — not just commercially — producing more accurate and realistic estimates.  
 
 ---
 

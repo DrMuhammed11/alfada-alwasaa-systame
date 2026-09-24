@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EN_SERVICES_DATA } from "@/config/en-services-data";
-import { EN_SITE_CONFIG } from "@/config/en-site";
+import { SERVICES_DATA } from "@/config/services-data";
+import { SITE_CONFIG } from "@/config/site";
 import { ServiceDetailView } from "@/components/site/service-detail-view";
 
 interface PageProps {
@@ -9,15 +9,15 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return Object.keys(EN_SERVICES_DATA).map((slug) => ({ slug }));
+  return Object.keys(SERVICES_DATA).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = EN_SERVICES_DATA[slug];
+  const service = SERVICES_DATA[slug];
   if (!service) return {};
 
-  const canonical = `https://www.alfadaalwasaa.com/en/services/${slug}`;
+  const canonical = `https://www.alfadaalwasaa.com/services/${slug}`;
   return {
     title: service.seoTitle,
     description: service.seoDescription,
@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical,
       languages: {
-        ar: `https://www.alfadaalwasaa.com/services/${slug}`,
-        en: canonical,
+        ar: canonical,
+        en: `https://www.alfadaalwasaa.com/en/services/${slug}`,
       },
     },
     openGraph: {
@@ -41,18 +41,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           alt: service.title,
         },
       ],
-      locale: "en_US",
+      locale: "ar_YE",
       type: "website",
     },
   };
 }
 
-export default async function EnServicePage({ params }: PageProps) {
+export default async function ServicePage({ params }: PageProps) {
   const { slug } = await params;
-  const service = EN_SERVICES_DATA[slug];
+  const service = SERVICES_DATA[slug];
   if (!service) notFound();
 
-  // Structured schemas: FAQ + Breadcrumb + Service
+  // المخططات المنظمة: الأسئلة الشائعة + مسار التنقل + الخدمة
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -73,20 +73,20 @@ export default async function EnServicePage({ params }: PageProps) {
       {
         "@type": "ListItem",
         position: 1,
-        name: "Home",
-        item: "https://www.alfadaalwasaa.com/en",
+        name: "الرئيسية",
+        item: "https://www.alfadaalwasaa.com",
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: "Services",
-        item: "https://www.alfadaalwasaa.com/en#services",
+        name: "خدماتنا",
+        item: "https://www.alfadaalwasaa.com/#services",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: service.title,
-        item: `https://www.alfadaalwasaa.com/en/services/${service.slug}`,
+        item: `https://www.alfadaalwasaa.com/services/${service.slug}`,
       },
     ],
   };
@@ -98,8 +98,8 @@ export default async function EnServicePage({ params }: PageProps) {
     description: service.subtitle,
     provider: {
       "@type": "Organization",
-      name: EN_SITE_CONFIG.company.fullName,
-      url: "https://www.alfadaalwasaa.com/en",
+      name: SITE_CONFIG.company.fullName,
+      url: "https://www.alfadaalwasaa.com",
     },
     areaServed: {
       "@type": "Country",
@@ -121,7 +121,7 @@ export default async function EnServicePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
       />
-      <ServiceDetailView service={service} locale="en" />
+      <ServiceDetailView service={service} locale="ar" />
     </>
   );
 }

@@ -10,7 +10,7 @@ import {
   Package,
   RadioTower,
   Ship,
-  MonitorSmartphone,
+  TrendingUp,
   ArrowRight,
   MessageSquare,
   CheckCircle2,
@@ -28,7 +28,7 @@ const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   supplies: Package,
   telecom: RadioTower,
   shipping: Ship,
-  marketing: MonitorSmartphone,
+  marketing: TrendingUp,
 };
 
 export function EnServicesTabs() {

@@ -5,7 +5,8 @@
 
 /* ===== Brand identity — extracted literally from the company profile PDF ===== */
 @theme inline {
-  --breakpoint-lg: 960px;
+  /* الوحدة rem ضرورية لترتيب media queries بشكل سليم في CSS المولّد (60rem = 960px) */
+  --breakpoint-lg: 60rem;
   --color-navy: #0a3453;
   --color-navy-deep: #072a44;
   --color-navy-darker: #051e31;
