@@ -1,0 +1,15 @@
+{
+  "name": "شركة الفضاء الواسع",
+  "short_name": "الفضاء الواسع",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#051e31",
+  "theme_color": "#0a3453",
+  "icons": [
+    {
+      "src": "/profile/logo_mark.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

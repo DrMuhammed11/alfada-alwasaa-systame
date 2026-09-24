@@ -18,6 +18,9 @@ export const metadata: Metadata = {
       en: "https://www.alfadaalwasaa.com/en",
       "x-default": "https://www.alfadaalwasaa.com",
     },
+    types: {
+      "application/rss+xml": "https://www.alfadaalwasaa.com/en/rss.xml",
+    },
   },
   twitter: {
     card: "summary_large_image",

@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next out",
     "start": "npx serve out -l 3001",
-    "lint": "eslint ."
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "preview": "node serve-out.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

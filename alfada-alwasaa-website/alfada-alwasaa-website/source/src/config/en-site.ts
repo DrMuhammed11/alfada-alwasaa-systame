@@ -15,6 +15,7 @@ export const EN_SITE_CONFIG = {
       "A multi-service professional entity founded on a clear vision: delivering integrated solutions that unite executive experience, institutional discipline, and the capacity to achieve high standards of quality and professionalism.",
     subBrief:
       "Since its inception, the company has been committed to being a reliable partner for organizations seeking solid performance, meticulous execution, and outcomes befitting major enterprise initiatives.",
+    rss: "/en/rss.xml",
   },
 
   // Official Contact Channels & Directory

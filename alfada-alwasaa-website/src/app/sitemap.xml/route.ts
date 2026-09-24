@@ -9,6 +9,7 @@ interface SitemapUrl {
   loc: string;
   priority: string;
   changefreq: string;
+  lastmod?: string;
   alternates?: { ar: string; en: string };
 }
 
@@ -17,18 +18,18 @@ export async function GET() {
   const baseUrl = "https://www.alfadaalwasaa.com";
 
   const staticUrls: SitemapUrl[] = [
-    { loc: `${baseUrl}/`, priority: "1.0", changefreq: "daily", alternates: { ar: `${baseUrl}/`, en: `${baseUrl}/en` } },
-    { loc: `${baseUrl}/en`, priority: "1.0", changefreq: "daily" },
-    { loc: `${baseUrl}/about`, priority: "0.9", changefreq: "monthly", alternates: { ar: `${baseUrl}/about`, en: `${baseUrl}/en/about` } },
-    { loc: `${baseUrl}/en/about`, priority: "0.9", changefreq: "monthly" },
-    { loc: `${baseUrl}/contact`, priority: "0.9", changefreq: "monthly", alternates: { ar: `${baseUrl}/contact`, en: `${baseUrl}/en/contact` } },
-    { loc: `${baseUrl}/en/contact`, priority: "0.9", changefreq: "monthly" },
-    { loc: `${baseUrl}/blog`, priority: "0.8", changefreq: "weekly", alternates: { ar: `${baseUrl}/blog`, en: `${baseUrl}/en/blog` } },
-    { loc: `${baseUrl}/en/blog`, priority: "0.8", changefreq: "weekly" },
-    { loc: `${baseUrl}/privacy`, priority: "0.3", changefreq: "yearly", alternates: { ar: `${baseUrl}/privacy`, en: `${baseUrl}/en/privacy` } },
-    { loc: `${baseUrl}/en/privacy`, priority: "0.3", changefreq: "yearly" },
-    { loc: `${baseUrl}/terms`, priority: "0.3", changefreq: "yearly", alternates: { ar: `${baseUrl}/terms`, en: `${baseUrl}/en/terms` } },
-    { loc: `${baseUrl}/en/terms`, priority: "0.3", changefreq: "yearly" },
+    { loc: `${baseUrl}/`, priority: "1.0", changefreq: "daily", lastmod: today, alternates: { ar: `${baseUrl}/`, en: `${baseUrl}/en` } },
+    { loc: `${baseUrl}/en`, priority: "1.0", changefreq: "daily", lastmod: today },
+    { loc: `${baseUrl}/about`, priority: "0.9", changefreq: "monthly", lastmod: today, alternates: { ar: `${baseUrl}/about`, en: `${baseUrl}/en/about` } },
+    { loc: `${baseUrl}/en/about`, priority: "0.9", changefreq: "monthly", lastmod: today },
+    { loc: `${baseUrl}/contact`, priority: "0.9", changefreq: "monthly", lastmod: today, alternates: { ar: `${baseUrl}/contact`, en: `${baseUrl}/en/contact` } },
+    { loc: `${baseUrl}/en/contact`, priority: "0.9", changefreq: "monthly", lastmod: today },
+    { loc: `${baseUrl}/blog`, priority: "0.8", changefreq: "weekly", lastmod: today, alternates: { ar: `${baseUrl}/blog`, en: `${baseUrl}/en/blog` } },
+    { loc: `${baseUrl}/en/blog`, priority: "0.8", changefreq: "weekly", lastmod: today },
+    { loc: `${baseUrl}/privacy`, priority: "0.3", changefreq: "yearly", lastmod: today, alternates: { ar: `${baseUrl}/privacy`, en: `${baseUrl}/en/privacy` } },
+    { loc: `${baseUrl}/en/privacy`, priority: "0.3", changefreq: "yearly", lastmod: today },
+    { loc: `${baseUrl}/terms`, priority: "0.3", changefreq: "yearly", lastmod: today, alternates: { ar: `${baseUrl}/terms`, en: `${baseUrl}/en/terms` } },
+    { loc: `${baseUrl}/en/terms`, priority: "0.3", changefreq: "yearly", lastmod: today },
   ];
 
   const serviceUrls: SitemapUrl[] = Object.keys(SERVICES_DATA).flatMap((slug) => [
@@ -36,12 +37,14 @@ export async function GET() {
       loc: `${baseUrl}/services/${slug}`,
       priority: "0.9",
       changefreq: "weekly",
+      lastmod: today,
       alternates: { ar: `${baseUrl}/services/${slug}`, en: `${baseUrl}/en/services/${slug}` },
     },
     {
       loc: `${baseUrl}/en/services/${slug}`,
       priority: "0.9",
       changefreq: "weekly",
+      lastmod: today,
     },
   ]);
 
@@ -50,17 +53,18 @@ export async function GET() {
       loc: `${baseUrl}/blog/${slug}`,
       priority: "0.8",
       changefreq: "monthly",
+      lastmod: BLOG_POSTS[slug]?.date || today,
       alternates: { ar: `${baseUrl}/blog/${slug}`, en: `${baseUrl}/en/blog/${slug}` },
     },
     {
       loc: `${baseUrl}/en/blog/${slug}`,
       priority: "0.8",
       changefreq: "monthly",
+      lastmod: EN_BLOG_POSTS[slug]?.date || today,
     },
   ]);
 
   void EN_SERVICES_DATA;
-  void EN_BLOG_POSTS;
 
   const allUrls = [...staticUrls, ...serviceUrls, ...blogUrls];
 
@@ -76,7 +80,7 @@ ${allUrls
       : "";
     return `  <url>
     <loc>${u.loc}</loc>
-${u.alternates ? alternateLines + "\n" : ""}    <lastmod>${today}</lastmod>
+${u.alternates ? alternateLines + "\n" : ""}    <lastmod>${u.lastmod || today}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
   </url>`;

@@ -62,7 +62,11 @@ export const metadata: Metadata = {
       en: "https://www.alfadaalwasaa.com/en",
       "x-default": "https://www.alfadaalwasaa.com",
     },
+    types: {
+      "application/rss+xml": "https://www.alfadaalwasaa.com/rss.xml",
+    },
   },
+  manifest: "/manifest.webmanifest",
   verification: {
     google: "016da0dfa06d1301",
     other: {
