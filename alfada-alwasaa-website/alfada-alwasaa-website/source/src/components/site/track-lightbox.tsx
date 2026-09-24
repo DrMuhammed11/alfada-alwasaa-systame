@@ -3,14 +3,13 @@
 import { useEffect, useCallback } from "react";
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  X, 
-  ChevronRight, 
-  ChevronLeft, 
-  CheckCircle2, 
-  ShieldCheck, 
-  ExternalLink 
+import {
+  X,
+  ChevronRight,
+  ChevronLeft,
+  CheckCircle2,
+  ShieldCheck,
+  ExternalLink
 } from "lucide-react";
 
 export type TrackItem = {
@@ -74,31 +73,20 @@ export function TrackLightbox({
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <AnimatePresence>
-        {isOpen && (
-          <Dialog.Portal forceMount>
-            {/* Backdrop */}
-            <Dialog.Overlay asChild>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-50 bg-navy-darker/90 backdrop-blur-md"
-              />
-            </Dialog.Overlay>
+      {isOpen && (
+        <Dialog.Portal>
+          {/* Backdrop */}
+          <Dialog.Overlay asChild>
+            <div className="fade-pop-fast fixed inset-0 z-50 bg-navy-darker/90 backdrop-blur-md" />
+          </Dialog.Overlay>
 
-            {/* Modal Dialog Content */}
-            <Dialog.Content asChild>
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative my-auto flex w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-b from-navy via-navy to-navy-darker text-white shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
+          {/* Modal Dialog Content */}
+          <Dialog.Content asChild>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+              <div
+                className="fade-pop-enter relative my-auto flex w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-b from-navy via-navy to-navy-darker text-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
                   {/* Top Bar with Tag, Counter & Close Button */}
                   <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5 sm:px-6">
                     <div className="flex items-center gap-3">
@@ -206,12 +194,11 @@ export function TrackLightbox({
                       </div>
                     </div>
                   </div>
-                </motion.div>
               </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        )}
-      </AnimatePresence>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      )}
     </Dialog.Root>
   );
 }

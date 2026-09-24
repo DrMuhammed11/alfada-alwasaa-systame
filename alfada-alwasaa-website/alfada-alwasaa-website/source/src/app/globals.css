@@ -396,4 +396,47 @@ a, button, input, select, textarea {
   }
 }
 
+/* حركات عناصر وقت التشغيل فقط (قوائم، نوافذ، ودجات) — بديل framer-motion
+   تُركَّب بعد الـ mount فقط فلا تظهر أبداً في HTML الثابت */
+.fade-pop-enter {
+  animation: fade-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-pop-fast {
+  animation: fade-pop 0.2s ease-out;
+}
+
+@keyframes fade-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* شريط الشراكات المتحرك (Marquee) — CSS خالص بديل framer-motion */
+.marquee-track {
+  animation: marquee-scroll 35s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-pop-enter,
+  .fade-pop-fast,
+  .marquee-track {
+    animation: none;
+  }
+}
+
 

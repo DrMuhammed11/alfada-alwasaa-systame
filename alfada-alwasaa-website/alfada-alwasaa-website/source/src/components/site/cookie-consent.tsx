@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X, Check } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -57,19 +56,14 @@ export function CookieConsent() {
   };
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          role="dialog"
-          aria-live="polite"
-          aria-label={t.ariaLabel}
-          dir={isEnglish ? "ltr" : "rtl"}
-          className="fixed bottom-5 end-5 z-50 max-w-sm rounded-3xl border border-gold/30 bg-navy-darker/95 p-5 text-white shadow-[0_20px_50px_rgba(5,30,49,0.7)] backdrop-blur-xl"
-        >
+    visible && (
+      <div
+        role="dialog"
+        aria-live="polite"
+        aria-label={t.ariaLabel}
+        dir={isEnglish ? "ltr" : "rtl"}
+        className="fade-pop-enter fixed bottom-5 end-5 z-50 max-w-sm rounded-3xl border border-gold/30 bg-navy-darker/95 p-5 text-white shadow-[0_20px_50px_rgba(5,30,49,0.7)] backdrop-blur-xl"
+      >
           <div className="flex items-start gap-3.5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gold/15 text-gold-light ring-1 ring-gold/40">
               <Cookie className="h-5 w-5" />
@@ -109,8 +103,7 @@ export function CookieConsent() {
               </div>
             </div>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    )
   );
 }

@@ -1,20 +1,20 @@
 "use client";
 
 /**
- * English Site Header — shared chrome for all English subpages (/en/about, /en/services/...)
- * Extracted verbatim from the English homepage header (src/app/en/page.tsx) for pixel parity.
+ * English Site Header — shared chrome for all English pages (/en, /en/about, /en/services/...)
+ * Pure CSS mobile accordion using grid-rows technique (zero framer-motion).
  */
 
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, Search, X } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { LanguageSwitcher } from "@/components/site/language-switcher";
 import { CommandSearch } from "@/components/site/command-search";
+import { cn } from "@/lib/utils";
 
 export function EnHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,6 +102,7 @@ export function EnHeader() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}
+              aria-expanded={mobileMenuOpen}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white"
               aria-label="Toggle Navigation"
             >
@@ -110,14 +111,19 @@ export function EnHeader() {
           </div>
         </div>
 
-        {/* Mobile Dropdown */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="border-t border-white/10 bg-navy-deep px-4 py-4 lg:hidden"
+        {/* Mobile dropdown — pure CSS accordion with grid-rows technique */}
+        <div
+          className={cn(
+            "grid transition-all duration-300 ease-in-out lg:hidden",
+            mobileMenuOpen
+              ? "grid-rows-[1fr] opacity-100 visible"
+              : "grid-rows-[0fr] opacity-0 invisible"
+          )}
+        >
+          <div className="overflow-hidden">
+            <nav
+              className="border-t border-white/10 bg-navy-deep px-4 py-4"
+              aria-label="Mobile Navigation"
             >
               <div className="space-y-2">
                 {EN_SITE_CONFIG.navItems.map((item) => (
@@ -157,9 +163,9 @@ export function EnHeader() {
                   </a>
                 </div>
               </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
+            </nav>
+          </div>
+        </div>
       </header>
 
       {/* Command Search Palette */}
@@ -167,3 +173,5 @@ export function EnHeader() {
     </>
   );
 }
+
+export default EnHeader;

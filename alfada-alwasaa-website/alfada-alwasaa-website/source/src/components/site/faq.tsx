@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
@@ -120,21 +119,21 @@ export function Faq() {
                     />
                   </button>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="border-t border-navy/5 dark:border-white/10 px-4 sm:px-5 pb-5 pt-3 text-xs sm:text-sm leading-7 text-slate-600 dark:text-slate-300">
-                          <p>{item.answer}</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* أكورديون CSS خالص: تقنية grid-rows (بديل AnimatePresence) —
+                      invisible تُبقي المحتوى خارج ترتيب التبويب عند الإغلاق */}
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out ${
+                      isOpen
+                        ? "grid-rows-[1fr] opacity-100 visible"
+                        : "grid-rows-[0fr] opacity-0 invisible"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="border-t border-navy/5 dark:border-white/10 px-4 sm:px-5 pb-5 pt-3 text-xs sm:text-sm leading-7 text-slate-600 dark:text-slate-300">
+                        <p>{item.answer}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Reveal>
             );

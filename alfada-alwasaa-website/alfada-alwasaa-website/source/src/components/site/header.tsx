@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
@@ -140,13 +139,9 @@ export function SiteHeader() {
               )}
             >
               {item.label}
-              {/* مؤشر الرابط النشط — يتحرك بسلاسة بين الروابط عبر layoutId */}
+              {/* مؤشر الرابط النشط — يظهر تحت الرابط الحالي */}
               {active === item.href && (
-                <motion.span
-                  layoutId="nav-active-indicator"
-                  className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gold"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
+                <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gold" />
               )}
             </a>
           ))}
@@ -208,15 +203,19 @@ export function SiteHeader() {
       {/* Command Search Palette */}
       <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* Mobile dropdown */}
-      <AnimatePresence>
-        {open && (
-          <motion.nav
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-white/10 bg-navy-deep/98 backdrop-blur-md lg:hidden"
+      {/* Mobile dropdown — أكورديون CSS خالص بتقنية grid-rows (بديل AnimatePresence)،
+          invisible عند الإغلاق تُبقي الروابط خارج ترتيب التبويب وشجرة الوصولية */}
+      <div
+        className={cn(
+          "grid transition-all duration-300 ease-in-out lg:hidden",
+          open
+            ? "grid-rows-[1fr] opacity-100 visible"
+            : "grid-rows-[0fr] opacity-0 invisible"
+        )}
+      >
+        <div className="overflow-hidden">
+          <nav
+            className="border-t border-white/10 bg-navy-deep/98 backdrop-blur-md"
             aria-label="قائمة التنقل للجوال"
           >
             <ul className="space-y-1 px-4 py-4">
@@ -266,9 +265,9 @@ export function SiteHeader() {
                 </div>
               </li>
             </ul>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+          </nav>
+        </div>
+      </div>
     </header>
   );
 }

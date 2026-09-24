@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ShieldCheck, Briefcase, Award, ArrowLeft, Phone, FileDown } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
@@ -18,8 +19,26 @@ const fadeUpDelay = (delay: number): CSSProperties =>
 
 export function Hero() {
   const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 800], [0, 800 * 0.12]);
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  // بارالاكس خفيف للخلفية عبر rAF مباشر على الـ DOM (بديل useScroll/useTransform من framer-motion)
+  // بدون إعادة رندر React لكل إطار — نفس أداء الحل السابق أو أفضل
+  useEffect(() => {
+    if (reduce) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (bgRef.current) {
+          bgRef.current.style.transform = `translate3d(0, ${window.scrollY * 0.12}px, 0)`;
+        }
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [reduce]);
 
   return (
     <section id="home" className="relative flex items-center overflow-hidden bg-navy-darker pt-24 pb-14 sm:pb-16 lg:pt-28 lg:pb-20">
@@ -27,9 +46,9 @@ export function Hero() {
       <span id="about" className="absolute -top-24" />
 
       {/* Background artwork with elegant overlay and subtle parallax */}
-      <motion.div
-        style={{ y: reduce ? 0 : yParallax }}
-        className="absolute -top-12 -bottom-12 inset-x-0"
+      <div
+        ref={bgRef}
+        className="absolute -top-12 -bottom-12 inset-x-0 will-change-transform"
       >
         <Image
           src={SITE_CONFIG.assets.heroBg}
@@ -41,7 +60,7 @@ export function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy-darker/95 via-navy/90 to-navy-darker/98" />
         <div className="dot-grid absolute inset-0 opacity-25" />
-      </motion.div>
+      </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main 2-Column Responsive Layout: Unified Home & About */}

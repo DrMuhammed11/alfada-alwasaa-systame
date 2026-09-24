@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
   Route,
@@ -91,18 +90,13 @@ export function Services() {
           </div>
         </Reveal>
 
-        {/* Active Tab Content Display with Framer Motion AnimatePresence */}
+        {/* Active Tab Content Display — تبديل بتقنية remount (key) مع أنيميشن CSS خالص
+            أول تبويب يُرسَّر مرئياً في HTML الثابت (بلا opacity:0) والتبديل يبقى متحركاً */}
         <div className="relative">
-          {/* initial={false}: أول تبويب يُرسَّر مرئياً في HTML الثابت (بلا opacity:0) والتبديل يبقى متحركاً */}
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeService.slug}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-gradient-to-br from-navy via-navy-deep to-navy-darker p-6 sm:p-8 lg:p-10 text-white shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)]"
-            >
+          <div
+            key={activeService.slug}
+            className="fade-pop-enter relative overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-gradient-to-br from-navy via-navy-deep to-navy-darker p-6 sm:p-8 lg:p-10 text-white shadow-[0_25px_60px_-15px_rgba(5,30,49,0.7)]"
+          >
               {/* Subtle background glow effect */}
               <div
                 aria-hidden
@@ -216,12 +210,11 @@ export function Services() {
                       <span className="text-[10px] text-white/80">
                         تنفيذ احترافي مطابق للمواصفات
                       </span>
-                    </div>
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          </div>
         </div>
 
         {/* Company Guarantee & Tagline Banner */}

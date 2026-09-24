@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useReducedMotion, useInView } from "framer-motion";
 import { Award, Layers, Clock, ShieldCheck } from "lucide-react";
 import { Reveal } from "./reveal";
 import { SITE_CONFIG } from "@/config/site";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const STAT_ICONS = [Layers, ShieldCheck, Award, Clock];
 
@@ -29,10 +29,28 @@ function AnimatedCounter({ rawNum }: { rawNum: string }) {
   const reduce = useReducedMotion();
   const { target, suffix } = parseStat(rawNum);
   const containerRef = useRef<HTMLSpanElement>(null);
-  const inView = useInView(containerRef, { once: true, amount: 0.25 });
+  const [inView, setInView] = useState(false);
   // الحالة الابتدائية = القيمة النهائية: الـ SSR والزواحف و no-JS يرون الرقم الحقيقي،
   // وأنيميشن العد من الصفر يُشغَّل بعد الـ mount ودخول مجال الرؤية فقط
   const [count, setCount] = useState(target);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!inView || reduce) {
