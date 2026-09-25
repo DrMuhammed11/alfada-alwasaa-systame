@@ -118,7 +118,7 @@ export function EnHero() {
                   <h2 className="mt-1 text-[11px] font-extrabold tracking-[0.25em] text-gold-light">
                     AL-FADA AL-WASAA
                   </h2>
-                  <p className="mt-1 text-xs text-gold-light font-medium">Telecom & General Contracting Corporate Entity</p>
+                  <p className="mt-1 text-xs text-gold-light font-medium">Telecom & General Contracting</p>
                 </div>
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
@@ -126,7 +126,7 @@ export function EnHero() {
                     <span className="text-[10px] text-white/70">Field Practice</span>
                   </div>
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
-                    <span className="block text-xs font-black text-gold-light">65+ Sites</span>
+                    <span className="block text-xs font-black text-gold-light">65+ Projects</span>
                     <span className="text-[10px] text-white/70">Completed</span>
                   </div>
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">

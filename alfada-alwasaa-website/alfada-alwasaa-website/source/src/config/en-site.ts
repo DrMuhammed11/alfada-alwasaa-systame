@@ -133,7 +133,7 @@ export const EN_SITE_CONFIG = {
       num: "01",
       title: "Telecommunications & Internet",
       services: [
-        "Infrastructure and field networking solutions tailored to modern enterprise requirements.",
+        "Infrastructure and field networking solutions tailored to the needs of modern businesses and organizations.",
       ],
       photos: [
         { src: "/profile/site_telecom_tower.webp", alt: "Telecom towers and field microwave networks" },
@@ -145,8 +145,8 @@ export const EN_SITE_CONFIG = {
       title: "General Contracting",
       services: [
         "Construction and maintenance of roads and bridges.",
-        "Excavation and site grading works.",
-        "Construction supplies and provisioning.",
+        "Excavation and site grading.",
+        "Construction materials and project supplies.",
       ],
       photos: [
         { src: "/profile/site_mountain_station.webp", alt: "Construction works in mountain station sites" },
@@ -181,8 +181,8 @@ export const EN_SITE_CONFIG = {
       num: "05",
       title: "Real Estate Marketing & Investment",
       services: [
-        "Feasibility studies and real estate asset marketing.",
-        "Development supervision and asset management.",
+        "Real Estate Feasibility Studies & Asset Marketing",
+        "Development Supervision & Asset Management",
       ],
       photos: [
         { src: "/profile/site_hadramout_building.webp", alt: "Developed residential building projects" },

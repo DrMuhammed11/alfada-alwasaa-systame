@@ -35,7 +35,7 @@ export function EnPartnersMarquee() {
     <section className="py-12 bg-slate-50 dark:bg-navy-darker/40 border-b border-navy/5 dark:border-white/5 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-6 text-center">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gold-light">
-          Ecosystem Network & Strategic Sectors
+          Strategic Sectors
         </span>
       </div>
       <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">

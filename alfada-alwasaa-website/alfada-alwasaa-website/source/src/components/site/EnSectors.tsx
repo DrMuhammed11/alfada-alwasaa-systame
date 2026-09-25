@@ -48,10 +48,10 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
               Core Strategic Sectors
             </span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-navy dark:text-white">
-              Five Pillars of Operational Mastery
+              Five Strategic Sectors
             </h2>
             <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-              Deploying interconnected capabilities that combine engineering proficiency, heavy equipment fleets, and nationwide logistics readiness.
+              Delivering integrated solutions that combine engineering expertise, heavy equipment, and nationwide logistics capabilities.
             </p>
           </div>
         </Reveal>
@@ -116,7 +116,7 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
                         href="#contact"
                         className="inline-flex items-center gap-1.5 rounded-xl bg-gold px-4 py-2 text-xs font-bold text-navy-darker hover:bg-gold-light transition"
                       >
-                        <span>Inquire About Sector</span>
+                        <span>Inquire About This Sector</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </a>
                     </div>

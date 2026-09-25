@@ -51,10 +51,10 @@ export function EnServicesTabs() {
               Detailed Services Portfolio
             </span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-navy dark:text-white">
-              Integrated Technical & Engineering Services
+              Integrated Technical, Engineering & Business Services
             </h2>
             <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-              Browse our key specialization areas, review execution specifications, or request direct tender proposals.
+              Explore our key service areas, review execution specifications, or request a project quotation
             </p>
           </div>
         </Reveal>
