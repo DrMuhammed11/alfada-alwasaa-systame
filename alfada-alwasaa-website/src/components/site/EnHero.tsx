@@ -82,7 +82,7 @@ export function EnHero() {
                 className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-6 py-3 text-sm font-bold text-emerald-300 hover:bg-emerald-500 hover:text-white transition"
               >
                 <MessageSquare className="h-4 w-4" />
-                <span>WhatsApp Management</span>
+                <span>Contact Us on WhatsApp</span>
               </a>
             </div>
           </div>
