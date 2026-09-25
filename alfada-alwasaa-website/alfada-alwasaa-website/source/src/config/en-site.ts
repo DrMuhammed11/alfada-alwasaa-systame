@@ -10,18 +10,18 @@ export const EN_SITE_CONFIG = {
     fullName: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
     shortName: "Al-Fada Al-Wasaa",
     enName: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting",
-    tagline: "Integrated Solutions Within One Ecosystem",
+    tagline: "Integrated Solutions Under One Roof",
     brief:
-      "A multi-service professional entity founded on a clear vision: delivering integrated solutions that unite executive experience, institutional discipline, and the capacity to achieve high standards of quality and professionalism.",
+      "A multi-service professional company founded on a clear vision: to deliver integrated solutions that combine operational experience, organizational discipline, and a strong commitment to quality and professionalism.",
     subBrief:
-      "Since its inception, the company has been committed to being a reliable partner for organizations seeking solid performance, meticulous execution, and outcomes befitting major enterprise initiatives.",
+      "Since its inception, the company has been committed to serving as a trusted partner for organizations seeking dependable performance, precise execution, and results that meet the demands of major projects.",
     rss: "/en/rss.xml",
   },
 
   // Official Contact Channels & Directory
   contacts: {
     general: {
-      label: "General Management",
+      label: "General Administration",
       sublabel: "Unified & Direct Line",
       display: "+967 776 999 942",
       raw: "+967776999942",
@@ -50,7 +50,7 @@ export const EN_SITE_CONFIG = {
 
     location: {
       city: "Sana'a",
-      fullAddress: "Sana'a — Beside Shamlan Factory, Republic of Yemen",
+      fullAddress: "Near Shamlan Factory, Sana'a, Yemen",
       label: "Corporate Headquarters",
       coverage: "Nationwide operational coverage across all Yemeni governorates and ports",
     },
@@ -61,7 +61,7 @@ export const EN_SITE_CONFIG = {
       label: "Official Corporate Email",
     },
 
-    workingHours: "Saturday – Thursday: 8:00 AM – 6:00 PM (24/7 Emergency Field Support)",
+    workingHours: "Saturday – Thursday: 8:00 AM – 6:00 PM",
   },
 
   // Main Navigation Links (mirrors the Arabic nav structure: pages + homepage anchors)
@@ -90,16 +90,16 @@ export const EN_SITE_CONFIG = {
   // Core Pillars
   pillars: [
     {
-      title: "Executive Experience",
-      subtitle: "Seasoned Field Practice",
+      title: "Operational Experience",
+      subtitle: "Proven Field Expertise",
     },
     {
       title: "Institutional Discipline",
-      subtitle: "Strict Standards Adherence",
+      subtitle: "Strict Adherence to Standards",
     },
     {
       title: "Quality & Professionalism",
-      subtitle: "Enterprise-Grade Deliverables",
+      subtitle: "High-Quality Professional Deliverables",
     },
   ],
 
@@ -107,23 +107,23 @@ export const EN_SITE_CONFIG = {
   stats: [
     {
       num: "10+",
-      label: "Years of Accumulated Experience",
-      sub: "Seasoned field practice in the Yemeni market",
+      label: "Years of Experience",
+      sub: "Extensive field experience in the Yemeni market",
     },
     {
       num: "65+",
-      label: "Vital Completed Projects",
-      sub: "Across contracting, telecom networks, and supplies",
+      label: "Major Completed Projects",
+      sub: "Across contracting, telecommunications, and supply services",
     },
     {
       num: "45+",
-      label: "Specialized Engineers & Experts",
-      sub: "Dedicated field engineering, technical, and survey teams",
+      label: "Specialized Engineers & Technical Personnel",
+      sub: "Dedicated engineering, technical, and surveying teams",
     },
     {
       num: "15+",
-      label: "Governorates & Ports Covered",
-      sub: "Operational readiness across Yemen's provinces and seaports",
+      label: "Governorates Covered",
+      sub: "Operational readiness across Yemen's governorates and seaports",
     },
   ],
 
@@ -243,40 +243,40 @@ export const EN_SITE_CONFIG = {
       id: "roads",
       title: "Road Paving, Grading & Mountain Earthworks",
       tag: "Civil & Infrastructure",
-      desc: "Rock blasting, trenching, roadbed compaction, and asphalt surfacing alongside drainage culverts and rock slope stabilization in mountainous terrain.",
-      metrics: "Code-compliant technical specifications with specialized heavy equipment fleets.",
+      desc: "Rock blasting, trenching, roadbed compaction, and asphalt surfacing, together with drainage culverts and rock slope stabilization in mountainous terrain.",
+      metrics: "Compliance with applicable technical specifications, supported by specialized heavy-equipment fleets and strong field capabilities.",
       src: "/profile/track_roller.webp",
     },
     {
       id: "customs",
-      title: "Port Customs Clearance & Supply Expediting",
+      title: "Port Customs Clearance & Supply Coordination",
       tag: "International Trade",
-      desc: "High-efficiency commercial clearance for heavy machinery, cargo, and project imports across seaports and land border crossings.",
-      metrics: "Accelerated port turnaround time with full regulatory compliance.",
+      desc: "Efficient customs clearance for heavy machinery, cargo, and project-related imports through seaports and land border crossings.",
+      metrics: "Efficient port turnaround with full compliance with applicable regulations.",
       src: "/profile/track_ship.webp",
     },
     {
       id: "telecom",
-      title: "Cell Tower Construction & Field Maintenance",
+      title: "Telecommunications Tower Construction & Field Maintenance",
       tag: "Network Infrastructure",
-      desc: "Civil works, lattice tower erection, antenna alignment, and deployment of hybrid solar-generator power systems with 24/7 emergency response.",
-      metrics: "24/7 emergency readiness and maximum broadcast uptime in challenging remote sites.",
+      desc: "Civil works, lattice tower erection, antenna alignment, and deployment of hybrid solar-generator power systems, supported by 24/7 emergency response.",
+      metrics: "24/7 emergency readiness and reliable network uptime at challenging remote sites.",
       src: "/profile/track_tower.webp",
     },
     {
       id: "supplies",
       title: "Industrial Supply Chains & Fuel Logistics",
       tag: "General Supplies",
-      desc: "Procuring vital materials, technical supplies, and certified fuel consignments for key industrial operations under strict QA/QC testing.",
-      metrics: "Stringent laboratory verification and on-time delivery schedules.",
+      desc: "Procuring essential materials, technical supplies, and certified fuel supplies for key industrial operations under strict QA/QC controls.",
+      metrics: "Strict laboratory verification and on-time delivery.",
       src: "/profile/track_forklift.webp",
     },
     {
       id: "logistics",
       title: "Multimodal Freight & Heavy Equipment Transport",
       tag: "Logistics Solutions",
-      desc: "Managing dedicated heavy haulage fleets, oversized cargo routing, and live convoy tracking from entry ports directly to site locations.",
-      metrics: "Modern GPS-tracked transport fleet with rigorous transit safety protocols.",
+      desc: "Managing dedicated heavy-haulage fleets, oversized-cargo routing, and live convoy tracking from ports of entry directly to project sites.",
+      metrics: "A modern GPS-tracked transport fleet supported by rigorous transit-safety protocols.",
       src: "/profile/track_truck.webp",
     },
   ],
@@ -285,24 +285,24 @@ export const EN_SITE_CONFIG = {
   values: [
     {
       title: "Results-Driven Mindset",
-      desc: "A steadfast focus on hitting milestones and completing deliverables on budget and on schedule.",
+      desc: "A strong focus on achieving targets and completing tasks efficiently, consistently, and according to plan.",
     },
     {
       title: "Clear Methodology",
-      desc: "Structured management, transparent tracking, and ongoing oversight across every project phase.",
+      desc: "Structured management, careful planning, and continuous oversight throughout every project phase, from initiation through final handover.",
     },
     {
       title: "Unwavering Commitment",
-      desc: "Strict professional discipline, compliance with specifications, and building enduring client trust.",
+      desc: "Strict professional discipline, adherence to schedules and specifications, and a commitment to building long-term client relationships.",
     },
   ],
 
   // Strategic Position (from Profile)
   position: {
     kicker: "Our Standing",
-    title: "Established Market Stature",
-    p1: "The company was founded on the firm conviction that major enterprises seek more than a mere vendor—they require a dependable partner. Consequently, we accord utmost attention to engineering precision, procedural integrity, rigorous monitoring, and transparent communication across all operational stages, from initial design to final commissioning.",
-    p2: "We are committed to ensuring our deliverables reflect an elevated corporate stature that harmonizes seriousness with agility, high quality with speed, and technical prowess with unwavering client dedication. Today, the company stands as the premier choice for organizations seeking project delivery through seasoned teams that master market dynamics and tackle complex, multi-tiered initiatives.",
+    title: "Established Market Position & Confident Presence",
+    p1: "The company was founded on the belief that major projects require more than a contractor; they require a dependable partner. For this reason, we place strong emphasis on careful planning, close field supervision, meticulous execution, and transparent communication with our partners throughout every stage of the project.",
+    p2: "We are committed to ensuring that our deliverables consistently reflect a corporate approach that combines professionalism with flexibility, and high quality with well-managed execution. Today, the company stands as a trusted choice for organizations seeking reliable project delivery by teams that understand the local market and address challenges with a high level of professionalism.",
   },
 
   // Vision & Mission (from Profile)
@@ -310,19 +310,19 @@ export const EN_SITE_CONFIG = {
     title: "Vision & Mission",
     mission: {
       title: "Our Mission",
-      text: "We strive to deliver reliable, integrated services centered on quality, transparency, discipline, and execution excellence, maintaining complete fidelity to client requirements and achieving top tiers of satisfaction and confidence.",
+      text: "We strive to deliver reliable, integrated services grounded in quality, transparency, discipline, and timely execution, while fully meeting our clients' requirements and earning their satisfaction and trust.",
     },
     vision: {
       title: "Our Vision",
-      text: "To lead as a regional benchmark in multi-sector contracting, telecommunications, and support logistics by building enduring strategic alliances with our partners and generating tangible value in every endeavor we undertake.",
+      text: "To be the first choice and a recognized benchmark, locally and regionally, in general contracting, telecommunications, and support services, while building lasting strategic partnerships with our clients and making a meaningful contribution to community development.",
     },
   },
 
   // Corporate Epilogue / Conclusion (from Profile)
   conclusion: {
     kicker: "Corporate Epilogue",
-    title: "Executive Closing Statement",
-    text: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting is not merely a brand in the marketplace; it is an integrated execution platform uniting operational vigor, refined professional conduct, and uncompromising precision. Today, we place seasoned field proficiency, strategic clarity, and genuine capability at the service of our clients, transforming ambitious requirements into enduring achievements.",
+    title: "Closing Remarks & Outlook",
+    text: "Al-Fada Al-Wasaa Company for Telecommunications Services & General Contracting is more than a name in the contracting and telecommunications market; it is an integrated platform built on dedicated effort, high professional standards, and dependable execution. Today, we place our experience and capabilities at the service of our clients, ready to move forward with them toward broader opportunities and greater goals.",
   },
 
   // Compliance & Institutional Certifications
@@ -395,27 +395,27 @@ export const EN_SITE_CONFIG = {
     {
       question: "What geographic areas does Al-Fada Al-Wasaa cover for project execution?",
       answer:
-        "We operate across all governorates of the Republic of Yemen, with proven capability in demanding mountainous terrains, remote installations, and strategic ports including Sana'a, Hodeidah, Aden, and border trade crossings.",
+        "We operate across all governorates of the Republic of Yemen, with established capabilities in challenging mountainous terrain, remote sites, and strategic ports, including Sana'a and major land-border crossings.",
     },
     {
       question: "How does the procurement and bidding process work?",
       answer:
-        "Clients submit project specifications or Bills of Quantities (BOQ) through our online inquiry form or via direct management contact. Our engineering team conducts technical evaluations and site surveys to provide structured, competitive commercial proposals.",
+        "Clients submit project specifications or a Bill of Quantities (BOQ) through our online inquiry form or by contacting management directly. Our engineering team then conducts technical evaluations and site inspections to prepare detailed and competitive commercial proposals.",
     },
     {
       question: "What quality and safety standards are enforced across project sites?",
       answer:
-        "We adhere strictly to recognized civil engineering codes and sector-specific standards, enforcing comprehensive Health, Safety, and Environmental (HSE) protocols alongside continuous laboratory testing of all construction materials.",
+        "We strictly adhere to recognized civil engineering codes and sector-specific standards, applying comprehensive Health, Safety, and Environmental (HSE) procedures alongside continuous laboratory testing of construction materials.",
     },
     {
       question: "What operational capacity and heavy equipment fleet does the company own?",
       answer:
-        "The company maintains a self-owned fleet of earthmovers, hydraulic excavators, compaction rollers, heavy transport trucks, and precision surveying instruments, backed by licensed field engineers.",
+        "The company maintains its own fleet of earthmoving equipment, hydraulic excavators, compaction rollers, heavy-duty transport vehicles, and precision testing and inspection equipment, supported by qualified field engineers.",
     },
     {
       question: "Does the company provide 24/7 technical support and maintenance for telecom networks?",
       answer:
-        "Yes, our specialized field maintenance teams operate around the clock (24/7) for preventive and emergency interventions, microwave link alignment, and hybrid power supply maintenance.",
+        "Yes. Our specialized field maintenance teams operate around the clock (24/7), providing preventive and emergency interventions, microwave-link alignment, and hybrid power-system maintenance.",
     },
   ],
 } as const;

@@ -5,7 +5,12 @@ import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 
-export const FAQ_ITEMS = [
+export interface FaqEntry {
+  question: string;
+  answer: string;
+}
+
+export const FAQ_ITEMS: FaqEntry[] = [
   {
     question: "ما هي النطاقات الجغرافية ومناطق تغطية الشركة لتنفيذ المشاريع؟",
     answer:
@@ -38,7 +43,7 @@ export const FAQ_ITEMS = [
   },
 ];
 
-export function Faq() {
+export function Faq({ items = FAQ_ITEMS }: { items?: FaqEntry[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggle = (idx: number) => {
@@ -49,7 +54,7 @@ export function Faq() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
+    mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.question,
       acceptedAnswer: {
@@ -81,7 +86,7 @@ export function Faq() {
         </Reveal>
 
         <div className="space-y-3.5">
-          {FAQ_ITEMS.map((item, idx) => {
+          {items.map((item, idx) => {
             const isOpen = openIndex === idx;
             return (
               <Reveal key={idx} index={idx}>

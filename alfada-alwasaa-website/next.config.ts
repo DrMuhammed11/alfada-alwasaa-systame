@@ -6,30 +6,54 @@ const analyze = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+/**
+ * رؤوس الأمان — ممكنة الآن بعد التحول من التصدير الثابت إلى SSR
+ * (كانت استحالة بنيوية تحت output: "export")
+ */
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+  {
+    // CSP انطلاقية: تقيّد المصادر وتُبقي سكربت GA وtheme-provider الداخليين
+    // (تتطور لاحقًا إلى nonces صارمة عند الحاجة)
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
+  },
+];
+
 const nextConfig: NextConfig = {
   /**
-   * التصدير الثابت الكامل (Static HTML/CSS/JS Export)
-   * يولّد موقعاً ساكناً في مجلد out/ صالحاً للنشر المباشر على خوادم الويب وCDNs
-   */
-  output: "export",
-
-  /**
-   * الإبقاء على unoptimized: true ضروري لأن الموقع يُقدّم كثابت (Static Export عبر npx serve أو بيئات CDN الثابتة).
-   * إزالة هذه الخاصية تجعل Next.js يوجّه طلبات الصور إلى نقطة نهاية ديناميكية (/_next/image)
-   * غير متوفرة في بيئة التقديم الثابت المستقلة عن خادم Node.
-   * وقد تم بالفعل تحسين وضغط كافة الصور المصدرية وتحويلها إلى WebP بجودة 82 وأبعاد مدروسة في Task 1.
-   */
-  images: { unoptimized: true },
-
-  /**
-   * تفعيل الوضع الصارم لـ React للكشف المبكر عن أي آثار جانبية محتملة وضمان توافقية React 19
+   * SSR/ISR — بدل التصدير الثابت:
+   * - يمكن قراءة الترويسات في الجذر (lang/dir بنيوي)
+   * - الصور تُحسَّن عبر /_next/image تلقائيًا
+   * - رؤوس الأمان أعلاه ممكنة
+   * - المحتوى يُجلب من /site-content/* مع revalidate بدل التجميد وقت البناء
    */
   reactStrictMode: true,
-
-  /**
-   * إخفاء مؤشرات التطوير العائمة في الواجهة
-   */
   devIndicators: false,
+
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
 };
 
 export default analyze(nextConfig);

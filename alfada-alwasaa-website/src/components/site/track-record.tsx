@@ -17,6 +17,28 @@ import {
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 import { TrackLightbox, type TrackItem } from "./track-lightbox";
+export type { TrackItem };
+
+
+export interface TrackCmsItem {
+  titleAr: string; titleEn: string; tagAr?: string; tagEn?: string;
+  scopeAr?: string; scopeEn?: string; metrics?: string[]; image?: string; order?: number;
+}
+
+/** تحويل مشاريع الـ CMS إلى صيغة العرض مع الحفاظ على الافتراضي عند غياب البيانات */
+export function mapCmsToTrackItems(items: TrackCmsItem[]): TrackItem[] {
+  const icons = [Route, ClipboardCheck, RadioTower, Package, Truck];
+  return items.map((p, i) => ({
+    id: `cms-${p.order ?? i}`,
+    title: p.titleAr,
+    tag: p.tagAr ?? "أعمال منفذة",
+    scope: p.scopeAr ?? "",
+    metrics: (p.metrics ?? []).slice(0, 2),
+    src: p.image ?? "/profile/track_roller.webp",
+    alt: p.titleAr,
+    Icon: icons[i % icons.length],
+  }));
+}
 
 const TRACK_CASE_STUDIES: TrackItem[] = [
   {
@@ -86,7 +108,8 @@ const TRACK_CASE_STUDIES: TrackItem[] = [
   },
 ];
 
-export function TrackRecord() {
+export function TrackRecord({ items }: { items?: TrackItem[] }) {
+  const caseStudies = items ?? TRACK_CASE_STUDIES;
   const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -119,7 +142,7 @@ export function TrackRecord() {
 
         {/* Case Study Cards Grid — Balanced uniform grid matching English standard */}
         <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {TRACK_CASE_STUDIES.map((item, idx) => (
+          {caseStudies.map((item, idx) => (
             <Reveal 
               key={item.id} 
               index={idx}
@@ -229,7 +252,7 @@ export function TrackRecord() {
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         item={selectedItem}
-        items={TRACK_CASE_STUDIES}
+        items={caseStudies}
         onSelect={(item) => setSelectedItem(item)}
       />
     </section>

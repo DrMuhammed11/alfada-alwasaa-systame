@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -224,60 +225,8 @@ const jsonLd = {
         "التوريدات العامة والتجهيزات",
         "التسويق العقاري والفرص الاستثمارية",
       ],
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "5.0",
-        bestRating: "5",
-        ratingCount: "38",
-        reviewCount: "3",
-      },
-      review: [
-        {
-          "@type": "Review",
-          author: {
-            "@type": "Person",
-            name: "م. عبدالسلام القاضي",
-            jobTitle: "استشاري إشراف مشروعات بنية تحتية وطرق",
-          },
-          reviewBody:
-            "تميزت شركة الفضاء الواسع بالانضباط الهندسي الصارم في تسوية المسارات الجبلية والالتزام الدقيق بمواصفات كود الطرق وفحوصات الدمك المخبرية لطبقات الأساس في الموعد التعاقدي المحدد.",
-          reviewRating: {
-            "@type": "Rating",
-            ratingValue: "5",
-            bestRating: "5",
-          },
-        },
-        {
-          "@type": "Review",
-          author: {
-            "@type": "Person",
-            name: "أ. عادل الحمادي",
-            jobTitle: "مدير سلاسل الإمداد والخدمات اللوجستية",
-          },
-          reviewBody:
-            "سلاسة التخليص الجمركي للشحنات وسرعة تسيير القوافل والشحن من الموانئ إلى مواقع العمل مباشرة وفّرت على مشاريعنا الصناعية وقتاً حرجاً وتكاليف تخزين إضافية كانت تؤرق سلاسل الإمداد.",
-          reviewRating: {
-            "@type": "Rating",
-            ratingValue: "5",
-            bestRating: "5",
-          },
-        },
-        {
-          "@type": "Review",
-          author: {
-            "@type": "Person",
-            name: "م. طارق الصعفاني",
-            jobTitle: "مدير تشغيل وصيانة شبكات الاتصالات",
-          },
-          reviewBody:
-            "استجابة فرق الطوارئ الميدانية على مدار 24/7 وتركيب أنظمة الطاقة الشمسية الهجينة للأبراج في أصعب التضاريس شكّلت ركيزة أساسية لاستقرار بث وتغطية الشبكة دون أي انقطاع تشغيلي.",
-          reviewRating: {
-            "@type": "Rating",
-            ratingValue: "5",
-            bestRating: "5",
-          },
-        },
-      ],
+      // أزيلت aggregateRating وreview المزيفة ذاتيًا — مخالفة موثقة لإرشادات
+      // Google للبيانات المنظمة وتعرّض الموقع لإجراء يدوي
     },
     {
       "@type": "WebSite",
@@ -292,15 +241,21 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
+  // اللغة والاتجاه يُحدَّدان من ترويسة x-locale التي يضعها middleware حسب المسار (/en*)
+  // — إشارة HTML صحيحة للزواحف وقارئات الشاشة في كلتا اللغتين، بلا هجمات عميل
+  const requestHeaders = await headers();
+  const locale = requestHeaders.get("x-locale") === "en" ? "en" : "ar";
+  const dir = locale === "en" ? "ltr" : "rtl";
+
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

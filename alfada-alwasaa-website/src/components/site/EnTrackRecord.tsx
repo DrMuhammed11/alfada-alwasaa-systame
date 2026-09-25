@@ -4,7 +4,22 @@ import Image from "next/image";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { Reveal } from "./reveal";
 
-export function EnTrackRecord() {
+export interface EnTrackCmsItem {
+  titleEn: string; tagEn?: string; scopeEn?: string; image?: string; order?: number;
+}
+
+export function EnTrackRecord({ items }: { items?: EnTrackCmsItem[] }) {
+  const trackItems =
+    items && items.length > 0
+      ? items.map((p, i) => ({
+          id: `cms-${p.order ?? i}`,
+          title: p.titleEn,
+          tag: p.tagEn ?? "Delivered Work",
+          desc: p.scopeEn ?? "",
+          metrics: "",
+          src: p.image ?? "/profile/track_roller.webp",
+        }))
+      : EN_SITE_CONFIG.trackRecord;
   return (
     <section id="track" className="py-16 bg-slate-50 dark:bg-navy-darker/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -23,7 +38,7 @@ export function EnTrackRecord() {
         </Reveal>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {EN_SITE_CONFIG.trackRecord.map((tr, idx) => (
+          {trackItems.map((tr, idx) => (
             <Reveal key={tr.id} index={idx}>
               <div className="h-full overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy shadow-md hover:shadow-xl transition">
                 <div className="relative aspect-[16/10] bg-navy-darker">

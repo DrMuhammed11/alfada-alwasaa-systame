@@ -15,7 +15,7 @@ import {
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 
-type Sector = {
+export type Sector = {
   num: string;
   title: string;
   href: string;
@@ -24,6 +24,49 @@ type Sector = {
   photos: { src: string; alt: string }[];
   accentColor?: string;
 };
+
+
+export interface SectorCmsItem {
+  titleAr: string; titleEn: string; descAr?: string; descEn?: string;
+  icon?: string; services?: string[]; photos?: { src: string; alt?: string }[]; order?: number;
+}
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Antenna: RadioTower,
+  Building2: Building2,
+  Blocks: Flame,
+  Ship: Truck,
+  TrendingUp: TrendingUp,
+};
+
+const SECTOR_HREF: Record<string, string> = {
+  "الاتصالات والإنترنت": "/services/telecom",
+  "الاتصالات وتقنية المعلومات": "/services/telecom",
+  "المقاولات العامة": "/services/contracting",
+  "التوريدات العامة والتجهيزات": "/services/supplies",
+  "الخدمات اللوجستية": "/services/shipping",
+  "التسويق العقاري والفرص الاستثمارية": "/services/marketing",
+};
+
+const DEFAULT_PHOTOS = [
+  { src: "/profile/site_telecom_tower.webp", alt: "عمليات ميدانية" },
+  { src: "/profile/road_roller.webp", alt: "أعمال مواقع" },
+];
+
+/** تحويل قطاعات الـ CMS إلى صيغة العرض — الأيقونة والرابط والصور ببدائل آمنة */
+export function mapCmsToSectors(items: SectorCmsItem[]): Sector[] {
+  return items.map((s, i) => ({
+    num: String(s.order ?? i + 1).padStart(2, "0"),
+    title: s.titleAr,
+    href: SECTOR_HREF[s.titleAr] ?? "/services",
+    Icon: (s.icon && ICON_MAP[s.icon]) || Building2,
+    services: s.services ?? (s.descAr ? [s.descAr] : []),
+    photos:
+      s.photos && s.photos.length > 0
+        ? s.photos.map((ph) => ({ src: ph.src, alt: ph.alt ?? s.titleAr }))
+        : DEFAULT_PHOTOS,
+  }));
+}
 
 const SECTORS: Sector[] = [
   {
@@ -98,12 +141,13 @@ const SECTORS: Sector[] = [
   },
 ];
 
-export function Sectors() {
+export function Sectors({ items }: { items?: Sector[] }) {
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const filteredSectors = activeFilter === "all" 
-    ? SECTORS 
-    : SECTORS.filter(s => s.num === activeFilter);
+  const sectors = items ?? SECTORS;
+  const filteredSectors = activeFilter === "all"
+    ? sectors
+    : sectors.filter(s => s.num === activeFilter);
 
   return (
     <section id="sectors" className="relative overflow-hidden bg-mist dark:bg-navy-darker/60 py-12 sm:py-16 transition-colors duration-300">
@@ -129,9 +173,9 @@ export function Sectors() {
                   : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy"
               }`}
             >
-              جميع القطاعات (5)
+              جميع القطاعات ({sectors.length})
             </button>
-            {SECTORS.map((s) => (
+            {sectors.map((s) => (
               <button
                 key={s.num}
                 type="button"

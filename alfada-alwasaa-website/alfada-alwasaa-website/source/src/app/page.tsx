@@ -1,4 +1,18 @@
 import dynamic from "next/dynamic";
+import {
+  getSectors,
+  getProjects,
+  getFaqs,
+  type ContentSector,
+  type ContentProject,
+  type ContentFaq,
+} from "@/lib/content";
+import { mapCmsToSectors, type Sector } from "@/components/site/sectors";
+import {
+  mapCmsToTrackItems,
+  type TrackItem,
+} from "@/components/site/track-record";
+import type { FaqEntry } from "@/components/site/faq";
 import { SiteHeader } from "@/components/site/header";
 import { Hero } from "@/components/site/hero";
 import { SiteFooter } from "@/components/site/footer";
@@ -73,20 +87,36 @@ const BlogPreview = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
-export default function Home() {
+export default async function Home() {
+  // جلب المحتوى من CMS (ISR — revalidate 5 دقائق)؛ عند فشل الخادم تعيد [] ويُستخدم الافتراضي
+  const [cmsSectors, cmsProjects, cmsFaqs] = await Promise.all([
+    getSectors(),
+    getProjects(),
+    getFaqs(),
+  ]);
+  const sectors: Sector[] | undefined = cmsSectors.length
+    ? mapCmsToSectors(cmsSectors as unknown as import("@/components/site/sectors").SectorCmsItem[])
+    : undefined;
+  const trackItems: TrackItem[] | undefined = cmsProjects.length
+    ? mapCmsToTrackItems(cmsProjects as unknown as import("@/components/site/track-record").TrackCmsItem[])
+    : undefined;
+  const faqItems: FaqEntry[] | undefined = cmsFaqs.length
+    ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionAr, answer: f.answerAr }))
+    : undefined;
+
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-navy-darker transition-colors duration-300">
       <SiteHeader />
       <main id="main-content">
         <Hero />
         <PartnersMarquee />
-        <Sectors />
+        <Sectors items={sectors} />
         <Services />
         <Position />
         <VisionMission />
-        <TrackRecord />
+        <TrackRecord items={trackItems} />
         <WhyUs />
-        <Faq />
+        <Faq items={faqItems} />
         <BlogPreview />
         <Conclusion />
         <Contact />

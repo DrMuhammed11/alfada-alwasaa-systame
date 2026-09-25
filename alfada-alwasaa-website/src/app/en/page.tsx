@@ -3,6 +3,14 @@ import { EnHeader } from "@/components/site/EnHeader";
 import { EnHero } from "@/components/site/EnHero";
 import { EnFooter } from "@/components/site/EnFooter";
 import { EnFloatingContact } from "@/components/site/EnFloatingContact";
+import {
+  getSectors,
+  getProjects,
+  getFaqs,
+  type ContentSector,
+  type ContentProject,
+  type ContentFaq,
+} from "@/lib/content";
 
 // Fixed-height skeleton to prevent Cumulative Layout Shift (CLS) on dynamic sections
 function SectionSkeleton() {
@@ -77,7 +85,23 @@ const EnContactSection = dynamic(
   { loading: SectionSkeleton, ssr: true }
 );
 
-export default function EnglishHomePage() {
+export default async function EnglishHomePage() {
+  const [cmsSectors, cmsProjects, cmsFaqs] = await Promise.all([
+    getSectors(),
+    getProjects(),
+    getFaqs(),
+  ]);
+  // تمرير خام: مكوّنات EN تقوم بالتحويل إلى صيغة العرض داخليًا مع بدائل آمنة
+  const sectors = cmsSectors.length
+    ? (cmsSectors as unknown as import("@/components/site/EnSectors").EnSectorCmsItem[])
+    : undefined;
+  const trackItems = cmsProjects.length
+    ? (cmsProjects as unknown as import("@/components/site/EnTrackRecord").EnTrackCmsItem[])
+    : undefined;
+  const faqItems = cmsFaqs.length
+    ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionEn, answer: f.answerEn }))
+    : undefined;
+
   return (
     <div
       className="flex min-h-screen flex-col bg-white dark:bg-navy-darker text-slate-900 dark:text-white transition-colors duration-300 font-sans"
@@ -87,13 +111,13 @@ export default function EnglishHomePage() {
       <main id="main-content">
         <EnHero />
         <EnPartnersMarquee />
-        <EnSectors />
+        <EnSectors items={sectors} />
         <EnServicesTabs />
         <EnPosition />
         <EnVisionMission />
-        <EnTrackRecord />
+        <EnTrackRecord items={trackItems} />
         <EnWhyUs />
-        <EnFaq />
+        <EnFaq items={faqItems} />
         <EnConclusion />
         <EnContactSection />
       </main>

@@ -5,13 +5,15 @@ import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { Reveal } from "./reveal";
 
-export function EnFaq() {
+export interface EnFaqEntry { readonly question: string; readonly answer: string }
+
+export function EnFaq({ items = EN_SITE_CONFIG.faq as unknown as EnFaqEntry[] }: { items?: EnFaqEntry[] }) {
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(0);
 
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: EN_SITE_CONFIG.faq.map((item) => ({
+    mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.question,
       acceptedAnswer: {
@@ -43,7 +45,7 @@ export function EnFaq() {
         </Reveal>
 
         <div className="space-y-3.5">
-          {EN_SITE_CONFIG.faq.map((item, idx) => {
+          {items.map((item, idx) => {
             const isOpen = faqOpenIndex === idx;
             return (
               <Reveal key={idx} index={idx}>

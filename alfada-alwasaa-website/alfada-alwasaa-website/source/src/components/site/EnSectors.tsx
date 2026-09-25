@@ -5,7 +5,26 @@ import { CheckCircle2, ArrowRight } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { Reveal } from "./reveal";
 
-export function EnSectors() {
+export interface EnSectorCmsItem {
+  titleEn: string; descEn?: string; services?: string[];
+  photos?: { src: string; alt?: string }[]; order?: number;
+}
+
+const FALLBACK_PHOTOS = [
+  { src: "/profile/site_telecom_tower.webp", alt: "Field operations" },
+  { src: "/profile/road_roller.webp", alt: "Site works" },
+];
+
+export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
+  const sectors =
+    items && items.length > 0
+      ? items.map((s, i) => ({
+          num: String(s.order ?? i + 1).padStart(2, "0"),
+          title: s.titleEn,
+          services: s.services ?? (s.descEn ? [s.descEn] : []),
+          photos: s.photos && s.photos.length > 0 ? s.photos : FALLBACK_PHOTOS,
+        }))
+      : EN_SITE_CONFIG.sectors;
   return (
     <section id="sectors" className="py-16 bg-slate-50 dark:bg-navy-darker/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -24,7 +43,7 @@ export function EnSectors() {
         </Reveal>
 
         <div className="space-y-12">
-          {EN_SITE_CONFIG.sectors.map((sec, idx) => (
+          {sectors.map((sec, idx) => (
             <Reveal key={sec.num} index={idx}>
               <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 shadow-md hover:shadow-xl transition">
                 <div className="grid gap-8 lg:grid-cols-12 items-center">

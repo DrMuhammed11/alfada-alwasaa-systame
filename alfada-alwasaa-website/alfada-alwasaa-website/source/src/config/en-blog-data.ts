@@ -1,7 +1,10 @@
 /**
- * English Blog Data — direct professional translation of blog-data.ts
- * Same interface shape, same slugs, same images and dates. Single source of
- * truth for the English blog index (/en/blog) and article pages (/en/blog/[slug]).
+ * English Blog Data — professional translation of blog-data.ts
+ * Wording adopted verbatim from the approved final bilingual review
+ * (6_CONTENT_REVIEW_AR_EN_10-10_FINAL_MASTER).
+ * Same interface shape, same slugs, same images, dates, and keywords.
+ * Single source of truth for the English blog index (/en/blog) and
+ * article pages (/en/blog/[slug]).
  */
 
 export interface EnBlogPost {
@@ -27,8 +30,9 @@ export interface EnBlogPost {
 export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
   "guide-choosing-contractor-yemen-2026": {
     slug: "guide-choosing-contractor-yemen-2026",
-    title: "How to Choose the Best Contracting Company in Sana'a and Yemen? 7 Decisive Engineering Criteria",
-    description: "A comprehensive guide to selecting a certified building contractor in Yemen. Criteria for examining past projects, execution contracts, quality control, and avoiding unaccounted construction costs in Sana'a.",
+    title: "How to Choose the Right Contracting Company in Sana'a, Yemen: 7 Essential Engineering Criteria",
+    description:
+      "A comprehensive guide to selecting a qualified building contractor in Yemen, covering past-project verification, execution contracts, quality control, and ways to avoid unforeseen construction costs in Sana'a.",
     category: "General Contracting",
     date: "2026-09-15",
     readTime: "6 min read",
@@ -42,50 +46,53 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
       "contracting engineer Sana'a"
     ],
     content: {
-      intro: "Building a commercial or residential facility is a massive financial investment that requires choosing the right execution partner. In the Yemeni market, companies and contractors vary widely in levels of institutional discipline and field expertise. This guide summarizes 7 essential engineering criteria you should verify before signing any construction contract.",
+      intro:
+        "Building a commercial or residential facility is a major financial investment that requires the right project partner. In the Yemeni market, companies and contractors vary widely in their levels of organizational discipline and field experience. This guide presents seven essential engineering criteria to verify before signing a construction contract.",
       sections: [
         {
-          heading: "1. Examining Existing Field Track Record",
+          heading: "1. Reviewing the Company's Project Track Record",
           paragraphs: [
-            "Do not rely on photos or promotional profiles; request an on-site visit to projects the company has actually delivered or sites currently under construction.",
-            "A field inspection lets you assess reinforced concrete quality, column alignment, finishing precision, and the level of cleanliness and occupational safety on site."
+            "Do not rely solely on photographs or promotional profiles; request an on-site visit to projects the company has completed or sites that are currently under construction.",
+            "A field inspection allows you to assess the quality of reinforced concrete, column alignment, finishing work, site cleanliness, and occupational health and safety."
           ]
         },
         {
           heading: "2. Availability of Specialized Engineering & Supervision Staff",
           paragraphs: [
-            "The fundamental difference between an experienced contracting company and an individual contractor lies in a permanent engineering supervision apparatus that monitors foundation rebar stages, concrete mix ratios, and pressure and soil tests.",
-            "At Al-Fada Al-Wasaa, every project is accompanied by a certified site engineer to guarantee full conformity with the approved structural and architectural drawings."
+            "A key difference between an experienced contracting company and an individual contractor is the presence of dedicated engineering supervision that monitors foundation reinforcement, concrete mix ratios, and soil and concrete compressive-strength testing.",
+            "At Al-Fada Al-Wasaa, every project is supported by a certified site engineer to ensure full compliance with approved structural and architectural drawings."
           ]
         },
         {
-          heading: "3. Heavy Equipment & Machinery Capabilities",
+          heading: "3. Company-Owned Heavy Equipment & Machinery",
           paragraphs: [
-            "Having access to a comprehensive fleet of heavy equipment and machinery ready for deployment eliminates project delays associated with external rental availability.",
-            "This also directly reflects on stable contract pricing, consistent costs, and prompt project delivery without unexpected setbacks."
+            "Using company-owned equipment (excavators, rollers, mixers, and transport trucks) can reduce the time spent waiting to rent machinery from external suppliers by 20% to 30%.",
+            "This also supports more stable contract pricing and greater cost predictability for clients."
           ]
         },
         {
           heading: "4. Clarity and Detail of the Bill of Quantities (BOQ)",
           paragraphs: [
-            "Avoid vague contracts or lump-sum pricing without a detailed bill of quantities specifying cement grades, rebar, mix ratios, insulation types, and finishing materials.",
-            "Contractual clarity is the real guarantee for protecting both parties' rights and preventing future disputes during execution."
+            "Avoid vague contracts or lump-sum pricing without a detailed Bill of Quantities specifying cement grades, reinforcement steel, mix ratios, insulation types, and finishing materials.",
+            "Clear contractual terms help protect both parties' rights and reduce the risk of disputes during project execution."
           ]
         },
         {
           heading: "5. Deep Knowledge of Sana'a's Soil and Terrain",
           paragraphs: [
-            "Sana'a is characterized by varied soil layers, from expansive clay to harsh basalt rock strata, requiring special geotechnical expertise in foundation design and the right excavation methods without damaging neighboring buildings."
+            "Sana'a has varied soil conditions, ranging from expansive clay to hard basaltic rock strata, requiring appropriate geotechnical expertise in foundation design and excavation methods that protect adjacent buildings."
           ]
         }
       ],
-      conclusion: "Choosing the right contractor means peace of mind and a building that lasts for decades. At Al-Fada Al-Wasaa, we place quality, safety, and full transparency at the top of our priorities across all our projects in Sana'a and Yemen."
+      conclusion:
+        "Choosing the right contractor supports reliable project delivery and long-term building performance. At Al-Fada Al-Wasaa, quality, safety, and transparency remain central priorities across our projects in Sana'a and throughout Yemen."
     }
   },
   "telecom-infrastructure-solar-yemen": {
     slug: "telecom-infrastructure-solar-yemen",
-    title: "The Role of Solar Power in Sustaining Telecom Towers and Networks in Yemen",
-    description: "A technical study on the role of hybrid photovoltaic power stations in operating and maintaining mobile towers at mountainous and rugged sites across Yemen without interruption.",
+    title: "The Role of Solar Power in Supporting Telecom Towers and Networks in Yemen",
+    description:
+      "A technical study on the role of hybrid photovoltaic power systems in the operation and maintenance of mobile towers at mountainous and rugged sites across Yemen, supporting reliable and uninterrupted service.",
     category: "Telecom Services",
     date: "2026-09-12",
     readTime: "5 min read",
@@ -99,37 +106,40 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
       "fiber optic networks Yemen"
     ],
     content: {
-      intro: "Telecom operators in Yemen face complex challenges related to difficult mountainous site terrain and the high cost of hauling fuel to run conventional diesel generators. This is where hybrid solar power systems stand out as a sustainable and efficient engineering solution that guarantees round-the-clock broadcast and connectivity services.",
+      intro:
+        "Telecom operators in Yemen face complex challenges arising from difficult mountainous terrain and the high cost of transporting fuel for conventional diesel generators. Hybrid solar power systems offer a sustainable and efficient engineering solution that supports continuous connectivity and reliable network service.",
       sections: [
         {
-          heading: "1. Operational Challenges of Mountain & Remote Sites",
+          heading: "1. Operational Challenges at Mountainous & Remote Sites",
           paragraphs: [
-            "Most radio and cellular broadcast stations and towers sit atop high mountain peaks to secure the widest geographic coverage, making diesel delivery and generator maintenance extremely difficult and costly.",
-            "Repeated power outages lead to signal loss affecting thousands of subscribers in nearby districts and villages."
+            "Many radio and cellular stations and towers are located on high mountain peaks to maximize geographic coverage, making diesel delivery and generator maintenance difficult and costly.",
+            "Frequent power outages can lead to signal loss and affect subscribers in nearby districts and villages."
           ]
         },
         {
-          heading: "2. Hybrid Solutions: Integrating Solar Panels with Lithium Banks",
+          heading: "2. Hybrid Solutions: Integrating Solar Panels with Lithium Battery Banks",
           paragraphs: [
-            "Solar power stations designed specifically for telecom towers provide stable energy generation throughout Yemen's sunny daylight hours, charging advanced lithium battery banks with long service life.",
-            "The diesel generator runs only limited hours as an emergency reserve, significantly reducing fuel consumption while also lowering emissions and routine maintenance costs."
+            "Solar power systems designed specifically for telecom towers provide stable energy generation during daylight hours while charging advanced lithium battery banks with long service lives.",
+            "The diesel generator operates only for limited periods as an emergency backup, reducing fuel consumption by more than 75% while also lowering emissions and routine maintenance costs."
           ]
         },
         {
           heading: "3. Al-Fada Al-Wasaa's Role in Telecom Infrastructure",
           paragraphs: [
-            "Al-Fada Al-Wasaa has executed and rehabilitated dozens of solar power stations for telecom towers across the governorates of the Republic, with wind-resistant mounting structures designed for mountain peaks and ultra-protective grounding and lightning systems.",
-            "Our specialized field teams also provide preventive and emergency maintenance services to ensure signal stability and network consistency."
+            "Al-Fada Al-Wasaa has executed and rehabilitated dozens of solar power stations for telecom towers across Yemen, including wind-resistant mounting structures designed for mountain peaks and enhanced grounding and lightning-protection systems.",
+            "Our specialized field teams also provide preventive and emergency maintenance to help maintain signal stability and network reliability."
           ]
         }
       ],
-      conclusion: "The shift toward clean energy in the telecom sector is not merely an economic choice — it is an inevitable necessity to guarantee digital security and uninterrupted connectivity for all segments of Yemeni society."
+      conclusion:
+        "The shift toward cleaner energy in the telecommunications sector is not merely an economic consideration; it is an essential step toward supporting digital security and reliable, continuous connectivity across Yemeni communities."
     }
   },
   "yemen-customs-clearance-ports-guide-2026": {
     slug: "yemen-customs-clearance-ports-guide-2026",
-    title: "Yemen Customs Clearance & Port Procedures Guide 2026: Speeding Up Release and Avoiding Penalties",
-    description: "A practical guide for major importers and companies on customs clearance requirements at Yemeni ports and crossings, document auditing, and avoiding storage fees and container demurrage penalties.",
+    title: "Yemen Customs Clearance & Port Procedures Guide 2026: How to Speed Up Customs Release and Avoid Penalties",
+    description:
+      "A practical guide for major importers and companies covering customs-clearance requirements at Yemeni ports and crossings, document verification, and ways to avoid storage charges and container demurrage charges.",
     category: "Logistics & Shipping",
     date: "2026-09-18",
     readTime: "7 min read",
@@ -143,36 +153,39 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
       "Yemen supply chains"
     ],
     content: {
-      intro: "Customs clearance is the vital link in supply chains for commercial companies and industrial facilities in Yemen. With complex regulatory procedures and varying requirements between land and sea crossings, precise knowledge of legal controls and advance coordination are the only guarantee against hefty delay penalties and protection of project investments.",
+      intro:
+        "Customs clearance is a vital link in the supply chains of trading companies and industrial facilities in Yemen. With complex procedures and varying requirements across land and sea crossings, accurate knowledge of applicable regulations and advance coordination can help reduce delays, penalties, and disruptions to project investments.",
       sections: [
         {
-          heading: "1. Preparing Commercial Documents and Advance Verification",
+          heading: "1. Preparing Commercial Documents and Advance Compliance Verification",
           paragraphs: [
-            "The first step to prevent any setback is the meticulous audit of bills of lading, certified commercial invoices, original certificates of origin, and detailed packing lists.",
-            "Even a minor error in tariff description or coordinated codes (HS Codes) can route a shipment into complex inspection tracks, holding up release for weeks."
+            "The first step in preventing delays is a careful review of bills of lading, certified commercial invoices, original certificates of origin, and detailed packing lists.",
+            "Even a minor error in a customs description or HS code can subject a shipment to more complex inspection procedures and delay its release for weeks."
           ]
         },
         {
-          heading: "2. Strategies for Managing Storage and Demurrage Fees",
+          heading: "2. Strategies for Managing Storage and Demurrage Charges",
           paragraphs: [
-            "Shipping lines and freight agencies impose escalating daily penalties once the free grace period granted for containers at ports and customs crossings is exceeded.",
-            "Through advance digital follow-up and preparing forms before vessel arrival, container dwell time is cut by more than 60%, delivering direct financial savings to importers."
+            "Shipping lines and freight agencies may impose escalating daily charges once the free period for containers at ports or customs facilities is exceeded.",
+            "Through proactive digital tracking and document preparation before vessel arrival, container dwell time can be reduced by more than 60%, helping importers achieve direct cost savings."
           ]
         },
         {
-          heading: "3. Logistics Linkage: From the Port Quay to the Project Site",
+          heading: "3. Logistics Linkage: From Port to Project Site",
           paragraphs: [
-            "The mission does not end with issuing the customs release permit; it requires a ready land transport fleet for immediate loading to move goods and heavy equipment under full supervision, insurance, and live tracking until delivery at the client's warehouses and sites across the governorates."
+            "The process does not end with customs release; it also requires a ready land-transport fleet for the immediate loading and transport of goods and heavy equipment, with appropriate supervision, insurance coverage, and live tracking through delivery to the client's warehouses and sites."
           ]
         }
       ],
-      conclusion: "Professionalism in customs clearance is not merely finishing paperwork — it is strategic risk management that guarantees goods flow without stoppages or financial waste."
+      conclusion:
+        "Professional customs clearance is more than completing paperwork; it is a form of strategic risk management that helps keep goods moving without interruption while reducing avoidable delays and financial losses."
     }
   },
   "mountain-road-construction-standards-yemen": {
     slug: "mountain-road-construction-standards-yemen",
-    title: "Engineering Standards for Cutting and Asphalting Roads in Yemen's Mountainous and Rugged Terrain",
-    description: "A specialized engineering study on rock excavation techniques, flood drainage design, surfacing and compaction layers, and slope reinforcement to protect mountain roads from washouts and rockfalls.",
+    title: "Engineering Standards for Road Construction and Asphalt Paving in Yemen's Mountainous and Rugged Terrain",
+    description:
+      "A specialized engineering study covering rock excavation techniques, stormwater and flood-drainage design, pavement and compaction layers, and slope reinforcement to protect mountain roads from washouts and rockfalls.",
     category: "General Contracting",
     date: "2026-09-20",
     readTime: "6 min read",
@@ -186,30 +199,32 @@ export const EN_BLOG_POSTS: Record<string, EnBlogPost> = {
       "soil compaction road code"
     ],
     content: {
-      intro: "Yemen's geography is defined by towering mountain terrain and steep gradients that make road construction both a critically important and an extremely difficult development artery. Ensuring road sustainability in these harsh environments requires advanced engineering standards beyond conventional methods, capable of withstanding heavy rainy seasons and mountain washouts.",
+      intro:
+        "Yemen's geography includes steep mountainous terrain that makes road construction both essential and highly challenging. Long-term road performance in these environments requires advanced engineering practices that go beyond conventional methods and address heavy rainfall, runoff, and mountain washouts.",
       sections: [
         {
           heading: "1. Topographic Surveying and Choosing a Safe Alignment",
           paragraphs: [
-            "Work begins with precise surveying studies to determine the most suitable engineering gradients for the alignment and to avoid geological faults and active rockslide zones.",
-            "Using specialized heavy machinery for excavation and controlled rock blasting ensures opening paths without affecting the cohesion of surrounding mountain masses."
+            "The work begins with detailed topographic surveys to determine appropriate grades for the road alignment and to avoid geological faults and active rockslide zones.",
+            "Specialized excavation equipment and controlled rock blasting help open road corridors while minimizing disturbance to surrounding rock formations."
           ]
         },
         {
-          heading: "2. Hydrology: Rainwater and Flood Drainage Networks",
+          heading: "2. Hydrology: Stormwater and Flood Drainage Systems",
           paragraphs: [
-            "Rainwater and rushing floods are the number one enemy of mountain roads in Yemen. That is why designing and building box and pipe culverts, side drainage ditches, and stone retaining walls is the essential foundation for preventing road-layer erosion.",
-            "Reinforcing slopes with steel mesh and shotcrete protects traffic from sudden rockfalls."
+            "Rainfall and flash floods are major threats to mountain roads in Yemen. Designing and constructing box and pipe culverts, side drainage ditches, and stone retaining walls is therefore essential to protecting road layers from erosion.",
+            "Reinforcing slopes with steel mesh and shotcrete helps protect road users from sudden rockfalls."
           ]
         },
         {
-          heading: "3. Quality Control of Base Layers and Laboratory Compaction",
+          heading: "3. Quality Control of Base Layers and Laboratory Compaction Testing",
           paragraphs: [
-            "Every sector undergoes strict laboratory tests for compaction density (Proctor Test) and California Bearing Ratio (CBR) for sub-base and gravel base layers before hot asphalt is laid at thicknesses and standards that guarantee resistance to the axial loads of heavy trucks."
+            "Each road section undergoes strict laboratory testing of compaction density (Proctor Test) and California Bearing Ratio (CBR) for sub-base and gravel base layers before hot-mix asphalt is laid at specified thicknesses in accordance with applicable standards, providing the required bearing capacity to withstand heavy truck axle loads."
           ]
         }
       ],
-      conclusion: "Mountain road construction is an investment in communities' lives and development, and the quality of engineering execution is the real deciding factor between a road that lasts for decades and one that collapses with the first rainy season."
+      conclusion:
+        "Mountain road construction is an investment in community development and long-term connectivity. The quality of engineering execution is critical to determining whether a road delivers reliable performance over decades or deteriorates after a severe rainy season."
     }
   }
 };
