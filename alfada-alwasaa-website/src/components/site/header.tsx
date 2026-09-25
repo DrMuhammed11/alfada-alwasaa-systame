@@ -117,28 +117,28 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand */}
-        <a 
-          href="#home" 
+        {/* Brand — مدمج على الجوال: شعار أصغر واسم فقط بلا السطر الإنجليزي */}
+        <a
+          href="#home"
           onClick={(e) => handleNavClick(e, "#home")}
-          className="flex items-center gap-3" 
+          className="flex items-center gap-2 sm:gap-3"
           aria-label="الفضاء الواسع - الرئيسية"
         >
-          <span className="relative h-11 w-11 overflow-hidden rounded-xl bg-white/5 ring-1 ring-gold/40 sm:h-12 sm:w-12">
+          <span className="relative h-9 w-9 overflow-hidden rounded-xl bg-white/5 ring-1 ring-gold/40 sm:h-12 sm:w-12">
             <Image
               src={SITE_CONFIG.assets.logoMark}
               alt="شعار شركة الفضاء الواسع"
               fill
-              sizes="(max-width: 640px) 44px, 48px"
+              sizes="(max-width: 640px) 36px, 48px"
               className="object-contain p-1"
               priority
             />
           </span>
           <span className="leading-tight">
-            <span className="block text-lg font-extrabold text-white sm:text-xl">
+            <span className="block text-[15px] font-extrabold text-white sm:text-xl">
               الفضاء الواسع
             </span>
-            <span className="block text-[10px] font-semibold tracking-[0.28em] text-gold-light sm:text-[11px]">
+            <span className="hidden text-[10px] font-semibold tracking-[0.28em] text-gold-light sm:block sm:text-[11px]">
               AL-FADA AL-WASAA
             </span>
           </span>
@@ -197,24 +197,24 @@ export function SiteHeader() {
           </a>
         </div>
 
-        {/* Mobile: Search, Language, Theme Toggle, and Menu button */}
-        <div className="flex items-center gap-2 lg:hidden">
+        {/* Mobile: Search, Language, Theme Toggle, and Menu button — أزرار 40px متساوية وفراغات مضغوطة */}
+        <div className="flex items-center gap-1.5 lg:hidden">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
             aria-label="البحث السريع"
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
           >
             <Search className="h-4 w-4 text-gold-light" />
           </button>
-          <LanguageSwitcher variant="button" />
-          <ThemeToggle />
+          <LanguageSwitcher variant="button" className="h-10" />
+          <ThemeToggle className="h-10 w-10" />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label="فتح قائمة التنقل"
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
           >
             <Menu className="h-5 w-5" />
           </button>

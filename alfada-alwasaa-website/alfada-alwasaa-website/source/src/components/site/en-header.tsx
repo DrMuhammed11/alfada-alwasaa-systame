@@ -30,23 +30,23 @@ export function EnHeader() {
     <>
       <header className="fixed inset-x-0 top-0 z-50 bg-navy/95 backdrop-blur-md shadow-md border-b border-white/10 text-white">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Brand */}
-          <Link href="/en" className="flex items-center gap-3" aria-label="Al-Fada Al-Wasaa Home">
-            <span className="relative h-11 w-11 overflow-hidden rounded-xl bg-white/5 ring-1 ring-gold/40 sm:h-12 sm:w-12">
+          {/* Brand — compact on mobile: smaller mark, subtitle hidden under sm */}
+          <Link href="/en" className="flex items-center gap-2 sm:gap-3" aria-label="Al-Fada Al-Wasaa Home">
+            <span className="relative h-9 w-9 overflow-hidden rounded-xl bg-white/5 ring-1 ring-gold/40 sm:h-12 sm:w-12">
               <Image
                 src={SITE_CONFIG.assets.logoMark}
                 alt="Al-Fada Al-Wasaa Logo"
                 fill
-                sizes="(max-width: 640px) 44px, 48px"
+                sizes="(max-width: 640px) 36px, 48px"
                 className="object-contain p-1"
                 priority
               />
             </span>
             <span className="leading-tight">
               <span className="block text-base font-extrabold text-white sm:text-lg tracking-tight">
-                AL-FADA AL-WASAA
+                AL-FADA <br className="sm:hidden" />AL-WASAA
               </span>
-              <span className="block text-[9.5px] font-semibold tracking-[0.24em] text-gold-light sm:text-[10.5px]">
+              <span className="hidden text-[9.5px] font-semibold tracking-[0.24em] text-gold-light sm:block sm:text-[10.5px]">
                 TELECOM & CONTRACTING
               </span>
             </span>
@@ -94,7 +94,7 @@ export function EnHeader() {
           </div>
 
           {/* Mobile buttons */}
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-1.5 lg:hidden">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -103,8 +103,8 @@ export function EnHeader() {
             >
               <Search className="h-4 w-4 text-gold-light" />
             </button>
-            <LanguageSwitcher variant="button" />
-            <ThemeToggle />
+            <LanguageSwitcher variant="button" className="h-10" />
+            <ThemeToggle className="h-10 w-10" />
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}
