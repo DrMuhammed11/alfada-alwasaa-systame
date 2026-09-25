@@ -14,8 +14,9 @@ class AuthApi {
   Future<Map<String, dynamic>> login(String email, String password) async {
     _session.resetUnauthorizedCount();
     try {
+      // login-v2 يعيد رمز تحديث قابل للتجديد الصامت (لا يوفره /auth/login القديم)
       final response = await http.post(
-        Uri.parse(ApiConstants.login),
+        Uri.parse('${ApiConstants.baseUrl}/auth/login-v2'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 5));
@@ -24,7 +25,7 @@ class AuthApi {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final token = data['accessToken'];
         if (token != null) {
-          await _session.saveToken(token);
+          await _session.saveToken(token, refreshToken: data['refreshToken'] as String?);
         }
         return {'success': true, 'user': User.fromJson(data['user'])};
       } else {

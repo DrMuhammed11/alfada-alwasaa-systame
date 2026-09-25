@@ -26,22 +26,19 @@ class _UserDialogState extends State<UserDialog> {
   late String _role;
   String? _departmentId;
   late bool _isActive;
-  late Set<String> _permissions;
   bool _isSaving = false;
 
-  final List<Map<String, String>> _availablePermissions = [
-    {'key': 'CORRESPONDENCE_CREATE', 'name': 'إنشاء المراسلات والوارد'},
-    {'key': 'CORRESPONDENCE_VIEW', 'name': 'استعراض وقراءة المعاملات'},
-    {'key': 'CORRESPONDENCE_EDIT', 'name': 'تعديل المعاملات'},
-    {'key': 'REFERRAL_CREATE', 'name': 'إحالة وتوجيه المعاملات'},
-    {'key': 'TASK_CREATE', 'name': 'إسناد وتكليف المهام'},
-    {'key': 'TASK_COMPLETE', 'name': 'إنجاز واعتماد المهام'},
-    {'key': 'REPLY_CREATE', 'name': 'صياغة وإعداد الردود'},
-    {'key': 'REPLY_APPROVE', 'name': 'اعتماد ومصادقة الردود'},
-    {'key': 'ARCHIVE_ACCESS', 'name': 'أرشفة واسترجاع الأرشيف'},
-    {'key': 'AUDIT_VIEW', 'name': 'الاطلاع على سجلات التدقيق والأمان'},
-    {'key': 'USER_MANAGE', 'name': 'إدارة الموظفين وتعديل الصلاحيات'},
-  ];
+  /// سياسة كلمة المرور مطابقة لتحقق الخادم: 10 خانات فأكثر مع حرف كبير وصغير ورقم ورمز
+  String? _validatePassword(String? v) {
+    final password = v ?? '';
+    if (password.isEmpty) return null; // اختياري (في التعديل)
+    if (password.length < 10) return 'كلمة المرور 10 خانات فأكثر';
+    if (!password.contains(RegExp(r'[A-Z]'))) return 'يلزم حرف لاتيني كبير (A-Z)';
+    if (!password.contains(RegExp(r'[a-z]'))) return 'يلزم حرف لاتيني صغير (a-z)';
+    if (!password.contains(RegExp(r'[0-9]'))) return 'يلزم رقم (0-9)';
+    if (!password.contains(RegExp(r'[^A-Za-z0-9]'))) return 'يلزم رمز خاص مثل !@#';
+    return null;
+  }
 
   @override
   void initState() {
@@ -52,7 +49,6 @@ class _UserDialogState extends State<UserDialog> {
     _role = u?.role ?? 'EMPLOYEE';
     _departmentId = u?.departmentId;
     _isActive = u?.isActive ?? true;
-    _permissions = u != null ? Set.from(u.permissions) : {'CORRESPONDENCE_VIEW', 'CORRESPONDENCE_CREATE'};
   }
 
   @override
@@ -63,14 +59,23 @@ class _UserDialogState extends State<UserDialog> {
     super.dispose();
   }
 
+  String _errorMessageOf(Map<String, dynamic> res) {
+    final msg = res['message'];
+    if (msg is List) return msg.join(' — ');
+    if (msg != null) return msg.toString();
+    return 'فشلت العملية';
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
     final isEdit = widget.userToEdit != null;
+    final newPassword = _passwordController.text;
 
     Map<String, dynamic> res;
     if (isEdit) {
+      // إعادة تعيين كلمة المرور اختيارية في التعديل — تُرسل فقط عند إدخالها
       res = await AdminApiService().updateUser(
         widget.userToEdit!.id,
         name: _nameController.text.trim(),
@@ -78,23 +83,15 @@ class _UserDialogState extends State<UserDialog> {
         role: _role,
         departmentId: _departmentId ?? 'NONE',
         isActive: _isActive,
-        permissions: _permissions.toList(),
+        password: newPassword.isEmpty ? null : newPassword,
       );
     } else {
-      if (_passwordController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('كلمة المرور مطلوبة لإضافة موظف جديد')),
-        );
-        setState(() => _isSaving = false);
-        return;
-      }
       res = await AdminApiService().createUser(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        password: _passwordController.text,
+        password: newPassword,
         role: _role,
         departmentId: _departmentId,
-        permissions: _permissions.toList(),
       );
     }
 
@@ -105,7 +102,7 @@ class _UserDialogState extends State<UserDialog> {
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشلت العملية'), backgroundColor: AdminTheme.crimson),
+        SnackBar(content: Text(_errorMessageOf(res)), backgroundColor: AdminTheme.crimson),
       );
     }
   }
@@ -135,7 +132,7 @@ class _UserDialogState extends State<UserDialog> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    isEdit ? 'تعديل بيانات وصلاحيات الموظف' : 'إضافة موظف ومستخدم جديد',
+                    isEdit ? 'تعديل بيانات الموظف' : 'إضافة موظف ومستخدم جديد',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
@@ -182,20 +179,23 @@ class _UserDialogState extends State<UserDialog> {
                       const SizedBox(height: 14),
 
                       // كلمة المرور
-                      if (!isEdit) ...[
-                        const Text('كلمة المرور الابتدائية', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            hintText: 'كلمة مرور قوية (8 خانات على الأقل)',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          ),
+                      Text(
+                        isEdit ? 'إعادة تعيين كلمة المرور (اختياري)' : 'كلمة المرور الابتدائية',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        validator: isEdit ? _validatePassword : (v) => _validatePassword(v) ?? ((v ?? '').isEmpty ? 'كلمة المرور مطلوبة' : null),
+                        decoration: InputDecoration(
+                          hintText: isEdit ? 'اتركه فارغًا للإبقاء على كلمة المرور الحالية' : '10 خانات فأكثر مع حرف كبير وصغير ورقم ورمز',
+                          helperText: 'الصلاحيات مشتقة تلقائيًا من الدور الوظيفي — تُدار من مصفوفة الصلاحيات المركزية',
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
-                        const SizedBox(height: 14),
-                      ],
+                      ),
+                      const SizedBox(height: 14),
 
                       // الصف: الدور الوظيفي + القسم
                       Row(
@@ -256,7 +256,7 @@ class _UserDialogState extends State<UserDialog> {
                       if (isEdit) ...[
                         SwitchListTile(
                           title: const Text('حساب نشط ومفعل', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                          subtitle: const Text('يمكن للحساب تسجيل الدخول واستقبال التكليفات', style: TextStyle(fontSize: 11)),
+                          subtitle: const Text('التعطيل يُبطل جلسات المستخدم فورًا', style: TextStyle(fontSize: 11)),
                           value: _isActive,
                           activeColor: AdminTheme.emerald,
                           contentPadding: EdgeInsets.zero,
@@ -264,44 +264,6 @@ class _UserDialogState extends State<UserDialog> {
                         ),
                         const SizedBox(height: 14),
                       ],
-
-                      // الصلاحيات الدقيقة
-                      const Text('الصلاحيات الدقيقة الممنوحة (Granular Permissions)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 6,
-                          children: _availablePermissions.map((perm) {
-                            final isChecked = _permissions.contains(perm['key']);
-                            return FilterChip(
-                              label: Text(perm['name']!, style: const TextStyle(fontSize: 11)),
-                              selected: isChecked,
-                              selectedColor: AdminTheme.accent.withAlpha(30),
-                              checkmarkColor: AdminTheme.accent,
-                              labelStyle: TextStyle(
-                                color: isChecked ? AdminTheme.accent : const Color(0xFF475569),
-                                fontWeight: isChecked ? FontWeight.bold : FontWeight.normal,
-                              ),
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    _permissions.add(perm['key']!);
-                                  } else {
-                                    _permissions.remove(perm['key']!);
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
                     ],
                   ),
                 ),

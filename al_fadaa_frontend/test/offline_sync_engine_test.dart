@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:al_fadaa_frontend/core/offline/sync_queue_model.dart';
 import 'package:al_fadaa_frontend/core/offline/offline_storage_service.dart';
 import 'package:al_fadaa_frontend/core/offline/offline_sync_engine.dart';
@@ -8,8 +10,17 @@ import 'package:al_fadaa_frontend/models/correspondence_model.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
+  late Directory tempDir;
+
+  setUp(() async {
+    // تخزين Hive في مجلد مؤقت لكل اختبار — كان يعتمد على SharedPreferences
+    tempDir = Directory.systemTemp.createTempSync('hive_test');
+    Hive.init(tempDir.path);
+  });
+
+  tearDown(() async {
+    await Hive.deleteFromDisk();
+    tempDir.deleteSync(recursive: true);
   });
 
   group('SyncQueueItem Model Tests', () {

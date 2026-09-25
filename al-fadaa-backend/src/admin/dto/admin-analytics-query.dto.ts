@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsRealDate } from '../../common/utils/dates';
 
 export class AdminAnalyticsQueryDto {
   @ApiPropertyOptional({
@@ -13,14 +14,20 @@ export class AdminAnalyticsQueryDto {
   })
   period?: '7d' | '30d' | '90d' | 'year' | 'all';
 
-  @ApiPropertyOptional({ description: 'تاريخ بداية مخصص (ISO)', example: '2026-01-01T00:00:00Z' })
+  @ApiPropertyOptional({
+    description: 'تاريخ بداية مخصص (YYYY-MM-DD أو ISO كامل)',
+    example: '2026-01-01T00:00:00Z',
+  })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة تاريخ البداية غير صالحة' })
+  @IsRealDate({ message: 'صيغة تاريخ البداية غير صالحة' })
   from?: string;
 
-  @ApiPropertyOptional({ description: 'تاريخ نهاية مخصص (ISO)', example: '2026-12-31T23:59:59Z' })
+  @ApiPropertyOptional({
+    description: 'تاريخ نهاية مخصص (YYYY-MM-DD يشمل كامل اليوم، أو ISO كامل)',
+    example: '2026-12-31T23:59:59Z',
+  })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة تاريخ النهاية غير صالحة' })
+  @IsRealDate({ message: 'صيغة تاريخ النهاية غير صالحة' })
   to?: string;
 
   @ApiPropertyOptional({ description: 'تصفية إحصائيات قسم معين (UUID)' })

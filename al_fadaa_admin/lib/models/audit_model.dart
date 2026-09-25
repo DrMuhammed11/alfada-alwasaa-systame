@@ -25,17 +25,19 @@ class AuditLogItem {
 
   factory AuditLogItem.fromJson(Map<String, dynamic> json) {
     final user = json['user'] is Map ? json['user'] as Map<String, dynamic> : null;
+    // الخادم يعيد البيانات الوصفية باسم metadata — وقديمًا كانت تُستهلك باسم details
+    final rawDetails = json['metadata'] ?? json['details'];
     return AuditLogItem(
       id: json['id'] ?? '',
       action: json['action'] ?? '',
-      summary: json['summary'] ?? json['details']?.toString() ?? '',
+      summary: json['summary'] ?? rawDetails?.toString() ?? '',
       userName: user?['name'] ?? user?['fullName'] ?? 'النظام',
       userEmail: user?['email'],
       ipAddress: json['ipAddress'],
       previousHash: json['previousHash'],
       recordHash: json['recordHash'],
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) ?? DateTime.now() : DateTime.now(),
-      details: json['details'] is Map<String, dynamic> ? json['details'] : null,
+      details: rawDetails is Map<String, dynamic> ? rawDetails : null,
     );
   }
 }
@@ -43,6 +45,9 @@ class AuditLogItem {
 class AuditIntegrityReport {
   final bool isTamperFree;
   final int totalVerified;
+
+  /// إجمالي سجلات التدقيق في الخادم — لبيان تغطية الفحص (قد يكون جزئية)
+  final int totalRecords;
   final String chainStatus;
   final String verifiedUntil;
   final String details;
@@ -51,6 +56,7 @@ class AuditIntegrityReport {
   AuditIntegrityReport({
     required this.isTamperFree,
     required this.totalVerified,
+    this.totalRecords = 0,
     required this.chainStatus,
     required this.verifiedUntil,
     required this.details,
@@ -61,10 +67,30 @@ class AuditIntegrityReport {
     return AuditIntegrityReport(
       isTamperFree: json['isTamperFree'] ?? false,
       totalVerified: json['totalVerified'] ?? 0,
+      totalRecords: json['totalRecords'] ?? 0,
       chainStatus: json['chainStatus'] ?? 'UNKNOWN',
       verifiedUntil: json['verifiedUntil'] ?? '',
       details: json['details'] ?? '',
       brokenRecordId: json['brokenRecordId'],
     );
   }
+}
+
+/// صفحة من سجل التدقيق — نتيجة استعلام مفلتر ومقسّم إلى صفحات
+class AuditLogsPage {
+  final List<AuditLogItem> items;
+  final int page;
+  final int totalPages;
+  final int total;
+
+  /// true يعني فشل الطلب (اتصال/خادم) — وليس غياب النتائج
+  final bool error;
+
+  AuditLogsPage({
+    required this.items,
+    required this.page,
+    required this.totalPages,
+    required this.total,
+    this.error = false,
+  });
 }

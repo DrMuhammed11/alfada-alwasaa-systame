@@ -43,6 +43,13 @@ export class UsersService {
     if (dto.role) where.role = dto.role;
     if (dto.departmentId) where.departmentId = dto.departmentId;
     if (dto.isActive !== undefined) where.isActive = dto.isActive;
+    if (dto.search && dto.search.trim().length > 0) {
+      const q = dto.search.trim();
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+      ];
+    }
 
     const [total, data] = await this.prisma.$transaction([
       this.prisma.user.count({ where }),
@@ -111,11 +118,20 @@ export class UsersService {
 
     const user = await this.prisma.user.update({ where: { id }, data, select: SAFE_SELECT });
 
+    // إبطال كل جلسات المستخدم عند تغيير كلمة المرور أو الدور أو التعطيل
+    const mustRevokeSessions = Boolean(dto.password) || Boolean(dto.role) || dto.isActive === false;
+    if (mustRevokeSessions) {
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+
     await this.audit.log({
       action: AuditAction.UPDATE,
       entityType: 'User',
       entityId: id,
-      summary: `تعديل حساب ${user.name} (${user.email})`,
+      summary: `تعديل حساب ${user.name} (${user.email})${mustRevokeSessions ? ' — وأُبطلت جلساته' : ''}`,
       metadata: { updatedFields: Object.keys(dto) },
     });
     return user;
@@ -126,16 +142,23 @@ export class UsersService {
    * الحذف ممنوع تصميميًا للحفاظ على سلامة سجل التدقيق وسلسلة المراسلات.
    */
   async deactivate(id: string): Promise<SafeUserRow> {
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: { isActive: false },
-      select: SAFE_SELECT,
-    });
+    const [user] = await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: { isActive: false },
+        select: SAFE_SELECT,
+      }),
+      // إنهاء كل جلسات الحساب المعطل فورًا
+      this.prisma.refreshToken.updateMany({
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
     await this.audit.log({
       action: AuditAction.DEACTIVATE,
       entityType: 'User',
       entityId: id,
-      summary: `تعطيل حساب ${user.name} (${user.email})`,
+      summary: `تعطيل حساب ${user.name} (${user.email}) وإبطال جلساته`,
     });
     return user;
   }

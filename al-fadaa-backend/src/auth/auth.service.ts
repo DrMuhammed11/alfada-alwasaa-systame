@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AuditAction } from '@prisma/client';
@@ -7,7 +7,11 @@ import { randomBytes, createHash } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { SafeUser } from '../common/types';
-import { LoginDto } from './dto';
+import { LoginDto, ChangePasswordDto } from './dto';
+
+/** عتبات قفل الحساب: 5 محاولات فاشلة ⇒ قفل 15 دقيقة */
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCK_MINUTES = 15;
 
 @Injectable()
 export class AuthService {
@@ -17,20 +21,64 @@ export class AuthService {
     private readonly audit: AuditService,
   ) {}
 
-  /** تسجيل الدخول: تحقق من البيانات → إصدار JWT → تسجيل الحدث في سجل التدقيق */
-  async login(dto: LoginDto): Promise<{ accessToken: string; user: SafeUser }> {
+  /**
+   * منطق المصادقة المشترك: جلب المستخدم، فحص القفل، التحقق من كلمة المرور،
+   * وتحديث عدّاد المحاولات الفاشلة (قفل عند التكرار، تصفير عند النجاح).
+   */
+  private async authenticate(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
+      where: { email: email.toLowerCase().trim() },
       include: { department: { select: { id: true, name: true } } },
     });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
 
-    const valid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const minutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+      throw new UnauthorizedException(
+        `الحساب مقفل مؤقتًا بسبب محاولات دخول فاشلة متكررة — أعد المحاولة بعد ${minutes} دقيقة`,
+      );
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
+      const attempts = user.failedLoginAttempts + 1;
+      const lock = attempts >= MAX_FAILED_ATTEMPTS;
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: lock ? 0 : attempts,
+          ...(lock ? { lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60 * 1000) } : {}),
+        },
+      });
+      if (lock) {
+        await this.audit.log({
+          action: AuditAction.LOGIN,
+          userId: user.id,
+          entityType: 'User',
+          entityId: user.id,
+          summary: `قفل مؤقت للحساب ${user.email} بعد ${MAX_FAILED_ATTEMPTS} محاولات دخول فاشلة (${LOCK_MINUTES} دقيقة)`,
+        });
+        throw new UnauthorizedException(
+          `كلمة المرور غير صحيحة — قُفل الحساب ${LOCK_MINUTES} دقيقة بعد تكرار المحاولات`,
+        );
+      }
       throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
+
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { failedLoginAttempts: 0, lockedUntil: null },
+      });
+    }
+    return user;
+  }
+
+  /** تسجيل الدخول: تحقق من البيانات → إصدار JWT → تسجيل الحدث في سجل التدقيق */
+  async login(dto: LoginDto): Promise<{ accessToken: string; user: SafeUser }> {
+    const user = await this.authenticate(dto.email, dto.password);
 
     const accessToken = await this.jwt.signAsync({
       sub: user.id,
@@ -62,18 +110,7 @@ export class AuthService {
     dto: LoginDto,
     meta?: { userAgent?: string; ipAddress?: string },
   ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
-      include: { department: { select: { id: true, name: true } } },
-    });
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-    }
-
-    const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) {
-      throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-    }
+    const user = await this.authenticate(dto.email, dto.password);
 
     const accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '15m') as any;
     const accessToken = await this.jwt.signAsync(
@@ -221,5 +258,43 @@ export class AuthService {
     }
     const { passwordHash: _hash, ...safe } = user;
     return safe as SafeUser;
+  }
+
+  /**
+   * تغيير كلمة المرور الذاتي — المسار الوحيد لتبديل كلمة مرور حساب قائم:
+   * تحقق من الحالية → سياسة قوية للجديدة → إبطال كل جلسات المستخدم فورًا.
+   */
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<{ success: boolean; message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.isActive) throw new UnauthorizedException('الحساب غير متاح');
+
+    const currentValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!currentValid) throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
+
+    if (await bcrypt.compare(dto.newPassword, user.passwordHash)) {
+      throw new BadRequestException('كلمة المرور الجديدة مطابقة للحالية — اختر كلمة مرور مختلفة');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: await bcrypt.hash(dto.newPassword, 10) },
+      }),
+      // إبطال كل رموز التحديث الحية — الجلسات الحالية تنتهي مع انتهاء رمز الوصول (15 دقيقة كحد أقصى)
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    await this.audit.log({
+      action: AuditAction.UPDATE,
+      userId,
+      entityType: 'User',
+      entityId: userId,
+      summary: `تغيير كلمة المرور الذاتي وإبطال كل الجلسات: ${user.email}`,
+    });
+
+    return { success: true, message: 'تم تغيير كلمة المرور وإبطال الجلسات الأخرى — سجّل الدخول من جديد' };
   }
 }

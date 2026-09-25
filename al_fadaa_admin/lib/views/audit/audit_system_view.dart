@@ -4,6 +4,25 @@ import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../models/audit_model.dart';
 
+/// تسميات عربية لأنواع أحداث التدقيق — يجب أن تطابق enum AuditAction في الخادم
+const Map<String, String> kAuditActionLabels = {
+  'LOGIN': 'تسجيل دخول',
+  'CREATE': 'إنشاء',
+  'UPDATE': 'تعديل',
+  'DEACTIVATE': 'تعطيل حساب',
+  'REFER': 'إحالة',
+  'ASSIGN': 'تكليف',
+  'SUBMIT': 'رفع للاعتماد',
+  'APPROVE': 'اعتماد',
+  'REJECT': 'رفض',
+  'SEND': 'إرسال',
+  'CLOSE': 'إغلاق',
+  'ARCHIVE': 'أرشفة',
+  'UPLOAD': 'رفع مرفق',
+  'DELETE': 'حذف مرفق',
+  'DOWNLOAD': 'تنزيل مرفق',
+};
+
 class AuditSystemView extends StatefulWidget {
   const AuditSystemView({super.key});
 
@@ -12,18 +31,35 @@ class AuditSystemView extends StatefulWidget {
 }
 
 class _AuditSystemViewState extends State<AuditSystemView> {
+  static const int _limit = 25;
+
   final _searchController = TextEditingController();
   List<AuditLogItem> _logs = [];
   bool _isLoading = true;
+  bool _hasError = false;
   bool _isActionRunning = false;
   bool _isCheckingIntegrity = false;
   AuditIntegrityReport? _integrityReport;
   final DateFormat _dateFormat = DateFormat('yyyy/MM/dd HH:mm', 'ar');
 
+  // الفلاتر الخدمية (تنفَّذ في الخادم) وحالة الترقيم
+  String _selectedAction = 'ALL';
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  int _page = 1;
+  int _totalPages = 1;
+  int _total = 0;
+
+  bool get _hasActiveFilters =>
+      _searchController.text.trim().isNotEmpty ||
+      _selectedAction != 'ALL' ||
+      _fromDate != null ||
+      _toDate != null;
+
   @override
   void initState() {
     super.initState();
-    _loadLogs();
+    _loadLogs(page: 1);
   }
 
   @override
@@ -32,15 +68,29 @@ class _AuditSystemViewState extends State<AuditSystemView> {
     super.dispose();
   }
 
-  Future<void> _loadLogs() async {
-    setState(() => _isLoading = true);
-    final logs = await AdminApiService().getAuditLogs();
-    if (mounted) {
-      setState(() {
-        _logs = logs;
-        _isLoading = false;
-      });
-    }
+  /// جلب السجل من الخادم بالفلاتر الحالية — البحث النصي نفّذه الخادم عبر q
+  Future<void> _loadLogs({required int page}) async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final res = await AdminApiService().getAuditLogs(
+      q: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+      action: _selectedAction,
+      from: _fromDate != null ? DateFormat('yyyy-MM-dd').format(_fromDate!) : null,
+      to: _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null,
+      page: page,
+      limit: _limit,
+    );
+    if (!mounted) return;
+    setState(() {
+      _logs = res.items;
+      _hasError = res.error;
+      _page = res.page;
+      _totalPages = res.totalPages;
+      _total = res.total;
+      _isLoading = false;
+    });
   }
 
   Future<void> _checkIntegrity() async {
@@ -53,11 +103,14 @@ class _AuditSystemViewState extends State<AuditSystemView> {
     });
 
     if (report != null) {
+      final partial = report.totalRecords > 0 && report.totalVerified < report.totalRecords;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             report.isTamperFree
-                ? 'اكتمل فحص النزاهة بنجاح: السلسلة التشفيرية متطابقة وسليمة 100%'
+                ? (partial
+                    ? 'فحص النزاهة سليم: آخر ${report.totalVerified} سجلًا من أصل ${report.totalRecords} — أعد الفحص بنطاق أوسع لتغطية الأقدم'
+                    : 'اكتمل فحص النزاهة بنجاح: السلسلة التشفيرية متطابقة وسليمة 100%')
                 : 'تحذير أمني: تم رصد انقطاع أو تلاعب في سلسلة التدقيق!',
           ),
           backgroundColor: report.isTamperFree ? AdminTheme.emerald : AdminTheme.crimson,
@@ -85,122 +138,284 @@ class _AuditSystemViewState extends State<AuditSystemView> {
         backgroundColor: res['success'] == true ? AdminTheme.emerald : AdminTheme.crimson,
       ),
     );
-    _loadLogs();
+    _loadLogs(page: _page);
   }
 
-  List<AuditLogItem> get _filteredLogs {
-    final q = _searchController.text.trim().toLowerCase();
-    if (q.isEmpty) return _logs;
-    return _logs.where((l) {
-      return l.action.toLowerCase().contains(q) ||
-          l.summary.toLowerCase().contains(q) ||
-          (l.userName != null && l.userName!.toLowerCase().contains(q)) ||
-          (l.ipAddress != null && l.ipAddress!.contains(q));
-    }).toList();
+  Future<void> _pickDate({required bool isFrom}) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isFrom ? (_fromDate ?? now) : (_toDate ?? now),
+      firstDate: DateTime(2020),
+      lastDate: now.add(const Duration(days: 1)),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      if (isFrom) {
+        _fromDate = picked;
+        if (_toDate != null && _toDate!.isBefore(picked)) _toDate = picked;
+      } else {
+        _toDate = picked;
+        if (_fromDate != null && _fromDate!.isAfter(picked)) _fromDate = picked;
+      }
+    });
+    _loadLogs(page: 1);
+  }
+
+  Future<void> _clearFilters() async {
+    setState(() {
+      _searchController.clear();
+      _selectedAction = 'ALL';
+      _fromDate = null;
+      _toDate = null;
+    });
+    _loadLogs(page: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filteredLogs;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Column(
         children: [
-          // شريط أدوات النظام والبحث
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.security_rounded, color: AdminTheme.accent, size: 22),
-                    const SizedBox(width: 8),
-                    const Text('سجل التدقيق والرقابة الأمنية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    const Spacer(),
-                    // زر فحص النزاهة الرقمية المشفرة
-                    FilledButton.icon(
-                      onPressed: _isCheckingIntegrity ? null : _checkIntegrity,
-                      icon: _isCheckingIntegrity
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.verified_user_rounded, size: 16),
-                      label: const Text('فحص النزاهة الرقمية (SHA-256)', style: TextStyle(fontSize: 12)),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AdminTheme.emerald,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // زر إعادة إرسال البريد المعلق
-                    OutlinedButton.icon(
-                      onPressed: _isActionRunning ? null : _resendMails,
-                      icon: _isActionRunning
-                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.forward_to_inbox_rounded, size: 16),
-                      label: const Text('إعادة إرسال البريد المعلق', style: TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AdminTheme.primary,
-                        side: const BorderSide(color: AdminTheme.primary),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded, size: 20),
-                      tooltip: 'تحديث السجل',
-                      onPressed: _loadLogs,
-                    ),
-                  ],
+          _buildToolbar(),
+          // بطاقة تقرير فحص النزاهة الرقمية
+          if (_integrityReport != null) _buildIntegrityBanner(_integrityReport!),
+          Expanded(child: _buildBody()),
+          _buildPaginationBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolbar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // شريط أدوات النظام
+          Row(
+            children: [
+              const Icon(Icons.security_rounded, color: AdminTheme.accent, size: 22),
+              const SizedBox(width: 8),
+              const Text('سجل التدقيق والرقابة الأمنية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const Spacer(),
+              // زر فحص النزاهة الرقمية المشفرة
+              FilledButton.icon(
+                onPressed: _isCheckingIntegrity ? null : _checkIntegrity,
+                icon: _isCheckingIntegrity
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.verified_user_rounded, size: 16),
+                label: const Text('فحص النزاهة الرقمية (SHA-256)', style: TextStyle(fontSize: 12)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AdminTheme.emerald,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                const SizedBox(height: 12),
-                // حقل تصفية السجل
-                SizedBox(
+              ),
+              const SizedBox(width: 8),
+              // زر إعادة إرسال البريد المعلق
+              OutlinedButton.icon(
+                onPressed: _isActionRunning ? null : _resendMails,
+                icon: _isActionRunning
+                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.forward_to_inbox_rounded, size: 16),
+                label: const Text('إعادة إرسال البريد المعلق', style: TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AdminTheme.primary,
+                  side: const BorderSide(color: AdminTheme.primary),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                tooltip: 'تحديث السجل',
+                onPressed: () => _loadLogs(page: _page),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // البحث النصي (ينفَّذ في الخادم) + فلتر نوع الحدث
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
                   height: 38,
                   child: TextField(
                     controller: _searchController,
+                    textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: 'ابحث في السجل بالإجراء، اسم المستخدم، البصمة، أو العنوان...',
                       hintStyle: const TextStyle(fontSize: 12, color: AdminTheme.textMuted),
-                      prefixIcon: const Icon(Icons.filter_list_rounded, size: 18),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                     ),
-                    onChanged: (_) => setState(() {}),
+                    onSubmitted: (_) => _loadLogs(page: 1),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              _buildActionDropdown(),
+            ],
           ),
+          const SizedBox(height: 8),
+          // فلتر النطاق الزمني + مسح الفلاتر + العدد الكلي
+          Row(
+            children: [
+              const Icon(Icons.date_range_rounded, size: 16, color: AdminTheme.textMuted),
+              const SizedBox(width: 6),
+              _buildDateChip(isFrom: true),
+              const SizedBox(width: 8),
+              _buildDateChip(isFrom: false),
+              if (_hasActiveFilters) ...[
+                const SizedBox(width: 8),
+                ActionChip(
+                  label: const Text('مسح الفلاتر', style: TextStyle(fontSize: 11, color: AdminTheme.crimson)),
+                  avatar: const Icon(Icons.filter_alt_off_rounded, size: 15, color: AdminTheme.crimson),
+                  side: BorderSide(color: AdminTheme.crimson.withAlpha(80)),
+                  onPressed: _clearFilters,
+                ),
+              ],
+              const Spacer(),
+              Text(
+                'إجمالي السجلات: $_total',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-          // بطاقة تقرير فحص النزاهة الرقمية
-          if (_integrityReport != null) _buildIntegrityBanner(_integrityReport!),
+  Widget _buildActionDropdown() {
+    return Container(
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedAction,
+          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+          items: [
+            const DropdownMenuItem(value: 'ALL', child: Text('كل أنواع الأحداث')),
+            ...kAuditActionLabels.entries.map(
+              (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+            ),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              setState(() => _selectedAction = val);
+              _loadLogs(page: 1);
+            }
+          },
+        ),
+      ),
+    );
+  }
 
-          // قائمة أحداث التدقيق
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : filtered.isEmpty
-                    ? const Center(child: Text('لا توجد سجلات تدقيق مطابقة', style: TextStyle(color: AdminTheme.textMuted)))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
-                          final item = filtered[index];
-                          return _buildLogCard(item);
-                        },
-                      ),
+  Widget _buildDateChip({required bool isFrom}) {
+    final date = isFrom ? _fromDate : _toDate;
+    final label = date == null
+        ? (isFrom ? 'من تاريخ' : 'إلى تاريخ')
+        : '${isFrom ? 'من' : 'إلى'}: ${DateFormat('yyyy/MM/dd').format(date)}';
+    return ActionChip(
+      label: Text(label, style: const TextStyle(fontSize: 11)),
+      avatar: Icon(
+        isFrom ? Icons.event_rounded : Icons.event_available_rounded,
+        size: 15,
+        color: date != null ? AdminTheme.accent : AdminTheme.textMuted,
+      ),
+      onPressed: () => _pickDate(isFrom: isFrom),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_hasError) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 44, color: AdminTheme.crimson),
+            const SizedBox(height: 10),
+            const Text('تعذر تحميل سجل التدقيق من الخادم', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => _loadLogs(page: _page),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('إعادة المحاولة'),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_logs.isEmpty) {
+      return const Center(
+        child: Text(
+          'لا توجد سجلات تدقيق مطابقة للفلاتر المحددة',
+          style: TextStyle(color: AdminTheme.textMuted),
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: () => _loadLogs(page: _page),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _logs.length,
+        itemBuilder: (context, index) {
+          final item = _logs[index];
+          return _buildLogCard(item);
+        },
+      ),
+    );
+  }
+
+  Widget _buildPaginationBar() {
+    if (_isLoading || _hasError || _logs.isEmpty) return const SizedBox.shrink();
+    final canPrev = _page > 1;
+    final canNext = _page < _totalPages;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'الصفحة $_page من $_totalPages',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.chevron_right_rounded),
+            tooltip: 'الصفحة السابقة',
+            onPressed: canPrev ? () => _loadLogs(page: _page - 1) : null,
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_left_rounded),
+            tooltip: 'الصفحة التالية',
+            onPressed: canNext ? () => _loadLogs(page: _page + 1) : null,
           ),
         ],
       ),
@@ -280,9 +495,12 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 16,
+                  runSpacing: 4,
                   children: [
                     Text(
-                      'عدد السجلات المفحوصة: ${report.totalVerified}',
+                      report.totalRecords > report.totalVerified
+                          ? 'التغطية: ${report.totalVerified} من أصل ${report.totalRecords} سجل (الأحدث)'
+                          : 'عدد السجلات المفحوصة: ${report.totalVerified}',
                       style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
                     ),
                     Text(

@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaService } from '../prisma/prisma.service';
+import { validateMagicBytes, isZipAllowed } from '../common/attachments/magic-bytes';
 
 @Injectable()
 export class IncomingMailAttachmentService {
@@ -10,7 +12,10 @@ export class IncomingMailAttachmentService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * حفظ مرفقات رسالة العميل على القرص وإنشاء سجلات لها في قاعدة البيانات
+   * حفظ مرفقات رسالة العميل على القرص وإنشاء سجلات لها في قاعدة البيانات.
+   * تُطبَّق نفس سياسة الأمان الخاصة برفع المستخدمين: فحص البايتات السحرية
+   * (وليس الاعتماد على نوع MIME المُعلن)، حظر ZIP وفق الإعداد، وبصمة SHA-256.
+   * مرفقات البريد الوارد سطح هجوم خارجي — أدنى تساهل معها يعني RCE محتمل.
    */
   async saveIncomingAttachments(
     attachments: any[] | undefined,
@@ -72,26 +77,48 @@ export class IncomingMailAttachmentService {
           continue;
         }
 
+        if (!att.content || !Buffer.isBuffer(att.content)) continue;
+
+        // ZIP محظور وفق الإعداد نفسه المطبق على رفع المستخدمين
+        if (mime === 'application/zip' && !isZipAllowed()) {
+          this.logger.warn(
+            `رفض مرفق ZIP «${att.filename}» من البريد الوارد (ALLOW_ZIP_UPLOADS غير مفعّل)`,
+          );
+          continue;
+        }
+
         const unique = `${Date.now()}-${Math.round(Math.random() * 1_000_000_000)}`;
         const storedName = `${unique}${ext || ''}`;
         const filePath = path.join(uploadDir, storedName);
 
-        if (att.content && Buffer.isBuffer(att.content)) {
-          await fs.promises.writeFile(filePath, att.content);
-          await this.prisma.attachment.create({
-            data: {
-              correspondenceId,
-              fileName: att.filename || 'attachment',
-              storedName,
-              mimeType: mime || 'application/octet-stream',
-              size,
-              uploadedById: systemUserId,
-            },
-          });
-          this.logger.log(
-            `[IMAP Engine] تم حفظ المرفق «${att.filename}» (${(size / 1024).toFixed(1)}KB) للمراسلة`,
+        await fs.promises.writeFile(filePath, att.content);
+
+        // فحص المحتوى الفعلي (magic bytes) بعد الكتابة — النوع المُعلن من المرسل غير موثوق
+        if (!validateMagicBytes(filePath, mime || guessMimeFromExt(ext))) {
+          this.logger.warn(
+            `محتوى المرفق «${att.filename}» لا يطابق نوعه المُعلن (${mime}) — حُذف الملف ورُفض السجل`,
           );
+          fs.unlinkSync(filePath);
+          continue;
         }
+
+        // بصمة SHA-256 للتحقق من السلامة — مطابقة لسلوك رفع المستخدمين
+        const sha256 = crypto.createHash('sha256').update(att.content).digest('hex');
+
+        await this.prisma.attachment.create({
+          data: {
+            correspondenceId,
+            fileName: att.filename || 'attachment',
+            storedName,
+            mimeType: mime || 'application/octet-stream',
+            size,
+            sha256,
+            uploadedById: systemUserId,
+          },
+        });
+        this.logger.log(
+          `[IMAP Engine] تم حفظ المرفق «${att.filename}» (${(size / 1024).toFixed(1)}KB) للمراسلة`,
+        );
       } catch (err) {
         this.logger.error(
           `فشل حفظ المرفق «${att.filename}»: ${(err as Error).message}`,
@@ -99,4 +126,23 @@ export class IncomingMailAttachmentService {
       }
     }
   }
+}
+
+/** تخمين نوع MIME من الامتداد لغرض فحص البايتات السحرية عندما يغيب النوع */
+function guessMimeFromExt(ext: string): string {
+  const map: Record<string, string> = {
+    '.pdf': 'application/pdf',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.doc': 'application/msword',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.xls': 'application/vnd.ms-excel',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    '.zip': 'application/zip',
+    '.txt': 'text/plain',
+  };
+  return map[ext] ?? 'application/octet-stream';
 }

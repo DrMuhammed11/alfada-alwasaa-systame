@@ -1,4 +1,6 @@
 import { Injectable, Optional } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
   CorrespondenceStatus,
   CorrespondenceType,
@@ -12,6 +14,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { MailRetryService } from '../mail/mail-retry.service';
 import { AdminAnalyticsQueryDto } from './dto/admin-analytics-query.dto';
+import { parseDateEnd, parseDateStart } from '../common/utils/dates';
 
 @Injectable()
 export class AdminService {
@@ -98,6 +101,44 @@ export class AdminService {
     return configs;
   }
 
+  /**
+   * حالة النسخ الاحتياطي: الإعداد، أمر الرفع الخارجي، وقائمة النسخ الموجودة محليًا
+   * (الاسم، الحجم، آخر تعديل) — الأحدث أولًا.
+   */
+  getBackupStatus() {
+    const enabled = process.env.BACKUP_ENABLED === 'true';
+    const dir = process.env.BACKUP_DIR || './backups';
+    const retentionDays = Number(process.env.BACKUP_RETENTION_DAYS) || 7;
+    const uploadCommand = process.env.BACKUP_UPLOAD_COMMAND || '';
+
+    const files: { name: string; sizeBytes: number; modifiedAt: string }[] = [];
+    try {
+      if (fs.existsSync(dir)) {
+        for (const name of fs.readdirSync(dir)) {
+          if (!name.endsWith('.sql.gz')) continue;
+          const stat = fs.statSync(path.join(dir, name));
+          files.push({
+            name,
+            sizeBytes: stat.size,
+            modifiedAt: stat.mtime.toISOString(),
+          });
+        }
+      }
+    } catch {
+      // مجلد غير مقروء — تُعاد قائمة فارغة
+    }
+    files.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+
+    return {
+      enabled,
+      directory: dir,
+      retentionDays,
+      offsiteConfigured: uploadCommand.trim().length > 0,
+      files: files.slice(0, 30),
+      totalFiles: files.length,
+    };
+  }
+
   /** تحديث مسار اعتماد لأولوية معينة مع التحقق من صحة التسلسل الهرمي */
   async setApprovalWorkflow(priority: any, steps: { level: number; requiredRole: any }[]) {
     // 1. فرز الخطوات حسب المستوى
@@ -160,6 +201,31 @@ export class AdminService {
     return this.mailRetry.retryManually(id);
   }
 
+  /**
+   * إعادة جدولة كل رسائل الصادر الفاشلة نهائيًا — تُستدعى من زر
+   * «إعادة إرسال البريد المعلق» في لوحة الإدارة.
+   */
+  async resendFailedMails() {
+    if (!this.mailRetry || !this.prisma) {
+      throw new Error('خدمة استرداد البريد غير مهيأة');
+    }
+    const failed = await this.prisma.outboxMail.findMany({
+      where: { status: OutboxMailStatus.FAILED },
+      select: { id: true },
+    });
+    for (const mail of failed) {
+      await this.mailRetry.retryManually(mail.id);
+    }
+    return {
+      success: true,
+      requeued: failed.length,
+      message:
+        failed.length > 0
+          ? `أُعيدت جدولة ${failed.length} رسالة فاشلة لإعادة الإرسال`
+          : 'لا توجد رسائل فاشلة لإعادة الإرسال',
+    };
+  }
+
   /** إيقاف إعادة المحاولة مؤقتًا */
   async pauseOutboxMail(id: string) {
     if (!this.mailRetry) throw new Error('خدمة استرداد البريد غير مهيأة');
@@ -173,14 +239,14 @@ export class AdminService {
     let endDate: Date | undefined;
 
     if (dto.from) {
-      startDate = new Date(dto.from);
+      startDate = parseDateStart(dto.from);
     } else if (dto.period && dto.period !== 'all') {
       const days = dto.period === '7d' ? 7 : dto.period === '90d' ? 90 : dto.period === 'year' ? 365 : 30;
       startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     }
 
     if (dto.to) {
-      endDate = new Date(dto.to);
+      endDate = parseDateEnd(dto.to);
     }
 
     const dateFilter: Prisma.DateTimeFilter | undefined =

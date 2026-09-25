@@ -110,14 +110,16 @@ export class RepliesController {
   }
 
   @Get(':id/diff')
-  @ApiOperation({ summary: 'مقارنة الفروق السطرية بين نسختين للرد' })
+  @ApiOperation({ summary: 'مقارنة الفروق السطرية بين نسختين للرد — خاضع لنطاق الرؤية' })
   getDiff(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUser,
     @Query('from') fromVersion?: string,
     @Query('to') toVersion?: string,
   ) {
     return this.repliesService.getDiff(
       id,
+      user,
       fromVersion ? parseInt(fromVersion, 10) : undefined,
       toVersion ? parseInt(toVersion, 10) : undefined,
     );

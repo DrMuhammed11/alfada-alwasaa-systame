@@ -1,45 +1,66 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/correspondence_model.dart';
 import '../../models/user_model.dart';
 import 'sync_queue_model.dart';
 
-/// خدمة التخزين المحلي المنظم والمحمي لدعم العمل بدون اتصال بالإنترنت (Offline-First)
+/// خدمة التخزين المحلي — مبنية على Hive (صناديق دائمة، كتابة O(1) لكل معرف،
+/// بلا إعادة تحليل JSON كامل لكل عملية كما كان في SharedPreferences).
+/// الواجهة العامة للدوال محفوظة كما هي حتى لا يتأثر المحرك والواجهات.
 class OfflineStorageService {
   static final OfflineStorageService _instance = OfflineStorageService._internal();
   factory OfflineStorageService() => _instance;
   OfflineStorageService._internal();
 
-  static const String _kCorrespondences = 'alfadaa_offline_correspondences';
-  static const String _kTasks = 'alfadaa_offline_tasks';
-  static const String _kReferrals = 'alfadaa_offline_referrals';
-  static const String _kSyncQueue = 'alfadaa_offline_sync_queue';
-  static const String _kLastSync = 'alfadaa_offline_last_sync';
-  static const String _kUserProfile = 'alfadaa_offline_user_profile';
+  static const String _kCorrBox = 'offline_correspondences';
+  static const String _kTasksBox = 'offline_tasks';
+  static const String _kReferralsBox = 'offline_referrals';
+  static const String _kQueueBox = 'offline_sync_queue';
+  static const String _kMetaBox = 'offline_meta';
 
-  SharedPreferences? _prefs;
+  /// سقف ذاكرة المراسلات المؤقتة — الأقدم استحقاقاً يُمحى عند التجاوز
+  static const int _maxCachedCorrespondences = 300;
+
+  bool _opened = false;
 
   Future<void> init() async {
+    // الصناديق قد تُغلق خارجياً (اختبارات) — الفحص مباشر على Hive لا راية فقط
+    if (_opened &&
+        Hive.isBoxOpen(_kCorrBox) &&
+        Hive.isBoxOpen(_kTasksBox) &&
+        Hive.isBoxOpen(_kReferralsBox) &&
+        Hive.isBoxOpen(_kQueueBox) &&
+        Hive.isBoxOpen(_kMetaBox)) {
+      return;
+    }
     try {
-      _prefs ??= await SharedPreferences.getInstance();
+      try {
+        // الإنتاج: يضبط مسار التخزين عبر path_provider
+        // الاختبارات: يفشل ويُتجاهل — المسار مضبوط مسبقاً عبر Hive.init
+        await Hive.initFlutter();
+      } catch (_) {}
+      await Hive.openBox(_kCorrBox);
+      await Hive.openBox(_kTasksBox);
+      await Hive.openBox(_kReferralsBox);
+      await Hive.openBox(_kQueueBox);
+      await Hive.openBox(_kMetaBox);
+      _opened = true;
     } catch (e) {
       debugPrint('OfflineStorageService init error: $e');
     }
   }
 
-  SharedPreferences get _safePrefs {
-    if (_prefs == null) {
-      throw StateError('OfflineStorageService must be initialized before use.');
-    }
-    return _prefs!;
-  }
+  Box get _corrBox => Hive.box(_kCorrBox);
+  Box get _tasksBox => Hive.box(_kTasksBox);
+  Box get _referralsBox => Hive.box(_kReferralsBox);
+  Box get _queueBox => Hive.box(_kQueueBox);
+  Box get _metaBox => Hive.box(_kMetaBox);
 
-  // ─── تخزين واسترجاع الملف الشخصي للمستخدم ───
+  // ─── الملف الشخصي ───
   Future<void> cacheUserProfile(User user) async {
     try {
       await init();
-      await _safePrefs.setString(_kUserProfile, jsonEncode(user.toJson()));
+      await _metaBox.put('user_profile', user.toJson());
     } catch (e) {
       debugPrint('cacheUserProfile error: $e');
     }
@@ -47,58 +68,49 @@ class OfflineStorageService {
 
   User? getCachedUserProfile() {
     try {
-      if (_prefs == null) return null;
-      final raw = _safePrefs.getString(_kUserProfile);
-      if (raw != null && raw.isNotEmpty) {
-        return User.fromJson(jsonDecode(raw));
-      }
+      if (!_opened) return null;
+      final raw = _metaBox.get('user_profile');
+      if (raw is Map) return User.fromJson(Map<String, dynamic>.from(raw));
     } catch (e) {
       debugPrint('getCachedUserProfile error: $e');
     }
     return null;
   }
 
-  // ─── تخزين واسترجاع وفهرسة المراسلات محلياً ───
+  // ─── المراسلات ───
   Future<void> cacheCorrespondences(List<Correspondence> items) async {
     try {
       await init();
-      // دمج المراسلات الجديدة مع المخزنة سابقاً بناءً على المعرف id
-      final currentMap = <String, Map<String, dynamic>>{};
-      final raw = _safePrefs.getString(_kCorrespondences);
-      if (raw != null && raw.isNotEmpty) {
-        final List existing = jsonDecode(raw);
-        for (final item in existing) {
-          if (item is Map<String, dynamic> && item['id'] != null) {
-            currentMap[item['id']] = item;
-          }
-        }
-      }
-
       for (final item in items) {
-        currentMap[item.id] = item.toJson();
+        await _corrBox.put(item.id, item.toJson());
       }
-
-      await _safePrefs.setString(_kCorrespondences, jsonEncode(currentMap.values.toList()));
+      await _evictOverflow();
     } catch (e) {
       debugPrint('cacheCorrespondences error: $e');
+    }
+  }
+
+  /// إخلاء الأقدم إن تجاوز المخزون السقف — يمنع النمو غير المحدود
+  Future<void> _evictOverflow() async {
+    if (_corrBox.length <= _maxCachedCorrespondences) return;
+    final entries = _corrBox.toMap().entries
+        .map((e) {
+          final map = Map<String, dynamic>.from(e.value as Map);
+          final created = DateTime.tryParse(map['createdAt']?.toString() ?? '') ?? DateTime(2000);
+          return MapEntry(e.key as String, created);
+        })
+        .toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+    final toDelete = entries.length - _maxCachedCorrespondences;
+    for (var i = 0; i < toDelete; i++) {
+      await _corrBox.delete(entries[i].key);
     }
   }
 
   Future<void> updateCachedCorrespondence(Correspondence item) async {
     try {
       await init();
-      final currentMap = <String, Map<String, dynamic>>{};
-      final raw = _safePrefs.getString(_kCorrespondences);
-      if (raw != null && raw.isNotEmpty) {
-        final List existing = jsonDecode(raw);
-        for (final ex in existing) {
-          if (ex is Map<String, dynamic> && ex['id'] != null) {
-            currentMap[ex['id']] = ex;
-          }
-        }
-      }
-      currentMap[item.id] = item.toJson();
-      await _safePrefs.setString(_kCorrespondences, jsonEncode(currentMap.values.toList()));
+      await _corrBox.put(item.id, item.toJson());
     } catch (e) {
       debugPrint('updateCachedCorrespondence error: $e');
     }
@@ -112,16 +124,10 @@ class OfflineStorageService {
   }) async {
     try {
       await init();
-      final raw = _safePrefs.getString(_kCorrespondences);
-      if (raw == null || raw.isEmpty) return [];
-
-      final List list = jsonDecode(raw);
-      List<Correspondence> result = list
-          .whereType<Map<String, dynamic>>()
-          .map((j) => Correspondence.fromJson(j))
+      List<Correspondence> result = _corrBox.values
+          .map((v) => Correspondence.fromJson(Map<String, dynamic>.from(v as Map)))
           .toList();
 
-      // تطبيق الفلاتر محلياً
       if (type != null && type.isNotEmpty && type != 'ALL') {
         result = result.where((c) => c.type == type).toList();
       }
@@ -141,7 +147,6 @@ class OfflineStorageService {
         }).toList();
       }
 
-      // ترتيب تنازلي حسب تاريخ الإنشاء
       result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return result;
     } catch (e) {
@@ -153,27 +158,22 @@ class OfflineStorageService {
   Future<Correspondence?> getCachedCorrespondence(String id) async {
     try {
       await init();
-      final raw = _safePrefs.getString(_kCorrespondences);
-      if (raw == null || raw.isEmpty) return null;
-
-      final List list = jsonDecode(raw);
-      for (final j in list) {
-        if (j is Map<String, dynamic> && j['id'] == id) {
-          return Correspondence.fromJson(j);
-        }
-      }
+      final raw = _corrBox.get(id);
+      if (raw is Map) return Correspondence.fromJson(Map<String, dynamic>.from(raw));
     } catch (e) {
       debugPrint('getCachedCorrespondence error: $e');
     }
     return null;
   }
 
-  // ─── تخزين واسترجاع المهام والإحالات محلياً ───
+  // ─── المهام والإحالات ───
   Future<void> cacheMyTasks(List<TaskItem> tasks) async {
     try {
       await init();
-      final list = tasks.map((t) => t.toJson()).toList();
-      await _safePrefs.setString(_kTasks, jsonEncode(list));
+      await _tasksBox.clear();
+      for (final t in tasks) {
+        await _tasksBox.add(t.toJson());
+      }
     } catch (e) {
       debugPrint('cacheMyTasks error: $e');
     }
@@ -182,10 +182,9 @@ class OfflineStorageService {
   Future<List<TaskItem>> getCachedMyTasks() async {
     try {
       await init();
-      final raw = _safePrefs.getString(_kTasks);
-      if (raw == null || raw.isEmpty) return [];
-      final List list = jsonDecode(raw);
-      return list.whereType<Map<String, dynamic>>().map((j) => TaskItem.fromJson(j)).toList();
+      return _tasksBox.values
+          .map((j) => TaskItem.fromJson(Map<String, dynamic>.from(j as Map)))
+          .toList();
     } catch (e) {
       debugPrint('getCachedMyTasks error: $e');
       return [];
@@ -195,8 +194,10 @@ class OfflineStorageService {
   Future<void> cacheMyReferrals(List<ReferralItem> referrals) async {
     try {
       await init();
-      final list = referrals.map((r) => r.toJson()).toList();
-      await _safePrefs.setString(_kReferrals, jsonEncode(list));
+      await _referralsBox.clear();
+      for (final r in referrals) {
+        await _referralsBox.add(r.toJson());
+      }
     } catch (e) {
       debugPrint('cacheMyReferrals error: $e');
     }
@@ -205,24 +206,22 @@ class OfflineStorageService {
   Future<List<ReferralItem>> getCachedMyReferrals() async {
     try {
       await init();
-      final raw = _safePrefs.getString(_kReferrals);
-      if (raw == null || raw.isEmpty) return [];
-      final List list = jsonDecode(raw);
-      return list.whereType<Map<String, dynamic>>().map((j) => ReferralItem.fromJson(j)).toList();
+      return _referralsBox.values
+          .map((j) => ReferralItem.fromJson(Map<String, dynamic>.from(j as Map)))
+          .toList();
     } catch (e) {
       debugPrint('getCachedMyReferrals error: $e');
       return [];
     }
   }
 
-  // ─── طابور المزامنة للعمليات المعلقة (Sync Mutation Queue) ───
+  // ─── طابور المزامنة ───
   Future<List<SyncQueueItem>> getSyncQueue() async {
     try {
       await init();
-      final raw = _safePrefs.getString(_kSyncQueue);
-      if (raw == null || raw.isEmpty) return [];
-      final List list = jsonDecode(raw);
-      return list.whereType<Map<String, dynamic>>().map((j) => SyncQueueItem.fromJson(j)).toList();
+      return _queueBox.values
+          .map((j) => SyncQueueItem.fromJson(Map<String, dynamic>.from(j as Map)))
+          .toList();
     } catch (e) {
       debugPrint('getSyncQueue error: $e');
       return [];
@@ -232,10 +231,7 @@ class OfflineStorageService {
   Future<void> enqueueMutation(SyncQueueItem item) async {
     try {
       await init();
-      final queue = await getSyncQueue();
-      queue.add(item);
-      final raw = jsonEncode(queue.map((q) => q.toJson()).toList());
-      await _safePrefs.setString(_kSyncQueue, raw);
+      await _queueBox.put(item.id, item.toJson());
     } catch (e) {
       debugPrint('enqueueMutation error: $e');
     }
@@ -244,13 +240,7 @@ class OfflineStorageService {
   Future<void> updateMutation(SyncQueueItem item) async {
     try {
       await init();
-      final queue = await getSyncQueue();
-      final idx = queue.indexWhere((q) => q.id == item.id);
-      if (idx != -1) {
-        queue[idx] = item;
-        final raw = jsonEncode(queue.map((q) => q.toJson()).toList());
-        await _safePrefs.setString(_kSyncQueue, raw);
-      }
+      await _queueBox.put(item.id, item.toJson());
     } catch (e) {
       debugPrint('updateMutation error: $e');
     }
@@ -259,10 +249,7 @@ class OfflineStorageService {
   Future<void> removeMutation(String id) async {
     try {
       await init();
-      final queue = await getSyncQueue();
-      queue.removeWhere((q) => q.id == id);
-      final raw = jsonEncode(queue.map((q) => q.toJson()).toList());
-      await _safePrefs.setString(_kSyncQueue, raw);
+      await _queueBox.delete(id);
     } catch (e) {
       debugPrint('removeMutation error: $e');
     }
@@ -271,10 +258,13 @@ class OfflineStorageService {
   Future<void> clearCompletedMutations() async {
     try {
       await init();
-      final queue = await getSyncQueue();
-      queue.removeWhere((q) => q.status == 'COMPLETED');
-      final raw = jsonEncode(queue.map((q) => q.toJson()).toList());
-      await _safePrefs.setString(_kSyncQueue, raw);
+      final keys = _queueBox.keys.toList();
+      for (final key in keys) {
+        final raw = _queueBox.get(key);
+        if (raw is Map && raw['status'] == 'COMPLETED') {
+          await _queueBox.delete(key);
+        }
+      }
     } catch (e) {
       debugPrint('clearCompletedMutations error: $e');
     }
@@ -285,11 +275,11 @@ class OfflineStorageService {
     return queue.where((q) => q.status == 'PENDING' || q.status == 'SYNCING').length;
   }
 
-  // ─── توقيت آخر مزامنة ناجحة ───
+  // ─── آخر مزامنة ───
   Future<void> setLastSyncTime(DateTime time) async {
     try {
       await init();
-      await _safePrefs.setString(_kLastSync, time.toIso8601String());
+      await _metaBox.put('last_sync', time.toIso8601String());
     } catch (e) {
       debugPrint('setLastSyncTime error: $e');
     }
@@ -297,11 +287,9 @@ class OfflineStorageService {
 
   DateTime? getLastSyncTime() {
     try {
-      if (_prefs == null) return null;
-      final raw = _safePrefs.getString(_kLastSync);
-      if (raw != null && raw.isNotEmpty) {
-        return DateTime.tryParse(raw);
-      }
+      if (!_opened) return null;
+      final raw = _metaBox.get('last_sync');
+      if (raw is String && raw.isNotEmpty) return DateTime.tryParse(raw);
     } catch (e) {
       debugPrint('getLastSyncTime error: $e');
     }

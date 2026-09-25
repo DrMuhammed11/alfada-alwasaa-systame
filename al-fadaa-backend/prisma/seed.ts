@@ -15,14 +15,22 @@ import {
   AuditAction,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();
 
-/** كلمة المرور الموحدة لجميع الحسابات التجريبية (للتطوير فقط — غيّرها في الإنتاج) */
-const DEV_PASSWORD = 'Alfadaa@2026';
+/**
+ * كلمة مرور الحسابات التجريبية — تُقرأ من متغير البيئة SEED_PASSWORD ولا تُخزَّن في المستودع.
+ * إن لم يُعطَ، تُولَّد عشوائيًا لكل تشغيل وتُطبع مرة واحدة في الطرفية.
+ */
+const DEV_PASSWORD =
+  process.env.SEED_PASSWORD && process.env.SEED_PASSWORD.length >= 10
+    ? process.env.SEED_PASSWORD
+    : `Alfadaa-${randomBytes(6).toString('hex')}!`;
 
 async function main() {
   const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10);
+  console.log(`🔑 كلمة مرور الحسابات التجريبية لهذا التشغيل: ${DEV_PASSWORD}`);
   const year = new Date().getFullYear();
   const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
 

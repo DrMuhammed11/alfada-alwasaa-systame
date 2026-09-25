@@ -23,7 +23,13 @@ describe('Cryptographic Audit Chain & Tamper-Proof Integrity (سجل التدق�
         mockLogs.push(entry);
         return Promise.resolve(entry);
       }),
-      findMany: jest.fn().mockImplementation(() => Promise.resolve([...mockLogs])),
+      findMany: jest.fn().mockImplementation(({ orderBy, take } = {}) => {
+        // محاكاة سلوك Prisma الحقيقي: احترام orderBy desc وtake
+        let arr = [...mockLogs];
+        if (orderBy?.createdAt === 'desc') arr = arr.reverse();
+        if (take) arr = arr.slice(0, take);
+        return Promise.resolve(arr);
+      }),
       count: jest.fn().mockImplementation(() => Promise.resolve(mockLogs.length)),
     },
     $transaction: jest.fn().mockImplementation((args) => Promise.all(args)),

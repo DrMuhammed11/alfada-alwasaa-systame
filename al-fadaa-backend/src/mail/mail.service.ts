@@ -133,4 +133,21 @@ export class MailService implements OnModuleInit {
       }
     }
   }
+
+  /**
+   * إرسال مُتتبَّع لرسالة مسجلة مسبقًا في OutboxMail (أنشئت داخل معاملة الحالة) —
+   * المسار الافتراضي لكل رد رسمي: لا يوجد نافذة يُفقد فيها البريد بانتهار العملية.
+   */
+  async sendReplyTracked(outboxMailId: string, opts: SendReplyOptions): Promise<void> {
+    if (this.retryService) {
+      await this.retryService.attemptTrackedSend(outboxMailId, opts);
+      return;
+    }
+    // لا خدمة استرداد — نرسل مع تسجيل الخطأ فقط (نفس سلوك sendReply القديم)
+    try {
+      await this.rawSend(opts);
+    } catch (e) {
+      this.logger.error(`فشل إرسال البريد المتتبَّع ${opts.refNumber}: ${(e as Error).message}`);
+    }
+  }
 }

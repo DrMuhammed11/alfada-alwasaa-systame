@@ -35,6 +35,9 @@ class ApiService {
   Future<void> init() => _session.init();
   Future<void> saveToken(String token) => _session.saveToken(token);
   Future<void> clearToken() => _session.clearToken();
+
+  /// خروج كامل — يبطل رمز التحديث في الخادم ثم يمسح الجلسة المحلية
+  Future<void> logout() => _session.logout();
   String? get token => _session.token;
   String get sseNotificationsUrl => _notifications.sseNotificationsUrl;
 
@@ -241,8 +244,21 @@ class ApiService {
   Future<List<Map<String, dynamic>>> getAuditLogs() => _system.getAuditLogs();
   Future<Map<String, dynamic>> syncMail() => _system.syncMail();
 
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) =>
+      _system.changePassword(currentPassword, newPassword);
+
+  Future<Map<String, dynamic>> getMyNotificationsPaged({int page = 1, int limit = 30, bool unreadOnly = false}) =>
+      _system.getMyNotificationsPaged(page: page, limit: limit, unreadOnly: unreadOnly);
+
+  Future<bool> markNotificationRead(String id) => _system.markNotificationRead(id);
+
+  Future<bool> markAllNotificationsRead() => _system.markAllNotificationsRead();
+
   Future<List<Map<String, dynamic>>> getMyDelegations() =>
       _system.getMyDelegations();
+
+  Future<List<Map<String, dynamic>>> getDelegationsForMe() =>
+      _system.getDelegationsForMe();
 
   Future<Map<String, dynamic>> createDelegation({
     required String delegateId,

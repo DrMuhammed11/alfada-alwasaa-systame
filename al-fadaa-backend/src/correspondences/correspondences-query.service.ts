@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthUser, Paginated } from '../common/types';
 import { buildPageMeta } from '../common/types';
+import { parseDateEnd, parseDateStart } from '../common/utils/dates';
 import { CorrespondencesQueryDto, SearchCorrespondencesDto } from './dto';
 import {
   CorrespondenceDetailRow,
@@ -45,6 +46,52 @@ export class CorrespondencesQueryService {
         { replies: { some: { authorId: user.id } } },
       ],
     };
+  }
+
+  /**
+   * إثراء الصفوف بحالة التعثر (إحالات/مهام نشطة تجاوزت موعد استحقاقها) —
+   * المنطق الموحّد للقائمة والبحث حتى لا يختلف الرقم بين الشاشتين.
+   * اليوم المتأخر يُحسب بتجاوز أي جزء منه وبحد أدنى يوم واحد.
+   */
+  private enrichOverdue<
+    T extends {
+      referrals?: { dueDate: Date | string | null }[];
+      tasks?: { dueDate: Date | string | null }[];
+    },
+  >(rows: T[]): (T & { isOverdue: boolean; overdueDays: number })[] {
+    const now = new Date();
+    return rows.map((item) => {
+      let isOverdue = false;
+      let maxOverdueDays = 0;
+
+      for (const r of item.referrals ?? []) {
+        if (!r.dueDate) continue;
+        const due = new Date(r.dueDate);
+        if (due < now) {
+          isOverdue = true;
+          const days = Math.max(
+            1,
+            Math.ceil((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)),
+          );
+          if (days > maxOverdueDays) maxOverdueDays = days;
+        }
+      }
+
+      for (const t of item.tasks ?? []) {
+        if (!t.dueDate) continue;
+        const due = new Date(t.dueDate);
+        if (due < now) {
+          isOverdue = true;
+          const days = Math.max(
+            1,
+            Math.ceil((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)),
+          );
+          if (days > maxOverdueDays) maxOverdueDays = days;
+        }
+      }
+
+      return { ...item, isOverdue, overdueDays: maxOverdueDays };
+    });
   }
 
   /** استعراض المراسلات الجذرية بنطاق الرؤية والفلترة والترقيم */
@@ -86,42 +133,7 @@ export class CorrespondencesQueryService {
       }),
     ]);
 
-    const now = new Date();
-    const enrichedData = data.map((item: any) => {
-      let isOverdue = false;
-      let maxOverdueDays = 0;
-
-      const dueDates: Date[] = [];
-      if (item.referrals) {
-        for (const r of item.referrals) {
-          if (r.dueDate) dueDates.push(new Date(r.dueDate));
-        }
-      }
-      if (item.tasks) {
-        for (const t of item.tasks) {
-          if (t.dueDate) dueDates.push(new Date(t.dueDate));
-        }
-      }
-
-      for (const d of dueDates) {
-        if (d < now) {
-          isOverdue = true;
-          const diffMs = now.getTime() - d.getTime();
-          const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-          if (days > maxOverdueDays) {
-            maxOverdueDays = days;
-          }
-        }
-      }
-
-      return {
-        ...item,
-        isOverdue,
-        overdueDays: maxOverdueDays,
-      };
-    });
-
-    return { data: enrichedData, meta: buildPageMeta(page, limit, total) };
+    return { data: this.enrichOverdue(data), meta: buildPageMeta(page, limit, total) };
   }
 
   /** تفاصيل مراسلة — مع فرض نطاق الرؤية نفسه */
@@ -188,12 +200,13 @@ export class CorrespondencesQueryService {
     if (dto.status) filters.push({ status: dto.status });
     if (dto.priority) filters.push({ priority: dto.priority });
     if (dto.departmentId) filters.push({ departmentId: dto.departmentId });
+    if (dto.channel) filters.push({ channel: dto.channel });
 
     if (dto.from || dto.to) {
       filters.push({
         createdAt: {
-          ...(dto.from ? { gte: new Date(dto.from) } : {}),
-          ...(dto.to ? { lte: new Date(dto.to) } : {}),
+          ...(dto.from ? { gte: parseDateStart(dto.from) } : {}),
+          ...(dto.to ? { lte: parseDateEnd(dto.to) } : {}),
         },
       });
     }
@@ -235,40 +248,8 @@ export class CorrespondencesQueryService {
       }),
     ]);
 
-    const now = new Date();
-    const enrichedData = data.map((item: any) => {
-      let isOverdue = false;
-      let maxOverdueDays = 0;
-
-      const dueDates: Date[] = [];
-      if (item.referrals) {
-        for (const r of item.referrals) {
-          if (r.dueDate) dueDates.push(new Date(r.dueDate));
-        }
-      }
-      if (item.tasks) {
-        for (const t of item.tasks) {
-          if (t.dueDate) dueDates.push(new Date(t.dueDate));
-        }
-      }
-
-      for (const d of dueDates) {
-        if (d < now) {
-          isOverdue = true;
-          const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-          if (diffDays > maxOverdueDays) maxOverdueDays = diffDays;
-        }
-      }
-
-      return {
-        ...item,
-        isOverdue,
-        overdueDays: maxOverdueDays,
-      };
-    });
-
     return {
-      data: enrichedData,
+      data: this.enrichOverdue(data),
       meta: buildPageMeta(page, limit, total),
     };
   }

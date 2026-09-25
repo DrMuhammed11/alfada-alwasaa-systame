@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: al-fadaa-backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: alfadaa
+          POSTGRES_PASSWORD: alfadaa
+          POSTGRES_DB: alfadaa_correspondence
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U alfadaa"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: al-fadaa-backend/package-lock.json
+
+      - name: تثبيت الحزم
+        run: npm ci
+
+      - name: توليد Prisma Client
+        run: npx prisma generate
+
+      - name: التحقق من مخطط Prisma والترحيلات
+        run: npx prisma validate
+
+      - name: البناء
+        run: npm run build
+
+      - name: اختبارات الوحدة
+        run: npm test
+
+      - name: اختبارات e2e (قاعدة بيانات اختبارية alfadaa_test)
+        run: npm run test:e2e
+        env:
+          DATABASE_URL: postgresql://alfadaa:alfadaa@localhost:5432/alfadaa_correspondence?schema=public
+          JWT_SECRET: ci-secret-for-tests-only
+          MAIL_DRIVER: console
+
+  flutter-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: al_fadaa_frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: تثبيت الحزم
+        run: flutter pub get
+      - name: تحليل ثابت
+        run: flutter analyze --fatal-infos
+      - name: اختبارات
+        run: flutter test
+
+  flutter-admin:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: al_fadaa_admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: تثبيت الحزم
+        run: flutter pub get
+      - name: تحليل ثابت
+        run: flutter analyze --fatal-infos
+      - name: اختبارات
+        run: flutter test
+
+  website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: alfada-alwasaa-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: alfada-alwasaa-website/package-lock.json
+      - name: تثبيت الحزم
+        run: npm ci
+      - name: فحص ESLint
+        run: npm run lint
+      - name: بناء التصدير الساكن
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api-placeholder.example.com/api/v1

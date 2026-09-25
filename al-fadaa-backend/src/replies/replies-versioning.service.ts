@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CorrespondencesQueryService } from '../correspondences/correspondences-query.service';
 import type { AuthUser } from '../common/types';
 
 export interface DiffLine {
@@ -45,7 +46,10 @@ export function computeLineDiff(textA: string, textB: string): DiffLine[] {
 
 @Injectable()
 export class RepliesVersioningService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly correspondencesQuery: CorrespondencesQueryService,
+  ) {}
 
   /** إنشاء أو حفظ نسخة جديدة غير قابلة للتعديل */
   async saveSnapshot(
@@ -74,10 +78,28 @@ export class RepliesVersioningService {
     });
   }
 
-  /** استعراض كافة الإصدارات التاريخية للرد مرتبة تصاعديًا */
-  async getVersions(replyId: string, _user: AuthUser) {
-    const reply = await this.prisma.reply.findUnique({ where: { id: replyId } });
+  /**
+   * فحص صلاحية الاطلاع على نسخ الرد — عبر نطاق الرؤية للمراسلة الأم.
+   * حماية من IDOR: بدون هذا الفحص يستطيع أي موظف قراءة نص أي رد رسمي بسرد المعرفات.
+   */
+  private async assertCanViewReply(replyId: string, user: AuthUser): Promise<void> {
+    const reply = await this.prisma.reply.findUnique({
+      where: { id: replyId },
+      select: { id: true, correspondenceId: true },
+    });
     if (!reply) throw new NotFoundException('الرد غير موجود');
+    const corr = await this.prisma.correspondence.findUnique({
+      where: { id: reply.correspondenceId },
+      select: { id: true, departmentId: true },
+    });
+    if (!corr || !(await this.correspondencesQuery.canView(corr, user))) {
+      throw new ForbiddenException('ليست لديك صلاحية الاطلاع على نسخ هذا الرد');
+    }
+  }
+
+  /** استعراض كافة الإصدارات التاريخية للرد مرتبة تصاعديًا — خاضع لنطاق الرؤية */
+  async getVersions(replyId: string, user: AuthUser) {
+    await this.assertCanViewReply(replyId, user);
 
     return this.prisma.replyVersion.findMany({
       where: { replyId },
@@ -90,8 +112,11 @@ export class RepliesVersioningService {
 
   /**
    * حساب الفرق السطري بين آخر نسخة مرفوضة والنسخة الحالية (أو نسختين محددتين)
+   * — خاضع لنطاق الرؤية
    */
-  async getDiff(replyId: string, fromVersion?: number, toVersion?: number) {
+  async getDiff(replyId: string, user: AuthUser, fromVersion?: number, toVersion?: number) {
+    await this.assertCanViewReply(replyId, user);
+
     const versions = await this.prisma.replyVersion.findMany({
       where: { replyId },
       orderBy: { version: 'asc' },

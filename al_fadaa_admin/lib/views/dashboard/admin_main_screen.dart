@@ -5,7 +5,11 @@ import '../../core/theme/admin_theme.dart';
 import '../analytics/analytics_dashboard_view.dart';
 import '../audit/audit_system_view.dart';
 import '../auth/admin_login_screen.dart';
+import '../content/site_content_view.dart';
+import '../correspondences/correspondences_management_view.dart';
 import '../departments/departments_management_view.dart';
+import '../operations/operations_view.dart';
+import '../settings/change_password_dialog.dart';
 import '../users/users_management_view.dart';
 
 class AdminMainScreen extends StatefulWidget {
@@ -18,22 +22,62 @@ class AdminMainScreen extends StatefulWidget {
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _views = const [
-    AnalyticsDashboardView(),
-    UsersManagementView(),
-    DepartmentsManagementView(),
-    AuditSystemView(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // انتهاء الجلسة (فشل تجديد الرمز) → إعادة توجيه فورية لشاشة الدخول بدل حلقات «أعد المحاولة»
+    SessionManager().sessionExpiredTick.addListener(_onSessionExpired);
+  }
 
-  final List<String> _titles = const [
-    'لوحة الإحصائيات والتحليلات',
-    'إدارة المستخدمين والصلاحيات',
-    'إدارة الهيكل التنظيمي والأقسام',
-    'سجل التدقيق والرقابة الأمنية',
-  ];
+  void _onSessionExpired() {
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
+      (_) => false,
+    );
+  }
+
+  @override
+  void dispose() {
+    SessionManager().sessionExpiredTick.removeListener(_onSessionExpired);
+    super.dispose();
+  }
+
+  /// بناء الأقسام حسب الدور: إدارة المحتوى والتشغيل متاحة لمدير النظام فقط
+  List<_NavSection> _sections(String? role) {
+    final isSuperAdmin = role == 'ADMIN';
+    return [
+      _NavSection('لوحة الإحصائيات والتحليلات', 'الإحصائيات', 'الإحصائيات والتحليلات', Icons.analytics_rounded, const AnalyticsDashboardView()),
+      _NavSection('إدارة المراسلات', 'المراسلات', 'المراسلات — النطاق الكامل', Icons.mark_email_unread_rounded, const CorrespondencesManagementView()),
+      _NavSection('إدارة المستخدمين والصلاحيات', 'المستخدمين', 'الموظفون والصلاحيات', Icons.manage_accounts_rounded, const UsersManagementView()),
+      _NavSection('إدارة الهيكل التنظيمي والأقسام', 'الأقسام', 'الأقسام والقطاعات', Icons.corporate_fare_rounded, const DepartmentsManagementView()),
+      if (isSuperAdmin)
+        _NavSection('محتويات الموقع الإلكتروني', 'المحتوى', 'محتوى الموقع الإلكتروني', Icons.web_rounded, const SiteContentView()),
+      if (isSuperAdmin)
+        _NavSection('إدارة التشغيل والرقابة', 'التشغيل', 'التشغيل: الصادر، الاعتماد، اليتامى، الوكالات، النسخ', Icons.settings_suggest_rounded, const OperationsView()),
+      _NavSection('سجل التدقيق والرقابة الأمنية', 'التدقيق', 'سجل التدقيق والرقابة', Icons.security_rounded, const AuditSystemView()),
+    ];
+  }
+
+  /// تغيير كلمة المرور الذاتي — النجاح يعني إبطال الجلسات وإعادة للدخول
+  Future<void> _openChangePassword() async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const ChangePasswordDialog(),
+    );
+    if (changed == true && mounted) {
+      await SessionManager().logout();
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
+        (_) => false,
+      );
+    }
+  }
 
   Future<void> _handleLogout() async {
-    await SessionManager().clearSession();
+    // خروج كامل: إبطال رمز التحديث في الخادم ثم مسح الجلسة المحلية
+    await SessionManager().logout();
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -44,6 +88,10 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   @override
   Widget build(BuildContext context) {
     final user = SessionManager().currentUser;
+    final sections = _sections(user?.role);
+    // حماية من بقاء فهرس خارج النطاق بعد تغيّر الدور
+    if (_selectedIndex >= sections.length) _selectedIndex = sections.length - 1;
+    final current = sections[_selectedIndex];
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -68,7 +116,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _titles[_selectedIndex],
+                      current.title,
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                     const Text(
@@ -108,6 +156,11 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                 ),
               ],
               IconButton(
+                icon: const Icon(Icons.lock_reset_rounded, color: Color(0xFF94A3B8), size: 20),
+                tooltip: 'تغيير كلمة المرور',
+                onPressed: _openChangePassword,
+              ),
+              IconButton(
                 icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
                 tooltip: 'تسجيل الخروج',
                 onPressed: _handleLogout,
@@ -119,12 +172,12 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               ? Row(
                   children: [
                     // الشريط الجانبي للشاشات الكبيرة
-                    _buildWideSidebar(),
+                    _buildWideSidebar(sections),
                     // المحتوى
-                    Expanded(child: _views[_selectedIndex]),
+                    Expanded(child: current.view),
                   ],
                 )
-              : _views[_selectedIndex],
+              : current.view,
           // شريط التنقل السفلي للأجهزة الذكية (Mobile / Android)
           bottomNavigationBar: !isWide
               ? BottomNavigationBar(
@@ -136,28 +189,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   selectedFontSize: 11,
                   unselectedFontSize: 11,
                   onTap: (index) => setState(() => _selectedIndex = index),
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.analytics_outlined),
-                      activeIcon: Icon(Icons.analytics_rounded),
-                      label: 'الإحصائيات',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.manage_accounts_outlined),
-                      activeIcon: Icon(Icons.manage_accounts_rounded),
-                      label: 'المستخدمين',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.corporate_fare_outlined),
-                      activeIcon: Icon(Icons.corporate_fare_rounded),
-                      label: 'الأقسام',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.security_outlined),
-                      activeIcon: Icon(Icons.security_rounded),
-                      label: 'التدقيق',
-                    ),
-                  ],
+                  items: sections
+                      .map((s) => BottomNavigationBarItem(
+                            icon: Icon(s.icon),
+                            activeIcon: Icon(s.icon),
+                            label: s.navLabel,
+                          ))
+                      .toList(),
                 )
               : null,
         );
@@ -165,7 +203,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     );
   }
 
-  Widget _buildWideSidebar() {
+  Widget _buildWideSidebar(List<_NavSection> sections) {
     return Container(
       width: 240,
       decoration: const BoxDecoration(
@@ -175,10 +213,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       child: Column(
         children: [
           const SizedBox(height: 16),
-          _buildSidebarItem(0, 'الإحصائيات والتحليلات', Icons.analytics_rounded),
-          _buildSidebarItem(1, 'الموظفون والصلاحيات', Icons.manage_accounts_rounded),
-          _buildSidebarItem(2, 'الأقسام والقطاعات', Icons.corporate_fare_rounded),
-          _buildSidebarItem(3, 'سجل التدقيق والرقابة', Icons.security_rounded),
+          for (var i = 0; i < sections.length; i++)
+            _buildSidebarItem(i, sections[i].sidebarLabel, sections[i].icon),
           const Spacer(),
           // حالة الاتصال
           Container(
@@ -233,4 +269,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       ),
     );
   }
+}
+
+/// قسم تنقلي في لوحة الإدارة: عنوان علوي، تسمية شريط سفلي، تسمية شريط جانبي، أيقونة، وشاشة
+class _NavSection {
+  final String title;
+  final String navLabel;
+  final String sidebarLabel;
+  final IconData icon;
+  final Widget view;
+
+  const _NavSection(this.title, this.navLabel, this.sidebarLabel, this.icon, this.view);
 }

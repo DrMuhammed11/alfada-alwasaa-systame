@@ -20,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
 import { SlaModule } from './sla/sla.module';
 import { DelegationModule } from './delegation/delegation.module';
 import { BackupModule } from './backup/backup.module';
+import { SiteContentModule } from './site-content/site-content.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthController } from './health.controller';
@@ -58,6 +59,7 @@ import { validateEnv } from './common/config/env.validation';
     RepliesModule,
     AttachmentsModule,
     MailModule,
+    SiteContentModule,
   ],
   controllers: [HealthController],
   providers: [

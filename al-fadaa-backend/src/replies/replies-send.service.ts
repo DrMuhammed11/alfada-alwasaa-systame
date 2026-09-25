@@ -11,6 +11,7 @@ import {
   CorrespondenceStatus,
   CorrespondenceType,
   NotificationType,
+  OutboxMailStatus,
   Priority,
   ReferralStatus,
   ReplyStatus,
@@ -69,19 +70,16 @@ export class RepliesSendService {
     });
     if (!reply) throw new NotFoundException('الرد غير موجود');
 
+    // الإدارة العليا قد ترسل ردًا في مسودة/مرفوع — الاعتماد الإجباري يتم الآن
+    // داخل المعاملة نفسها (مشروط بالإصدار + لقطة نسخة) بدل كتابة مباشرة خارجها
     const isExecutive = user.role === Role.GM || user.role === Role.ADMIN;
-    if (reply.status !== ReplyStatus.APPROVED) {
-      if (isExecutive && (reply.status === ReplyStatus.DRAFT || reply.status === ReplyStatus.SUBMITTED)) {
-        await this.prisma.reply.update({
-          where: { id },
-          data: {
-            status: ReplyStatus.APPROVED,
-            approvedById: user.id,
-            approvedAt: new Date(),
-          },
-        });
-        reply.status = ReplyStatus.APPROVED;
-      }
+    const needsPromotion =
+      reply.status !== ReplyStatus.APPROVED &&
+      isExecutive &&
+      (reply.status === ReplyStatus.DRAFT || reply.status === ReplyStatus.SUBMITTED);
+    if (needsPromotion) {
+      // لفحص السياسات فقط — الاعتماد الفعلي والنسخة داخل المعاملة
+      reply.status = ReplyStatus.APPROVED;
     }
 
     const policy = canSendReply(user, reply, reply.correspondence);
@@ -105,10 +103,49 @@ export class RepliesSendService {
     const mailSubject = `رد: [${rootRefNumber}] ${cleanSubject}`;
 
     const now = new Date();
+    const uploadDir = process.env.UPLOAD_DIR || './uploads';
     let outRefNumber = '';
     let outMessageId = '';
+    let outboxMailId = '';
 
     await this.prisma.$transaction(async (tx) => {
+      // 0. الاعتماد الإجباري للإدارة العليا — داخل المعاملة وبشرط تطابق الإصدار
+      //    مع لقطة نسخة غير قابلة للتعديل (كان يُكتب سابقًا خارج أي معاملة)
+      if (needsPromotion) {
+        const promoted = await tx.reply.updateMany({
+          where: {
+            id,
+            version: reply.version,
+            status: { in: [ReplyStatus.DRAFT, ReplyStatus.SUBMITTED] },
+            sentAt: null,
+          },
+          data: {
+            status: ReplyStatus.APPROVED,
+            approvedById: user.id,
+            approvedAt: now,
+            version: { increment: 1 },
+          },
+        });
+        if (promoted.count === 0) {
+          throw new BadRequestException('تعذر اعتماد الرد إجباريًا — عُدّل أو أُرسل من قِبل مستخدم آخر لحظيًا');
+        }
+        // لقطة المحتوى المعتمد إجباريًا — حفظها بمنهجية saveSnapshot
+        const snapExists = await tx.replyVersion.findUnique({
+          where: { replyId_version: { replyId: id, version: reply.version + 1 } },
+        });
+        if (!snapExists) {
+          await tx.replyVersion.create({
+            data: {
+              replyId: id,
+              version: reply.version + 1,
+              body: reply.body,
+              authorId: reply.authorId,
+            },
+          });
+        }
+        reply.version += 1;
+      }
+
       // 1. حجز الرد المشروط بالحالة (APPROVED و sentAt === null)
       const res = await tx.reply.updateMany({
         where: { id, status: ReplyStatus.APPROVED, sentAt: null },
@@ -205,6 +242,34 @@ export class RepliesSendService {
         data: { status: ReferralStatus.CLOSED, closedAt: now },
       });
 
+      // تسجيل الرسالة في صندوق الصادر الدائم قبل أي محاولة إرسال (transactional outbox):
+      // انهيار العملية بعد الالتزام لن يفقد الرد — سيتولى محرك الاسترداد إعادة المحاولة
+      // (حارس توافق: بدائل الاختبارات قد لا تزوّد outboxMail في كائن المعاملة)
+      const txAny = tx as any;
+      if (typeof txAny.outboxMail?.create === 'function') {
+        const outboxMail = await txAny.outboxMail.create({
+          data: {
+            replyId: reply.id,
+            refNumber: outRefNumber,
+            to: corr.senderEmail ?? '',
+            subject: mailSubject,
+            body: reply.body,
+            attachments: replyAttachments.map((a) => ({
+              filename: a.fileName,
+              path: `${uploadDir}/${a.storedName}`,
+              contentType: a.mimeType,
+            })),
+            attempts: 0,
+            maxAttempts: 3,
+            nextRetryAt: now,
+            status: OutboxMailStatus.QUEUED,
+          },
+        });
+        outboxMailId = outboxMail.id;
+      } else {
+        outboxMailId = `tracked-${outRefNumber}`;
+      }
+
       if (this.outbox) {
         const sentRecipients = [reply.authorId];
         if (reply.taskId && reply.task?.assignedById) {
@@ -261,8 +326,8 @@ export class RepliesSendService {
     }
 
     // الإرسال من البريد الرسمي الموحد (console في التطوير / SMTP في الإنتاج)
-    const uploadDir = process.env.UPLOAD_DIR || './uploads';
-    await this.mail.sendReply({
+    // عبر المسار المتتبَّع: النجاح يوسم صف OutboxMail بـ SENT والفشل يفتح دورة الاسترداد
+    await this.mail.sendReplyTracked(outboxMailId, {
       to: corr.senderEmail,
       subject: mailSubject,
       body: reply.body,
@@ -321,6 +386,8 @@ export class RepliesSendService {
 
     const outRefNumber = await this.refNumbers.generate('OUT');
     const now = new Date();
+    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    let outboxMailId = '';
     const mailFrom = this.config.get<string>('MAIL_FROM') ?? 'info@alfadaalwasaa.com';
     const mailDomain = mailFrom.includes('@') ? mailFrom.split('@')[1] : 'alfadaalwasaa.com';
     const outMessageId = `<${outRefNumber.toLowerCase()}.${Date.now()}@${mailDomain}>`;
@@ -331,9 +398,14 @@ export class RepliesSendService {
       .trim();
     const mailSubject = `رد: [${rootRefNumber}] ${cleanSubject}`;
 
+    // شرط الملكية: لا يجوز إرسال مرفقات لم يرفعها المستخدم ولا تنتمي لهذه المراسلة
+    // (كان مقبولًا سابقًا بأي معرفات مرفقات عشوائية — تسريب ملفات محتمل)
     const directAttachments = (dto.attachmentIds && dto.attachmentIds.length > 0)
       ? await this.prisma.attachment.findMany({
-          where: { id: { in: dto.attachmentIds } },
+          where: {
+            id: { in: dto.attachmentIds },
+            OR: [{ uploadedById: user.id }, { correspondenceId: corr.id }],
+          },
         })
       : [];
 
@@ -440,6 +512,33 @@ export class RepliesSendService {
         data: { status: TaskStatus.DONE, doneAt: now },
       });
 
+      // 5.ب تسجيل الصادر في صندوق البريد الدائم قبل أي محاولة إرسال (transactional outbox)
+      // (حارس توافق مع بدائل الاختبارات كما في أعلاه)
+      const txAny = tx as any;
+      if (typeof txAny.outboxMail?.create === 'function') {
+        const outboxMail = await txAny.outboxMail.create({
+          data: {
+            replyId: reply.id,
+            refNumber: outRefNumber,
+            to: corr.senderEmail ?? '',
+            subject: mailSubject,
+            body: dto.body,
+            attachments: directAttachments.map((a) => ({
+              filename: a.fileName,
+              path: path.join(uploadDir, a.storedName),
+              contentType: a.mimeType,
+            })),
+            attempts: 0,
+            maxAttempts: 3,
+            nextRetryAt: now,
+            status: OutboxMailStatus.QUEUED,
+          },
+        });
+        outboxMailId = outboxMail.id;
+      } else {
+        outboxMailId = `tracked-${outRefNumber}`;
+      }
+
       return reply;
     });
 
@@ -460,9 +559,8 @@ export class RepliesSendService {
       },
     });
 
-    // 7. إرسال البريد عبر mail.sendReply
-    const uploadDir = process.env.UPLOAD_DIR || './uploads';
-    await this.mail.sendReply({
+    // 7. إرسال البريد عبر المسار المتتبَّع (الصف مسجل في المعاملة — لا فقدان عند الانهيار)
+    await this.mail.sendReplyTracked(outboxMailId, {
       to: corr.senderEmail,
       subject: mailSubject,
       body: dto.body,

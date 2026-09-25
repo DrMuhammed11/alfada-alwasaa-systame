@@ -10,6 +10,8 @@ class SyncQueueItem {
   int retryCount;
   String status; // PENDING, SYNCING, COMPLETED, FAILED
   String? lastError;
+  /// موعد المحاولة التالية (تراجع أسي) — null يعني جاهزة فوراً
+  DateTime? nextRetryAt;
 
   SyncQueueItem({
     required this.id,
@@ -23,6 +25,7 @@ class SyncQueueItem {
     this.retryCount = 0,
     this.status = 'PENDING',
     this.lastError,
+    this.nextRetryAt,
   });
 
   factory SyncQueueItem.fromJson(Map<String, dynamic> json) {
@@ -40,6 +43,7 @@ class SyncQueueItem {
       retryCount: json['retryCount'] ?? 0,
       status: json['status'] ?? 'PENDING',
       lastError: json['lastError'],
+      nextRetryAt: json['nextRetryAt'] != null ? DateTime.tryParse(json['nextRetryAt']) : null,
     );
   }
 
@@ -56,6 +60,7 @@ class SyncQueueItem {
       'retryCount': retryCount,
       'status': status,
       'lastError': lastError,
+      if (nextRetryAt != null) 'nextRetryAt': nextRetryAt!.toIso8601String(),
     };
   }
 
@@ -71,6 +76,7 @@ class SyncQueueItem {
     int? retryCount,
     String? status,
     String? lastError,
+    DateTime? nextRetryAt,
   }) {
     return SyncQueueItem(
       id: id ?? this.id,
@@ -84,6 +90,7 @@ class SyncQueueItem {
       retryCount: retryCount ?? this.retryCount,
       status: status ?? this.status,
       lastError: lastError ?? this.lastError,
+      nextRetryAt: nextRetryAt ?? this.nextRetryAt,
     );
   }
 

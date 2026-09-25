@@ -37,6 +37,13 @@ export const ThrottlerLimits = {
       ttl: (_ctx?: ExecutionContext) => (Number(process.env.THROTTLE_TRACK_TTL) || 60) * 1000,
     },
   },
+  /** حد قراءة محتوى الموقع العام (خدمات/قطاعات/مشاريع/أسئلة) — سخي لأنه محتوى عرض */
+  publicContent: {
+    default: {
+      limit: (_ctx?: ExecutionContext) => Number(process.env.THROTTLE_CONTENT_LIMIT) || 120,
+      ttl: (_ctx?: ExecutionContext) => (Number(process.env.THROTTLE_CONTENT_TTL) || 60) * 1000,
+    },
+  },
 };
 
 export interface AppThrottlerOptions {

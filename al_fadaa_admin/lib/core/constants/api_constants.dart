@@ -19,14 +19,25 @@ class ApiConstants {
   static const String users = '$baseUrl/users';
   static const String audit = '$baseUrl/audit';
 
-  // Demo Credentials for Quick Admin Login
-  static const Map<String, String> demoAccounts = {
-    'ADMIN': 'admin@al-fadaa.com',
-    'GM': 'gm@al-fadaa.com',
-    'DEPUTY_GM': 'deputy@al-fadaa.com',
-  };
+  // المراسلات (نطاق رؤية الإدارة العليا: الكل)
+  static const String correspondences = '$baseUrl/correspondences';
 
-  static const String defaultPassword = 'Alfadaa@2026';
+  // محتوى الموقع الإلكتروني (إدارة)
+  static const String siteContentManage = '$baseUrl/site-content/manage';
+  static String siteContentKind(String kind) => '$siteContentManage/$kind';
+  static String siteContentKindId(String kind, String id) => '$siteContentManage/$kind/$id';
+  static String siteContentSetting(String key) => '$siteContentManage/settings/$key';
+
+  // وضع العرض التجريبي — يُفعَّل وقت البناء فقط: --dart-define=DEMO_MODE=true
+  // لا تُضمَّن أي بيانات دخول في نسخة الإنتاج
+  static const bool isDemoMode = bool.fromEnvironment('DEMO_MODE', defaultValue: false);
+
+  // بريدات العرض التجريبي — كلمة المرور تُقرأ من define وقت البناء ولا تُخزَّن في الكود
+  static const List<String> demoAccounts = [
+    'admin@al-fadaa.com',
+    'gm@al-fadaa.com',
+  ];
+  static const String demoPassword = String.fromEnvironment('DEV_PASSWORD', defaultValue: '');
 
   // Role Names in Arabic
   static String getRoleName(String role) {

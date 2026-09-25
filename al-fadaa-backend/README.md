@@ -62,7 +62,7 @@ npm run start:dev
 
 ## الحسابات التجريبية (من seed)
 
-كلمة المرور للجميع: **`Alfadaa@2026`** (للتطوير فقط — غيّرها فورًا في الإنتاج)
+كلمة المرور تُقرأ من متغير البيئة `SEED_PASSWORD` عند تنفيذ البذرة (لا تُخزَّن كلمة مرور في المستودع). إن لم يُحدَّد تُولَّد عشوائيًا وتُطبع في الطرفية عند تشغيل البذرة.
 
 | الدور | البريد | الاسم |
 |---|---|---|
@@ -272,7 +272,7 @@ GET    /audit                                # قراءة فقط + تصفية (A
 # دخول
 TOKEN=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"gm@al-fadaa.com","password":"Alfadaa@2026"}' | node -pe "JSON.parse(require('fs').readFileSync(0)).accessToken")
+  -d '{"email":"gm@al-fadaa.com","password":"$SEED_PASSWORD"}' | node -pe "JSON.parse(require('fs').readFileSync(0)).accessToken")
 
 # تسجيل مراسلة واردة
 curl -s -X POST http://localhost:3000/api/v1/correspondences/incoming \
@@ -552,7 +552,7 @@ npm run test:e2e
 ### 3) الاختبار اليدوي عبر Swagger — أسهل طريقة
 
 1. افتح `http://localhost:3000/api/docs`
-2. `POST /auth/login` → جرّب `gm@al-fadaa.com` / `Alfadaa@2026` → انسخ `accessToken`
+2. `POST /auth/login` → استخدم `gm@al-fadaa.com` وكلمة المرور المطبوعة عند تشغيل البذرة (`SEED_PASSWORD`) → انسخ `accessToken`
 3. اضغط زر **Authorize** أعلى الصفحة وألصق الرمز — الآن كل النقاط جاهزة للتجربة
 4. اتبع نفس ترتيب الرحلة أعلاه: سجّل واردًا ← أحِله ← كلّف ← اكتب مسودة ← ارفعها ← اعتمدها ← أرسلها
 5. راقب الأحداث في `GET /audit` — والرسالة ستُطبع في طرفية الخادم (وضع console)

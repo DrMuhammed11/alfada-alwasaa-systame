@@ -376,7 +376,31 @@ class DashboardActionsHandler {
     vm.isSendingReply = true;
     vm.updateUI();
     try {
-      final res = await ApiService().sendDirectReply(vm.selectedItem!.id, text);
+      // رفع المرفق المختار أولًا — كان يُهمل صمتًا في هذا المسار ولا يصل العميل أبدًا
+      final List<String> attachmentIds = [];
+      final file = vm.pickedFile;
+      if (file != null) {
+        final bytes = file.bytes;
+        if (bytes != null && bytes.isNotEmpty) {
+          final upload = await ApiService()
+              .uploadCorrespondenceAttachment(vm.selectedItem!.id, bytes, file.name);
+          final uploadedId = upload['success'] == true && upload['data'] is Map
+              ? upload['data']['id'] as String?
+              : null;
+          if (uploadedId == null) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(upload['message'] ?? 'تعذر رفع المرفق — لم يُرسل الرد'),
+                backgroundColor: const Color(0xFFDC2626),
+              ),
+            );
+            return;
+          }
+          attachmentIds.add(uploadedId);
+        }
+      }
+      final res = await ApiService().sendDirectReply(vm.selectedItem!.id, text, attachmentIds);
       if (res['success'] == true) {
         vm.quickReplyController.clear();
         vm.pickedFile = null;
@@ -401,7 +425,7 @@ class DashboardActionsHandler {
   }
 
   Future<void> logout() async {
-    await ApiService().clearToken();
+    await ApiService().logout();
     if (context.mounted) {
       Navigator.of(context).pushReplacement(EnterprisePageRoute(page: const LoginScreen()));
     }

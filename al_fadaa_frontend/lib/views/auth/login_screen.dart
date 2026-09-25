@@ -18,11 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  String get _devPassword {
-    const envPass = String.fromEnvironment('DEV_PASSWORD', defaultValue: '');
-    if (envPass.isNotEmpty) return envPass;
-    return String.fromCharCodes([65, 108, 102, 97, 100, 97, 97, 64, 50, 48, 50, 54]);
-  }
+  /// كلمة مرور وضع التطوير — تُقرأ من define وقت البناء فقط ولا تُضمَّن في الكود إطلاقًا:
+  /// flutter run --dart-define=DEV_MODE=true --dart-define=DEV_PASSWORD=...
+  String get _devPassword => const String.fromEnvironment('DEV_PASSWORD', defaultValue: '');
 
   @override
   void initState() {
@@ -111,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _quickSwitch(String email) {
-    if (!ApiConstants.isDevMode) return;
+    if (!ApiConstants.isDevMode || _devPassword.isEmpty) return;
     _emailController.text = email;
     _passwordController.text = _devPassword;
     _handleLogin(email, _devPassword);

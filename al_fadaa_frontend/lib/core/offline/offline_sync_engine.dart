@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import '../network/http_client.dart';
 import 'offline_storage_service.dart';
@@ -19,7 +21,14 @@ class SyncResult {
   });
 }
 
-/// محرك المزامنة الثنائي الذكي وإدارة الاتصال لوضع Offline-First
+/// محرك المزامنة الثنائي الذكي وإدارة الاتصال لوضع Offline-First.
+///
+/// إصلاحات الجيل الثاني:
+/// - الاتصال يُراقب فعلياً عبر connectivity_plus — العودة للشبكة تعيد المزامنة تلقائياً
+///   (كان المحرك يعلق «غير متصل» إلى الأبد بعد أول فشل)
+/// - سقف إعادة محاولة (5) مع تراجع أسي (30ث → 10د) لكل عنصر — لا إعادة لانهائية
+///   لعناصر ترمي 500 باستمرار
+/// - معرف عنصر الطابور فريد (طابع زمني + عشوائي) بدل الطابع وحده المعرض للتصادم
 class OfflineSyncEngine extends ChangeNotifier {
   static final OfflineSyncEngine _instance = OfflineSyncEngine._internal();
   factory OfflineSyncEngine() => _instance;
@@ -28,6 +37,10 @@ class OfflineSyncEngine extends ChangeNotifier {
   final OfflineStorageService _storage = OfflineStorageService();
   final AppHttpClient _http = AppHttpClient();
 
+  static const int _maxRetries = 5;
+  static const Duration _baseBackoff = Duration(seconds: 30);
+  static const Duration _maxBackoff = Duration(minutes: 10);
+
   bool _isOnline = true;
   bool _isSyncing = false;
   bool _manualOfflineMode = false;
@@ -35,6 +48,7 @@ class OfflineSyncEngine extends ChangeNotifier {
   DateTime? _lastSyncTime;
   String? _lastSyncMessage;
   Timer? _autoSyncTimer;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
   bool get isOnline => _isOnline && !_manualOfflineMode;
   bool get isOffline => !isOnline;
@@ -50,7 +64,24 @@ class OfflineSyncEngine extends ChangeNotifier {
     _lastSyncTime = _storage.getLastSyncTime();
     notifyListeners();
 
-    // فحص دوري خفيف للمزامنة التلقائية كل دقيقتين
+    // مراقبة الاتصال الفعلية — الخروج من التعليق يحدث هنا تلقائياً
+    _connectivitySub?.cancel();
+    try {
+      _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+        final hasConnection =
+            results.any((r) => r != ConnectivityResult.none);
+        setOnlineStatus(hasConnection);
+      });
+      // فحص أولي فوري للحالة الراهنة
+      Connectivity().checkConnectivity().then((results) {
+        setOnlineStatus(results.any((r) => r != ConnectivityResult.none));
+      }).catchError((_) {});
+    } catch (e) {
+      // بيئات الاختبار بلا منصة اتصال — تُدار الحالة يدوياً عبر setOnlineStatus
+      debugPrint('Connectivity watch unavailable: $e');
+    }
+
+    // مزامنة دورية خفيفة كل دقيقتين
     _autoSyncTimer?.cancel();
     _autoSyncTimer = Timer.periodic(const Duration(minutes: 2), (_) {
       if (isOnline && _pendingCount > 0 && !_isSyncing) {
@@ -62,6 +93,7 @@ class OfflineSyncEngine extends ChangeNotifier {
   @override
   void dispose() {
     _autoSyncTimer?.cancel();
+    _connectivitySub?.cancel();
     super.dispose();
   }
 
@@ -94,62 +126,74 @@ class OfflineSyncEngine extends ChangeNotifier {
     required Future<Map<String, dynamic>> Function() onlineAction,
     required Future<void> Function() onOptimisticUpdate,
   }) async {
-    // 1. إذا كان التطبيق في وضع الأوفلاين يدوياً أو فعلياً:
+    // 1. وضع الأوفلاين (يدوي أو فعلي): حفظ تفاؤلي في الطابور
     if (isOffline) {
-      await onOptimisticUpdate();
-      final item = SyncQueueItem(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      return _enqueueOffline(
         actionType: actionType,
         endpoint: endpoint,
         httpMethod: httpMethod,
         payload: payload,
-        createdAt: DateTime.now(),
         entityId: entityId,
         entitySummary: entitySummary,
+        onOptimisticUpdate: onOptimisticUpdate,
+        message: 'تم تسجيل الإجراء محلياً بنجاح وسيتم رفعه تلقائياً فور توفر الاتصال',
       );
-      await _storage.enqueueMutation(item);
-      _pendingCount = await _storage.getPendingMutationsCount();
-      notifyListeners();
-
-      return {
-        'success': true,
-        'offline': true,
-        'message': 'تم تسجيل الإجراء محلياً بنجاح وسيتم رفعه تلقائياً فور توفر الاتصال',
-      };
     }
 
-    // 2. إذا كان أونلاين: نحاول التنفيذ الفوري
+    // 2. أونلاين: التنفيذ الفوري، وعند فشل الشبكة التحويل للطابور
     try {
-      final res = await onlineAction();
-      if (res['success'] == true) {
-        return res;
-      }
-      return res;
+      return await onlineAction();
     } catch (e) {
       debugPrint('Action network error, falling back to offline queue: $e');
-      // عند فشل الشبكة أو timeout، نتحول فوراً للأوفلاين ونحفظ الإجراء
       setOnlineStatus(false);
-      await onOptimisticUpdate();
-      final item = SyncQueueItem(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      return _enqueueOffline(
         actionType: actionType,
         endpoint: endpoint,
         httpMethod: httpMethod,
         payload: payload,
-        createdAt: DateTime.now(),
         entityId: entityId,
         entitySummary: entitySummary,
+        onOptimisticUpdate: onOptimisticUpdate,
+        message: 'تعذر الاتصال بالخادم، تم حفظ الإجراء محلياً وسيتم رفعه تلقائياً',
       );
-      await _storage.enqueueMutation(item);
-      _pendingCount = await _storage.getPendingMutationsCount();
-      notifyListeners();
-
-      return {
-        'success': true,
-        'offline': true,
-        'message': 'تعذر الاتصال بالخادم، تم حفظ الإجراء محلياً وسيتم رفعه تلقائياً',
-      };
     }
+  }
+
+  Future<Map<String, dynamic>> _enqueueOffline({
+    required String actionType,
+    required String endpoint,
+    required String httpMethod,
+    required Map<String, dynamic> payload,
+    required String entityId,
+    required String entitySummary,
+    required Future<void> Function() onOptimisticUpdate,
+    required String message,
+  }) async {
+    await onOptimisticUpdate();
+    // معرف فريد: طابع زمني + لاحقة عشوائية (الطابع وحده يتصادم في نفس المللي ثانية)
+    final id =
+        '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(0x7FFFFFFF)}';
+    final item = SyncQueueItem(
+      id: id,
+      actionType: actionType,
+      endpoint: endpoint,
+      httpMethod: httpMethod,
+      payload: payload,
+      createdAt: DateTime.now(),
+      entityId: entityId,
+      entitySummary: entitySummary,
+    );
+    await _storage.enqueueMutation(item);
+    _pendingCount = await _storage.getPendingMutationsCount();
+    notifyListeners();
+
+    return {'success': true, 'offline': true, 'message': message};
+  }
+
+  /// تراجع أسي: 30ث، 1د، 2د، 4د، 8د — بسقف 10 دقائق
+  Duration _backoffFor(int retryCount) {
+    final seconds = _baseBackoff.inSeconds * pow(2, max(0, retryCount - 1)).toInt();
+    return seconds > _maxBackoff.inSeconds ? _maxBackoff : Duration(seconds: seconds);
   }
 
   /// رفع ومعالجة طابور العمليات المعلقة (Background Sync Worker)
@@ -171,7 +215,12 @@ class OfflineSyncEngine extends ChangeNotifier {
 
     try {
       final queue = await _storage.getSyncQueue();
-      final pendingItems = queue.where((q) => q.status == 'PENDING' || q.status == 'SYNCING').toList();
+      final now = DateTime.now();
+      final pendingItems = queue
+          .where((q) =>
+              (q.status == 'PENDING' || q.status == 'SYNCING') &&
+              (force || q.nextRetryAt == null || q.nextRetryAt!.isBefore(now)))
+          .toList();
 
       if (pendingItems.isEmpty) {
         _isSyncing = false;
@@ -201,26 +250,34 @@ class OfflineSyncEngine extends ChangeNotifier {
             synced++;
             setOnlineStatus(true);
           } else if (response.statusCode >= 400 && response.statusCode < 500) {
-            // خطأ تحقق أو تعارض أعمال (Business Conflict)
+            // خطأ تحقق أو تعارض أعمال — إعادة المحاولة لن تغير النتيجة
             item.status = 'FAILED';
             item.lastError = 'رفض الخادم: رمز ${response.statusCode}';
+            item.nextRetryAt = null;
             await _storage.updateMutation(item);
             failed++;
           } else {
-            // خطأ سيرفر أو انقطاع
+            // خطأ سيرفر: سقف محاولات + تراجع أسي بدل التكرار اللانهائي
             item.retryCount++;
+            if (item.retryCount >= _maxRetries) {
+              item.status = 'FAILED';
+              item.lastError = 'استُنفدت المحاولات (${item.retryCount}) — آخر رمز: ${response.statusCode}';
+              item.nextRetryAt = null;
+            } else {
+              item.nextRetryAt = DateTime.now().add(_backoffFor(item.retryCount));
+            }
             await _storage.updateMutation(item);
           }
         } catch (netErr) {
           debugPrint('Sync network drop on item ${item.id}: $netErr');
           setOnlineStatus(false);
-          break; // إيقاف المزامنة مؤقتاً لحين استقرار الشبكة
+          break; // إيقاف المزامنة مؤقتاً — عودة الاتصال (connectivity) تعيد المحاولة
         }
       }
 
-      final now = DateTime.now();
-      _lastSyncTime = now;
-      await _storage.setLastSyncTime(now);
+      final now2 = DateTime.now();
+      _lastSyncTime = now2;
+      await _storage.setLastSyncTime(now2);
       _pendingCount = await _storage.getPendingMutationsCount();
 
       _lastSyncMessage = synced > 0
@@ -253,6 +310,8 @@ class OfflineSyncEngine extends ChangeNotifier {
     final item = queue.firstWhere((q) => q.id == id, orElse: () => throw 'Item not found');
     item.status = 'PENDING';
     item.lastError = null;
+    item.retryCount = 0;
+    item.nextRetryAt = null;
     await _storage.updateMutation(item);
     _pendingCount = await _storage.getPendingMutationsCount();
     notifyListeners();

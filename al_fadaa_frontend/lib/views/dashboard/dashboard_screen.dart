@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../models/user_model.dart';
+import '../settings/user_tools_screen.dart';
 import '../correspondences/create_incoming_dialog.dart';
 import '../notifications/notifications_bell.dart';
 import 'controllers/dashboard_actions_handler.dart';
@@ -109,6 +110,15 @@ class _DashboardScreenState extends State<DashboardScreen>
             onPressed: () => _showMobileSidebar(isAdminOrGM),
           ),
           const NotificationsBell(),
+          IconButton(
+            icon: const Icon(Icons.tune_rounded, color: Colors.white),
+            tooltip: 'أدوات الحساب والرقابة',
+            onPressed: () => Navigator.of(context).push(
+              EnterprisePageRoute(
+                page: UserToolsScreen(user: widget.user, isAdminOrGM: isAdminOrGM),
+              ),
+            ),
+          ),
           IconButton(
             icon: AnimatedBuilder(
               animation: _syncIconController,

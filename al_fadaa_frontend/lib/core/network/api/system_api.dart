@@ -79,6 +79,21 @@ class SystemApi {
     return {'success': false, 'newCount': 0, 'message': 'فشل الاتصال بالخادم'};
   }
 
+  /// الوكالات الممنوحة لي (أنا الوكيل فيها)
+  Future<List<Map<String, dynamic>>> getDelegationsForMe() async {
+    try {
+      final response = await _http.get(Uri.parse('${ApiConstants.baseUrl}/delegations/for-me'));
+      if (response.statusCode == 200) {
+        final List list = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(list);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('getDelegationsForMe error: $e');
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getMyDelegations() async {
     try {
       final response = await _http.get(Uri.parse('${ApiConstants.baseUrl}/delegations/my'));
@@ -253,5 +268,66 @@ class SystemApi {
       debugPrint('downloadAttachment exception: $e');
     }
     return false;
+  }
+
+  // ─── الإشعارات ومركزها وكلمة المرور ───
+
+  /// إشعاراتي — الأحدث أولًا مع ترقيم صفحات وفلترة غير المقروء
+  Future<Map<String, dynamic>> getMyNotificationsPaged({
+    int page = 1,
+    int limit = 30,
+    bool unreadOnly = false,
+  }) async {
+    try {
+      final params = <String, String>{'page': '$page', 'limit': '$limit'};
+      if (unreadOnly) params['unread'] = 'true';
+      final uri = Uri.parse('${ApiConstants.baseUrl}/notifications/my').replace(queryParameters: params);
+      final response = await _http.get(uri);
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      debugPrint('getMyNotifications error: $e');
+    }
+    return {'data': [], 'meta': {'total': 0, 'totalPages': 1, 'page': page}};
+  }
+
+  Future<bool> markNotificationRead(String id) async {
+    try {
+      final response = await _http.patch(Uri.parse('${ApiConstants.baseUrl}/notifications/$id/read'));
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('markNotificationRead error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> markAllNotificationsRead() async {
+    try {
+      final response = await _http.patch(Uri.parse('${ApiConstants.baseUrl}/notifications/read-all'));
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('markAllNotificationsRead error: $e');
+      return false;
+    }
+  }
+
+  /// تغيير كلمة المرور الذاتي — الخادم يبطل كل الجلسات الأخرى
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    try {
+      final response = await _http.patch(
+        Uri.parse('${ApiConstants.baseUrl}/auth/password'),
+        body: jsonEncode({'currentPassword': currentPassword, 'newPassword': newPassword}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'تم تغيير كلمة المرور'};
+      }
+      final msg = data['message'];
+      return {'success': false, 'message': msg is List ? msg.join(' — ') : (msg ?? 'فشل تغيير كلمة المرور')};
+    } catch (e) {
+      debugPrint('changePassword error: $e');
+      return {'success': false, 'message': 'تعذر الاتصال بالخادم'};
+    }
   }
 }

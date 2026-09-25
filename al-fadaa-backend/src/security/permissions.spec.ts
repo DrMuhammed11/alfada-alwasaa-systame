@@ -16,7 +16,8 @@ describe('مصفوفة الصلاحيات', () => {
     expect(hasPermission(Role.DEPUTY_GM, Permission.CORR_SEND)).toBe(true);
     expect(hasPermission(Role.DEPT_MANAGER, Permission.CORR_SEND)).toBe(false);
     expect(hasPermission(Role.EMPLOYEE, Permission.CORR_SEND)).toBe(false);
-    expect(hasPermission(Role.ADMIN, Permission.CORR_SEND)).toBe(false);
+    // ADMIN يعامل كمعتمِد ومرسل مطلق في سياسات الأعمال — حُدِّث ليطابق المصفوفة
+    expect(hasPermission(Role.ADMIN, Permission.CORR_SEND)).toBe(true);
   });
 
   it('الموظف يعدّ المسودات ويرفعها فقط — لا يعتمد ولا يحيل', () => {

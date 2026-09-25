@@ -358,11 +358,42 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
 
             await this.pipeline.execute(ctx);
 
-            if (ctx.status !== 'ABORTED' || ctx.isDuplicate || ctx.isBlocked) {
-              maxProcessedUid = Math.max(maxProcessedUid, item.uid);
+            // سياسة موحدة: كل رسالة تمت رؤيتها تُقدّم علامة الماء (سواء استُوعبت
+            // أو أُجهضت كمكررة/محجوبة أو فشلت) — فشل المعالجة يُوثَّق ويُنذَر عنه
+            // بدل تكرار الفشل إلى الأبد (poison pill) أو فقدانه بصمت.
+            const outcome =
+              ctx.status === 'ABORTED'
+                ? ctx.isDuplicate
+                  ? 'مكررة'
+                  : ctx.isBlocked
+                    ? 'محجوبة'
+                    : 'أُجهضت'
+                : ctx.status;
+            if (ctx.status === 'ABORTED' && !ctx.isDuplicate && !ctx.isBlocked) {
+              const failMsg = `فشل استيعاب رسالة واردة UID ${item.uid} (حالة: ${outcome}) — تُقدَّم علامة الماء وتُراجَع يدويًا في صندوق البريد`;
+              this.logger.error(failMsg);
+              await this.audit
+                .log({
+                  action: AuditAction.CREATE,
+                  entityType: 'MailIngestion',
+                  summary: failMsg,
+                  metadata: { uid: item.uid, status: ctx.status },
+                })
+                .catch(() => {});
             }
+            maxProcessedUid = Math.max(maxProcessedUid, item.uid);
           } catch (msgErr) {
-            this.logger.error(`خطأ في معالجة رسالة UID ${item.uid}: ${(msgErr as Error).message}`);
+            // خطأ غير متوقع — نُقدّم العلامة كذلك مع توثيق الفقدان بدل تجاهل الرسالة صامتًا
+            const errMsg = `خطأ في معالجة رسالة واردة UID ${item.uid} — تُقدَّم علامة الماء ويُراجع البريد يدويًا: ${(msgErr as Error).message}`;
+            this.logger.error(errMsg);
+            await this.audit
+              .log({
+                action: AuditAction.CREATE,
+                entityType: 'MailIngestion',
+                summary: errMsg,
+                metadata: { uid: item.uid, error: (msgErr as Error).message },
+              })
+              .catch(() => {});
             maxProcessedUid = Math.max(maxProcessedUid, item.uid);
           }
         }

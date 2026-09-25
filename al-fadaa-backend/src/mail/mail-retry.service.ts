@@ -389,6 +389,43 @@ export class MailRetryService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * إرسال مُتتبَّع لرسالة صادر مسجلة مسبقًا في جدول OutboxMail (داخل معاملة الحالة):
+   * النجاح يوسمها SENT، والفشل يبدأ دورة التراجع الأسي على نفس الصف.
+   * هذا يجعل الإرسال محصّنًا من انهيار العملية: الصف موجود قبل أي محاولة إرسال،
+   * فلا يُفقد رد رسمي لعميل مهما حدث بين الالتزام والإرسال.
+   */
+  async attemptTrackedSend(outboxMailId: string, opts: SendReplyOptions): Promise<void> {
+    if (!this.prisma) return;
+    const mail = await this.prisma.outboxMail.findUnique({ where: { id: outboxMailId } });
+    if (!mail) return;
+
+    if (!this.senderFn) {
+      // وضع تجريبي بدون مُرسل — يُعتبر مُسلَّمًا (نفس دلالات console mode)
+      await this.prisma.outboxMail.update({
+        where: { id: mail.id },
+        data: { status: OutboxMailStatus.SENT, sentAt: new Date() },
+      });
+      return;
+    }
+
+    try {
+      const success = await this.senderFn(opts);
+      if (success) {
+        await this.prisma.outboxMail.update({
+          where: { id: mail.id },
+          data: { status: OutboxMailStatus.SENT, sentAt: new Date() },
+        });
+        this.logger.log(`تم إرسال البريد المتتبَّع ${mail.refNumber} بنجاح ✅`);
+        this.queue.delete(mail.refNumber);
+      } else {
+        await this.handleFailedCandidate(mail, 'فشلت محاولة الإرسال بدون استثناء');
+      }
+    } catch (e) {
+      await this.handleFailedCandidate(mail, (e as Error).message);
+    }
+  }
+
   // ─────────────── وظائف الإدارة والتحكم الإداري ───────────────
 
   /** استرجاع قائمة الرسائل في الصادر مع الفلترة والترقيم */

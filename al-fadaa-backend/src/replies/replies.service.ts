@@ -17,6 +17,7 @@ import { AuditService } from '../audit/audit.service';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
+import { CorrespondencesQueryService } from '../correspondences/correspondences-query.service';
 import { RefNumberService } from '../correspondences/ref-number.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import {
@@ -54,12 +55,13 @@ export class RepliesService {
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
+    private readonly correspondencesQuery: CorrespondencesQueryService,
     @Optional() approvalService?: RepliesApprovalService,
     @Optional() sendService?: RepliesSendService,
     @Optional() versioningService?: RepliesVersioningService,
   ) {
     this.versioningService =
-      versioningService ?? new RepliesVersioningService(this.prisma);
+      versioningService ?? new RepliesVersioningService(this.prisma, correspondencesQuery);
     this.approvalService =
       approvalService ??
       new RepliesApprovalService(
@@ -204,9 +206,9 @@ export class RepliesService {
     return this.versioningService.getVersions(replyId, user);
   }
 
-  /** حساب مقارنة الفروق السطرية بين نسختين للرد */
-  getDiff(replyId: string, fromVersion?: number, toVersion?: number) {
-    return this.versioningService.getDiff(replyId, fromVersion, toVersion);
+  /** حساب مقارنة الفروق السطرية بين نسختين للرد — خاضع لنطاق الرؤية */
+  getDiff(replyId: string, user: AuthUser, fromVersion?: number, toVersion?: number) {
+    return this.versioningService.getDiff(replyId, user, fromVersion, toVersion);
   }
 
   // ─────────────── تفويض دورة الاعتماد ───────────────

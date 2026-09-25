@@ -239,6 +239,12 @@ export class BackupService {
 
           const deletedOld = this.rotateBackups(backupDir);
 
+          // رفع النسخة إلى مخزن خارجي إن ضُبط أمر الرفع — القرص المحلي فاني وقد يُمحى عند النشر
+          const uploadError = await this.uploadOffsite(targetPath);
+          if (uploadError) {
+            await this.sendFailureAlert(`نجح النسخ الاحتياطي محليًا لكن فشل رفعه للمخزن الخارجي: ${uploadError}`);
+          }
+
           resolve({
             success: true,
             filePath: targetPath,
@@ -261,6 +267,30 @@ export class BackupService {
         await this.sendFailureAlert(errorMsg);
         resolve({ success: false, error: errorMsg });
       });
+    });
+  }
+
+  /**
+   * رفع النسخة الاحتياطية إلى مخزن خارجي (S3 / R2 / Backblaze عبر rclone أو أي أداة).
+   * يُضبط الأمر من متغير البيئة BACKUP_UPLOAD_COMMAND مع العنصرين البديلين:
+   *   {file} = المسار الكامل للنسخة، {name} = اسم الملف فقط
+   * مثال: rclone copyto {file} r2:alfadaa-backups/{name}
+   * يعيد نص الخطأ عند الفشل، أو null عند النجاح أو عدم ضبط الأمر.
+   */
+  private uploadOffsite(filePath: string): Promise<string | null> {
+    const commandTemplate = process.env.BACKUP_UPLOAD_COMMAND;
+    if (!commandTemplate || !commandTemplate.trim()) return Promise.resolve(null);
+
+    const finalCommand = commandTemplate
+      .replace('{file}', filePath)
+      .replace('{name}', path.basename(filePath));
+
+    return new Promise((resolve) => {
+      spawn(finalCommand, { shell: true, stdio: 'ignore' })
+        .on('error', (err) => resolve(err.message))
+        .on('close', (code) =>
+          code === 0 ? resolve(null) : resolve(`أمر الرفع انتهى بكود ${code}: ${commandTemplate}`),
+        );
     });
   }
 

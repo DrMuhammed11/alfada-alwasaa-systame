@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { AuditAction } from '@prisma/client';
-import { IsDateString, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { IsRealDate } from '../common/utils/dates';
 
 /** استعلام استعراض سجل التدقيق — تصفية وتقسيم صفحات */
 export class AuditQueryDto extends PaginationDto {
@@ -30,13 +31,27 @@ export class AuditQueryDto extends PaginationDto {
   @IsUUID('4', { message: 'معرف الكيان غير صالح' })
   entityId?: string;
 
-  @ApiPropertyOptional({ description: 'من تاريخ (ISO 8601)', example: '2026-01-01T00:00:00Z' })
+  @ApiPropertyOptional({
+    description: 'من تاريخ (YYYY-MM-DD أو ISO 8601 كامل)',
+    example: '2026-01-01T00:00:00Z',
+  })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة التاريخ غير صالحة' })
+  @IsRealDate({ message: 'صيغة التاريخ غير صالحة' })
   from?: string;
 
-  @ApiPropertyOptional({ description: 'إلى تاريخ (ISO 8601)' })
+  @ApiPropertyOptional({
+    description: 'إلى تاريخ (YYYY-MM-DD يشمل كامل اليوم، أو ISO 8601 كامل)',
+  })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة التاريخ غير صالحة' })
+  @IsRealDate({ message: 'صيغة التاريخ غير صالحة' })
   to?: string;
+
+  @ApiPropertyOptional({
+    description: 'بحث نصي حر في الإجراء، البيان، نوع الكيان، عنوان IP، البصمات التشفيرية، واسم/بريد المستخدم',
+    example: 'LOGIN',
+  })
+  @IsOptional()
+  @IsString({ message: 'البحث يجب أن يكون نصًا' })
+  @MaxLength(200, { message: 'نص البحث طويل جدًا (200 حرف كحد أقصى)' })
+  q?: string;
 }

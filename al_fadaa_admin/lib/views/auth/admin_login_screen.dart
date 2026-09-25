@@ -12,11 +12,21 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
-  final _emailController = TextEditingController(text: 'admin@al-fadaa.com');
-  final _passwordController = TextEditingController(text: ApiConstants.defaultPassword);
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    // التعبئة التلقائية فقط في وضع العرض التجريبي الصريح وقت البناء (DEMO_MODE=true)
+    if (ApiConstants.isDemoMode && ApiConstants.demoPassword.isNotEmpty) {
+      _emailController.text = ApiConstants.demoAccounts.first;
+      _passwordController.text = ApiConstants.demoPassword;
+    }
+  }
 
   @override
   void dispose() {
@@ -56,9 +66,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   void _quickFill(String email) {
+    if (!ApiConstants.isDemoMode || ApiConstants.demoPassword.isEmpty) return;
     setState(() {
       _emailController.text = email;
-      _passwordController.text = ApiConstants.defaultPassword;
+      _passwordController.text = ApiConstants.demoPassword;
       _errorMessage = null;
     });
   }
@@ -226,36 +237,38 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // أزرار الدخول السريع للاختبار التجريبي
-                const Divider(color: Color(0xFF334155)),
-                const SizedBox(height: 12),
-                const Text(
-                  'حسابات الدخول المصرحة للتجربة:',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    ActionChip(
-                      label: const Text('مدير النظام (Admin)', style: TextStyle(fontSize: 11)),
-                      backgroundColor: const Color(0xFF0F172A),
-                      labelStyle: const TextStyle(color: Color(0xFF38BDF8)),
-                      side: const BorderSide(color: Color(0xFF0284C7)),
-                      onPressed: () => _quickFill('admin@al-fadaa.com'),
-                    ),
-                    ActionChip(
-                      label: const Text('المدير العام (GM)', style: TextStyle(fontSize: 11)),
-                      backgroundColor: const Color(0xFF0F172A),
-                      labelStyle: const TextStyle(color: Color(0xFF34D399)),
-                      side: const BorderSide(color: Color(0xFF059669)),
-                      onPressed: () => _quickFill('gm@al-fadaa.com'),
-                    ),
-                  ],
-                ),
+                // أزرار الدخول السريع — وضع العرض التجريبي فقط (DEMO_MODE وقت البناء)
+                if (ApiConstants.isDemoMode && ApiConstants.demoPassword.isNotEmpty) ...[
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'حسابات الدخول المصرحة للتجربة:',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ActionChip(
+                        label: const Text('مدير النظام (Admin)', style: TextStyle(fontSize: 11)),
+                        backgroundColor: const Color(0xFF0F172A),
+                        labelStyle: const TextStyle(color: Color(0xFF38BDF8)),
+                        side: const BorderSide(color: Color(0xFF0284C7)),
+                        onPressed: () => _quickFill('admin@al-fadaa.com'),
+                      ),
+                      ActionChip(
+                        label: const Text('المدير العام (GM)', style: TextStyle(fontSize: 11)),
+                        backgroundColor: const Color(0xFF0F172A),
+                        labelStyle: const TextStyle(color: Color(0xFF34D399)),
+                        side: const BorderSide(color: Color(0xFF059669)),
+                        onPressed: () => _quickFill('gm@al-fadaa.com'),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

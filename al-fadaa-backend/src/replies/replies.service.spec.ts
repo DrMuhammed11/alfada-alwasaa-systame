@@ -8,6 +8,7 @@ import { RefNumberService } from '../correspondences/ref-number.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CorrespondencesQueryService } from '../correspondences/correspondences-query.service';
 import { RepliesService } from './replies.service';
 import type { AuthUser } from '../common/types';
 
@@ -83,7 +84,10 @@ describe('RepliesService Concurrency and Conditional Updates', () => {
     notifyReplyApproved: jest.fn().mockResolvedValue(undefined),
     notifyReplySent: jest.fn().mockResolvedValue(undefined),
   };
-  const mailMock = { sendReply: jest.fn().mockResolvedValue({ messageId: '<msg-1>' }) };
+  const mailMock = {
+    sendReply: jest.fn().mockResolvedValue({ messageId: '<msg-1>' }),
+    sendReplyTracked: jest.fn().mockResolvedValue(undefined),
+  };
   const refNumbersMock = { generate: jest.fn().mockResolvedValue('OUT-2026-00001') };
   const configMock = { get: jest.fn().mockReturnValue('info@al-fadaa.com') };
   const correspondencesMock = {
@@ -97,7 +101,8 @@ describe('RepliesService Concurrency and Conditional Updates', () => {
         RepliesService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RefNumberService, useValue: refNumbersMock },
-        { provide: CorrespondencesService, useValue: correspondencesMock },
+        { provide: CorrespondencesQueryService, useValue: { canView: jest.fn().mockResolvedValue(true) } },
+          { provide: CorrespondencesService, useValue: correspondencesMock },
         { provide: MailService, useValue: mailMock },
         { provide: AuditService, useValue: auditMock },
         { provide: NotificationsService, useValue: notifMock },
@@ -164,7 +169,7 @@ describe('RepliesService Concurrency and Conditional Updates', () => {
         where: { id: 'reply-1', status: ReplyStatus.APPROVED, sentAt: null },
         data: expect.objectContaining({ sentAt: expect.any(Date) }),
       });
-      expect(mailMock.sendReply).toHaveBeenCalledTimes(1);
+      expect(mailMock.sendReplyTracked).toHaveBeenCalledTimes(1);
     });
 
     it('الطلب المتزامن الثاني يجد 0 صفوف متأثرة ويرمي BadRequestException لمنع تكرار الإرسال بالبريد', async () => {

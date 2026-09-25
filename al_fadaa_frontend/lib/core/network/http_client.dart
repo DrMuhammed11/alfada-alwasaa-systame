@@ -23,9 +23,28 @@ class AppHttpClient {
     return headers;
   }
 
-  /// فحص الاستجابة وتتبع انتهاء الجلسة
-  http.Response _inspectResponse(http.Response response) {
+  /// فحص الاستجابة: عند 401 يُجرَّب تجديد صامت واحد ثم إعادة الطلب مرة واحدة —
+  /// فشل التجديد يُسجَّل في عداد الخروج التلقائي كما سابقًا.
+  /// [repeat] اختياري: طلبات multipart لا تُعاد (ملفها يُستهلك بإرساله الأول).
+  Future<http.Response> _inspectResponse(
+    http.Response response, [
+    Future<http.Response> Function()? repeat,
+  ]) async {
     if (response.statusCode == 401) {
+      final refreshed = await _sessionManager.tryRefresh();
+      if (refreshed) {
+        if (repeat != null) {
+          final retried = await repeat();
+          if (retried.statusCode != 401) {
+            _sessionManager.resetUnauthorizedCount();
+            return retried;
+          }
+        } else {
+          // التجديد نجح — الطلب التالي سيحمل الرمز الجديد تلقائيًا
+          _sessionManager.resetUnauthorizedCount();
+          return response;
+        }
+      }
       _sessionManager.handleUnauthorizedResponse();
     } else {
       _sessionManager.resetUnauthorizedCount();
@@ -33,24 +52,31 @@ class AppHttpClient {
     return response;
   }
 
-  /// تنفيذ طلب مع محاولة إعادة واحدة عند انتهاء المهلة أو كود 503
+  /// تنفيذ طلب مع إعادة محاولة واحدة عند انتهاء المهلة أو كود 503.
+  /// إعادة المحاولة محصورة بالطلبات القرائية (GET) حصرًا: إعادة POST بعد timeout
+  /// قد تُرسل بريد العميل مرتين — لا مفتاح تعريف طلب (idempotency key) بعد.
   Future<http.Response> _executeWithRetry(
     Future<http.Response> Function() action, {
     String description = 'HTTP Request',
+    bool isReadOnly = false,
   }) async {
     try {
       final res = await action();
-      if (res.statusCode == 503) {
+      if (isReadOnly && res.statusCode == 503) {
         debugPrint('503 Service Unavailable on $description -> Retrying once in 1s...');
         await Future.delayed(const Duration(seconds: 1));
-        return _inspectResponse(await action());
+        return _inspectResponse(await action(), action);
       }
-      return _inspectResponse(res);
+      return _inspectResponse(res, action);
     } on TimeoutException {
+      if (!isReadOnly) {
+        debugPrint('Timeout on $description -> NOT retrying (non-read request, could duplicate a send)');
+        rethrow;
+      }
       debugPrint('Timeout on $description -> Retrying once in 1s...');
       await Future.delayed(const Duration(seconds: 1));
       final retryRes = await action();
-      return _inspectResponse(retryRes);
+      return _inspectResponse(retryRes, action);
     } catch (e) {
       debugPrint('$description error: $e');
       rethrow;
@@ -65,6 +91,7 @@ class AppHttpClient {
     return _executeWithRetry(
       () => http.get(uri, headers: headers ?? defaultHeaders).timeout(timeout),
       description: 'GET ${uri.path}',
+      isReadOnly: true,
     );
   }
 

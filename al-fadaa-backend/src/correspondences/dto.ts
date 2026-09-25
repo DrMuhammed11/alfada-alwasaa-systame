@@ -5,17 +5,18 @@ import {
   Priority,
 } from '@prisma/client';
 import {
-  IsDateString,
   IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { IsRealDate } from '../common/utils/dates';
 
 export class CreateIncomingDto {
   @ApiProperty({ description: 'موضوع المراسلة', example: 'طلب عرض سعر لأعمال الكهرباء' })
@@ -49,11 +50,11 @@ export class CreateIncomingDto {
   priority?: Priority;
 
   @ApiPropertyOptional({
-    description: 'تاريخ الاستلام (ISO) — الافتراضي: الآن',
+    description: 'تاريخ الاستلام (YYYY-MM-DD أو ISO كامل) — الافتراضي: الآن',
     example: '2026-09-01T10:30:00Z',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة التاريخ غير صالحة' })
+  @IsRealDate({ message: 'صيغة التاريخ غير صالحة' })
   receivedAt?: string;
 
   @ApiPropertyOptional({ description: 'معرف رأس الرسالة Message-ID' })
@@ -145,9 +146,10 @@ export class CorrespondencesQueryDto extends PaginationDto {
   @IsUUID('4', { message: 'معرف القسم غير صالح' })
   departmentId?: string;
 
-  @ApiPropertyOptional({ description: 'تصفية بحسب قناة الوصول: website | email | fax | portal' })
+  @ApiPropertyOptional({ description: 'تصفية بحسب قناة الوصول: website | email | fax | hand' })
   @IsOptional()
   @IsString()
+  @MaxLength(50, { message: 'القناة طويلة جدًا' })
   channel?: string;
 
   @ApiPropertyOptional({
@@ -156,6 +158,7 @@ export class CorrespondencesQueryDto extends PaginationDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(200, { message: 'نص البحث طويل جدًا (200 حرف كحد أقصى)' })
   q?: string;
 }
 
@@ -193,6 +196,7 @@ export class SearchCorrespondencesDto extends PaginationDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(200, { message: 'نص البحث طويل جدًا (200 حرف كحد أقصى)' })
   q?: string;
 
   @ApiPropertyOptional({ enum: CorrespondenceType, description: 'النوع: وارد / صادر / داخلي' })
@@ -215,19 +219,35 @@ export class SearchCorrespondencesDto extends PaginationDto {
   @IsUUID('4', { message: 'معرف القسم غير صالح' })
   departmentId?: string;
 
-  @ApiPropertyOptional({ description: 'تاريخ البداية (ISO)', example: '2026-01-01T00:00:00Z' })
+  @ApiPropertyOptional({ description: 'تصفية بحسب قناة الوصول: website | email | fax | hand' })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة تاريخ البداية غير صالحة' })
+  @IsString()
+  @MaxLength(50, { message: 'القناة طويلة جدًا' })
+  channel?: string;
+
+  @ApiPropertyOptional({
+    description: 'تاريخ البداية (YYYY-MM-DD أو ISO كامل)',
+    example: '2026-01-01T00:00:00Z',
+  })
+  @IsOptional()
+  @IsRealDate({ message: 'صيغة تاريخ البداية غير صالحة' })
   from?: string;
 
-  @ApiPropertyOptional({ description: 'تاريخ النهاية (ISO)', example: '2026-12-31T23:59:59Z' })
+  @ApiPropertyOptional({
+    description: 'تاريخ النهاية (YYYY-MM-DD يشمل كامل اليوم، أو ISO كامل)',
+    example: '2026-12-31T23:59:59Z',
+  })
   @IsOptional()
-  @IsDateString({}, { message: 'صيغة تاريخ النهاية غير صالحة' })
+  @IsRealDate({ message: 'صيغة تاريخ النهاية غير صالحة' })
   to?: string;
 
-  @ApiPropertyOptional({ description: 'هل تحتوي على مرفقات؟' })
+  @ApiPropertyOptional({ description: 'هل تحتوي على مرفقات؟ — تقبل true/false فقط' })
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(({ value }) => {
+    if (value === true || value === 'true') return true;
+    if (value === false || value === 'false') return false;
+    return undefined; // أي قيمة أخرى تُتجاهل بدل انقلاب الفلتر عكس مقصود المستخدم
+  })
   hasAttachments?: boolean;
 }
 

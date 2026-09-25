@@ -4,6 +4,7 @@ import { AuditAction, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { getRequestContext } from '../common/context/request-context';
 import { buildPageMeta, Paginated } from '../common/types';
+import { parseDateEnd, parseDateStart } from '../common/utils/dates';
 import { AuditQueryDto } from './dto';
 
 export const GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
@@ -11,6 +12,8 @@ export const GENESIS_HASH = '000000000000000000000000000000000000000000000000000
 export interface AuditVerificationResult {
   isTamperFree: boolean;
   totalVerified: number;
+  /** إجمالي سجلات التدقيق في قاعدة البيانات — لمقارنة التغطية بالمفحوص */
+  totalRecords: number;
   chainStatus: 'VERIFIED_INTACT' | 'TAMPER_DETECTED' | 'EMPTY';
   verifiedUntil: string;
   details: string;
@@ -130,30 +133,39 @@ export class AuditService {
   }
 
   /**
-   * فحص النزاهة التشفيرية لسلسلة سجلات التدقيق والتأكد من خلوها من أي تلاعب
+   * فحص النزاهة التشفيرية لسلسلة سجلات التدقيق والتأكد من خلوها من أي تلاعب.
+   * الفحص يبدأ من الأحدث (الأهم تشغيليًا) ويسير عكس السلسلة حتى نهاية النافذة —
+   * لا الأقدم في التاريخ كما كان سابقًا فيغيب الأحدث عن الفحص تمامًا.
    */
   async verifyIntegrity(limit: number = 1000): Promise<AuditVerificationResult> {
-    const logs = await this.prisma.auditLog.findMany({
-      orderBy: { createdAt: 'asc' },
-      take: limit,
-      select: {
-        id: true,
-        action: true,
-        userId: true,
-        entityType: true,
-        entityId: true,
-        summary: true,
-        metadata: true,
-        createdAt: true,
-        previousHash: true,
-        recordHash: true,
-      },
-    });
+    // سقف مزدوج للنافذة: 1 إلى 10 آلاف — لمنع حمولة استعلام غير محدودة
+    const window = Math.min(Math.max(Math.floor(Number(limit)) || 1000, 1), 10_000);
+
+    const [logs, totalRecords] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: window,
+        select: {
+          id: true,
+          action: true,
+          userId: true,
+          entityType: true,
+          entityId: true,
+          summary: true,
+          metadata: true,
+          createdAt: true,
+          previousHash: true,
+          recordHash: true,
+        },
+      }),
+      this.prisma.auditLog.count(),
+    ]);
 
     if (logs.length === 0) {
       return {
         isTamperFree: true,
         totalVerified: 0,
+        totalRecords,
         chainStatus: 'EMPTY',
         verifiedUntil: new Date().toISOString(),
         details: 'لا توجد سجلات تدقيق في قاعدة البيانات بعد',
@@ -162,7 +174,8 @@ export class AuditService {
     }
 
     let verifiedCount = 0;
-    let expectedPreviousHash: string | null = null;
+    let previousProcessed: (typeof logs)[number] | null = null;
+    let oldestVerifiedAt = new Date().toISOString();
 
     for (const log of logs) {
       if (!log.recordHash) {
@@ -185,6 +198,7 @@ export class AuditService {
         return {
           isTamperFree: false,
           totalVerified: verifiedCount,
+          totalRecords,
           chainStatus: 'TAMPER_DETECTED',
           verifiedUntil: log.createdAt.toISOString(),
           details: `تم اكتشاف تلاعب في محتوى السجل [${log.id}]: البصمة المحسوبة لا تطابق البصمة المسجلة!`,
@@ -192,28 +206,37 @@ export class AuditService {
         };
       }
 
-      // 2. فحص سلامة الربط بالسجل السابق
-      if (expectedPreviousHash !== null && log.previousHash !== expectedPreviousHash) {
+      // 2. فحص سلامة الربط: بصمة «السجل السابق» لأحدث سجل مفحوص
+      //    يجب أن تشير إلى بصمة السجل الأقدم مباشرة في نافذة الفحص
+      if (previousProcessed !== null && previousProcessed.previousHash !== log.recordHash) {
         return {
           isTamperFree: false,
           totalVerified: verifiedCount,
+          totalRecords,
           chainStatus: 'TAMPER_DETECTED',
           verifiedUntil: log.createdAt.toISOString(),
-          details: `تم اكتشاف انقطاع في سلسلة التدقيق عند السجل [${log.id}]: رابط السجل السابق مكسور!`,
+          details: `تم اكتشاف انقطاع في سلسلة التدقيق عند السجل [${previousProcessed.id}]: رابط السجل السابق مكسور!`,
           brokenRecordId: log.id,
         };
       }
 
-      expectedPreviousHash = log.recordHash;
+      previousProcessed = log;
+      oldestVerifiedAt = log.createdAt.toISOString();
       verifiedCount++;
     }
+
+    const coverageNote =
+      verifiedCount < totalRecords
+        ? `تغطية جزئية (${verifiedCount} من ${totalRecords} سجلًا) — أعد الفحص بنطاق أوسع لتغطية الأقدم`
+        : 'تغطية كاملة للسجل';
 
     return {
       isTamperFree: true,
       totalVerified: verifiedCount,
+      totalRecords,
       chainStatus: 'VERIFIED_INTACT',
-      verifiedUntil: logs[logs.length - 1].createdAt.toISOString(),
-      details: `تم فحص وتأكيد سلامة سلسلة التدقيق المشفرة بنجاح لـ ${verifiedCount} سجلاً خالية تماماً من أي تلاعب`,
+      verifiedUntil: oldestVerifiedAt,
+      details: `تم فحص أحدث ${verifiedCount} سجلًا (${coverageNote}): السلسلة التشفيرية متطابقة وسليمة خالية تماماً من أي تلاعب`,
       brokenRecordId: null,
     };
   }
@@ -234,9 +257,34 @@ export class AuditService {
     if (dto.entityId) where.entityId = dto.entityId;
     if (dto.from || dto.to) {
       where.createdAt = {
-        ...(dto.from ? { gte: new Date(dto.from) } : {}),
-        ...(dto.to ? { lte: new Date(dto.to) } : {}),
+        ...(dto.from ? { gte: parseDateStart(dto.from) } : {}),
+        ...(dto.to ? { lte: parseDateEnd(dto.to) } : {}),
       };
+    }
+    if (dto.q && dto.q.trim().length > 0) {
+      const q = dto.q.trim();
+      const or: Prisma.AuditLogWhereInput[] = [
+        { summary: { contains: q, mode: 'insensitive' } },
+        { entityType: { contains: q, mode: 'insensitive' } },
+        { ipAddress: { contains: q } },
+        { recordHash: { contains: q, mode: 'insensitive' } },
+        { previousHash: { contains: q, mode: 'insensitive' } },
+        {
+          user: {
+            is: {
+              OR: [
+                { name: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+              ],
+            },
+          },
+        },
+      ];
+      // نوع الحدث enum لا يقبل contains — يُطابق هنا إن كان النص اسم حدث صالحًا
+      if ((Object.values(AuditAction) as string[]).includes(q.toUpperCase())) {
+        or.push({ action: q.toUpperCase() as AuditAction });
+      }
+      where.OR = or;
     }
 
     const [total, data] = await this.prisma.$transaction([

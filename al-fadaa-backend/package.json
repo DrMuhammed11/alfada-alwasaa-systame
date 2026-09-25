@@ -13,7 +13,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "prisma migrate deploy || prisma db push --skip-generate; node dist/src/main.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -23,7 +23,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "db:backup": "ts-node scripts/db-backup.ts"
+    "db:backup": "ts-node scripts/db-backup.ts",
+    "seed:content": "ts-node scripts/seed-site-content.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

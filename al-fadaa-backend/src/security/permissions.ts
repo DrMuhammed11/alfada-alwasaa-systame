@@ -17,6 +17,7 @@ export enum Permission {
   REPLY_APPROVE = 'REPLY_APPROVE',
   CORR_SEND = 'CORR_SEND',
   AUDIT_VIEW = 'AUDIT_VIEW',
+  CONTENT_MANAGE = 'CONTENT_MANAGE',
 }
 
 /** مصفوفة الصلاحيات: كل دور ← الصلاحيات الممنوحة له */
@@ -26,6 +27,10 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     Permission.DEPARTMENTS_MANAGE,
     Permission.AUDIT_VIEW,
     Permission.CORR_VIEW_ALL,
+    Permission.CONTENT_MANAGE,
+    // الإدارة العليا تعامل كمعتمِد ومرسل مطلق في سياسات الأعمال
+    Permission.REPLY_APPROVE,
+    Permission.CORR_SEND,
   ],
   GM: [
     Permission.USERS_MANAGE,       // إدارة المستخدمين — مشتركة مع ADMIN وفق المخطط
@@ -75,6 +80,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   REPLY_APPROVE: 'اعتماد الردود ورفضها',
   CORR_SEND: 'إرسال الردود للعملاء',
   AUDIT_VIEW: 'الاطلاع على سجل التدقيق',
+  CONTENT_MANAGE: 'إدارة محتويات الموقع الإلكتروني',
 };
 
 export function hasPermission(role: Role, permission: Permission): boolean {

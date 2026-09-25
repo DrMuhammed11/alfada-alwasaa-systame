@@ -8,9 +8,11 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { IsStrongPassword } from '../common/validation/password-policy';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'الاسم الكامل', example: 'مهندس عمار' })
@@ -22,9 +24,10 @@ export class CreateUserDto {
   @IsEmail({}, { message: 'البريد الإلكتروني غير صالح' })
   email!: string;
 
-  @ApiProperty({ description: 'كلمة المرور المؤقتة (8 أحرف على الأقل)', example: 'Temp@12345' })
+  @ApiProperty({ description: 'كلمة المرور المؤقتة (10 خانات مع حرف كبير وصغير ورقم ورمز)', example: 'Temp@12345x' })
   @IsString()
-  @MinLength(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+  @MinLength(10, { message: 'كلمة المرور يجب أن تكون 10 أحرف على الأقل' })
+  @IsStrongPassword()
   password!: string;
 
   @ApiProperty({ enum: Role, description: 'الدور الوظيفي', example: Role.EMPLOYEE })
@@ -58,10 +61,11 @@ export class UpdateUserDto {
   @IsEmail({}, { message: 'البريد الإلكتروني غير صالح' })
   email?: string;
 
-  @ApiPropertyOptional({ description: 'كلمة مرور جديدة (تُشفَّر تلقائيًا)' })
+  @ApiPropertyOptional({ description: 'كلمة مرور جديدة (تُشفَّر تلقائيًا وتُبطل جلسات المستخدم)' })
   @IsOptional()
   @IsString()
-  @MinLength(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+  @MinLength(10, { message: 'كلمة المرور يجب أن تكون 10 أحرف على الأقل' })
+  @IsStrongPassword()
   password?: string;
 
   @ApiPropertyOptional({ enum: Role, description: 'الدور الوظيفي' })
@@ -105,4 +109,13 @@ export class UsersQueryDto extends PaginationDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'بحث نصي حر في الاسم أو البريد الإلكتروني',
+    example: 'أحمد',
+  })
+  @IsOptional()
+  @IsString({ message: 'البحث يجب أن يكون نصًا' })
+  @MaxLength(200, { message: 'نص البحث طويل جدًا (200 حرف كحد أقصى)' })
+  search?: string;
 }

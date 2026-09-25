@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OutboxMailStatus, Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -47,6 +47,16 @@ export class AdminController {
     return this.adminService.getApprovalWorkflows();
   }
 
+  @Get('backups/status')
+  @RequirePermission(Permission.USERS_MANAGE)
+  @ApiOperation({ summary: 'حالة النسخ الاحتياطي وقائمة النسخ المحلية (للأدمن فقط)' })
+  getBackupStatus(@CurrentUser() user: AuthUser) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
+    }
+    return this.adminService.getBackupStatus();
+  }
+
   @Put('approval-workflows')
   @RequirePermission(Permission.USERS_MANAGE)
   @ApiOperation({ summary: 'تحديث مسار الاعتماد لأولوية معينة (للأدمن فقط)' })
@@ -88,6 +98,17 @@ export class AdminController {
       throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
     }
     return this.adminService.retryOutboxMail(id);
+  }
+
+  @Post('resend-failed-mails')
+  @RequirePermission(Permission.USERS_MANAGE)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'إعادة جدولة كل رسائل الصادر الفاشلة نهائيًا (للأدمن فقط)' })
+  resendFailedMails(@CurrentUser() user: AuthUser) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException('هذه العملية متاحة للأدمن فقط');
+    }
+    return this.adminService.resendFailedMails();
   }
 
   @Post('outbox/:id/pause')

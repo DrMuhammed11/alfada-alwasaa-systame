@@ -145,6 +145,9 @@ model User {
   departmentId String?
   department   Department? @relation("UserBelongsToDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
   lastLoginAt  DateTime?
+  // قفل الحساب بعد محاولات دخول فاشلة متكررة — حماية من هجمات التخمين
+  failedLoginAttempts Int      @default(0)
+  lockedUntil         DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -254,6 +257,9 @@ model Correspondence {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // فهارس القوائم: كل استعلام قائمة يفلتر بالجذر (parentId) ويرتب بالتحديث الأحدث
+  @@index([parentId])
+  @@index([updatedAt])
   @@index([status, createdAt])
   @@index([type, createdAt])
   @@index([departmentId])
@@ -536,3 +542,91 @@ model OutboxMail {
   @@index([refNumber])
 }
 
+
+// ─────────────────────────────────────────────────────────────
+// محتويات الموقع الإلكتروني — تُدار من لوحة الإدارة وتُقرأ عامًا
+// كل عنصر ثنائي اللغة (عربي/إنجليزي) مع ترتيب وتفعيل
+// ─────────────────────────────────────────────────────────────
+
+/// الخدمات المعلنة في الموقع (المقاولات، الطرق، الاتصالات...)
+model SiteService {
+  id      String @id @default(uuid())
+  slug    String @unique // معرف الخدمة في روابط الموقع: contracting / roads ...
+  titleAr String
+  titleEn String
+  shortAr String? // وصف مختصر لبطاقة الخدمة
+  shortEn String?
+  fullAr  String? @db.Text // الوصف الكامل لصفحة الخدمة
+  fullEn  String? @db.Text
+  icon    String? // اسم أيقونة (lucide icon name)
+  image   String? // مسار الصورة الرئيسية
+  features Json?  // مصفوفة مزايا نصية ["..", ".."]
+  order    Int    @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+/// القطاعات التي تعمل فيها الشركة (عرض القطاعات في الرئيسية)
+model SiteSector {
+  id       String @id @default(uuid())
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  icon     String?
+  services Json?   // قائمة خدمات القطاع (نصوص)
+  photos   Json?   // مصفوفة صور [{src, alt}]
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+/// سابقة الأعمال والمشاريع المنجزة (سجل الأداء)
+model SiteProject {
+  id      String @id @default(uuid())
+  titleAr String
+  titleEn String
+  tagAr   String? // تصنيف المشروع: مقاولات وأعمال مدنية ...
+  tagEn   String?
+  scopeAr String? @db.Text // نطاق العمل ووصف المشروع
+  scopeEn String? @db.Text
+  metrics Json?   // مؤشرات المشروع ["نقطة 1", "نقطة 2"]
+  image   String?
+  order    Int    @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+/// الأسئلة الشائعة في الموقع (تدخل ضمن Schema.org FAQPage)
+model SiteFaq {
+  id         String @id @default(uuid())
+  questionAr String
+  questionEn String
+  answerAr   String @db.Text
+  answerEn   String @db.Text
+  order      Int     @default(0)
+  isActive   Boolean @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+/// إعدادات المحتوى العامة بمفاتيح مرنة: contacts / stats / pillars / values / hero ...
+model SiteSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique // contacts / stats / pillars / values / visionMission ...
+  value       Json     // محتوى المفتاح ككائن JSON
+  description String?  // شرح عربي لما يحويه المفتاح (يظهر في لوحة الإدارة)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}

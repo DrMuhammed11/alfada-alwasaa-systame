@@ -142,7 +142,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView> {
               _buildPeriodChip('7 أيام', '7d'),
               _buildPeriodChip('30 يوماً', '30d'),
               _buildPeriodChip('90 يوماً', '90d'),
-              _buildPeriodChip('سنة', '1y'),
+              _buildPeriodChip('سنة', 'year'),
             ],
           ),
 

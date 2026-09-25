@@ -4,6 +4,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RepliesVersioningService, computeLineDiff } from './replies-versioning.service';
 import { RepliesService } from './replies.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CorrespondencesQueryService } from '../correspondences/correspondences-query.service';
 import { RefNumberService } from '../correspondences/ref-number.service';
 import { CorrespondencesService } from '../correspondences/correspondences.service';
 import { MailService } from '../mail/mail.service';
@@ -75,6 +76,7 @@ describe('تاريخ إصدارات الردود وفرق التغييرات (Re
           { provide: PrismaService, useValue: mockPrisma },
           { provide: RefNumberService, useValue: {} },
           { provide: CorrespondencesService, useValue: { findOne: jest.fn() } },
+          { provide: CorrespondencesQueryService, useValue: { canView: jest.fn().mockResolvedValue(true) } },
           { provide: MailService, useValue: {} },
           { provide: AuditService, useValue: mockAudit },
           { provide: NotificationsService, useValue: mockNotifications },

@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RefreshTokenDto } from './dto';
+import { ChangePasswordDto, LoginDto, RefreshTokenDto } from './dto';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ThrottlerLimits } from '../common/throttler/throttler-config';
@@ -52,5 +52,15 @@ export class AuthController {
   @ApiOperation({ summary: 'بيانات المستخدم الحالي' })
   me(@CurrentUser('id') userId: string) {
     return this.authService.me(userId);
+  }
+
+  @Patch('password')
+  @Throttle(ThrottlerLimits.login)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'تغيير كلمة المرور الذاتي — يبطل كل الجلسات الأخرى فورًا ويلزم بإعادة الدخول',
+  })
+  changePassword(@Body() dto: ChangePasswordDto, @CurrentUser('id') userId: string) {
+    return this.authService.changePassword(userId, dto);
   }
 }
