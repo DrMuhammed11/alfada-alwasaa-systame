@@ -1,9 +1,17 @@
 "use client";
 
+/**
+ * English Strategic Sectors — showcase cards with a centered filter strip
+ * (mirrors the Arabic sectors.tsx: pills fit on one line when there is room,
+ * scroll as a single strip when tight — they never orphan-wrap).
+ */
+
+import { useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { Reveal } from "./reveal";
+import { cn } from "@/lib/utils";
 
 export interface EnSectorCmsItem {
   titleEn: string; descEn?: string; services?: string[];
@@ -16,6 +24,7 @@ const FALLBACK_PHOTOS = [
 ];
 
 export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
+  const [activeFilter, setActiveFilter] = useState("all");
   const sectors =
     items && items.length > 0
       ? items.map((s, i) => ({
@@ -25,11 +34,16 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
           photos: s.photos && s.photos.length > 0 ? s.photos : FALLBACK_PHOTOS,
         }))
       : EN_SITE_CONFIG.sectors;
+  const filteredSectors =
+    activeFilter === "all"
+      ? sectors
+      : sectors.filter((s) => s.num === activeFilter);
+
   return (
     <section id="sectors" className="py-16 bg-slate-50 dark:bg-navy-darker/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
-          <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <span className="inline-block rounded-full bg-gold/15 px-4 py-1 text-xs font-bold text-navy dark:text-gold-light">
               Core Strategic Sectors
             </span>
@@ -42,8 +56,45 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
           </div>
         </Reveal>
 
+        {/* Filter strip — centered when it fits, a single scrollable line when tight */}
+        <Reveal delay={0.1}>
+          <div className="mb-10 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="mx-auto flex w-fit max-w-full items-center gap-2 sm:gap-2.5">
+              <button
+                type="button"
+                onClick={() => setActiveFilter("all")}
+                aria-pressed={activeFilter === "all"}
+                className={cn(
+                  "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all duration-300",
+                  activeFilter === "all"
+                    ? "bg-navy text-gold-light shadow-md ring-1 ring-gold/40 scale-105"
+                    : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"
+                )}
+              >
+                All Sectors ({sectors.length})
+              </button>
+              {sectors.map((s) => (
+                <button
+                  key={s.num}
+                  type="button"
+                  onClick={() => setActiveFilter(s.num)}
+                  aria-pressed={activeFilter === s.num}
+                  className={cn(
+                    "shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-bold transition-all duration-300",
+                    activeFilter === s.num
+                      ? "bg-navy text-gold-light shadow-md ring-1 ring-gold/40 scale-105"
+                      : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"
+                  )}
+                >
+                  <span>{s.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
         <div className="space-y-12">
-          {sectors.map((sec, idx) => (
+          {filteredSectors.map((sec, idx) => (
             <Reveal key={sec.num} index={idx}>
               <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 shadow-md hover:shadow-xl transition">
                 <div className="grid gap-8 lg:grid-cols-12 items-center">

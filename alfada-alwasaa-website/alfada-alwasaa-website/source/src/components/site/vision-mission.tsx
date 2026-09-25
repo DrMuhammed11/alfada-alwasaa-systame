@@ -19,7 +19,7 @@ export function VisionMission() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:gap-10">
           {/* رسالتنا */}
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="h-full">
             <div className="group relative h-full overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-slate-50 dark:bg-navy p-8 sm:p-10 shadow-md hover:shadow-2xl hover:border-gold/50 transition-all duration-300 hover:-translate-y-1.5">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20 text-gold-dark dark:text-gold-light border border-gold/40 shadow-xs transition-transform duration-300 group-hover:scale-110">
@@ -44,7 +44,7 @@ export function VisionMission() {
           </Reveal>
 
           {/* رؤيتنا */}
-          <Reveal delay={0.2}>
+          <Reveal delay={0.2} className="h-full">
             <div className="group relative h-full overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-slate-50 dark:bg-navy p-8 sm:p-10 shadow-md hover:shadow-2xl hover:border-gold/50 transition-all duration-300 hover:-translate-y-1.5">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20 text-gold-dark dark:text-gold-light border border-gold/40 shadow-xs transition-transform duration-300 group-hover:scale-110">
