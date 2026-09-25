@@ -123,7 +123,7 @@ export function EnHero() {
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
                     <span className="block text-xs font-black text-gold-light">10+ Years</span>
-                    <span className="text-[10px] text-white/70">Field Practice</span>
+                    <span className="text-[10px] text-white/70">Field Experience</span>
                   </div>
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
                     <span className="block text-xs font-black text-gold-light">65+ Projects</span>
