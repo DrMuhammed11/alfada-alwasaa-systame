@@ -12,7 +12,6 @@ import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { SITE_CONFIG } from "@/config/site";
-import { ThemeToggle } from "@/components/site/theme-toggle";
 import { LanguageSwitcher } from "@/components/site/language-switcher";
 import { cn } from "@/lib/utils";
 
@@ -43,8 +42,8 @@ export function EnHeader() {
               />
             </span>
             <span className="leading-tight">
-              <span className="block text-base font-extrabold text-white sm:text-lg tracking-tight">
-                AL-FADA <br className="sm:hidden" />AL-WASAA
+              <span className="block whitespace-nowrap text-[15px] font-extrabold text-white sm:text-lg tracking-tight">
+                AL-FADA AL-WASAA
               </span>
               <span className="hidden text-[9.5px] font-semibold tracking-[0.24em] text-gold-light sm:block sm:text-[10.5px]">
                 TELECOM & CONTRACTING
@@ -80,10 +79,8 @@ export function EnHeader() {
               </kbd>
             </button>
 
-            {/* Language Switcher Button next to Theme Toggle */}
+            {/* Language Switcher Button next to Request Quote */}
             <LanguageSwitcher variant="button" />
-
-            <ThemeToggle />
 
             <a
               href="/en/contact"
@@ -104,7 +101,6 @@ export function EnHeader() {
               <Search className="h-4 w-4 text-gold-light" />
             </button>
             <LanguageSwitcher variant="button" className="h-10" />
-            <ThemeToggle className="h-10 w-10" />
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}

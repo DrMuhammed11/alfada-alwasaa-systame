@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, ArrowUp, Phone, X, Building2, UserCheck } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
+import { ThemeToggle } from "./theme-toggle";
 
 export function FloatingContact() {
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -22,6 +23,9 @@ export function FloatingContact() {
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-3">
+      {/* Theme toggle — خارج الهيدر ضمن المجموعة العائمة */}
+      <ThemeToggle className="h-11 w-11 rounded-full bg-navy/90 text-gold-light shadow-lg backdrop-blur-md ring-1 ring-white/20 transition-all hover:scale-110 hover:bg-gold hover:text-navy-darker hover:ring-gold/50 active:scale-95" />
+
       {/* Scroll to top button */}
       {showTopBtn && (
         <button

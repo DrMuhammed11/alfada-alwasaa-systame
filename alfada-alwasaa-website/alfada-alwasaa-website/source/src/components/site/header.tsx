@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { Menu, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/site";
-import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 
 // لوحة البحث تُحمَّل فقط عند أول فتح — باقة cmdk خارج المسار الحرج
@@ -135,7 +134,7 @@ export function SiteHeader() {
             />
           </span>
           <span className="leading-tight">
-            <span className="block text-[15px] font-extrabold text-white sm:text-xl">
+            <span className="block whitespace-nowrap text-base font-extrabold text-white sm:text-xl">
               الفضاء الواسع
             </span>
             <span className="hidden text-[10px] font-semibold tracking-[0.28em] text-gold-light sm:block sm:text-[11px]">
@@ -183,11 +182,8 @@ export function SiteHeader() {
             </kbd>
           </button>
 
-          {/* زر تبديل اللغة بجانب أيقونة الوضع الليلي مباشرة */}
+          {/* زر تبديل اللغة بجانب زر الطلب */}
           <LanguageSwitcher variant="button" />
-
-          {/* أيقونة الوضع الليلي */}
-          <ThemeToggle />
           <a
             href="#contact"
             onClick={(e) => handleNavClick(e, "#contact")}
@@ -208,7 +204,6 @@ export function SiteHeader() {
             <Search className="h-4 w-4 text-gold-light" />
           </button>
           <LanguageSwitcher variant="button" className="h-10" />
-          <ThemeToggle className="h-10 w-10" />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
