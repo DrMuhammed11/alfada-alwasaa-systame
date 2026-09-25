@@ -103,16 +103,21 @@ export function EnHero() {
 
                 <div className="relative mx-auto aspect-square w-48 overflow-hidden rounded-2xl bg-navy-darker/60 p-4 border border-gold/30 shadow-inner">
                   <Image
-                    src={SITE_CONFIG.assets.logoTransparent}
-                    alt="Al-Fada Al-Wasaa"
+                    src={SITE_CONFIG.assets.logoMark}
+                    alt="Al-Fada Al-Wasaa logo"
                     fill
                     sizes="(max-width: 640px) 192px, 240px"
                     className="object-contain p-2"
                   />
                 </div>
                 <div className="mt-5 text-center">
-                  <h3 className="text-lg font-extrabold text-white">AL-FADA AL-WASAA</h3>
-                  <p className="text-xs text-gold-light font-medium">Telecom & General Contracting Corporate Entity</p>
+                  <span className="block text-xl font-black text-white">
+                    الفضاء الواسع
+                  </span>
+                  <h3 className="mt-1 text-[11px] font-extrabold tracking-[0.25em] text-gold-light">
+                    AL-FADA AL-WASAA
+                  </h3>
+                  <p className="mt-1 text-xs text-gold-light font-medium">Telecom & General Contracting Corporate Entity</p>
                 </div>
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
                   <div className="rounded-xl bg-navy-darker/70 py-2 border border-gold/20 shadow-xs">
