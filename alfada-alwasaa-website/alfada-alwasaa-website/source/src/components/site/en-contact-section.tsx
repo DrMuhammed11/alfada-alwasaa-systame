@@ -266,9 +266,9 @@ export function EnContactSection() {
                   <span>{EN_SITE_CONFIG.company.fullName}</span>
                 </div>
 
-                <h3 className="mt-6 text-2xl font-black text-white">
+                <h2 className="mt-6 text-2xl font-black text-white">
                   Direct Executive Channels
-                </h3>
+                </h2>
                 <p className="mt-2 text-xs sm:text-sm text-white/75">
                   Reach our management directly for commercial discussions, tenders, or partnerships.
                 </p>
@@ -492,11 +492,12 @@ export function EnContactSection() {
                       )}
 
                       <div>
-                        <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                        <label htmlFor="enf-name" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                           Full Name / Company Name *
                         </label>
                         <input
-                          type="text"
+                          id="enf-name"
+                          autoComplete="name"
                           {...register("name")}
                           placeholder="e.g. John Doe / General Enterprise Ltd."
                           className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30"
@@ -508,11 +509,12 @@ export function EnContactSection() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                          <label htmlFor="enf-phone" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                             Phone / WhatsApp Number *
                           </label>
                           <input
-                            type="tel"
+                            id="enf-phone"
+                            autoComplete="tel"
                             {...register("phone")}
                             placeholder="+967 ... or 776999942"
                             className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm font-mono text-slate-900 dark:text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30"
@@ -523,11 +525,13 @@ export function EnContactSection() {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                          <label htmlFor="enf-email" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                             Email Address (Optional)
                           </label>
                           <input
-                            type="email"
+                            id="enf-email"
+                            autoComplete="email"
+                            spellCheck={false}
                             {...register("email")}
                             placeholder="name@company.com"
                             className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30"
@@ -539,10 +543,12 @@ export function EnContactSection() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                        <label htmlFor="enf-service" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                           Required Service Sector *
                         </label>
                         <select
+                          id="enf-service"
+                          autoComplete="off"
                           {...register("service")}
                           value={selectedService}
                           onChange={(e) => setSelectedService(e.target.value)}
@@ -557,11 +563,13 @@ export function EnContactSection() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                        <label htmlFor="enf-message" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                           Project Scope & Details (Optional)
                         </label>
                         <textarea
                           rows={4}
+                          id="enf-message"
+                          autoComplete="off"
                           {...register("message")}
                           placeholder="Provide project location, BOQ summary, execution timeline, or specific engineering requirements..."
                           className="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-navy-darker px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 resize-none"
@@ -634,12 +642,14 @@ export function EnContactSection() {
                   <form onSubmit={handleTrackSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                        <label htmlFor="enf-track-ref" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                           Inquiry Reference Number *
                         </label>
                         <input
                           type="text"
                           required
+                          id="enf-track-ref"
+                          autoComplete="off"
                           value={trackInput}
                           onChange={(e) => setTrackInput(e.target.value)}
                           placeholder="e.g. INC-2026-000001"
@@ -647,11 +657,13 @@ export function EnContactSection() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-navy dark:text-white mb-1.5">
+                        <label htmlFor="enf-track-token" className="block text-xs font-bold text-navy dark:text-white mb-1.5">
                           Secure Tracking Token
                         </label>
                         <input
                           type="text"
+                          id="enf-track-token"
+                          autoComplete="off"
                           value={trackTokenInput}
                           onChange={(e) => setTrackTokenInput(e.target.value)}
                           placeholder="Security Token"

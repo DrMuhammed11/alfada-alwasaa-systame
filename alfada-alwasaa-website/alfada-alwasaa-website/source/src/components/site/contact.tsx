@@ -293,9 +293,9 @@ export function Contact() {
                   <span>شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة</span>
                 </div>
 
-                <h3 className="mt-6 text-2xl font-black text-white sm:text-3xl">
+                <h2 className="mt-6 text-2xl font-black text-white sm:text-3xl">
                   قنوات التواصل المباشرة
-                </h3>
+                </h2>
                 <p className="mt-3 text-sm leading-7 text-white/75">
                   يسعدنا استقبال استفساراتكم ومشاريعكم عبر القنوات التالية على مدار الساعة.
                 </p>
@@ -570,11 +570,12 @@ export function Contact() {
                     <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                          <label htmlFor="af-name" className="block text-sm font-bold text-navy dark:text-white mb-2">
                             الاسم الكامل / اسم الجهة <span className="text-rose-500">*</span>
                           </label>
                           <input
-                            type="text"
+                            id="af-name"
+                            autoComplete="name"
                             {...register("name")}
                             required
                             aria-required="true"
@@ -589,11 +590,12 @@ export function Contact() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                          <label htmlFor="af-phone" className="block text-sm font-bold text-navy dark:text-white mb-2">
                             رقم الجوال <span className="text-rose-500">*</span>
                           </label>
                           <input
-                            type="tel"
+                            id="af-phone"
+                            autoComplete="tel"
                             {...register("phone")}
                             required
                             aria-required="true"
@@ -610,11 +612,13 @@ export function Contact() {
 
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                          <label htmlFor="af-email" className="block text-sm font-bold text-navy dark:text-white mb-2">
                             البريد الإلكتروني
                           </label>
                           <input
-                            type="email"
+                            id="af-email"
+                            autoComplete="email"
+                            spellCheck={false}
                             {...register("email")}
                             placeholder="example@domain.com"
                             className={`w-full rounded-xl border ${
@@ -627,10 +631,12 @@ export function Contact() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                          <label htmlFor="af-service" className="block text-sm font-bold text-navy dark:text-white mb-2">
                             المجال أو الخدمة المطلوبة <span className="text-rose-500">*</span>
                           </label>
                           <select
+                            id="af-service"
+                            autoComplete="off"
                             {...register("service")}
                             required
                             aria-required="true"
@@ -655,11 +661,13 @@ export function Contact() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                        <label htmlFor="af-message" className="block text-sm font-bold text-navy dark:text-white mb-2">
                           تفاصيل المشروع أو الاستفسار
                         </label>
                         <textarea
                           rows={4}
+                          id="af-message"
+                          autoComplete="off"
                           {...register("message")}
                           placeholder="اذكر بإيجاز طبيعة المشروع، الموقع، والجدول الزمني المتوقع إن وجد..."
                           className={`w-full rounded-xl border ${
@@ -774,12 +782,14 @@ export function Contact() {
                   <form onSubmit={handleTrackSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                        <label htmlFor="track-ref" className="block text-sm font-bold text-navy dark:text-white mb-2">
                           الرقم المرجعي للمعاملة
                         </label>
                         <input
                           type="text"
                           required
+                          id="track-ref"
+                          autoComplete="off"
                           value={trackInput}
                           onChange={(e) => setTrackInput(e.target.value)}
                           placeholder="مثال: INC-2026-000001"
@@ -787,12 +797,14 @@ export function Contact() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-navy dark:text-white mb-2">
+                        <label htmlFor="track-token" className="block text-sm font-bold text-navy dark:text-white mb-2">
                           رمز التتبع الآمن (Token)
                         </label>
                         <input
                           type="text"
                           required
+                          id="track-token"
+                          autoComplete="off"
                           value={trackTokenInput}
                           onChange={(e) => setTrackTokenInput(e.target.value)}
                           placeholder="رمز التتبع السري"

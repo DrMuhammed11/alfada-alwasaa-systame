@@ -47,7 +47,7 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
             <Reveal key={sec.num} index={idx}>
               <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 shadow-md hover:shadow-xl transition">
                 <div className="grid gap-8 lg:grid-cols-12 items-center">
-                  <div className="lg:col-span-6 space-y-4">
+                  <div className="lg:col-span-7 space-y-4">
                     <span className="inline-block rounded-full bg-gold/10 px-3 py-1 text-xs font-extrabold text-gold-light border border-gold/30 font-mono">
                       Sector {sec.num}
                     </span>
@@ -71,16 +71,16 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-6">
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="lg:col-span-5">
+                    <div className="grid grid-cols-2 items-start gap-3 lg:gap-5">
                       {sec.photos.map((ph, pIdx) => (
-                        <div key={pIdx} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-navy-darker">
+                        <div key={pIdx} className={`relative aspect-[4/3] overflow-hidden rounded-2xl bg-navy-darker ${pIdx === 1 ? "lg:mt-10" : ""}`}>
                           <Image
                             src={ph.src}
                             alt={ph.alt}
                             fill
                             loading="lazy"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 1024px) 50vw, 20vw"
                             className="object-cover hover:scale-105 transition duration-500"
                           />
                         </div>

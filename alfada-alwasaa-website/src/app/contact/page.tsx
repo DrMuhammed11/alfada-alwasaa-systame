@@ -122,7 +122,7 @@ export default function ContactPage() {
                     <PhoneCall className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-bold text-gold">{SITE_CONFIG.contacts.general.sublabel}</span>
-                  <h3 className="font-black text-navy dark:text-white text-base mt-1">{SITE_CONFIG.contacts.general.label}</h3>
+                  <h2 className="font-black text-navy dark:text-white text-lg mt-1">{SITE_CONFIG.contacts.general.label}</h2>
                   <a
                     href={SITE_CONFIG.contacts.general.telHref}
                     className="mt-3 block font-mono text-base font-black text-navy dark:text-gold-light hover:text-gold transition"
@@ -156,7 +156,7 @@ export default function ContactPage() {
                     <PhoneCall className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-bold text-gold">{SITE_CONFIG.contacts.deputy.sublabel}</span>
-                  <h3 className="font-black text-navy dark:text-white text-base mt-1">{SITE_CONFIG.contacts.deputy.label}</h3>
+                  <h2 className="font-black text-navy dark:text-white text-lg mt-1">{SITE_CONFIG.contacts.deputy.label}</h2>
                   <a
                     href={SITE_CONFIG.contacts.deputy.telHref}
                     className="mt-3 block font-mono text-base font-black text-navy dark:text-gold-light hover:text-gold transition"
@@ -190,7 +190,7 @@ export default function ContactPage() {
                     <Mail className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-bold text-gold">العقود والمراسلات</span>
-                  <h3 className="font-black text-navy dark:text-white text-base mt-1">البريد الرسمي</h3>
+                  <h2 className="font-black text-navy dark:text-white text-lg mt-1">البريد الرسمي</h2>
                   <a
                     href={SITE_CONFIG.contacts.email.mailHref}
                     className="mt-3 block font-mono text-sm font-bold text-navy dark:text-gold-light hover:text-gold transition break-all"
@@ -215,7 +215,7 @@ export default function ContactPage() {
                     <MapPin className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-bold text-gold">المقر والنطاق</span>
-                  <h3 className="font-black text-navy dark:text-white text-base mt-1">{SITE_CONFIG.contacts.location.label}</h3>
+                  <h2 className="font-black text-navy dark:text-white text-lg mt-1">{SITE_CONFIG.contacts.location.label}</h2>
                   <p className="text-xs text-slate-700 dark:text-slate-200 font-semibold mt-2 leading-relaxed">
                     {SITE_CONFIG.contacts.location.fullAddress}
                   </p>

@@ -163,14 +163,16 @@ export function Sectors({ items }: { items?: Sector[] }) {
 
         {/* Category switcher pills */}
         <Reveal delay={0.15}>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <div className="mt-10 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="mx-auto flex w-fit max-w-full items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={() => setActiveFilter("all")}
-              className={`rounded-full px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
+              aria-pressed={activeFilter === "all"}
+              className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${
                 activeFilter === "all"
                   ? "bg-navy text-gold-light shadow-md ring-1 ring-gold/40 scale-105"
-                  : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy"
+                  : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"
               }`}
             >
               جميع القطاعات ({sectors.length})
@@ -180,7 +182,8 @@ export function Sectors({ items }: { items?: Sector[] }) {
                 key={s.num}
                 type="button"
                 onClick={() => setActiveFilter(s.num)}
-                className={`flex items-center gap-2 rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
+                aria-pressed={activeFilter === s.num}
+                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-bold transition-all duration-300 ${
                   activeFilter === s.num
                     ? "bg-navy text-gold-light shadow-md ring-1 ring-gold/40 scale-105"
                     : "bg-white text-slate-700 hover:bg-slate-100 hover:text-navy dark:bg-navy dark:text-white/80 dark:hover:bg-navy-deep dark:hover:text-white dark:ring-1 dark:ring-white/10"
@@ -190,6 +193,7 @@ export function Sectors({ items }: { items?: Sector[] }) {
                 <span>{s.title}</span>
               </button>
             ))}
+            </div>
           </div>
         </Reveal>
 
@@ -200,7 +204,7 @@ export function Sectors({ items }: { items?: Sector[] }) {
               <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 lg:p-10 shadow-md hover:shadow-xl hover:border-gold/40 transition-all duration-300">
                 <div className="grid gap-8 lg:grid-cols-12 items-center">
                   {/* Content Column (6 cols) */}
-                  <div className="lg:col-span-6 space-y-5">
+                  <div className="lg:col-span-7 space-y-5">
                     <div className="flex items-center gap-3">
                       <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 dark:bg-gold/20 text-navy dark:text-gold-light border border-gold/30 shadow-xs">
                         <sector.Icon className="h-5 w-5 text-gold" />
@@ -249,12 +253,12 @@ export function Sectors({ items }: { items?: Sector[] }) {
                   </div>
 
                   {/* Media / Photos Column (6 cols) */}
-                  <div className="lg:col-span-6">
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="lg:col-span-5">
+                    <div className="grid grid-cols-2 items-start gap-3 sm:gap-4 lg:gap-5">
                       {sector.photos.map((ph, pIdx) => (
                         <div
                           key={pIdx}
-                          className="group/photo relative aspect-[4/3] overflow-hidden rounded-2xl bg-navy-darker shadow-sm ring-1 ring-navy/10 dark:ring-white/10"
+                          className={`group/photo relative aspect-[4/3] overflow-hidden rounded-2xl bg-navy-darker shadow-sm ring-1 ring-navy/10 dark:ring-white/10 ${pIdx === 1 ? "lg:mt-10" : ""}`}
                         >
                           <Image
                             src={ph.src}
@@ -262,7 +266,7 @@ export function Sectors({ items }: { items?: Sector[] }) {
                             fill
                             loading="lazy"
                             decoding="async"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 1024px) 50vw, 20vw"
                             className="object-cover transition-transform duration-500 group-hover/photo:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-navy-darker/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover/photo:opacity-100" />

@@ -117,7 +117,7 @@ export function Hero() {
                     <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-gold/20 text-gold-light transition-transform duration-300 group-hover:scale-110">
                       <PillarIcon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-2 text-xs sm:text-sm font-black text-white">{pillar.title}</h3>
+                    <h2 className="mt-2 text-xs sm:text-sm font-black text-white">{pillar.title}</h2>
                     <p className="mt-0.5 text-[10px] text-slate-300 hidden sm:block">{pillar.subtitle}</p>
                   </div>
                 );

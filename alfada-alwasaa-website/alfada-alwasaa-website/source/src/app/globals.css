@@ -324,6 +324,13 @@ div[data-nextjs-dev-tools] {
   }
 }
 
+/* مساحة تنفس أسفل الصفحات على الجوال حتى لا تغطي الأزرار العائمة آخر المحتوى */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: 4.5rem;
+  }
+}
+
 /* Eliminate tap delay and optimize touch interactions */
 a, button, input, select, textarea {
   touch-action: manipulation;

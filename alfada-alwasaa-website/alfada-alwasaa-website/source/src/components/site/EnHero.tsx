@@ -115,9 +115,9 @@ export function EnHero() {
                   <span className="block text-xl font-black text-white">
                     الفضاء الواسع
                   </span>
-                  <h3 className="mt-1 text-[11px] font-extrabold tracking-[0.25em] text-gold-light">
+                  <h2 className="mt-1 text-[11px] font-extrabold tracking-[0.25em] text-gold-light">
                     AL-FADA AL-WASAA
-                  </h3>
+                  </h2>
                   <p className="mt-1 text-xs text-gold-light font-medium">Telecom & General Contracting Corporate Entity</p>
                 </div>
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
@@ -153,7 +153,7 @@ export function EnHero() {
                 {i === 0 ? <Briefcase className="h-5 w-5" /> : i === 1 ? <ShieldCheck className="h-5 w-5" /> : <Award className="h-5 w-5" />}
               </div>
               <div>
-                <h4 className="text-sm font-extrabold text-white">{pillar.title}</h4>
+                <h3 className="text-sm font-extrabold text-white">{pillar.title}</h3>
                 <p className="text-xs text-gold-light">{pillar.subtitle}</p>
               </div>
             </div>
