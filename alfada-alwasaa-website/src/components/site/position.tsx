@@ -6,7 +6,7 @@ export function Position() {
   return (
     <section id="position" className="relative overflow-hidden bg-mist/60 dark:bg-navy-darker/60 py-16 sm:py-24 transition-colors duration-300">
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading center kicker="مكانتنا المؤسسية" title="مكانة راسخة وشراكة استراتيجية موثوقة" />
+        <SectionHeading center kicker="مكانتنا المؤسسية" title="مكانة رصينة.. وحضور واثق في السوق" />
 
         <Reveal delay={0.1}>
           <div className="relative mt-10 overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-8 sm:p-12 lg:p-16 shadow-[0_20px_50px_-20px_rgba(10,52,83,0.15)] dark:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)]">
@@ -34,29 +34,19 @@ export function Position() {
 
             {/* Two balanced editorial columns */}
             <div className="relative z-10 grid gap-8 md:grid-cols-2 md:gap-12">
-              <div className="space-y-4 text-slate-700 dark:text-slate-200">
-                <h3 className="text-xl font-black text-navy dark:text-white leading-snug">
-                  الشراكة الحقيقية تتجاوز مجرد تنفيذ المهام
-                </h3>
-                <p className="text-base leading-8 text-justify">
-                  انطلقت الشركة من قناعة راسخة بأن الشركات الكبرى لا تبحث فقط عن منفذ خدمة، بل
-                  عن شريك يعتمد عليه. ولذلك، نولي اهتمامًا بالغًا بالتفاصيل الفنية، وسلامة
-                  الإجراءات، ودقة المتابعة، ووضوح التواصل في جميع مراحل العمل، بدءًا من التخطيط
-                  وحتى التسليم النهائي.
-                </p>
-              </div>
+              <p className="text-base leading-8 text-justify text-slate-700 dark:text-slate-200">
+                انطلقت الشركة من إدراك عميق بأن المشاريع الكبرى لا تبحث عن مجرد مُنفّذ، بل
+                عن شريك يمكن الاعتماد عليه. لهذا، نولي اهتمامًا فائقًا بالتفاصيل، ونحرص على
+                التخطيط الدقيق، المتابعة الميدانية الصارمة، والتواصل الشفاف مع شركائنا في
+                كل مرحلة من مراحل العمل.
+              </p>
 
-              <div className="space-y-4 text-slate-700 dark:text-slate-200">
-                <h3 className="text-xl font-black text-navy dark:text-white leading-snug">
-                  التوازن المثالي بين الجدية والمرونة الميدانية
-                </h3>
-                <p className="text-base leading-8 text-justify">
-                  ونحرص على أن تعكس جميع أعمالنا صورة مؤسسية راقية تجمع بين الجدية والمرونة،
-                  وبين الجودة والسرعة، وبين الكفاءة الفنية والالتزام الكامل تجاه العميل. ومن هنا،
-                  أصبحت الشركة خيارًا موثوقاً للجهات التي تتطلع إلى تنفيذ أعمالها عبر فريق يفهم
-                  متطلبات السوق، ويجيد التعامل مع المشاريع ذات الطبيعة المتنوعة والمعقدة.
-                </p>
-              </div>
+              <p className="text-base leading-8 text-justify text-slate-700 dark:text-slate-200">
+                نحن حريصون على أن تكون مخرجاتنا دائمًا انعكاسًا لصورة مؤسسية تجمع بين
+                الجدية والمرونة، وبين الجودة العالية والسرعة المدروسة. اليوم، تقف الشركة
+                كخيار موثوق للجهات التي تبحث عن تنفيذ مشاريعها بأيدي كوادر تفهم طبيعة
+                السوق وتتعامل مع التحديات بمهنية عالية.
+              </p>
             </div>
 
             {/* Bottom accent line */}

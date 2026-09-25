@@ -10,7 +10,7 @@ export function Conclusion() {
             شريككم الاستراتيجي
           </span>
           <h2 className="mt-3 text-3xl font-extrabold text-navy dark:text-white sm:text-4xl lg:text-[2.75rem]">
-            خاتمة تعريفية
+            خاتمة وتطلعات
           </h2>
         </Reveal>
 
@@ -31,10 +31,10 @@ export function Conclusion() {
 
               {/* Exact closing text from the profile */}
               <p className="mt-6 text-justify sm:text-center leading-9 text-white/95 sm:text-[1.15rem] sm:leading-10 max-w-3xl mx-auto">
-                شركة الفضاء الواسع لخدمات الاتصالات والمقاولات العامة ليست مجرد اسم في السوق، بل
-                منصة عمل متكاملة تجمع بين القوة في التنفيذ، والرقّي في التعامل، والدقة في
-                الأداء. وهي اليوم تضع بين يدي عملائها خبرة عملية، ورؤية واضحة، وقدرة
-                حقيقية على تحويل المتطلبات إلى إنجازات ملموسة.
+                إن شركة الفضاء الواسع ليست مجرد اسم في سوق المقاولات والاتصالات، بل هي
+                منصة متكاملة للعمل الجاد، والسلوك المهني الرفيع، والإنجاز الموثوق. اليوم،
+                نضع خبراتنا وإمكاناتنا في خدمة عملائنا، مستعدين للمضي معهم نحو آفاق
+                أوسع وأهداف أكبر.
               </p>
 
               <div className="mt-8 flex items-center justify-center gap-3">
