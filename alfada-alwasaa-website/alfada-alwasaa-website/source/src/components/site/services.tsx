@@ -86,6 +86,9 @@ export function Services() {
                 aria-hidden
                 className="pointer-events-none absolute -end-24 -top-24 h-80 w-80 rounded-full bg-gold/15 blur-3xl"
               />
+              <div aria-hidden className="dot-grid pointer-events-none absolute inset-0 opacity-10" />
+              <span aria-hidden className="absolute -top-1.5 -start-1.5 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
+              <span aria-hidden className="absolute -bottom-1.5 -end-1.5 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
 
               <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
                 {/* Information Column (7 cols) */}

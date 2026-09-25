@@ -201,8 +201,9 @@ export function Sectors({ items }: { items?: Sector[] }) {
         <div className="mt-8 sm:mt-10 space-y-8 sm:space-y-10">
           {filteredSectors.map((sector, idx) => (
             <Reveal key={sector.num} index={idx}>
-              <div className="overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 lg:p-10 shadow-md hover:shadow-xl hover:border-gold/40 transition-all duration-300">
-                <div className="grid gap-8 lg:grid-cols-12 items-center">
+              <div className="group/card relative overflow-hidden rounded-3xl border border-navy/10 dark:border-white/10 bg-white dark:bg-navy p-6 sm:p-8 lg:p-10 shadow-md hover:shadow-xl hover:border-gold/40 transition-all duration-300">
+                  <span aria-hidden className="pointer-events-none absolute -top-5 end-4 select-none font-mono text-[5.5rem] font-black leading-none text-navy/[0.04] dark:text-white/[0.04]">{sector.num}</span>
+                <div className="relative z-10 grid gap-8 lg:grid-cols-12 items-center">
                   {/* Content Column (6 cols) */}
                   <div className="lg:col-span-7 space-y-5">
                     <div className="flex items-center gap-3">

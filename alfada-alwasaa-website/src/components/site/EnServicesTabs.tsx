@@ -19,6 +19,7 @@ import {
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { SERVICES_DATA } from "@/config/services-data";
 import { EN_SERVICES_DATA } from "@/config/en-services-data";
+import { SITE_CONFIG } from "@/config/site";
 import { Reveal } from "./reveal";
 
 const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -61,7 +62,8 @@ export function EnServicesTabs() {
 
         {/* Service Tabs Header */}
         <Reveal delay={0.05}>
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
+          <div className="mb-10 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="mx-auto flex w-fit max-w-full items-center gap-2">
             {EN_SITE_CONFIG.servicesList.map((svc) => {
               const Icon = SERVICE_ICONS[svc.slug] || Building2;
               const isSelected = activeTab === svc.slug;
@@ -69,7 +71,7 @@ export function EnServicesTabs() {
                 <button
                   key={svc.slug}
                   onClick={() => setActiveTab(svc.slug)}
-                  className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
+                  className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
                     isSelected
                       ? "bg-gold text-navy-darker shadow-lg shadow-gold/25 ring-1 ring-gold scale-[1.02] font-black z-10"
                       : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white/80 hover:bg-slate-200 dark:hover:bg-white/15"
@@ -87,6 +89,7 @@ export function EnServicesTabs() {
                 </button>
               );
             })}
+            </div>
           </div>
         </Reveal>
 
@@ -101,6 +104,9 @@ export function EnServicesTabs() {
               aria-hidden
               className="pointer-events-none absolute -end-24 -top-24 h-80 w-80 rounded-full bg-gold/15 blur-3xl"
             />
+            <div aria-hidden className="dot-grid pointer-events-none absolute inset-0 opacity-10" />
+            <span aria-hidden className="absolute -top-1.5 -start-1.5 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
+            <span aria-hidden className="absolute -bottom-1.5 -end-1.5 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
 
             <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
               <div className="flex flex-col justify-between lg:col-span-7 space-y-4">
@@ -211,6 +217,37 @@ export function EnServicesTabs() {
             </div>
           </div>
         </div>
+
+        {/* Company Guarantee & Tagline Banner */}
+        <Reveal delay={0.2} className="mt-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-navy/10 dark:border-white/10 bg-mist dark:bg-navy p-5 sm:p-6 text-slate-800 dark:text-white transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-navy dark:bg-navy-darker p-1 ring-1 ring-gold/40">
+                <Image
+                  src={SITE_CONFIG.assets.logoMark}
+                  alt="Al-Fada Al-Wasaa"
+                  fill
+                  sizes="40px"
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-black text-navy dark:text-gold-light">
+                  {EN_SITE_CONFIG.company.tagline}
+                </p>
+                <p className="text-xs text-slate-600 dark:text-white/70">
+                  Every sector is delivered under rigorous engineering coordination and executive supervision.
+                </p>
+              </div>
+            </div>
+            <a
+              href="#contact"
+              className="shrink-0 rounded-full bg-navy dark:bg-gold px-5 py-2 text-xs font-bold text-white dark:text-navy-darker shadow-sm transition hover:scale-105"
+            >
+              Request a Project Study Now
+            </a>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
