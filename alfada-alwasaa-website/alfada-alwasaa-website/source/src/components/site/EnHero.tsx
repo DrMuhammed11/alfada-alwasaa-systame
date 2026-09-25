@@ -101,13 +101,14 @@ export function EnHero() {
                 <span className="absolute -top-2 -start-2 h-8 w-8 rounded-tl-2xl border-t-2 border-s-2 border-gold" />
                 <span className="absolute -bottom-2 -end-2 h-8 w-8 rounded-br-2xl border-b-2 border-e-2 border-gold" />
 
-                <div className="relative mx-auto aspect-square w-48 overflow-hidden rounded-2xl bg-navy-darker/60 p-4 border border-gold/30 shadow-inner">
+                {/* Free-floating emblem — transparent, no tile, blends with the card */}
+                <div className="relative mx-auto h-40 w-40 sm:h-44 sm:w-44 drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
                   <Image
                     src={SITE_CONFIG.assets.logoMark}
                     alt="Al-Fada Al-Wasaa logo"
                     fill
-                    sizes="(max-width: 640px) 192px, 240px"
-                    className="object-contain p-2"
+                    sizes="(max-width: 640px) 160px, 176px"
+                    className="object-contain"
                   />
                 </div>
                 <div className="mt-5 text-center">
