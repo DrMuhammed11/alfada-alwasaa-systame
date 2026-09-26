@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
+  IsDefined,
   IsInt,
   IsOptional,
   IsString,
@@ -393,6 +394,8 @@ export class UpsertSiteSettingDto {
     type: 'object',
     additionalProperties: true,
   })
+  // IsDefined يبيّح الحقل لـ whitelist ويقبل أي قيمة JSON (كائن/مصفوفة/نص)
+  @IsDefined({ message: 'محتوى الإعداد (value) مطلوب' })
   value!: unknown;
 
   @ApiPropertyOptional({ description: 'شرح عربي لما يحويه المفتاح' })
