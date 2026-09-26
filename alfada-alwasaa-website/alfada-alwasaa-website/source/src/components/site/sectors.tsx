@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -141,10 +141,18 @@ const SECTORS: Sector[] = [
   },
 ];
 
-export function Sectors({ items }: { items?: Sector[] }) {
+export function Sectors({ items }: { items?: SectorCmsItem[] }) {
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const sectors = items ?? SECTORS;
+  // الخادم يمرر بيانات الـCMS الخام، والتحويل يتم هنا داخل العميل (مسموح عبر الحد)
+  // مع درع يضمن السقوط للبيانات الافتراضية عند أي شكل غير متوقع من الـCMS
+  const sectors = useMemo(() => {
+    try {
+      return items && items.length > 0 ? mapCmsToSectors(items) : SECTORS;
+    } catch {
+      return SECTORS;
+    }
+  }, [items]);
   const filteredSectors = activeFilter === "all"
     ? sectors
     : sectors.filter(s => s.num === activeFilter);

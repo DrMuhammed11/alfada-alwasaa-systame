@@ -1,17 +1,5 @@
 import dynamic from "next/dynamic";
-import {
-  getSectors,
-  getProjects,
-  getFaqs,
-  type ContentSector,
-  type ContentProject,
-  type ContentFaq,
-} from "@/lib/content";
-import { mapCmsToSectors, type Sector } from "@/components/site/sectors";
-import {
-  mapCmsToTrackItems,
-  type TrackItem,
-} from "@/components/site/track-record";
+import { getSectors, getProjects, getFaqs } from "@/lib/content";
 import type { FaqEntry } from "@/components/site/faq";
 import { SiteHeader } from "@/components/site/header";
 import { Hero } from "@/components/site/hero";
@@ -94,14 +82,12 @@ export default async function Home() {
     getProjects(),
     getFaqs(),
   ]);
-  const sectors: Sector[] | undefined = cmsSectors.length
-    ? mapCmsToSectors(cmsSectors as unknown as import("@/components/site/sectors").SectorCmsItem[])
-    : undefined;
-  const trackItems: TrackItem[] | undefined = cmsProjects.length
-    ? mapCmsToTrackItems(cmsProjects as unknown as import("@/components/site/track-record").TrackCmsItem[])
-    : undefined;
+  // تمرير خام: مكوّنات العميل تحوّل بيانات الـCMS داخليًا مع بدائل آمنة.
+  // (استدعاء دوال من وحدات "use client" داخل مكوّن خادم ممنوع — كان سبب 500 الإنتاج)
+  const sectors = cmsSectors.length ? cmsSectors : undefined;
+  const trackItems = cmsProjects.length ? cmsProjects : undefined;
   const faqItems: FaqEntry[] | undefined = cmsFaqs.length
-    ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionAr, answer: f.answerAr }))
+    ? cmsFaqs.map((f) => ({ question: f.questionAr, answer: f.answerAr }))
     : undefined;
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { 
   Quote, 
@@ -108,8 +108,16 @@ const TRACK_CASE_STUDIES: TrackItem[] = [
   },
 ];
 
-export function TrackRecord({ items }: { items?: TrackItem[] }) {
-  const caseStudies = items ?? TRACK_CASE_STUDIES;
+export function TrackRecord({ items }: { items?: TrackCmsItem[] }) {
+  // الخادم يمرر بيانات الـCMS الخام، والتحويل يتم هنا داخل العميل (مسموح عبر الحد)
+  // مع درع يضمن السقوط للبيانات الافتراضية عند أي شكل غير متوقع من الـCMS
+  const caseStudies = useMemo(() => {
+    try {
+      return items && items.length > 0 ? mapCmsToTrackItems(items) : TRACK_CASE_STUDIES;
+    } catch {
+      return TRACK_CASE_STUDIES;
+    }
+  }, [items]);
   const [selectedItem, setSelectedItem] = useState<TrackItem | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
