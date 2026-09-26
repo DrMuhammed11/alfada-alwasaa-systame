@@ -159,6 +159,14 @@ export function Hero() {
                 <Phone className="h-3.5 w-3.5 text-gold-light" />
                 <span dir="ltr">{SITE_CONFIG.contacts.general.display}</span>
               </a>
+
+              <a
+                href={SITE_CONFIG.contacts.deputy.telHref}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-xs sm:text-sm font-bold text-white/90 ring-1 ring-white/15 transition hover:bg-white/15"
+              >
+                <Phone className="h-3.5 w-3.5 text-gold-light" />
+                <span dir="ltr">{SITE_CONFIG.contacts.deputy.display}</span>
+              </a>
             </div>
           </div>
 
