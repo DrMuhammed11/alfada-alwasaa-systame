@@ -14,9 +14,11 @@ export class EnvironmentVariables {
   @IsString({ message: 'JWT_SECRET يجب أن يكون نصًا صالحًا' })
   JWT_SECRET: string;
 
-  @IsNotEmpty({ message: 'JWT_EXPIRES_IN إلزامي لتحديد مدة صلاحية الرمز' })
+  // اختياري بقيمة افتراضية — كاسمه القديم كان يُضبط يدوياً بلا داعٍ،
+  // وأخوه JWT_ACCESS_EXPIRES_IN يحمل الافتراض نفسه
+  @IsOptional()
   @IsString({ message: 'JWT_EXPIRES_IN يجب أن يكون نصًا صالحًا' })
-  JWT_EXPIRES_IN: string;
+  JWT_EXPIRES_IN?: string = '15m';
 
   @IsOptional()
   @IsString({ message: 'JWT_ACCESS_EXPIRES_IN يجب أن يكون نصًا صالحًا' })
