@@ -101,6 +101,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: AdminTheme.primary,
+            // Expanded حول النص — العنوان الطويل يتقلص على شاشات الجوال بدل تصدّع الصف
             title: Row(
               children: [
                 Container(
@@ -112,18 +113,26 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   child: const Icon(Icons.shield_rounded, color: AdminTheme.accent, size: 20),
                 ),
                 const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      current.title,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                    const Text(
-                      'نظام الفضاء الواسع — بوابة الإدارة العليا',
-                      style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        current.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'نظام الفضاء الواسع — بوابة الإدارة العليا',
+                          style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

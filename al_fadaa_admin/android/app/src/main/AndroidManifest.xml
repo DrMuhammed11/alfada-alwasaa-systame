@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- صلاحية الإنترنت إلزامية لنسخ Release — كانت غائبة فتفشل كل نداءات
+         الشبكة بـ "Failed host lookup" رغم سلامة الشبكة نفسها -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="al_fadaa_admin"
+        android:label="بوابة الإدارة والرقابة — الفضاء الواسع"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

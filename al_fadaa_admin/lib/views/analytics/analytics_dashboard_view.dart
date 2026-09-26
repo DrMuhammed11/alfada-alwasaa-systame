@@ -131,59 +131,65 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView> {
         crossAxisAlignment: WrapCrossAlignment.center,
         alignment: WrapAlignment.spaceBetween,
         children: [
-          // فترات التحليل
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.calendar_month_rounded, size: 18, color: AdminTheme.textMuted),
-              const SizedBox(width: 8),
-              const Text('الفترة:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              const SizedBox(width: 8),
-              _buildPeriodChip('7 أيام', '7d'),
-              _buildPeriodChip('30 يوماً', '30d'),
-              _buildPeriodChip('90 يوماً', '90d'),
-              _buildPeriodChip('سنة', 'year'),
-            ],
+          // فترات التحليل — قابلة للتمرير أفقياً على الشاشات الضيقة (لا تصدّع)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.calendar_month_rounded, size: 18, color: AdminTheme.textMuted),
+                const SizedBox(width: 8),
+                const Text('الفترة:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                _buildPeriodChip('7 أيام', '7d'),
+                _buildPeriodChip('30 يوماً', '30d'),
+                _buildPeriodChip('90 يوماً', '90d'),
+                _buildPeriodChip('سنة', 'year'),
+              ],
+            ),
           ),
 
-          // فلتر الأقسام
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.apartment_rounded, size: 18, color: AdminTheme.textMuted),
-              const SizedBox(width: 8),
-              Container(
-                height: 34,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedDepartmentId,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
-                    items: [
-                      const DropdownMenuItem(value: 'ALL', child: Text('كافة الأقسام والقطاعات')),
-                      ..._departments.map((d) => DropdownMenuItem(value: d.id, child: Text(d.name))),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedDepartmentId = val);
-                        _fetchData();
-                      }
-                    },
+          // فلتر الأقسام — قابلة للتمرير أفقياً على الشاشات الضيقة
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.apartment_rounded, size: 18, color: AdminTheme.textMuted),
+                const SizedBox(width: 8),
+                Container(
+                  height: 34,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedDepartmentId,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+                      items: [
+                        const DropdownMenuItem(value: 'ALL', child: Text('كافة الأقسام والقطاعات')),
+                        ..._departments.map((d) => DropdownMenuItem(value: d.id, child: Text(d.name))),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => _selectedDepartmentId = val);
+                          _fetchData();
+                        }
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, size: 20, color: AdminTheme.accent),
-                tooltip: 'تحديث المؤشرات',
-                onPressed: _fetchData,
-              ),
-            ],
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, size: 20, color: AdminTheme.accent),
+                  tooltip: 'تحديث المؤشرات',
+                  onPressed: _fetchData,
+                ),
+              ],
+            ),
           ),
         ],
       ),
