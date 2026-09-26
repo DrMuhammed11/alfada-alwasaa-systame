@@ -121,7 +121,6 @@ class _AdminMainScreenState extends State<AdminMainScreen>
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
-        final isMedium = constraints.maxWidth >= 600 && !isWide;
 
         return Scaffold(
           backgroundColor: AdminTheme.bgLight,

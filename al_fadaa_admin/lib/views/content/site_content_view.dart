@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_utils.dart';
 import '../../models/site_content_model.dart';
 
 /// إدارة محتويات الموقع الإلكتروني: الخدمات، القطاعات، سابقة الأعمال،
@@ -95,6 +96,7 @@ class _CollectionTab extends StatefulWidget {
 class _CollectionTabState extends State<_CollectionTab> with AutomaticKeepAliveClientMixin {
   List<Map<String, dynamic>> _items = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   bool get wantKeepAlive => true;

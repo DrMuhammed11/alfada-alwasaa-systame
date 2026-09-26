@@ -763,10 +763,8 @@ class _CorrespondencesManagementViewState
                                   icon: Icons.assignment_rounded,
                                   iconColor: AdminTheme.purple,
                                   title: t.title,
-                                  subtitle: '${taskStatusLabel(t.status)} — المنفذ: ${t.assignedToName}' +
-                                      (t.dueDate != null
-                                          ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(t.dueDate!)}'
-                                          : ''),
+                                  subtitle: '${taskStatusLabel(t.status)} — المنفذ: ${t.assignedToName}'
+                                      '${t.dueDate != null ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(t.dueDate!)}' : ''}',
                                   extra: t.assignedByName.isNotEmpty
                                       ? 'كلّفه: ${t.assignedByName}'
                                       : null,
