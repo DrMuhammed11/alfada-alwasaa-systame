@@ -94,15 +94,29 @@ export default async function Home() {
     getProjects(),
     getFaqs(),
   ]);
-  const sectors: Sector[] | undefined = cmsSectors.length
-    ? mapCmsToSectors(cmsSectors as unknown as import("@/components/site/sectors").SectorCmsItem[])
-    : undefined;
-  const trackItems: TrackItem[] | undefined = cmsProjects.length
-    ? mapCmsToTrackItems(cmsProjects as unknown as import("@/components/site/track-record").TrackCmsItem[])
-    : undefined;
-  const faqItems: FaqEntry[] | undefined = cmsFaqs.length
-    ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionAr, answer: f.answerAr }))
-    : undefined;
+  // درع ضد أي شكل بيانات غير متوقع من الـ CMS — الموقع لا يسقط أبداً بسبب محتوى
+  const safe = <T,>(fn: () => T): T | undefined => {
+    try {
+      return fn();
+    } catch {
+      return undefined;
+    }
+  };
+  const sectors: Sector[] | undefined = safe(() =>
+    cmsSectors.length
+      ? mapCmsToSectors(cmsSectors as unknown as import("@/components/site/sectors").SectorCmsItem[])
+      : undefined
+  );
+  const trackItems: TrackItem[] | undefined = safe(() =>
+    cmsProjects.length
+      ? mapCmsToTrackItems(cmsProjects as unknown as import("@/components/site/track-record").TrackCmsItem[])
+      : undefined
+  );
+  const faqItems: FaqEntry[] | undefined = safe(() =>
+    cmsFaqs.length
+      ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionAr, answer: f.answerAr }))
+      : undefined
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-navy-darker transition-colors duration-300">

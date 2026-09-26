@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_utils.dart';
 import '../../models/admin_user_model.dart';
 import 'user_dialog.dart';
 
@@ -13,41 +15,102 @@ class UsersManagementView extends StatefulWidget {
 }
 
 class _UsersManagementViewState extends State<UsersManagementView> {
+  static const int _limit = 20;
+
   final _searchController = TextEditingController();
+  Timer? _debounceTimer;
   List<AdminUser> _users = [];
   List<Department> _departments = [];
   bool _isLoading = true;
-
+  bool _hasError = false;
   String _selectedRole = 'ALL';
   String _selectedDepartmentId = 'ALL';
+  // حالة الترقيم من الخادم
+  int _page = 1;
+  int _totalPages = 1;
+  int _total = 0;
+  // العدد الدقيق لكل دور ضمن الفلاتر الحالية — يأتي من meta الخادم لا من الصفحة المعروضة
+  Map<String, int> _roleTotals = const {};
+
+  // أولوية الدور للفرز والترتيب
+  static const _rolePriority = {
+    'ADMIN': 0, 'GM': 1, 'DEPUTY_GM': 2, 'DEPT_MANAGER': 3, 'EMPLOYEE': 4
+  };
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData(page: 1);
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+  // بحث مؤجل (debounce) 300ms
+  void _onSearchChanged() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () => _loadData(page: 1));
+  }
+
+  Future<void> _loadData({int? page}) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final effectivePage = page ?? _page;
     final depts = await AdminApiService().getDepartments();
-    final users = await AdminApiService().getUsers(
-      search: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+    final res = await AdminApiService().getUsers(
+      search: _searchController.text.trim().isEmpty
+          ? null
+          : _searchController.text.trim(),
       role: _selectedRole,
       departmentId: _selectedDepartmentId,
+      page: effectivePage,
+      limit: _limit,
     );
+    final roleTotals = await _loadRoleTotals();
+    if (!mounted) return;
+    // ترتيب حسب الدور
+    res.items.sort((a, b) =>
+        (_rolePriority[a.role.toUpperCase()] ?? 9)
+            .compareTo(_rolePriority[b.role.toUpperCase()] ?? 9));
+    setState(() {
+      _departments = depts.items;
+      _users = res.items;
+      _page = res.page;
+      _totalPages = res.totalPages;
+      _total = res.total;
+      _roleTotals = roleTotals;
+      _isLoading = false;
+      _hasError = res.error;
+    });
+  }
 
-    if (mounted) {
-      setState(() {
-        _departments = depts;
-        _users = users;
-        _isLoading = false;
-      });
+  /// إحصاء دقيق لكل دور ضمن فلاتر البحث والقسم الحالية:
+  /// طلبات خفيفة (limit=1) يكفي فيها العدد الكلي القادم من meta
+  Future<Map<String, int>> _loadRoleTotals() async {
+    const roles = ['ADMIN', 'GM', 'DEPT_MANAGER', 'EMPLOYEE'];
+    final search = _searchController.text.trim().isEmpty
+        ? null
+        : _searchController.text.trim();
+    try {
+      final pages = await Future.wait(roles.map((r) => AdminApiService().getUsers(
+            search: search,
+            departmentId: _selectedDepartmentId,
+            role: r,
+            page: 1,
+            limit: 1,
+          )));
+      return {for (var i = 0; i < roles.length; i++) roles[i]: pages[i].total};
+    } catch (_) {
+      return const {};
     }
   }
 
@@ -56,299 +119,406 @@ class _UsersManagementViewState extends State<UsersManagementView> {
       context: context,
       builder: (_) => UserDialog(departments: _departments),
     );
-    if (res == true) _loadData();
+    if (res == true) _loadData(page: 1);
   }
 
   Future<void> _openEditDialog(AdminUser user) async {
     final res = await showDialog<bool>(
       context: context,
-      builder: (_) => UserDialog(userToEdit: user, departments: _departments),
+      builder: (_) =>
+          UserDialog(userToEdit: user, departments: _departments),
     );
     if (res == true) _loadData();
   }
 
-  Future<void> _confirmDelete(AdminUser user) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('تأكيد حذف المستخدم'),
-        content: Text('هل أنت متأكد من حذف الحساب "${user.name}"؟ لا يمكن التراجع عن هذا الإجراء.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AdminTheme.crimson, foregroundColor: Colors.white),
-            child: const Text('حذف'),
-          ),
-        ],
-      ),
+  Future<void> _confirmDeleteUser(AdminUser user) async {
+    final confirmed = await AppUtils.confirmDelete(
+      context,
+      title: 'تأكيد حذف المستخدم',
+      message:
+          'هل أنت متأكد من حذف الحساب «${user.name}»؟\nلا يمكن التراجع عن هذا الإجراء.',
     );
+    if (!confirmed || !mounted) return;
 
-    if (confirmed == true) {
-      final success = await AdminApiService().deleteUser(user.id);
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حذف المستخدم بنجاح')));
-          _loadData();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('فشل حذف المستخدم'), backgroundColor: AdminTheme.crimson),
-          );
-        }
-      }
+    final success = await AdminApiService().deleteUser(user.id);
+    if (!mounted) return;
+    if (success) {
+      AppUtils.showSuccess(context, 'تم حذف المستخدم بنجاح');
+      _loadData();
+    } else {
+      AppUtils.showError(context, 'فشل حذف المستخدم');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AdminTheme.bgLight,
       body: Column(
         children: [
-          // شريط العمليات والبحث العلوي
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+          _buildToolbar(),
+          if (!_isLoading && !_hasError) _buildSummaryRow(),
+          Expanded(child: _buildBody()),
+          // شريط الترقيم الموحد من app_utils
+          if (!_isLoading && !_hasError && _users.isNotEmpty)
+            PaginationBar(
+              currentPage: _page,
+              totalPages: _totalPages,
+              total: _total,
+              isLoading: _isLoading,
+              onPageChange: (p) => _loadData(page: p),
             ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    // حقل البحث النصي
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'ابحث بالاسم أو البريد الإلكتروني...',
-                            hintStyle: const TextStyle(fontSize: 12, color: AdminTheme.textMuted),
-                            prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            filled: true,
-                            fillColor: const Color(0xFFF8FAFC),
-                          ),
-                          onSubmitted: (_) => _loadData(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.search_rounded),
-                      onPressed: _loadData,
-                      tooltip: 'بحث',
-                    ),
-                    const SizedBox(width: 8),
-                    // زر إضافة مستخدم
-                    ElevatedButton.icon(
-                      onPressed: _openCreateDialog,
-                      icon: const Icon(Icons.add_rounded, size: 18),
-                      label: const Text('إضافة موظف'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AdminTheme.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                // فلاتر المسمى والقسم
-                Row(
-                  children: [
-                    // فلتر الدور
-                    _buildFilterDropdown(
-                      value: _selectedRole,
-                      items: const [
-                        DropdownMenuItem(value: 'ALL', child: Text('كافة الأدوار')),
-                        DropdownMenuItem(value: 'ADMIN', child: Text('مدير النظام')),
-                        DropdownMenuItem(value: 'GM', child: Text('المدير العام')),
-                        DropdownMenuItem(value: 'DEPT_MANAGER', child: Text('مدراء الإدارات')),
-                        DropdownMenuItem(value: 'EMPLOYEE', child: Text('الموظفون')),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedRole = val);
-                          _loadData();
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    // فلتر القسم
-                    _buildFilterDropdown(
-                      value: _selectedDepartmentId,
-                      items: [
-                        const DropdownMenuItem(value: 'ALL', child: Text('كافة الأقسام')),
-                        ..._departments.map((d) => DropdownMenuItem(value: d.id, child: Text(d.name))),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedDepartmentId = val);
-                          _loadData();
-                        }
-                      },
-                    ),
-                    const Spacer(),
-                    Text('العدد: ${_users.length}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        ],
+      ),
+    );
+  }
 
-          // قائمة المستخدمين
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _users.isEmpty
-                    ? const Center(child: Text('لا يوجد موظفون مطابقون لمعايير البحث', style: TextStyle(color: AdminTheme.textMuted)))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _users.length,
-                        itemBuilder: (context, index) {
-                          final u = _users[index];
-                          return _buildUserCard(u);
-                        },
-                      ),
+  Widget _buildToolbar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: AdminTheme.border)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // عنوان القسم
+              const Icon(Icons.manage_accounts_rounded,
+                  color: AdminTheme.accent, size: 22),
+              const SizedBox(width: 8),
+              const Text('إدارة المستخدمين والصلاحيات',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14)),
+              const Spacer(),
+              // عداد النتائج الكلي من الخادم
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AdminTheme.surface2,
+                  borderRadius:
+                      BorderRadius.circular(AdminTheme.radiusSm),
+                ),
+                child: Text(
+                  '$_total مستخدم',
+                  style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AdminTheme.textMuted),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // زر إضافة مستخدم
+              FilledButton.icon(
+                onPressed: _openCreateDialog,
+                icon: const Icon(Icons.person_add_rounded, size: 16),
+                label: const Text('إضافة موظف',
+                    style: TextStyle(fontSize: 12)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AdminTheme.primary,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              // حقل البحث مع debounce
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'ابحث بالاسم أو البريد الإلكتروني...',
+                    prefixIcon: Icon(Icons.search_rounded, size: 18),
+                    suffixIcon: Icon(Icons.manage_search_rounded,
+                        size: 16, color: AdminTheme.textLight),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // فلتر الدور
+              _buildDropdown(
+                value: _selectedRole,
+                items: const {
+                  'ALL': 'كافة الأدوار',
+                  'ADMIN': 'مدير النظام',
+                  'GM': 'المدير العام',
+                  'DEPUTY_GM': 'نائب المدير',
+                  'DEPT_MANAGER': 'مدراء الإدارات',
+                  'EMPLOYEE': 'الموظفون',
+                },
+                onChanged: (v) {
+                  setState(() => _selectedRole = v);
+                  _loadData(page: 1);
+                },
+              ),
+              const SizedBox(width: 8),
+              // فلتر القسم
+              _buildDropdown(
+                value: _selectedDepartmentId,
+                items: {
+                  'ALL': 'كافة الأقسام',
+                  for (final d in _departments) d.id: d.name,
+                },
+                onChanged: (v) {
+                  setState(() => _selectedDepartmentId = v);
+                  _loadData(page: 1);
+                },
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterDropdown({
+  Widget _buildSummaryRow() {
+    // الأعداد تأتي من meta الخادم (لكامل النتائج المطابقة لا الصفحة المعروضة)
+    final roleStats = [
+      ('ADMIN', 'مدير نظام', AdminTheme.crimson),
+      ('GM', 'مدير عام', AdminTheme.purple),
+      ('DEPT_MANAGER', 'مدير قسم', AdminTheme.accent),
+      ('EMPLOYEE', 'موظف', AdminTheme.textMuted),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,
+      child: Row(
+        children: [
+          // إحصاء كل دور له مستخدم واحد على الأقل ضمن الفلاتر الحالية
+          ...roleStats
+              .where((r) => (_roleTotals[r.$1] ?? 0) > 0)
+              .map((r) => Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: StatusBadge(
+                      text: '${r.$2}: ${_roleTotals[r.$1] ?? 0}',
+                      color: r.$3,
+                    ),
+                  )),
+          const Spacer(),
+          // عرض عدد الحسابات المعطلة إن وجدت — دقيق فقط عندما تُحمّل الصفحة كاملة
+          if (_totalPages == 1 && _users.any((u) => !u.isActive))
+            StatusBadge(
+              text:
+                  'معطل: ${_users.where((u) => !u.isActive).length}',
+              color: AdminTheme.amber,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const LoadingWidget(message: 'جاري تحميل بيانات الموظفين...');
+    }
+    // حالة الخطأ — تمييز فشل الطلب عن غياب النتائج
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل قائمة الموظفين',
+        onRetry: () => _loadData(),
+      );
+    }
+    if (_users.isEmpty) {
+      return EmptyStateWidget(
+        message: 'لا يوجد موظفون مطابقون لمعايير البحث',
+        icon: Icons.people_outline_rounded,
+        actionLabel: 'إعادة تحميل',
+        onAction: () => _loadData(page: 1),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: () => _loadData(),
+      color: AdminTheme.accent,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _users.length,
+        itemBuilder: (context, index) => _buildUserCard(_users[index]),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
     required String value,
-    required List<DropdownMenuItem<String>> items,
-    required ValueChanged<String?> onChanged,
+    required Map<String, String> items,
+    required ValueChanged<String> onChanged,
   }) {
     return Container(
-      height: 34,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
-          items: items,
-          onChanged: onChanged,
+          style: const TextStyle(
+              fontSize: 12,
+              color: AdminTheme.textMain,
+              fontWeight: FontWeight.w600),
+          items: items.entries
+              .map((e) =>
+                  DropdownMenuItem(value: e.key, child: Text(e.value)))
+              .toList(),
+          onChanged: (v) {
+            if (v != null) onChanged(v);
+          },
         ),
       ),
     );
   }
 
   Widget _buildUserCard(AdminUser u) {
-    Color roleColor;
-    switch (u.role.toUpperCase()) {
-      case 'ADMIN':
-        roleColor = AdminTheme.crimson;
-        break;
-      case 'GM':
-      case 'DEPUTY_GM':
-        roleColor = AdminTheme.purple;
-        break;
-      case 'DEPT_MANAGER':
-        roleColor = AdminTheme.accent;
-        break;
-      default:
-        roleColor = AdminTheme.textMuted;
-    }
+    // تحديد لون الدور لكل بطاقة مستخدم
+    final Color roleColor = switch (u.role.toUpperCase()) {
+      'ADMIN' => AdminTheme.crimson,
+      'GM' || 'DEPUTY_GM' => AdminTheme.purple,
+      'DEPT_MANAGER' => AdminTheme.accent,
+      _ => AdminTheme.textMuted,
+    };
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: const BorderSide(color: Color(0xFFE2E8F0))),
-      elevation: 0,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+        border: Border.all(
+          color: u.isActive
+              ? AdminTheme.border
+              : AdminTheme.crimson.withAlpha(40),
+        ),
+        boxShadow: AdminTheme.cardShadow,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            // الأيقونة أو الصورة الرمزية
-            CircleAvatar(
-              backgroundColor: roleColor.withAlpha(25),
-              child: Text(
-                u.name.isNotEmpty ? u.name[0].toUpperCase() : '؟',
-                style: TextStyle(color: roleColor, fontWeight: FontWeight.bold),
+            // أيقونة الحرف الأول بتدرج لوني حسب الدور
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    roleColor.withAlpha(180),
+                    roleColor,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  u.name.isNotEmpty ? u.name[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
               ),
             ),
             const SizedBox(width: 14),
-
-            // البيانات الرئيسية
+            // البيانات الرئيسية للمستخدم
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Text(u.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(width: 8),
-                      // شارة الدور
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: roleColor.withAlpha(20),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                      Flexible(
                         child: Text(
-                          ApiConstants.getRoleName(u.role),
-                          style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.bold),
+                          u.name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      // شارة الدور الوظيفي
+                      StatusBadge(
+                        text: ApiConstants.getRoleName(u.role),
+                        color: roleColor,
+                      ),
                       const SizedBox(width: 6),
-                      // حالة الحساب
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (u.isActive ? AdminTheme.emerald : AdminTheme.crimson).withAlpha(20),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          u.isActive ? 'مفعل' : 'معطل',
-                          style: TextStyle(
-                            color: u.isActive ? AdminTheme.emerald : AdminTheme.crimson,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      // شارة حالة الحساب
+                      StatusBadge(
+                        text: u.isActive ? 'مفعّل' : 'معطّل',
+                        color: u.isActive
+                            ? AdminTheme.emerald
+                            : AdminTheme.crimson,
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(u.email, style: const TextStyle(fontSize: 12, color: AdminTheme.textMuted)),
-                  const SizedBox(height: 4),
+                  // البريد الإلكتروني
+                  Text(
+                    u.email,
+                    style: const TextStyle(
+                        fontSize: 12, color: AdminTheme.textMuted),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
+                      // اسم القسم إن وُجد
                       if (u.department != null) ...[
-                        const Icon(Icons.apartment_rounded, size: 13, color: AdminTheme.textMuted),
-                        const SizedBox(width: 4),
-                        Text(u.department!.name, style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
-                        const SizedBox(width: 12),
+                        const Icon(Icons.apartment_rounded,
+                            size: 12, color: AdminTheme.textMuted),
+                        const SizedBox(width: 3),
+                        Flexible(
+                          child: Text(
+                            u.department!.name,
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: AdminTheme.textMuted),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
                       ],
-                      const Icon(Icons.vpn_key_rounded, size: 13, color: AdminTheme.textMuted),
-                      const SizedBox(width: 4),
-                      Text('${u.permissions.length} صلاحيات', style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
+                      // عدد الصلاحيات المخصصة
+                      const Icon(Icons.vpn_key_rounded,
+                          size: 12, color: AdminTheme.textMuted),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${u.permissions.length} صلاحية',
+                        style: const TextStyle(
+                            fontSize: 11, color: AdminTheme.textMuted),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // أزرار العمليات
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 18, color: AdminTheme.accent),
-              tooltip: 'تعديل الصلاحيات',
-              onPressed: () => _openEditDialog(u),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AdminTheme.crimson),
-              tooltip: 'حذف',
-              onPressed: () => _confirmDelete(u),
+            // أزرار التعديل والحذف
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Tooltip(
+                  message: 'تعديل الصلاحيات',
+                  child: IconButton(
+                    icon: const Icon(Icons.edit_outlined,
+                        size: 18, color: AdminTheme.accent),
+                    onPressed: () => _openEditDialog(u),
+                  ),
+                ),
+                Tooltip(
+                  message: 'حذف الحساب',
+                  child: IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded,
+                        size: 18, color: AdminTheme.crimson),
+                    onPressed: () => _confirmDeleteUser(u),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -107,9 +107,17 @@ class AdminApiService {
   }
 
   // ─── إدارة المستخدمين ───
-  Future<List<AdminUser>> getUsers({String? search, String? departmentId, String? role}) async {
+  /// قائمة المستخدمين مع الفلاتر والترقيم — يعيد صفحة كاملة
+  /// (العناصر + العدد الكلي + عدد الصفحات) مع راية خطأ لتمييز فشل الطلب عن غياب النتائج
+  Future<UsersPage> getUsers({
+    String? search,
+    String? departmentId,
+    String? role,
+    int page = 1,
+    int limit = 20,
+  }) async {
     try {
-      final params = <String, String>{'limit': '100'};
+      final params = <String, String>{'page': '$page', 'limit': '$limit'};
       if (search != null && search.trim().isNotEmpty) params['search'] = search.trim();
       if (departmentId != null && departmentId != 'ALL') params['departmentId'] = departmentId;
       if (role != null && role != 'ALL') params['role'] = role;
@@ -120,12 +128,20 @@ class AdminApiService {
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((u) => AdminUser.fromJson(u)).toList();
+        final meta = body['meta'] is Map ? body['meta'] as Map<String, dynamic> : const <String, dynamic>{};
+        final items = list.map((u) => AdminUser.fromJson(u)).toList();
+        return UsersPage(
+          items: items,
+          page: (meta['page'] as num?)?.toInt() ?? page,
+          totalPages: (meta['totalPages'] as num?)?.toInt() ?? 1,
+          total: (meta['total'] as num?)?.toInt() ?? items.length,
+        );
       }
+      debugPrint('getUsers failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getUsers error: $e');
     }
-    return [];
+    return UsersPage(items: [], page: page, totalPages: 1, total: 0, error: true);
   }
 
   Future<Map<String, dynamic>> createUser({
@@ -204,7 +220,24 @@ class AdminApiService {
   }
 
   // ─── إدارة الأقسام ───
-  Future<List<Department>> getDepartments() async {
+  // كاش قصير الأمد: أربع شاشات تجلب الأقسام عند كل فتح وعملياتها النادرة تمر من هنا
+  // فيُبطل الكاش عند أي إنشاء/تعديل/حذف، ويمكن تجاوزه بـ forceRefresh
+  static const Duration _deptsCacheTtl = Duration(seconds: 60);
+  List<Department>? _deptsCache;
+  DateTime? _deptsCacheAt;
+
+  void invalidateDepartmentsCache() {
+    _deptsCache = null;
+    _deptsCacheAt = null;
+  }
+
+  Future<ApiListResult<Department>> getDepartments({bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _deptsCache != null &&
+        _deptsCacheAt != null &&
+        DateTime.now().difference(_deptsCacheAt!) < _deptsCacheTtl) {
+      return ApiListResult(items: _deptsCache!);
+    }
     try {
       final uri = Uri.parse(ApiConstants.departments);
       final response = await _http.get(uri);
@@ -212,12 +245,16 @@ class AdminApiService {
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((d) => Department.fromJson(d)).toList();
+        final depts = list.map((d) => Department.fromJson(d)).toList();
+        _deptsCache = depts;
+        _deptsCacheAt = DateTime.now();
+        return ApiListResult(items: depts);
       }
+      debugPrint('getDepartments failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getDepartments error: $e');
     }
-    return [];
+    return const ApiListResult(items: [], error: true);
   }
 
   Future<Map<String, dynamic>> createDepartment({
@@ -235,6 +272,7 @@ class AdminApiService {
 
       final response = await _http.post(uri, body: payload);
       if (response.statusCode == 200 || response.statusCode == 201) {
+        invalidateDepartmentsCache();
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         final err = jsonDecode(response.body);
@@ -263,6 +301,7 @@ class AdminApiService {
 
       final response = await _http.patch(uri, body: payload);
       if (response.statusCode == 200) {
+        invalidateDepartmentsCache();
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         final err = jsonDecode(response.body);
@@ -278,7 +317,11 @@ class AdminApiService {
     try {
       final uri = Uri.parse('${ApiConstants.departments}/$id');
       final response = await _http.delete(uri);
-      return response.statusCode == 200 || response.statusCode == 204;
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        invalidateDepartmentsCache();
+        return true;
+      }
+      return false;
     } catch (e) {
       debugPrint('deleteDepartment error: $e');
       return false;
@@ -380,18 +423,19 @@ class AdminApiService {
   }
 
   /// مسارات الاعتماد المضبوطة للأولويات
-  Future<List<Map<String, dynamic>>> getWorkflows() async {
+  Future<ApiListResult<Map<String, dynamic>>> getWorkflows() async {
     try {
       final response = await _http.get(Uri.parse('${ApiConstants.baseUrl}/admin/approval-workflows'));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+        return ApiListResult(items: list.map((e) => Map<String, dynamic>.from(e)).toList());
       }
+      debugPrint('getWorkflows failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getWorkflows error: $e');
     }
-    return [];
+    return const ApiListResult(items: [], error: true);
   }
 
   Future<Map<String, dynamic>?> updateWorkflow(String priority, List<Map<String, String>> steps) async {
@@ -419,18 +463,19 @@ class AdminApiService {
   }
 
   /// سجل كل التفويضات في النظام
-  Future<List<Map<String, dynamic>>> getDelegations() async {
+  Future<ApiListResult<Map<String, dynamic>>> getDelegations() async {
     try {
       final response = await _http.get(Uri.parse('${ApiConstants.baseUrl}/delegations'));
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+        return ApiListResult(items: list.map((e) => Map<String, dynamic>.from(e)).toList());
       }
+      debugPrint('getDelegations failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getDelegations error: $e');
     }
-    return [];
+    return const ApiListResult(items: [], error: true);
   }
 
   Future<Map<String, dynamic>?> terminateDelegation(String id) async {
@@ -542,20 +587,20 @@ class AdminApiService {
   // ─── إدارة محتوى الموقع الإلكتروني ───
 
   /// قائمة عناصر مجموعة محتوى (services / sectors / projects / faqs) — شاملة غير المفعّلة
-  Future<List<Map<String, dynamic>>> getContentList(String kind) async {
+  Future<ApiListResult<Map<String, dynamic>>> getContentList(String kind) async {
     try {
       final uri = Uri.parse(ApiConstants.siteContentKind(kind));
       final response = await _http.get(uri);
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+        return ApiListResult(items: list.map((e) => Map<String, dynamic>.from(e)).toList());
       }
       debugPrint('getContentList($kind) failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getContentList($kind) error: $e');
     }
-    return [];
+    return const ApiListResult(items: [], error: true);
   }
 
   Future<Map<String, dynamic>?> createContent(String kind, Map<String, dynamic> payload) async {
@@ -598,19 +643,20 @@ class AdminApiService {
   }
 
   /// كل الإعدادات العامة (contacts / stats / pillars / values ...)
-  Future<List<Map<String, dynamic>>> getSiteSettings() async {
+  Future<ApiListResult<Map<String, dynamic>>> getSiteSettings() async {
     try {
       final uri = Uri.parse('${ApiConstants.siteContentManage}/settings');
       final response = await _http.get(uri);
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         final List list = body is List ? body : (body['data'] ?? []);
-        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+        return ApiListResult(items: list.map((e) => Map<String, dynamic>.from(e)).toList());
       }
+      debugPrint('getSiteSettings failed: ${response.statusCode}');
     } catch (e) {
       debugPrint('getSiteSettings error: $e');
     }
-    return [];
+    return const ApiListResult(items: [], error: true);
   }
 
   Future<Map<String, dynamic>?> upsertSiteSetting(String key, dynamic value, {String? description}) async {
@@ -659,4 +705,33 @@ class CorrPage {
     required this.total,
     this.error = false,
   });
+}
+
+/// صفحة من قائمة المستخدمين — نتيجة استعلام مفلتر ومقسّم إلى صفحات
+class UsersPage {
+  final List<AdminUser> items;
+  final int page;
+  final int totalPages;
+  final int total;
+
+  /// true يعني فشل الطلب (اتصال/خادم) — وليس غياب النتائج
+  final bool error;
+
+  UsersPage({
+    required this.items,
+    required this.page,
+    required this.totalPages,
+    required this.total,
+    this.error = false,
+  });
+}
+
+/// نتيجة قائمة غير مرقّمة مع راية خطأ لتمييز فشل الطلب عن غياب النتائج
+class ApiListResult<T> {
+  final List<T> items;
+
+  /// true يعني فشل الطلب (اتصال/خادم) — وليس غياب النتائج
+  final bool error;
+
+  const ApiListResult({required this.items, this.error = false});
 }

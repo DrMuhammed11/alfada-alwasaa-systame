@@ -91,16 +91,30 @@ export default async function EnglishHomePage() {
     getProjects(),
     getFaqs(),
   ]);
+  // درع ضد أي شكل بيانات غير متوقع من الـ CMS — الموقع لا يسقط أبداً بسبب محتوى
+  const safe = <T,>(fn: () => T): T | undefined => {
+    try {
+      return fn();
+    } catch {
+      return undefined;
+    }
+  };
   // تمرير خام: مكوّنات EN تقوم بالتحويل إلى صيغة العرض داخليًا مع بدائل آمنة
-  const sectors = cmsSectors.length
-    ? (cmsSectors as unknown as import("@/components/site/EnSectors").EnSectorCmsItem[])
-    : undefined;
-  const trackItems = cmsProjects.length
-    ? (cmsProjects as unknown as import("@/components/site/EnTrackRecord").EnTrackCmsItem[])
-    : undefined;
-  const faqItems = cmsFaqs.length
-    ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionEn, answer: f.answerEn }))
-    : undefined;
+  const sectors = safe(() =>
+    cmsSectors.length
+      ? (cmsSectors as unknown as import("@/components/site/EnSectors").EnSectorCmsItem[])
+      : undefined
+  );
+  const trackItems = safe(() =>
+    cmsProjects.length
+      ? (cmsProjects as unknown as import("@/components/site/EnTrackRecord").EnTrackCmsItem[])
+      : undefined
+  );
+  const faqItems = safe(() =>
+    cmsFaqs.length
+      ? (cmsFaqs as unknown as ContentFaq[]).map((f) => ({ question: f.questionEn, answer: f.answerEn }))
+      : undefined
+  );
 
   return (
     <div

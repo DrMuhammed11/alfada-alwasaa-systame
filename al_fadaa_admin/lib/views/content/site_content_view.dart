@@ -106,12 +106,16 @@ class _CollectionTabState extends State<_CollectionTab> with AutomaticKeepAliveC
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
-    final items = await AdminApiService().getContentList(widget.kind);
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final res = await AdminApiService().getContentList(widget.kind);
     if (!mounted) return;
     setState(() {
-      _items = items;
+      _items = res.items;
       _isLoading = false;
+      _hasError = res.error;
     });
   }
 
@@ -211,10 +215,19 @@ class _CollectionTabState extends State<_CollectionTab> with AutomaticKeepAliveC
         ),
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _items.isEmpty
-                  ? Center(child: Text(widget.emptyLabel, style: const TextStyle(color: AdminTheme.textMuted)))
-                  : RefreshIndicator(
+              ? const LoadingWidget(message: 'جارٍ تحميل العناصر...')
+              : _hasError
+                  ? ErrorStateWidget(
+                      message: 'تعذر تحميل عناصر المحتوى',
+                      onRetry: _load,
+                    )
+                  : _items.isEmpty
+                      ? EmptyStateWidget(
+                          message: widget.emptyLabel,
+                          actionLabel: 'تحديث',
+                          onAction: _load,
+                        )
+                      : RefreshIndicator(
                           onRefresh: _load,
                           child: ListView.builder(
                             padding: const EdgeInsets.all(16),
@@ -313,6 +326,74 @@ class _Field extends StatelessWidget {
 /// حقل قائمة متعددة الأسطر: كل سطر عنصر (المزايا / الخدمات / المؤشرات)
 List<String> _linesToList(String text) =>
     text.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+
+/// حقل مسار صورة مع معاينة حية — الروابط المطلقة (http/https) تُعرض فوراً،
+/// والمسارات النسبية (أصول الموقع) تُعرض على الموقع فقط فلا يمكن معاينتها هنا
+class _ImageField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+
+  const _ImageField({required this.controller, required this.label, this.hint});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final url = value.text.trim();
+        final isUrl = url.startsWith('http://') || url.startsWith('https://');
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Field(controller: controller, label: label, hint: hint),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 64,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: isUrl
+                        ? Image.network(
+                            url,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.broken_image_outlined,
+                              size: 18,
+                              color: AdminTheme.textMuted,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.image_outlined,
+                            size: 18,
+                            color: AdminTheme.textMuted,
+                          ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isUrl
+                          ? 'معاينة مباشرة للرابط أعلاه'
+                          : 'مسار نسبي لأصول الموقع — أدخل رابطاً مطلقاً (http/https) لمعاينته هنا',
+                      style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 class _OrderAndActive extends StatelessWidget {
   final TextEditingController orderController;
@@ -500,7 +581,7 @@ Future<Map<String, dynamic>?> _showServiceEditor(BuildContext context, Map<Strin
           _Field(controller: fullAr, label: 'الوصف الكامل بالعربية', maxLines: 4),
           _Field(controller: fullEn, label: 'الوصف الكامل بالإنجليزية', maxLines: 4),
           _Field(controller: icon, label: 'اسم أيقونة lucide', hint: 'Building2'),
-          _Field(controller: image, label: 'مسار الصورة الرئيسية', hint: '/profile/construction_building.webp'),
+          _ImageField(controller: image, label: 'مسار الصورة الرئيسية', hint: '/profile/construction_building.webp'),
           _Field(controller: features, label: 'مزايا الخدمة — كل ميزة في سطر', maxLines: 4),
           _OrderAndActive(
             orderController: order,
@@ -723,7 +804,7 @@ Future<Map<String, dynamic>?> _showProjectEditor(BuildContext context, Map<Strin
           _Field(controller: scopeAr, label: 'نطاق العمل ووصف المشروع بالعربية', maxLines: 4),
           _Field(controller: scopeEn, label: 'نطاق العمل بالإنجليزية', maxLines: 4),
           _Field(controller: metrics, label: 'مؤشرات المشروع — كل مؤشر في سطر', maxLines: 3),
-          _Field(controller: image, label: 'مسار صورة المشروع', hint: '/profile/track_roller.webp'),
+          _ImageField(controller: image, label: 'مسار صورة المشروع', hint: '/profile/track_roller.webp'),
           _OrderAndActive(
             orderController: order,
             isActive: isActive,
@@ -852,6 +933,7 @@ class _SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClientMixin {
   List<Map<String, dynamic>> _settings = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -863,12 +945,16 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
-    final items = await AdminApiService().getSiteSettings();
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final res = await AdminApiService().getSiteSettings();
     if (!mounted) return;
     setState(() {
-      _settings = items;
+      _settings = res.items;
       _isLoading = false;
+      _hasError = res.error;
     });
   }
 
@@ -929,14 +1015,23 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
   Widget build(BuildContext context) {
     super.build(context);
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget(message: 'جارٍ تحميل الإعدادات العامة...');
+    }
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل الإعدادات العامة',
+        onRetry: _load,
+      );
     }
     if (_settings.isEmpty) {
       return const Center(
         child: Text('لا توجد إعدادات محفوظة بعد', style: TextStyle(color: AdminTheme.textMuted)),
       );
     }
-    return ListView.builder(
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AdminTheme.accent,
+      child: ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _settings.length,
       itemBuilder: (context, index) {
@@ -976,6 +1071,7 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
           ),
         );
       },
+      ),
     );
   }
 }

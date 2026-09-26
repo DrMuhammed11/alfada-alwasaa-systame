@@ -4,14 +4,8 @@ class ApiConstants {
     defaultValue: 'http://localhost:3000/api/v1',
   );
 
-  // Auth
-  static const String login = '$baseUrl/auth/login';
-  static const String me = '$baseUrl/auth/me';
-
   // Admin & Analytics
   static const String adminAnalytics = '$baseUrl/admin/analytics';
-  static const String adminOrphans = '$baseUrl/admin/orphans';
-  static const String adminWorkflows = '$baseUrl/admin/workflows';
   static const String resendFailedMails = '$baseUrl/admin/resend-failed-mails';
 
   // Management

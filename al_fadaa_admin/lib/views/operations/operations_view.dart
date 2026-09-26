@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_utils.dart';
 
 /// شاشة التشغيل الإداري: صندوق البريد الصادر، مسارات الاعتماد،
 /// الكيانات اليتيمة، سجل الوكالات، وحالة النسخ الاحتياطي.
@@ -13,27 +14,35 @@ class OperationsView extends StatelessWidget {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: AdminTheme.bgLight,
         body: Column(
           children: [
+            // رأس شريط التبويب بخلفية محسَّنة
             Container(
-              color: Colors.white,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(bottom: BorderSide(color: AdminTheme.border)),
+              ),
               padding: const EdgeInsets.only(top: 12),
               child: Row(
                 children: [
                   const SizedBox(width: 16),
                   const Icon(Icons.settings_suggest_rounded, color: AdminTheme.accent, size: 22),
                   const SizedBox(width: 8),
-                  const Text('إدارة التشغيل والرقابة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const Text(
+                    'إدارة التشغيل والرقابة',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
                   const SizedBox(width: 24),
-                  Expanded(
+                  const Expanded(
                     child: TabBar(
                       isScrollable: true,
                       labelColor: AdminTheme.primary,
-                      unselectedLabelColor: const Color(0xFF64748B),
+                      unselectedLabelColor: AdminTheme.textMuted,
                       indicatorColor: AdminTheme.primary,
-                      labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                      tabs: const [
+                      labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      dividerColor: Colors.transparent,
+                      tabs: [
                         Tab(icon: Icon(Icons.outbox_rounded, size: 16), text: 'صندوق الصادر'),
                         Tab(icon: Icon(Icons.fact_check_rounded, size: 16), text: 'مسارات الاعتماد'),
                         Tab(icon: Icon(Icons.link_off_rounded, size: 16), text: 'الكيانات اليتيمة'),
@@ -68,41 +77,20 @@ class OperationsView extends StatelessWidget {
 final DateFormat _dtFormat = DateFormat('yyyy/MM/dd HH:mm', 'ar');
 
 Color _statusColor(String s) => switch (s) {
-      'SENT' => AdminTheme.emerald,
+      'SENT'   => AdminTheme.emerald,
       'QUEUED' => AdminTheme.amber,
       'PAUSED' => const Color(0xFF8B5CF6),
       'FAILED' => AdminTheme.crimson,
-      _ => AdminTheme.textMuted,
+      _        => AdminTheme.textMuted,
     };
 
 String _statusLabel(String s) => switch (s) {
-      'SENT' => 'أُرسلت',
+      'SENT'   => 'أُرسلت',
       'QUEUED' => 'بانتظار الإرسال',
       'PAUSED' => 'موقوفة',
       'FAILED' => 'فاشلة نهائيًا',
-      _ => s,
+      _        => s,
     };
-
-Widget _badge(String text, Color color) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: BoxDecoration(color: color.withAlpha(22), borderRadius: BorderRadius.circular(4)),
-    child: Text(text, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-  );
-}
-
-Widget _errorBody(Future<void> Function() retry) {
-  return Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.cloud_off_rounded, size: 40, color: AdminTheme.crimson),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(onPressed: retry, icon: const Icon(Icons.refresh_rounded, size: 16), label: const Text('إعادة المحاولة')),
-      ],
-    ),
-  );
-}
 
 // ═══════════ صندوق الصادر ═══════════
 
@@ -113,7 +101,13 @@ class _OutboxTab extends StatefulWidget {
 }
 
 class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMixin {
-  static const _kinds = {'ALL': 'كل الحالات', 'QUEUED': 'بانتظار الإرسال', 'FAILED': 'فاشلة', 'PAUSED': 'موقوفة', 'SENT': 'أُرسلت'};
+  static const _kinds = {
+    'ALL': 'كل الحالات',
+    'QUEUED': 'بانتظار الإرسال',
+    'FAILED': 'فاشلة',
+    'PAUSED': 'موقوفة',
+    'SENT': 'أُرسلت',
+  };
   List<Map<String, dynamic>> _items = [];
   String _status = 'ALL';
   int _page = 1, _totalPages = 1, _total = 0;
@@ -129,7 +123,10 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
   }
 
   Future<void> _load({int? page}) async {
-    setState(() { _isLoading = true; _hasError = false; });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     final res = await AdminApiService().getOutbox(status: _status, page: page ?? _page);
     if (!mounted) return;
     setState(() {
@@ -162,12 +159,16 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
     super.build(context);
     return Column(
       children: [
+        // شريط فلتر الحالة
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           color: Colors.white,
           child: Row(
             children: [
-              Text('العدد: $_total', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
+              Text(
+                'العدد: $_total',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted),
+              ),
               const Spacer(),
               ..._kinds.entries.map((e) => Padding(
                     padding: const EdgeInsets.only(left: 6),
@@ -175,26 +176,47 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                       label: Text(e.value, style: const TextStyle(fontSize: 11)),
                       selected: _status == e.key,
                       selectedColor: AdminTheme.primary,
-                      labelStyle: TextStyle(color: _status == e.key ? Colors.white : const Color(0xFF475569), fontSize: 11),
+                      labelStyle: TextStyle(
+                        color: _status == e.key ? Colors.white : AdminTheme.textMuted,
+                        fontSize: 11,
+                      ),
                       visualDensity: VisualDensity.compact,
-                      onSelected: (_) => setState(() => _status = e.key),
+                      onSelected: (_) {
+                        setState(() => _status = e.key);
+                        _load(page: 1);
+                      },
                     ),
                   )),
-              IconButton(icon: const Icon(Icons.refresh_rounded, size: 18), onPressed: () => _load(page: 1)),
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                onPressed: () => _load(page: 1),
+              ),
             ],
           ),
         ),
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              // حالة التحميل — ودجة موحدة
+              ? const LoadingWidget(message: 'جارٍ تحميل صندوق الصادر...')
               : _hasError
-                  ? _errorBody(() => _load())
+                  // حالة الخطأ — ودجة موحدة
+                  ? ErrorStateWidget(
+                      message: 'تعذر تحميل صندوق الصادر',
+                      onRetry: _load,
+                    )
                   : _items.isEmpty
-                      ? const Center(child: Text('لا توجد رسائل مطابقة', style: TextStyle(color: AdminTheme.textMuted)))
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _items.length,
-                          itemBuilder: (context, i) {
+                      // حالة الفراغ — ودجة موحدة
+                      ? const EmptyStateWidget(
+                          message: 'لا توجد رسائل مطابقة',
+                          icon: Icons.outbox_rounded,
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => _load(page: _page),
+                          color: AdminTheme.accent,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _items.length,
+                            itemBuilder: (context, i) {
                             final m = _items[i];
                             final status = (m['status'] ?? '').toString();
                             return Container(
@@ -202,8 +224,10 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                                borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+                                border: Border.all(color: AdminTheme.border),
+                                // ظل موحد من AdminTheme
+                                boxShadow: AdminTheme.cardShadow,
                               ),
                               child: Row(
                                 children: [
@@ -212,16 +236,40 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(children: [
-                                          Text(m['refNumber'] ?? '', style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF334155))),
+                                          Text(
+                                            m['refNumber'] ?? '',
+                                            style: const TextStyle(
+                                              fontFamily: 'monospace',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Color(0xFF334155),
+                                            ),
+                                          ),
                                           const SizedBox(width: 8),
-                                          _badge(_statusLabel(status), _statusColor(status)),
+                                          // شارة حالة الرسالة — StatusBadge من app_utils
+                                          StatusBadge(
+                                            text: _statusLabel(status),
+                                            color: _statusColor(status),
+                                          ),
                                           const SizedBox(width: 8),
-                                          _badge('محاولة ${m['attempts'] ?? 0}/${m['maxAttempts'] ?? 3}', AdminTheme.textMuted),
+                                          // شارة عدد المحاولات
+                                          StatusBadge(
+                                            text: 'محاولة ${m['attempts'] ?? 0}/${m['maxAttempts'] ?? 3}',
+                                            color: AdminTheme.textMuted,
+                                          ),
                                         ]),
                                         const SizedBox(height: 4),
-                                        Text('إلى: ${m['to'] ?? '-'}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569))),
+                                        Text(
+                                          'إلى: ${m['to'] ?? '-'}',
+                                          style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                                        ),
                                         if ((m['lastError'] ?? '').toString().isNotEmpty)
-                                          Text('الخطأ: ${m['lastError']}', style: const TextStyle(fontSize: 10.5, color: AdminTheme.crimson), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                          Text(
+                                            'الخطأ: ${m['lastError']}',
+                                            style: const TextStyle(fontSize: 10.5, color: AdminTheme.crimson),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                       ],
                                     ),
                                   ),
@@ -230,7 +278,10 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                       onPressed: () => _action(m['id'], true),
                                       icon: const Icon(Icons.replay_rounded, size: 14),
                                       label: const Text('إعادة', style: TextStyle(fontSize: 11)),
-                                      style: OutlinedButton.styleFrom(foregroundColor: AdminTheme.primary, side: const BorderSide(color: AdminTheme.primary)),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AdminTheme.primary,
+                                        side: const BorderSide(color: AdminTheme.primary),
+                                      ),
                                     ),
                                   if (status == 'QUEUED') ...[
                                     const SizedBox(width: 6),
@@ -238,24 +289,41 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                       onPressed: () => _action(m['id'], false),
                                       icon: const Icon(Icons.pause_rounded, size: 14),
                                       label: const Text('إيقاف', style: TextStyle(fontSize: 11)),
-                                      style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF8B5CF6), side: const BorderSide(color: Color(0xFF8B5CF6))),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: const Color(0xFF8B5CF6),
+                                        side: const BorderSide(color: Color(0xFF8B5CF6)),
+                                      ),
                                     ),
                                   ],
                                 ],
                               ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
         ),
+        // شريط الترقيم للصادر
         if (!_isLoading && !_hasError && _items.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Color(0xFFE2E8F0)))),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: AdminTheme.border)),
+            ),
             child: Row(children: [
-              Text('الصفحة $_page من $_totalPages', style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
+              Text(
+                'الصفحة $_page من $_totalPages',
+                style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+              ),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.chevron_right_rounded, size: 18), onPressed: _page > 1 ? () => _load(page: _page - 1) : null),
-              IconButton(icon: const Icon(Icons.chevron_left_rounded, size: 18), onPressed: _page < _totalPages ? () => _load(page: _page + 1) : null),
+              IconButton(
+                icon: const Icon(Icons.chevron_right_rounded, size: 18),
+                onPressed: _page > 1 ? () => _load(page: _page - 1) : null,
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                onPressed: _page < _totalPages ? () => _load(page: _page + 1) : null,
+              ),
             ]),
           ),
       ],
@@ -272,10 +340,21 @@ class _WorkflowsTab extends StatefulWidget {
 }
 
 class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveClientMixin {
-  static const _priorities = {'URGENT': 'عاجلة للغاية', 'HIGH': 'عالية', 'NORMAL': 'اعتيادية', 'LOW': 'منخفضة'};
-  static const _roles = {'DEPT_MANAGER': 'مدير قسم', 'DEPUTY_GM': 'نائب المدير العام', 'GM': 'المدير العام', 'ADMIN': 'مدير النظام'};
+  static const _priorities = {
+    'URGENT': 'عاجلة للغاية',
+    'HIGH': 'عالية',
+    'NORMAL': 'اعتيادية',
+    'LOW': 'منخفضة',
+  };
+  static const _roles = {
+    'DEPT_MANAGER': 'مدير قسم',
+    'DEPUTY_GM': 'نائب المدير العام',
+    'GM': 'المدير العام',
+    'ADMIN': 'مدير النظام',
+  };
   List<Map<String, dynamic>> _flows = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -287,10 +366,17 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
-    final flows = await AdminApiService().getWorkflows();
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final res = await AdminApiService().getWorkflows();
     if (!mounted) return;
-    setState(() { _flows = flows; _isLoading = false; });
+    setState(() {
+      _flows = res.items;
+      _isLoading = false;
+      _hasError = res.error;
+    });
   }
 
   Future<void> _edit(Map<String, dynamic> flow) async {
@@ -299,46 +385,15 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
         .map((s) => (s is Map ? s : Map<String, dynamic>.from(s))['requiredRole'].toString())
         .toList();
 
-    final controller = TextEditingController(text: existing.join(','));
-    final saved = await showDialog<bool>(
+    final steps = await showDialog<List<String>>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('مسار اعتماد: ${_priorities[priority] ?? priority}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        content: SizedBox(
-          width: 460,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('أدوار الاعتماد بالتسلسل — مفصولة بفواصل، تبدأ من المستوى 1 ولا تكون أولًا بأدنى من لاحقها:', style: TextStyle(fontSize: 11.5, color: Color(0xFF475569))),
-              const SizedBox(height: 10),
-              TextField(
-                controller: controller,
-                maxLines: 3,
-                decoration: const InputDecoration(hintText: 'DEPT_MANAGER, GM', border: OutlineInputBorder(), isDense: true),
-              ),
-              const SizedBox(height: 8),
-              Text('الأدوار المتاحة: ${_roles.entries.map((e) => e.key).join(' / ')}', style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: AdminTheme.primary), child: const Text('حفظ')),
-        ],
+      builder: (_) => _WorkflowStepsDialog(
+        priorityLabel: _priorities[priority] ?? priority,
+        initialSteps: existing,
       ),
     );
-    if (saved != true || !mounted) return;
+    if (steps == null || !mounted) return;
 
-    final steps = controller.text
-        .split(',')
-        .map((s) => s.trim().toUpperCase())
-        .where((s) => _roles.containsKey(s))
-        .toList();
-    if (steps.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا توجد أدوار صالحة'), backgroundColor: AdminTheme.crimson));
-      return;
-    }
     final res = await AdminApiService().updateWorkflow(priority, [
       for (var i = 0; i < steps.length; i++)
         {'level': '${i + 1}', 'requiredRole': steps[i]},
@@ -355,15 +410,34 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    return ListView(
+    // حالة التحميل — ودجة موحدة
+    if (_isLoading) return const LoadingWidget(message: 'جارٍ تحميل مسارات الاعتماد...');
+    // حالة الخطأ — ودجة موحدة
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل مسارات الاعتماد',
+        onRetry: _load,
+      );
+    }
+    // حالة الفراغ — ودجة موحدة
+    if (_flows.isEmpty) {
+      return const EmptyStateWidget(
+        message: 'لا توجد مسارات اعتماد معرّفة',
+        icon: Icons.fact_check_rounded,
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AdminTheme.accent,
+      child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // بانر توضيحي لمسارات الاعتماد
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
             border: Border.all(color: const Color(0xFFBFDBFE)),
           ),
           child: const Text(
@@ -375,35 +449,51 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
         ..._flows.map((flow) {
           final priority = (flow['priority'] ?? '').toString();
           final steps = ((flow['steps'] as List?) ?? []);
+          // لون شارة الأولوية
+          final priorityColor = priority == 'URGENT'
+              ? AdminTheme.crimson
+              : (priority == 'HIGH' ? AdminTheme.amber : AdminTheme.accent);
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+              border: Border.all(color: AdminTheme.border),
+              boxShadow: AdminTheme.cardShadow,
             ),
             child: Row(
               children: [
-                _badge(_priorities[priority] ?? priority, priority == 'URGENT' ? AdminTheme.crimson : (priority == 'HIGH' ? AdminTheme.amber : AdminTheme.accent)),
+                // شارة الأولوية — StatusBadge من app_utils
+                StatusBadge(
+                  text: _priorities[priority] ?? priority,
+                  color: priorityColor,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     steps.isEmpty
                         ? 'بدون خطوات'
                         : steps.asMap().entries.map((e) {
-                            final s = (e.value is Map ? e.value : Map<String, dynamic>.from(e.value));
+                            final s = (e.value is Map
+                                ? e.value
+                                : Map<String, dynamic>.from(e.value));
                             return 'م${e.key + 1}: ${_roles[s['requiredRole']] ?? s['requiredRole']}';
                           }).join(' ← '),
                     style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
                   ),
                 ),
-                IconButton(icon: const Icon(Icons.edit_rounded, size: 17, color: AdminTheme.accent), tooltip: 'تعديل', onPressed: () => _edit(flow)),
+                IconButton(
+                  icon: const Icon(Icons.edit_rounded, size: 17, color: AdminTheme.accent),
+                  tooltip: 'تعديل',
+                  onPressed: () => _edit(flow),
+                ),
               ],
             ),
           );
         }),
       ],
+        ),
     );
   }
 }
@@ -419,6 +509,8 @@ class _OrphansTab extends StatefulWidget {
 class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientMixin {
   Map<String, dynamic>? _report;
   bool _isLoading = true, _hasError = false;
+  // وقت إتمام آخر فحص ناجح — من الخادم فعلياً لا من لحظة البناء
+  DateTime? _lastCheckedAt;
 
   @override
   bool get wantKeepAlive => true;
@@ -430,19 +522,37 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
   }
 
   Future<void> _load() async {
-    setState(() { _isLoading = true; _hasError = false; });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     final report = await AdminApiService().getOrphans();
     if (!mounted) return;
-    setState(() { _report = report; _isLoading = false; _hasError = report == null; });
+    setState(() {
+      _report = report;
+      _isLoading = false;
+      _hasError = report == null;
+      if (report != null) _lastCheckedAt = DateTime.now();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_hasError) return _errorBody(_load);
+    // حالة التحميل — ودجة موحدة
+    if (_isLoading) return const LoadingWidget(message: 'جارٍ فحص الكيانات اليتيمة...');
+    // حالة الخطأ — ودجة موحدة
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل تقرير الكيانات اليتيمة',
+        onRetry: _load,
+      );
+    }
     final summary = (_report?['summary'] as Map?) ?? {};
-    return ListView(
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AdminTheme.accent,
+      child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Row(
@@ -455,23 +565,39 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
           ],
         ),
         const SizedBox(height: 12),
+        // بطاقة ملخص النزاهة البنيوية
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: (summary['totalOrphans'] ?? 0) == 0 ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: (summary['totalOrphans'] ?? 0) == 0 ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA)),
+            color: (summary['totalOrphans'] ?? 0) == 0
+                ? const Color(0xFFECFDF5)
+                : const Color(0xFFFEF2F2),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(
+              color: (summary['totalOrphans'] ?? 0) == 0
+                  ? const Color(0xFFA7F3D0)
+                  : const Color(0xFFFECACA),
+            ),
+            boxShadow: AdminTheme.cardShadow,
           ),
           child: Text(
             (summary['totalOrphans'] ?? 0) == 0
                 ? 'لا توجد كيانات يتيمة — سلامة بنيوية كاملة'
                 : 'رُصدت ${(summary['totalOrphans'] ?? 0)} كيانات يتيمة تحتاج معالجة يدوية (فتح المراسلة وإتمام دورتها)',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: (summary['totalOrphans'] ?? 0) == 0 ? AdminTheme.emerald : AdminTheme.crimson),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: (summary['totalOrphans'] ?? 0) == 0 ? AdminTheme.emerald : AdminTheme.crimson,
+            ),
           ),
         ),
         const SizedBox(height: 10),
-        Text('آخر فحص: ${_dtFormat.format(DateTime.now())}', style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted)),
+        Text(
+          'آخر فحص: ${_lastCheckedAt != null ? _dtFormat.format(_lastCheckedAt!) : '—'}',
+          style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+        ),
       ],
+        ),
     );
   }
 
@@ -479,11 +605,23 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE2E8F0))),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+          border: Border.all(color: AdminTheme.border),
+          boxShadow: AdminTheme.cardShadow,
+        ),
         child: Column(children: [
-          Text('$value', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+          Text(
+            '$value',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+          ),
           const SizedBox(height: 4),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted)),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+          ),
         ]),
       ),
     );
@@ -501,6 +639,7 @@ class _DelegationsTab extends StatefulWidget {
 class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliveClientMixin {
   List<Map<String, dynamic>> _items = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -512,10 +651,17 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
-    final items = await AdminApiService().getDelegations();
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    final res = await AdminApiService().getDelegations();
     if (!mounted) return;
-    setState(() { _items = items; _isLoading = false; });
+    setState(() {
+      _items = res.items;
+      _isLoading = false;
+      _hasError = res.error;
+    });
   }
 
   Future<void> _terminate(Map<String, dynamic> d) async {
@@ -532,21 +678,42 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_items.isEmpty) return const Center(child: Text('لا توجد تفويضات مسجلة', style: TextStyle(color: AdminTheme.textMuted)));
-    return ListView.builder(
+    // حالة التحميل — ودجة موحدة
+    if (_isLoading) return const LoadingWidget(message: 'جارٍ تحميل سجل الوكالات...');
+    // حالة الخطأ — ودجة موحدة
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل سجل الوكالات',
+        onRetry: _load,
+      );
+    }
+    // حالة الفراغ — ودجة موحدة
+    if (_items.isEmpty) {
+      return const EmptyStateWidget(
+        message: 'لا توجد تفويضات مسجلة',
+        icon: Icons.swap_horiz_rounded,
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AdminTheme.accent,
+      child: ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _items.length,
       itemBuilder: (context, i) {
         final d = _items[i];
-        final isActive = d['isActive'] == true || (d['status'] ?? '').toString().toUpperCase() == 'ACTIVE';
+        final isActive =
+            d['isActive'] == true || (d['status'] ?? '').toString().toUpperCase() == 'ACTIVE';
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: isActive ? const Color(0xFFA7F3D0) : const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(
+              color: isActive ? const Color(0xFFA7F3D0) : AdminTheme.border,
+            ),
+            boxShadow: AdminTheme.cardShadow,
           ),
           child: Row(
             children: [
@@ -554,14 +721,27 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('المفوِّض: ${_nameOf(d, 'delegator')} → الوكيل: ${_nameOf(d, 'delegate')}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                    Text(
+                      'المفوِّض: ${_nameOf(d, 'delegator')} → الوكيل: ${_nameOf(d, 'delegate')}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AdminTheme.primary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(children: [
-                      _badge(isActive ? 'نشط' : 'منتهٍ', isActive ? AdminTheme.emerald : AdminTheme.textMuted),
+                      // شارة حالة التفويض — StatusBadge من app_utils
+                      StatusBadge(
+                        text: isActive ? 'نشط' : 'منتهٍ',
+                        color: isActive ? AdminTheme.emerald : AdminTheme.textMuted,
+                      ),
                       const SizedBox(width: 6),
-                      if (d['startsAt'] != null) _metaChip('من: ${_dtFormat.format(DateTime.parse(d['startsAt']).toLocal())}'),
+                      if (d['startsAt'] != null)
+                        _metaChip('من: ${_dtFormat.format(DateTime.parse(d['startsAt']).toLocal())}'),
                       const SizedBox(width: 6),
-                      if (d['endsAt'] != null) _metaChip('إلى: ${_dtFormat.format(DateTime.parse(d['endsAt']).toLocal())}'),
+                      if (d['endsAt'] != null)
+                        _metaChip('إلى: ${_dtFormat.format(DateTime.parse(d['endsAt']).toLocal())}'),
                     ]),
                   ],
                 ),
@@ -571,12 +751,16 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
                   onPressed: () => _terminate(d),
                   icon: const Icon(Icons.cancel_outlined, size: 14),
                   label: const Text('إنهاء', style: TextStyle(fontSize: 11)),
-                  style: OutlinedButton.styleFrom(foregroundColor: AdminTheme.crimson, side: const BorderSide(color: AdminTheme.crimson)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AdminTheme.crimson,
+                    side: const BorderSide(color: AdminTheme.crimson),
+                  ),
                 ),
             ],
           ),
         );
       },
+      ),
     );
   }
 
@@ -589,8 +773,12 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
   Widget _metaChip(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFFE2E8F0))),
-      child: Text(text, style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+      decoration: BoxDecoration(
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+        border: Border.all(color: AdminTheme.border),
+      ),
+      child: Text(text, style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted)),
     );
   }
 }
@@ -617,10 +805,17 @@ class _BackupTabState extends State<_BackupTab> with AutomaticKeepAliveClientMix
   }
 
   Future<void> _load() async {
-    setState(() { _isLoading = true; _hasError = false; });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     final s = await AdminApiService().getBackupStatus();
     if (!mounted) return;
-    setState(() { _status = s; _isLoading = false; _hasError = s == null; });
+    setState(() {
+      _status = s;
+      _isLoading = false;
+      _hasError = s == null;
+    });
   }
 
   String _sizeOf(num bytes) {
@@ -631,40 +826,250 @@ class _BackupTabState extends State<_BackupTab> with AutomaticKeepAliveClientMix
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_hasError) return _errorBody(_load);
-    final files = ((_status?['files'] as List?) ?? []).map((e) => Map<String, dynamic>.from(e)).toList();
+    // حالة التحميل — ودجة موحدة
+    if (_isLoading) return const LoadingWidget(message: 'جارٍ تحميل حالة النسخ الاحتياطي...');
+    // حالة الخطأ — ودجة موحدة
+    if (_hasError) {
+      return ErrorStateWidget(
+        message: 'تعذر تحميل حالة النسخ الاحتياطي',
+        onRetry: _load,
+      );
+    }
+    final files = ((_status?['files'] as List?) ?? [])
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
     final enabled = _status?['enabled'] == true;
     final offsite = _status?['offsiteConfigured'] == true;
-    return ListView(
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AdminTheme.accent,
+      child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Row(
+        // شارات حالة النسخ الاحتياطي — StatusBadge من app_utils
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
           children: [
-            _badge(enabled ? 'النسخ المجدول مفعّل' : 'النسخ المجدول معطّل (BACKUP_ENABLED=false)', enabled ? AdminTheme.emerald : AdminTheme.crimson),
-            const SizedBox(width: 8),
-            _badge(offsite ? 'رفع خارجي مضبوط' : 'لا رفع خارجي — القرص المحلي فاني!', offsite ? AdminTheme.emerald : AdminTheme.crimson),
-            const SizedBox(width: 8),
-            _badge('الاحتفاظ: ${_status?['retentionDays'] ?? 7} يوم', AdminTheme.textMuted),
+            StatusBadge(
+              text: enabled
+                  ? 'النسخ المجدول مفعّل'
+                  : 'النسخ المجدول معطّل (BACKUP_ENABLED=false)',
+              color: enabled ? AdminTheme.emerald : AdminTheme.crimson,
+            ),
+            StatusBadge(
+              text: offsite
+                  ? 'رفع خارجي مضبوط'
+                  : 'لا رفع خارجي — القرص المحلي فاني!',
+              color: offsite ? AdminTheme.emerald : AdminTheme.crimson,
+            ),
+            StatusBadge(
+              text: 'الاحتفاظ: ${_status?['retentionDays'] ?? 7} يوم',
+              color: AdminTheme.textMuted,
+            ),
           ],
         ),
         const SizedBox(height: 12),
         if (files.isEmpty)
-          const Center(child: Padding(padding: EdgeInsets.all(24), child: Text('لا توجد نسخ محفوظة محليًا بعد', style: TextStyle(color: AdminTheme.textMuted))))
+          const EmptyStateWidget(
+            message: 'لا توجد نسخ محفوظة محليًا بعد',
+            icon: Icons.backup_rounded,
+          )
         else
           ...files.map((f) => Container(
                 margin: const EdgeInsets.only(bottom: 6),
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE2E8F0))),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+                  border: Border.all(color: AdminTheme.border),
+                  boxShadow: AdminTheme.cardShadow,
+                ),
                 child: Row(children: [
                   const Icon(Icons.archive_rounded, size: 16, color: AdminTheme.accent),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(f['name'], style: const TextStyle(fontFamily: 'monospace', fontSize: 11.5, color: Color(0xFF334155)))),
-                  Text(_sizeOf((f['sizeBytes'] as num?) ?? 0), style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
+                  Expanded(
+                    child: Text(
+                      f['name'],
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11.5,
+                        color: Color(0xFF334155),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    _sizeOf((f['sizeBytes'] as num?) ?? 0),
+                    style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                  ),
                   const SizedBox(width: 12),
-                  Text(_dtFormat.format(DateTime.parse(f['modifiedAt']).toLocal()), style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted)),
+                  Text(
+                    _dtFormat.format(DateTime.parse(f['modifiedAt']).toLocal()),
+                    style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+                  ),
                 ]),
               )),
+      ],
+        ),
+    );
+  }
+}
+
+/// نافذة تحرير مسار الاعتماد: اختيار الأدوار بالتسلسل عبر رقائق مع
+/// إعادة ترتيب صريحة (رفع/خفض) — بدل الحقل النصي المفصول بفواصل
+class _WorkflowStepsDialog extends StatefulWidget {
+  final String priorityLabel;
+  final List<String> initialSteps;
+
+  const _WorkflowStepsDialog({required this.priorityLabel, required this.initialSteps});
+
+  @override
+  State<_WorkflowStepsDialog> createState() => _WorkflowStepsDialogState();
+}
+
+class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
+  static const _roles = {
+    'DEPT_MANAGER': 'مدير قسم',
+    'DEPUTY_GM': 'نائب المدير العام',
+    'GM': 'المدير العام',
+    'ADMIN': 'مدير النظام',
+  };
+
+  late final List<String> _steps;
+
+  @override
+  void initState() {
+    super.initState();
+    // الاحتفاظ بالأدوار المعروفة فقط وبلا تكرار
+    _steps = [
+      for (final s in widget.initialSteps)
+        if (_roles.containsKey(s.trim().toUpperCase()) && !_steps.contains(s.trim().toUpperCase()))
+          s.trim().toUpperCase(),
+    ];
+  }
+
+  void _toggle(String role) {
+    setState(() {
+      if (_steps.contains(role)) {
+        _steps.remove(role);
+      } else {
+        _steps.add(role);
+      }
+    });
+  }
+
+  void _move(int index, int delta) {
+    final target = index + delta;
+    if (target < 0 || target >= _steps.length) return;
+    setState(() => _steps.insert(target, _steps.removeAt(index)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        'مسار اعتماد: ${widget.priorityLabel}',
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+      ),
+      content: SizedBox(
+        width: 460,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'اختر أدوار الاعتماد بالتسلسل — الترتيب المذكور هو ترتيب الموافقة (المستوى 1 أولًا):',
+              style: TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+            ),
+            const SizedBox(height: 10),
+            // التسلسل الحالي
+            if (_steps.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AdminTheme.bgLight,
+                  borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                  border: Border.all(color: AdminTheme.border),
+                ),
+                child: const Text(
+                  'لم يُختر أي دور بعد — أضف من الأدوار المتاحة أدناه',
+                  style: TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                ),
+              )
+            else
+              for (var i = 0; i < _steps.length; i++)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AdminTheme.surface2,
+                    borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                    border: Border.all(color: AdminTheme.border),
+                  ),
+                  child: Row(
+                    children: [
+                      StatusBadge(text: 'م${i + 1}', color: AdminTheme.accent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _roles[_steps[i]] ?? _steps[i],
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_upward_rounded, size: 15),
+                        tooltip: 'رفع مستوى',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: i > 0 ? () => _move(i, -1) : null,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_downward_rounded, size: 15),
+                        tooltip: 'خفض مستوى',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: i < _steps.length - 1 ? () => _move(i, 1) : null,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline_rounded, size: 15, color: AdminTheme.crimson),
+                        tooltip: 'إزالة من المسار',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _toggle(_steps[i]),
+                      ),
+                    ],
+                  ),
+                ),
+            const SizedBox(height: 8),
+            const Text(
+              'الأدوار المتاحة — انقر للإضافة أو الإزالة:',
+              style: TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final e in _roles.entries)
+                  FilterChip(
+                    label: Text(e.value, style: const TextStyle(fontSize: 11)),
+                    selected: _steps.contains(e.key),
+                    onSelected: (_) => _toggle(e.key),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('إلغاء'),
+        ),
+        FilledButton(
+          onPressed: _steps.isEmpty ? null : () => Navigator.pop(context, List<String>.of(_steps)),
+          style: FilledButton.styleFrom(backgroundColor: AdminTheme.primary),
+          child: const Text('حفظ'),
+        ),
       ],
     );
   }

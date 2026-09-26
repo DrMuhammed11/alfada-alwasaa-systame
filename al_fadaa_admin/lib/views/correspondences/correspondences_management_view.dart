@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_utils.dart';
 import '../../models/correspondence_model.dart';
 
 /// إدارة المراسلات — نطاق الإدارة العليا (كل المراسلات)
@@ -10,10 +11,12 @@ class CorrespondencesManagementView extends StatefulWidget {
   const CorrespondencesManagementView({super.key});
 
   @override
-  State<CorrespondencesManagementView> createState() => _CorrespondencesManagementViewState();
+  State<CorrespondencesManagementView> createState() =>
+      _CorrespondencesManagementViewState();
 }
 
-class _CorrespondencesManagementViewState extends State<CorrespondencesManagementView> {
+class _CorrespondencesManagementViewState
+    extends State<CorrespondencesManagementView> {
   static const int _limit = 20;
 
   final _searchController = TextEditingController();
@@ -52,11 +55,15 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
   }
 
   Future<void> _loadInitial() async {
-    final depts = await AdminApiService().getDepartments();
+    // الأقسام وأول صفحة بالتوازي — الأقسام لعناصر الفلترة فقط فلا تحجب القائمة
+    final deptsFuture = AdminApiService().getDepartments();
+    final pageFuture = _load(page: 1);
+    final deptsRes = await deptsFuture;
     if (mounted) {
-      setState(() => _departments = depts.map((d) => (id: d.id, name: d.name)).toList());
+      setState(
+          () => _departments = deptsRes.items.map((d) => (id: d.id, name: d.name)).toList());
     }
-    await _load(page: 1);
+    await pageFuture;
   }
 
   Future<void> _load({required int page}) async {
@@ -69,7 +76,9 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
       status: _status,
       priority: _priority,
       departmentId: _departmentId,
-      q: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+      q: _searchController.text.trim().isEmpty
+          ? null
+          : _searchController.text.trim(),
       page: page,
       limit: _limit,
     );
@@ -95,45 +104,131 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     _load(page: 1);
   }
 
+  // ─── ألوان النوع ───
+  Color _typeColor(String type) => switch (type) {
+        'INCOMING' => const Color(0xFF0284C7),
+        'OUTGOING' => AdminTheme.emerald,
+        'INTERNAL' => AdminTheme.purple,
+        _ => AdminTheme.textMuted,
+      };
+
+  // ─── أيقونة النوع ───
+  IconData _typeIcon(String type) => switch (type) {
+        'INCOMING' => Icons.south_west_rounded,
+        'OUTGOING' => Icons.north_east_rounded,
+        'INTERNAL' => Icons.sync_alt_rounded,
+        _ => Icons.mail_rounded,
+      };
+
+  // ─── ألوان الأولوية ───
+  Color _priorityColor(String p) => switch (p) {
+        'URGENT' => AdminTheme.crimson,
+        'HIGH' => AdminTheme.amber,
+        'NORMAL' => AdminTheme.accent,
+        _ => AdminTheme.textMuted,
+      };
+
+  // ─── أيقونة الأولوية ───
+  IconData _priorityIcon(String p) => switch (p) {
+        'URGENT' => Icons.priority_high_rounded,
+        'HIGH' => Icons.keyboard_double_arrow_up_rounded,
+        'NORMAL' => Icons.remove_rounded,
+        _ => Icons.keyboard_double_arrow_down_rounded,
+      };
+
+  // ─── ألوان الحالة ───
+  Color _statusColor(String s) => switch (s) {
+        'CLOSED' || 'ARCHIVED' || 'SENT' => AdminTheme.emerald,
+        'RECEIVED' || 'UNDER_REVIEW' => AdminTheme.amber,
+        _ => AdminTheme.accent,
+      };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AdminTheme.bgLight,
       body: Column(
         children: [
           _buildToolbar(),
           Expanded(child: _buildBody()),
-          _buildPaginationBar(),
+          // شريط ترقيم الصفحات — يُخفى أثناء التحميل أو الخطأ أو إذا لا توجد سجلات
+          if (!_isLoading && !_hasError && _corrs.isNotEmpty)
+            PaginationBar(
+              currentPage: _page,
+              totalPages: _totalPages,
+              total: _total,
+              isLoading: _isLoading,
+              onPageChange: (p) => _load(page: p),
+            ),
         ],
       ),
     );
   }
 
+  // ─── شريط الفلاتر والبحث ───
   Widget _buildToolbar() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        color: AdminTheme.cardBg,
+        border: Border(bottom: BorderSide(color: AdminTheme.border)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ─── سطر العنوان والعداد ───
           Row(
             children: [
-              const Icon(Icons.mark_email_unread_rounded, color: AdminTheme.accent, size: 22),
-              const SizedBox(width: 8),
-              const Text('إدارة المراسلات — النطاق الكامل', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AdminTheme.accent.withAlpha(18),
+                  borderRadius:
+                      BorderRadius.circular(AdminTheme.radiusSm),
+                ),
+                child: const Icon(
+                  Icons.mark_email_unread_rounded,
+                  color: AdminTheme.accent,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'إدارة المراسلات — النطاق الكامل',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AdminTheme.textMain,
+                ),
+              ),
               const Spacer(),
-              Text('العدد: $_total', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
-              const SizedBox(width: 8),
+              // عداد الإجمالي
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AdminTheme.surface2,
+                  borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                  border: Border.all(color: AdminTheme.border),
+                ),
+                child: Text(
+                  'الإجمالي: $_total',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AdminTheme.textMuted,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
               IconButton(
-                icon: const Icon(Icons.refresh_rounded, size: 20),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
                 tooltip: 'تحديث القائمة',
                 onPressed: () => _load(page: _page),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+          // ─── حقل البحث + فلتر النوع ───
           Row(
             children: [
               Expanded(
@@ -142,14 +237,21 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
                   child: TextField(
                     controller: _searchController,
                     textInputAction: TextInputAction.search,
-                    decoration: const InputDecoration(
-                      hintText: 'ابحث بالموضوع، الرقم المرجعي، أو اسم المرسل...',
-                      hintStyle: TextStyle(fontSize: 12, color: AdminTheme.textMuted),
-                      prefixIcon: Icon(Icons.search_rounded, size: 18),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                    decoration: InputDecoration(
+                      hintText:
+                          'ابحث بالموضوع، الرقم المرجعي، أو اسم المرسل...',
+                      hintStyle: const TextStyle(
+                          fontSize: 12, color: AdminTheme.textLight),
+                      prefixIcon:
+                          const Icon(Icons.search_rounded, size: 17),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 10),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AdminTheme.radiusSm),
+                      ),
                       filled: true,
-                      fillColor: Color(0xFFF8FAFC),
+                      fillColor: AdminTheme.bgLight,
                     ),
                     onSubmitted: (_) => _load(page: 1),
                   ),
@@ -172,6 +274,7 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
             ],
           ),
           const SizedBox(height: 8),
+          // ─── فلاتر الحالة / الأولوية / القسم ───
           Row(
             children: [
               _buildDropdown(
@@ -222,9 +325,14 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
               if (_hasActiveFilters) ...[
                 const SizedBox(width: 8),
                 ActionChip(
-                  label: const Text('مسح الفلاتر', style: TextStyle(fontSize: 11, color: AdminTheme.crimson)),
-                  avatar: const Icon(Icons.filter_alt_off_rounded, size: 15, color: AdminTheme.crimson),
+                  label: const Text(
+                    'مسح الفلاتر',
+                    style: TextStyle(fontSize: 11, color: AdminTheme.crimson),
+                  ),
+                  avatar: const Icon(Icons.filter_alt_off_rounded,
+                      size: 14, color: AdminTheme.crimson),
                   side: BorderSide(color: AdminTheme.crimson.withAlpha(80)),
+                  backgroundColor: AdminTheme.crimson.withAlpha(10),
                   onPressed: _clearFilters,
                 ),
               ],
@@ -235,6 +343,7 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
+  // ─── قائمة منسدلة موحدة ───
   Widget _buildDropdown({
     required String value,
     required Map<String, String> items,
@@ -244,14 +353,18 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
       height: 38,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontSize: 12,
+            color: AdminTheme.textMain,
+            fontWeight: FontWeight.w600,
+          ),
           items: items.entries
               .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
@@ -263,35 +376,32 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
+  // ─── جسم القائمة ───
   Widget _buildBody() {
+    // حالة التحميل
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget(message: 'جارٍ تحميل المراسلات…');
     }
+    // حالة الخطأ
     if (_hasError) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off_rounded, size: 44, color: AdminTheme.crimson),
-            const SizedBox(height: 10),
-            const Text('تعذر تحميل المراسلات من الخادم', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () => _load(page: _page),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('إعادة المحاولة'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: 'تعذر تحميل المراسلات من الخادم',
+        onRetry: () => _load(page: _page),
       );
     }
+    // حالة القائمة الفارغة
     if (_corrs.isEmpty) {
-      return const Center(
-        child: Text('لا توجد مراسلات مطابقة للفلاتر المحددة', style: TextStyle(color: AdminTheme.textMuted)),
+      return EmptyStateWidget(
+        icon: Icons.mark_email_unread_outlined,
+        message: 'لا توجد مراسلات مطابقة للفلاتر المحددة',
+        actionLabel: _hasActiveFilters ? 'مسح الفلاتر' : null,
+        onAction: _hasActiveFilters ? _clearFilters : null,
       );
     }
+    // قائمة المراسلات
     return RefreshIndicator(
       onRefresh: () => _load(page: _page),
+      color: AdminTheme.accent,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _corrs.length,
@@ -300,160 +410,192 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
-  Widget _buildPaginationBar() {
-    if (_isLoading || _hasError || _corrs.isEmpty) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: Row(
-        children: [
-          Text(
-            'الصفحة $_page من $_totalPages',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.chevron_right_rounded),
-            tooltip: 'الصفحة السابقة',
-            onPressed: _page > 1 ? () => _load(page: _page - 1) : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
-            tooltip: 'الصفحة التالية',
-            onPressed: _page < _totalPages ? () => _load(page: _page + 1) : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _typeColor(String type) => switch (type) {
-        'INCOMING' => const Color(0xFF0284C7),
-        'OUTGOING' => AdminTheme.emerald,
-        'INTERNAL' => AdminTheme.purple,
-        _ => AdminTheme.textMuted,
-      };
-
-  Color _priorityColor(String p) => switch (p) {
-        'URGENT' => AdminTheme.crimson,
-        'HIGH' => AdminTheme.amber,
-        'NORMAL' => AdminTheme.accent,
-        _ => AdminTheme.textMuted,
-      };
-
-  Color _statusColor(String s) => switch (s) {
-        'CLOSED' || 'ARCHIVED' || 'SENT' => AdminTheme.emerald,
-        'RECEIVED' || 'UNDER_REVIEW' => AdminTheme.amber,
-        _ => AdminTheme.accent,
-      };
-
-  Widget _badge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withAlpha(22),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
+  // ─── بطاقة مراسلة واحدة ───
   Widget _buildCorrCard(CorrListItem c) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: c.isOverdue ? AdminTheme.crimson.withAlpha(90) : const Color(0xFFE2E8F0)),
+    final isOverdue = c.isOverdue;
+    final priorityColor = _priorityColor(c.priority);
+    final typeColor = _typeColor(c.type);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: AdminTheme.cardBg,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+        border: Border.all(
+          color: isOverdue
+              ? AdminTheme.crimson.withAlpha(100)
+              : AdminTheme.border,
+          width: isOverdue ? 1.5 : 1,
+        ),
+        boxShadow: AdminTheme.cardShadow,
       ),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => _showDetails(c.id),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _badge(corrTypeLabel(c.type), _typeColor(c.type)),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(4),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+          onTap: () => _showDetails(c.id),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ─── سطر العلامات ───
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // شارة نوع المراسلة مع أيقونة
+                    StatusBadge(
+                      text: corrTypeLabel(c.type),
+                      color: typeColor,
                     ),
-                    child: Text(
-                      c.refNumber,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                    const SizedBox(width: 6),
+                    // رقم المرجعي
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AdminTheme.surface2,
+                        borderRadius:
+                            BorderRadius.circular(AdminTheme.radiusXs),
+                        border: Border.all(color: AdminTheme.border),
+                      ),
+                      child: Text(
+                        c.refNumber,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AdminTheme.textMuted,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  _badge(corrStatusLabel(c.status), _statusColor(c.status)),
-                  const SizedBox(width: 6),
-                  _badge('أولوية: ${priorityLabel(c.priority)}', _priorityColor(c.priority)),
-                  const Spacer(),
-                  if (c.isOverdue)
-                    _badge('متأخرة ${c.overdueDays} يوم', AdminTheme.crimson),
-                  Text(
-                    _dateFormat.format(c.updatedAt),
-                    style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                c.subject,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  if (c.senderName != null && c.senderName!.isNotEmpty) ...[
-                    const Icon(Icons.person_rounded, size: 13, color: AdminTheme.textMuted),
-                    const SizedBox(width: 3),
-                    Text(c.senderName!, style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 6),
+                    // شارة الحالة
+                    StatusBadge(
+                      text: corrStatusLabel(c.status),
+                      color: _statusColor(c.status),
+                    ),
+                    const Spacer(),
+                    // شارة التأخير (إن وُجدت)
+                    if (isOverdue) ...[
+                      StatusBadge(
+                        text: 'متأخرة ${c.overdueDays} يوم',
+                        color: AdminTheme.crimson,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    // تاريخ آخر تحديث
+                    Text(
+                      _dateFormat.format(c.updatedAt),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AdminTheme.textLight,
+                      ),
+                    ),
                   ],
-                  if (c.departmentName != null) ...[
-                    const Icon(Icons.apartment_rounded, size: 13, color: AdminTheme.textMuted),
+                ),
+                const SizedBox(height: 10),
+                // ─── سطر الموضوع ───
+                Text(
+                  c.subject,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: AdminTheme.textMain,
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // ─── خط فاصل خفيف ───
+                const Divider(height: 1, color: AdminTheme.border),
+                const SizedBox(height: 8),
+                // ─── سطر المعلومات التفصيلية ───
+                Row(
+                  children: [
+                    // أيقونة الأولوية مع النص
+                    Icon(
+                      _priorityIcon(c.priority),
+                      size: 13,
+                      color: priorityColor,
+                    ),
                     const SizedBox(width: 3),
-                    Text(c.departmentName!, style: const TextStyle(fontSize: 11, color: Color(0xFF475569))),
-                    const SizedBox(width: 12),
+                    StatusBadge(
+                      text: priorityLabel(c.priority),
+                      color: priorityColor,
+                      fontSize: 10,
+                    ),
+                    const SizedBox(width: 10),
+                    // اسم المرسل
+                    if (c.senderName != null &&
+                        c.senderName!.isNotEmpty) ...[
+                      const Icon(Icons.person_rounded,
+                          size: 13, color: AdminTheme.textMuted),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          c.senderName!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AdminTheme.textMuted,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    // اسم القسم
+                    if (c.departmentName != null) ...[
+                      const Icon(Icons.apartment_rounded,
+                          size: 13, color: AdminTheme.textMuted),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          c.departmentName!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AdminTheme.textMuted,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    // عدادات الإحالات / التكليفات / الردود / المرفقات
+                    _miniCount(
+                        Icons.swap_horiz_rounded, c.referralsCount, 'إحالة'),
+                    const SizedBox(width: 8),
+                    _miniCount(
+                        Icons.assignment_rounded, c.tasksCount, 'تكليف'),
+                    const SizedBox(width: 8),
+                    _miniCount(Icons.reply_rounded, c.repliesCount, 'رد'),
+                    const SizedBox(width: 8),
+                    _miniCount(
+                        Icons.attach_file_rounded, c.attachmentsCount, 'مرفق'),
                   ],
-                  const Spacer(),
-                  _miniCount(Icons.swap_horiz_rounded, c.referralsCount, 'إحالة'),
-                  const SizedBox(width: 10),
-                  _miniCount(Icons.assignment_rounded, c.tasksCount, 'تكليف'),
-                  const SizedBox(width: 10),
-                  _miniCount(Icons.reply_rounded, c.repliesCount, 'رد'),
-                  const SizedBox(width: 10),
-                  _miniCount(Icons.attach_file_rounded, c.attachmentsCount, 'مرفق'),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // ─── عداد صغير للإحالات / التكليفات / إلخ ───
   Widget _miniCount(IconData icon, int count, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: AdminTheme.textMuted),
+        Icon(icon, size: 12, color: AdminTheme.textLight),
         const SizedBox(width: 2),
-        Text('$count $label', style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted)),
+        Text(
+          '$count $label',
+          style: const TextStyle(fontSize: 10, color: AdminTheme.textLight),
+        ),
       ],
     );
   }
@@ -465,149 +607,203 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AdminTheme.radiusLg),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: FutureBuilder<CorrDetail?>(
             future: AdminApiService().getCorrespondence(id),
             builder: (context, snapshot) {
+              // حالة التحميل داخل النافذة
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(60),
-                  child: Center(child: CircularProgressIndicator()),
+                return const SizedBox(
+                  width: 400,
+                  height: 260,
+                  child: LoadingWidget(message: 'جارٍ تحميل تفاصيل المراسلة…'),
                 );
               }
               final d = snapshot.data;
+              // حالة الخطأ داخل النافذة
               if (d == null) {
-                return Padding(
-                  padding: const EdgeInsets.all(24),
+                return SizedBox(
+                  width: 400,
+                  height: 260,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.error_outline_rounded, color: AdminTheme.crimson, size: 40),
-                      SizedBox(height: 10),
-                      Text('تعذر تحميل تفاصيل المراسلة'),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AdminTheme.crimson.withAlpha(15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.error_outline_rounded,
+                            color: AdminTheme.crimson, size: 36),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'تعذر تحميل تفاصيل المراسلة',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('إغلاق'),
+                      ),
                     ],
                   ),
                 );
               }
+
+              // ─── محتوى نافذة التفاصيل ───
               return SizedBox(
-                width: 720,
-                height: 640,
+                width: 740,
+                height: 660,
                 child: Column(
                   children: [
-                    // رأس النافذة
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF8FAFC),
-                        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                      ),
-                      child: Row(
-                        children: [
-                          _badge(corrTypeLabel(d.type), _typeColor(d.type)),
-                          const SizedBox(width: 6),
-                          Text(
-                            d.refNumber,
-                            style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF475569)),
-                          ),
-                          const SizedBox(width: 6),
-                          _badge(corrStatusLabel(d.status), _statusColor(d.status)),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 18),
-                            onPressed: () => Navigator.pop(ctx),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // ─── رأس النافذة ───
+                    _buildDialogHeader(ctx, d),
+                    // ─── جسم النافذة القابل للتمرير ───
                     Expanded(
                       child: ListView(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(18),
                         children: [
+                          // موضوع المراسلة
                           Text(
                             d.subject,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B)),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                              color: AdminTheme.textMain,
+                              height: 1.4,
+                            ),
                           ),
                           const SizedBox(height: 12),
+                          // شارات الأولوية / القسم / القناة / تاريخ الإغلاق
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
                             children: [
-                              _badge('أولوية: ${priorityLabel(d.priority)}', _priorityColor(d.priority)),
-                              if (d.departmentName != null) _badge('القسم: ${d.departmentName}', AdminTheme.accent),
-                              if (d.channel != null && d.channel!.isNotEmpty) _badge('القناة: ${d.channel}', AdminTheme.textMuted),
-                              if (d.closedAt != null) _badge('تاريخ الإغلاق: ${DateFormat('yyyy/MM/dd').format(d.closedAt!)}', AdminTheme.emerald),
+                              _priorityBadgeRow(d.priority),
+                              if (d.departmentName != null)
+                                StatusBadge(
+                                  text: 'القسم: ${d.departmentName}',
+                                  color: AdminTheme.accent,
+                                ),
+                              if (d.channel != null &&
+                                  d.channel!.isNotEmpty)
+                                StatusBadge(
+                                  text: 'القناة: ${d.channel}',
+                                  color: AdminTheme.textMuted,
+                                ),
+                              if (d.closedAt != null)
+                                StatusBadge(
+                                  text:
+                                      'أُغلقت: ${DateFormat('yyyy/MM/dd').format(d.closedAt!)}',
+                                  color: AdminTheme.emerald,
+                                ),
                             ],
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 16),
+                          // ─── بيانات المرسل ───
                           _sectionTitle('بيانات المرسل', Icons.person_rounded),
                           _infoGrid([
                             ('الاسم', d.senderName ?? '-'),
-                            ('البريد', d.senderEmail ?? '-'),
+                            ('البريد الإلكتروني', d.senderEmail ?? '-'),
                             ('الهاتف', d.senderPhone ?? '-'),
                             ('سجّلها', d.createdByName ?? '-'),
-                            ('تاريخ الاستلام', d.receivedAt != null ? _dateFormat.format(d.receivedAt!) : _dateFormat.format(d.createdAt)),
-                            ('تاريخ الإرسال', d.sentAt != null ? _dateFormat.format(d.sentAt!) : '-'),
+                            (
+                              'تاريخ الاستلام',
+                              d.receivedAt != null
+                                  ? _dateFormat.format(d.receivedAt!)
+                                  : _dateFormat.format(d.createdAt)
+                            ),
+                            (
+                              'تاريخ الإرسال',
+                              d.sentAt != null
+                                  ? _dateFormat.format(d.sentAt!)
+                                  : '-'
+                            ),
                           ]),
-                          const SizedBox(height: 14),
-                          _sectionTitle('نص المراسلة', Icons.description_rounded),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: SelectableText(
-                              (d.body != null && d.body!.trim().isNotEmpty) ? d.body! : 'لا يوجد نص',
-                              style: const TextStyle(fontSize: 12.5, height: 1.6, color: Color(0xFF334155)),
-                            ),
+                          const SizedBox(height: 16),
+                          // ─── نص المراسلة ───
+                          _sectionTitle(
+                              'نص المراسلة', Icons.description_rounded),
+                          _bodyBox(d.body),
+                          const SizedBox(height: 16),
+                          // ─── الإحالات ───
+                          _sectionTitle(
+                            'الإحالات (${d.referrals.length})',
+                            Icons.swap_horiz_rounded,
                           ),
-                          const SizedBox(height: 14),
-                          _sectionTitle('الإحالات (${d.referrals.length})', Icons.swap_horiz_rounded),
                           if (d.referrals.isEmpty)
                             _emptyHint('لا توجد إحالات')
                           else
                             ...d.referrals.map((r) => _listTile(
                                   icon: Icons.swap_horiz_rounded,
+                                  iconColor: AdminTheme.accent,
                                   title: '${r.fromName} → ${r.toName}',
-                                  subtitle: '${referralStatusLabel(r.status)}'
-                                      '${r.dueDate != null ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(r.dueDate!)}' : ''}',
+                                  subtitle: referralStatusLabel(r.status) +
+                                      (r.dueDate != null
+                                          ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(r.dueDate!)}'
+                                          : ''),
                                   extra: r.note,
                                 )),
-                          const SizedBox(height: 14),
-                          _sectionTitle('التكليفات (${d.tasks.length})', Icons.assignment_rounded),
+                          const SizedBox(height: 16),
+                          // ─── التكليفات ───
+                          _sectionTitle(
+                            'التكليفات (${d.tasks.length})',
+                            Icons.assignment_rounded,
+                          ),
                           if (d.tasks.isEmpty)
                             _emptyHint('لا توجد تكليفات')
                           else
                             ...d.tasks.map((t) => _listTile(
                                   icon: Icons.assignment_rounded,
+                                  iconColor: AdminTheme.purple,
                                   title: t.title,
-                                  subtitle: '${taskStatusLabel(t.status)} — المنفذ: ${t.assignedToName}'
-                                      '${t.dueDate != null ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(t.dueDate!)}' : ''}',
-                                  extra: t.assignedByName.isNotEmpty ? 'كلّفه: ${t.assignedByName}' : null,
+                                  subtitle: '${taskStatusLabel(t.status)} — المنفذ: ${t.assignedToName}' +
+                                      (t.dueDate != null
+                                          ? ' — استحقاق: ${DateFormat('yyyy/MM/dd').format(t.dueDate!)}'
+                                          : ''),
+                                  extra: t.assignedByName.isNotEmpty
+                                      ? 'كلّفه: ${t.assignedByName}'
+                                      : null,
                                 )),
-                          const SizedBox(height: 14),
-                          _sectionTitle('الردود (${d.replies.length})', Icons.reply_rounded),
+                          const SizedBox(height: 16),
+                          // ─── الردود ───
+                          _sectionTitle(
+                            'الردود (${d.replies.length})',
+                            Icons.reply_rounded,
+                          ),
                           if (d.replies.isEmpty)
                             _emptyHint('لا توجد ردود')
                           else
                             ...d.replies.map((r) => _listTile(
                                   icon: Icons.reply_rounded,
-                                  title: '${r.authorName} — ${replyStatusLabel(r.status)}',
+                                  iconColor: AdminTheme.emerald,
+                                  title:
+                                      '${r.authorName} — ${replyStatusLabel(r.status)}',
                                   subtitle: r.body,
                                 )),
-                          const SizedBox(height: 14),
-                          _sectionTitle('المرفقات (${d.attachments.length})', Icons.attach_file_rounded),
+                          const SizedBox(height: 16),
+                          // ─── المرفقات ───
+                          _sectionTitle(
+                            'المرفقات (${d.attachments.length})',
+                            Icons.attach_file_rounded,
+                          ),
                           if (d.attachments.isEmpty)
                             _emptyHint('لا توجد مرفقات')
                           else
                             ...d.attachments.map((a) => _listTile(
                                   icon: Icons.insert_drive_file_rounded,
+                                  iconColor: AdminTheme.amber,
                                   title: a.fileName,
-                                  subtitle: '${a.mimeType} — ${(a.size / 1024).toStringAsFixed(1)} كيلوبايت',
+                                  subtitle:
+                                      '${a.mimeType} — ${(a.size / 1024).toStringAsFixed(1)} كيلوبايت',
                                 )),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
@@ -621,39 +817,141 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
-  Widget _sectionTitle(String title, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+  // ─── رأس نافذة التفاصيل ───
+  Widget _buildDialogHeader(BuildContext ctx, CorrDetail d) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        color: AdminTheme.surface2,
+        border: Border(bottom: BorderSide(color: AdminTheme.border)),
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AdminTheme.accent),
-          const SizedBox(width: 6),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
+          // أيقونة النوع
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: _typeColor(d.type).withAlpha(18),
+              borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+            ),
+            child: Icon(_typeIcon(d.type),
+                size: 16, color: _typeColor(d.type)),
+          ),
+          const SizedBox(width: 8),
+          // شارة النوع
+          StatusBadge(
+            text: corrTypeLabel(d.type),
+            color: _typeColor(d.type),
+          ),
+          const SizedBox(width: 8),
+          // الرقم المرجعي
+          Text(
+            d.refNumber,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AdminTheme.textMuted,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // شارة الحالة
+          StatusBadge(
+            text: corrStatusLabel(d.status),
+            color: _statusColor(d.status),
+          ),
+          const Spacer(),
+          // زر الإغلاق
+          IconButton(
+            icon: const Icon(Icons.close_rounded, size: 18),
+            tooltip: 'إغلاق',
+            onPressed: () => Navigator.pop(ctx),
+          ),
         ],
       ),
     );
   }
 
+  // ─── شارة أولوية مع أيقونة ───
+  Widget _priorityBadgeRow(String priority) {
+    final color = _priorityColor(priority);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(_priorityIcon(priority), size: 13, color: color),
+        const SizedBox(width: 3),
+        StatusBadge(text: 'أولوية: ${priorityLabel(priority)}', color: color),
+      ],
+    );
+  }
+
+  // ─── عنوان قسم في النافذة ───
+  Widget _sectionTitle(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: AdminTheme.accent.withAlpha(15),
+              borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+            ),
+            child: Icon(icon, size: 14, color: AdminTheme.accent),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: AdminTheme.textMain,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── شبكة بيانات الجهة المُرسِلة ───
   Widget _infoGrid(List<(String, String)> pairs) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
+        boxShadow: AdminTheme.cardShadow,
       ),
       child: Wrap(
-        spacing: 24,
-        runSpacing: 8,
+        spacing: 28,
+        runSpacing: 10,
         children: pairs
             .map((p) => SizedBox(
                   width: 200,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(p.$1, style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted, fontWeight: FontWeight.w600)),
-                      Text(p.$2, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF1E293B))),
+                      Text(
+                        p.$1,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AdminTheme.textLight,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        p.$2,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AdminTheme.textMain,
+                        ),
+                      ),
                     ],
                   ),
                 ))
@@ -662,37 +960,87 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
+  // ─── صندوق نص المراسلة ───
+  Widget _bodyBox(String? body) {
+    final text = (body != null && body.trim().isNotEmpty) ? body : 'لا يوجد نص';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
+      ),
+      child: SelectableText(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          height: 1.7,
+          color: AdminTheme.textMain,
+        ),
+      ),
+    );
+  }
+
+  // ─── صف عنصر في قوائم الإحالات / التكليفات / الردود / المرفقات ───
   Widget _listTile({
     required IconData icon,
+    required Color iconColor,
     required String title,
     required String subtitle,
     String? extra,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AdminTheme.cardBg,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
+        boxShadow: AdminTheme.cardShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: AdminTheme.accent),
-          const SizedBox(width: 8),
+          Container(
+            margin: const EdgeInsets.only(top: 1),
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: iconColor.withAlpha(15),
+              borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+            ),
+            child: Icon(icon, size: 13, color: iconColor),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AdminTheme.textMain,
+                  ),
+                ),
+                const SizedBox(height: 3),
                 SelectableText(
                   subtitle,
-                  style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.5),
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: AdminTheme.textMuted,
+                    height: 1.5,
+                  ),
                 ),
-                if (extra != null && extra.isNotEmpty)
-                  Text(extra, style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted)),
+                if (extra != null && extra.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    extra,
+                    style: const TextStyle(
+                        fontSize: 10.5, color: AdminTheme.textLight),
+                  ),
+                ],
               ],
             ),
           ),
@@ -701,10 +1049,28 @@ class _CorrespondencesManagementViewState extends State<CorrespondencesManagemen
     );
   }
 
+  // ─── نص تلميح فراغ ───
   Widget _emptyHint(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(text, style: const TextStyle(fontSize: 11.5, color: AdminTheme.textMuted)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: AdminTheme.surface2,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.inbox_outlined,
+              size: 14, color: AdminTheme.textLight),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: const TextStyle(
+                fontSize: 11.5, color: AdminTheme.textMuted),
+          ),
+        ],
+      ),
     );
   }
 }

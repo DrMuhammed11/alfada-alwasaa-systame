@@ -19,13 +19,28 @@ class AdminMainScreen extends StatefulWidget {
   State<AdminMainScreen> createState() => _AdminMainScreenState();
 }
 
-class _AdminMainScreenState extends State<AdminMainScreen> {
+class _AdminMainScreenState extends State<AdminMainScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  bool _sidebarCollapsed = false;
+
+  late final AnimationController _sidebarController;
+  late final Animation<double> _sidebarAnim;
 
   @override
   void initState() {
     super.initState();
-    // انتهاء الجلسة (فشل تجديد الرمز) → إعادة توجيه فورية لشاشة الدخول بدل حلقات «أعد المحاولة»
+    // تهيئة تحريك الشريط الجانبي
+    _sidebarController = AnimationController(
+      vsync: this,
+      duration: AdminTheme.medium,
+      value: 1.0,
+    );
+    _sidebarAnim = CurvedAnimation(
+      parent: _sidebarController,
+      curve: Curves.easeInOut,
+    );
+    // انتهاء الجلسة → إعادة توجيه فورية لشاشة الدخول
     SessionManager().sessionExpiredTick.addListener(_onSessionExpired);
   }
 
@@ -40,6 +55,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   @override
   void dispose() {
     SessionManager().sessionExpiredTick.removeListener(_onSessionExpired);
+    _sidebarController.dispose();
     super.dispose();
   }
 
@@ -59,7 +75,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     ];
   }
 
-  /// تغيير كلمة المرور الذاتي — النجاح يعني إبطال الجلسات وإعادة للدخول
+  /// تغيير كلمة المرور الذاتي
   Future<void> _openChangePassword() async {
     final changed = await showDialog<bool>(
       context: context,
@@ -85,6 +101,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     );
   }
 
+  void _toggleSidebar() {
+    setState(() => _sidebarCollapsed = !_sidebarCollapsed);
+    if (_sidebarCollapsed) {
+      _sidebarController.reverse();
+    } else {
+      _sidebarController.forward();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = SessionManager().currentUser;
@@ -96,155 +121,301 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
+        final isMedium = constraints.maxWidth >= 600 && !isWide;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
-          appBar: AppBar(
-            backgroundColor: AdminTheme.primary,
-            // Expanded حول النص — العنوان الطويل يتقلص على شاشات الجوال بدل تصدّع الصف
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AdminTheme.accent.withAlpha(40),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(Icons.shield_rounded, color: AdminTheme.accent, size: 20),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        current.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
-                      const FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'نظام الفضاء الواسع — بوابة الإدارة العليا',
-                          style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              // اسم المستخدم والدور
-              if (user != null) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: AdminTheme.accent.withAlpha(40),
-                        child: Text(
-                          user.name.isNotEmpty ? user.name[0].toUpperCase() : 'A',
-                          style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(user.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                          Text(ApiConstants.getRoleName(user.role), style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              IconButton(
-                icon: const Icon(Icons.lock_reset_rounded, color: Color(0xFF94A3B8), size: 20),
-                tooltip: 'تغيير كلمة المرور',
-                onPressed: _openChangePassword,
-              ),
-              IconButton(
-                icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
-                tooltip: 'تسجيل الخروج',
-                onPressed: _handleLogout,
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
+          backgroundColor: AdminTheme.bgLight,
+          appBar: _buildAppBar(current, user, isWide),
           body: isWide
               ? Row(
                   children: [
-                    // الشريط الجانبي للشاشات الكبيرة
-                    _buildWideSidebar(sections),
-                    // المحتوى
-                    Expanded(child: current.view),
+                    // الشريط الجانبي المتحرك
+                    SizeTransition(
+                      sizeFactor: _sidebarAnim,
+                      axis: Axis.horizontal,
+                      child: _buildWideSidebar(sections),
+                    ),
+                    // حد فاصل قابل للسحب
+                    if (!_sidebarCollapsed)
+                      MouseRegion(
+                        cursor: SystemMouseCursors.resizeColumn,
+                        child: Container(
+                          width: 1,
+                          color: AdminTheme.borderDark,
+                        ),
+                      ),
+                    // المحتوى الرئيسي
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: AdminTheme.fast,
+                        child: KeyedSubtree(
+                          key: ValueKey(_selectedIndex),
+                          child: current.view,
+                        ),
+                      ),
+                    ),
                   ],
                 )
               : current.view,
-          // شريط التنقل السفلي للأجهزة الذكية (Mobile / Android)
           bottomNavigationBar: !isWide
-              ? BottomNavigationBar(
-                  currentIndex: _selectedIndex,
-                  type: BottomNavigationBarType.fixed,
-                  backgroundColor: Colors.white,
-                  selectedItemColor: AdminTheme.accent,
-                  unselectedItemColor: const Color(0xFF64748B),
-                  selectedFontSize: 11,
-                  unselectedFontSize: 11,
-                  onTap: (index) => setState(() => _selectedIndex = index),
-                  items: sections
-                      .map((s) => BottomNavigationBarItem(
-                            icon: Icon(s.icon),
-                            activeIcon: Icon(s.icon),
-                            label: s.navLabel,
-                          ))
-                      .toList(),
+              ? _buildBottomNav(sections)
+              : null,
+          // زر طي الشريط الجانبي (WIDE فقط)
+          floatingActionButton: isWide
+              ? FloatingActionButton.small(
+                  onPressed: _toggleSidebar,
+                  backgroundColor: AdminTheme.slate,
+                  foregroundColor: Colors.white70,
+                  elevation: 0,
+                  tooltip:
+                      _sidebarCollapsed ? 'إظهار القائمة' : 'طي القائمة',
+                  child: AnimatedRotation(
+                    turns: _sidebarCollapsed ? 0.5 : 0,
+                    duration: AdminTheme.medium,
+                    child: const Icon(Icons.chevron_right_rounded, size: 20),
+                  ),
                 )
               : null,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.startFloat,
         );
       },
     );
   }
 
+  PreferredSizeWidget _buildAppBar(
+      _NavSection current, dynamic user, bool isWide) {
+    return AppBar(
+      backgroundColor: AdminTheme.primary,
+      elevation: 0,
+      title: Row(
+        children: [
+          // أيقونة الدرع مع تدرج
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              gradient: AdminTheme.accentGradient,
+              borderRadius:
+                  BorderRadius.circular(AdminTheme.radiusSm),
+            ),
+            child: const Icon(Icons.shield_rounded,
+                color: Colors.white, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  current.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const Text(
+                  'نظام الفضاء الواسع — بوابة الإدارة العليا',
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: AdminTheme.textLight),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (user != null) _buildUserInfo(user),
+        // زر تغيير كلمة المرور
+        Tooltip(
+          message: 'تغيير كلمة المرور',
+          child: IconButton(
+            icon: const Icon(Icons.lock_reset_rounded,
+                color: AdminTheme.textLight, size: 19),
+            onPressed: _openChangePassword,
+          ),
+        ),
+        // زر الخروج
+        Tooltip(
+          message: 'تسجيل الخروج',
+          child: IconButton(
+            icon: const Icon(Icons.logout_rounded,
+                color: AdminTheme.crimson, size: 19),
+            onPressed: _handleLogout,
+          ),
+        ),
+        const SizedBox(width: 6),
+      ],
+    );
+  }
+
+  Widget _buildUserInfo(dynamic user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // صورة رمزية بتدرج
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              gradient: AdminTheme.accentGradient,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                user.name.isNotEmpty
+                    ? user.name[0].toUpperCase()
+                    : 'A',
+                style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.name,
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              Text(
+                ApiConstants.getRoleName(user.role),
+                style: const TextStyle(
+                    fontSize: 10, color: AdminTheme.textLight),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWideSidebar(List<_NavSection> sections) {
     return Container(
-      width: 240,
+      width: 230,
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
-        border: Border(left: BorderSide(color: Color(0xFF1E293B))),
+        color: AdminTheme.primary,
+        border: Border(left: BorderSide(color: AdminTheme.borderDark)),
       ),
       child: Column(
         children: [
-          const SizedBox(height: 16),
-          for (var i = 0; i < sections.length; i++)
-            _buildSidebarItem(i, sections[i].sidebarLabel, sections[i].icon),
-          const Spacer(),
-          // حالة الاتصال
-          Container(
-            padding: const EdgeInsets.all(12),
-            margin: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF334155)),
-            ),
+          const SizedBox(height: 12),
+          // عنوان القائمة
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             child: Row(
               children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle),
-                ),
-                const SizedBox(width: 8),
+                const Icon(Icons.menu_rounded,
+                    size: 14, color: AdminTheme.textLight),
+                const SizedBox(width: 6),
                 const Text(
-                  'الخادم: متصل ومستقر',
-                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+                  'قائمة التنقل',
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: AdminTheme.textLight,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          for (var i = 0; i < sections.length; i++)
+            _buildSidebarItem(i, sections[i]),
+          const Spacer(),
+          // مؤشر حالة الخادم
+          _buildServerStatus(),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem(int index, _NavSection section) {
+    final isSelected = _selectedIndex == index;
+    return AnimatedContainer(
+      duration: AdminTheme.fast,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AdminTheme.accent
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+      ),
+      child: ListTile(
+        leading: AnimatedContainer(
+          duration: AdminTheme.fast,
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.white.withAlpha(30)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+          ),
+          child: Icon(
+            section.icon,
+            color: isSelected
+                ? Colors.white
+                : const Color(0xFF94A3B8),
+            size: 18,
+          ),
+        ),
+        title: Text(
+          section.sidebarLabel,
+          style: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
+            fontSize: 12,
+            fontWeight:
+                isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+        dense: true,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AdminTheme.radiusSm)),
+        onTap: () => setState(() => _selectedIndex = index),
+      ),
+    );
+  }
+
+  Widget _buildServerStatus() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AdminTheme.slate,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.borderDark),
+      ),
+      child: Row(
+        children: [
+          // مؤشر نبضي
+          _PulsingDot(color: AdminTheme.emerald),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'الخادم: متصل',
+                  style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'API v1 • آمن',
+                  style: TextStyle(
+                      color: AdminTheme.textLight, fontSize: 9),
                 ),
               ],
             ),
@@ -254,33 +425,99 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     );
   }
 
-  Widget _buildSidebarItem(int index, String title, IconData icon) {
-    final isSelected = _selectedIndex == index;
+  Widget _buildBottomNav(List<_NavSection> sections) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: isSelected ? AdminTheme.accent : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AdminTheme.border)),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: isSelected ? Colors.white : const Color(0xFF94A3B8), size: 20),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-          ),
-        ),
-        dense: true,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onTap: () => setState(() => _selectedIndex = index),
+      child: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: AdminTheme.accent,
+        unselectedItemColor: AdminTheme.textMuted,
+        selectedFontSize: 10,
+        unselectedFontSize: 10,
+        elevation: 0,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: sections
+            .map((s) => BottomNavigationBarItem(
+                  icon: Icon(s.icon, size: 20),
+                  activeIcon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AdminTheme.accent.withAlpha(20),
+                      borderRadius: BorderRadius.circular(
+                          AdminTheme.radiusXs),
+                    ),
+                    child: Icon(s.icon,
+                        size: 20, color: AdminTheme.accent),
+                  ),
+                  label: s.navLabel,
+                ))
+            .toList(),
       ),
     );
   }
 }
 
-/// قسم تنقلي في لوحة الإدارة: عنوان علوي، تسمية شريط سفلي، تسمية شريط جانبي، أيقونة، وشاشة
+/// نقطة نبضية متحركة
+class _PulsingDot extends StatefulWidget {
+  final Color color;
+  const _PulsingDot({required this.color});
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _anim,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: widget.color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: widget.color.withAlpha(80),
+              blurRadius: 6,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// قسم تنقلي في لوحة الإدارة
 class _NavSection {
   final String title;
   final String navLabel;
@@ -288,5 +525,6 @@ class _NavSection {
   final IconData icon;
   final Widget view;
 
-  const _NavSection(this.title, this.navLabel, this.sidebarLabel, this.icon, this.view);
+  const _NavSection(
+      this.title, this.navLabel, this.sidebarLabel, this.icon, this.view);
 }

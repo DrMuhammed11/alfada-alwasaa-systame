@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_utils.dart';
 import '../../models/audit_model.dart';
 
 /// تسميات عربية لأنواع أحداث التدقيق — يجب أن تطابق enum AuditAction في الخادم
@@ -39,6 +40,9 @@ class _AuditSystemViewState extends State<AuditSystemView> {
   bool _hasError = false;
   bool _isActionRunning = false;
   bool _isCheckingIntegrity = false;
+  bool _isExporting = false;
+  /// سقف التصدير الواحد — يمنع طلباً لا نهائياً على سجل ضخم
+  static const int _exportCap = 2000;
   AuditIntegrityReport? _integrityReport;
   final DateFormat _dateFormat = DateFormat('yyyy/MM/dd HH:mm', 'ar');
 
@@ -141,6 +145,74 @@ class _AuditSystemViewState extends State<AuditSystemView> {
     _loadLogs(page: _page);
   }
 
+  /// تصدير السجلات المطابقة للفلاتر الحالية إلى CSV — يجمع كل الصفحات
+  /// (بسقف 2000 سجل) قبل الحفظ لأن تصدير الصفحة المعروضة وحدها لا يصلح للرقابة
+  Future<void> _exportCsv() async {
+    setState(() => _isExporting = true);
+    var page = 1;
+    var truncated = false;
+    final rows = <List<String>>[
+      ['التوقيت', 'الإجراء', 'المستخدم', 'البريد', 'عنوان IP', 'البيان', 'بصمة السجل (SHA-256)', 'بصمة السجل السابق', 'معرف السجل'],
+    ];
+    try {
+      while (true) {
+        final res = await AdminApiService().getAuditLogs(
+          q: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+          action: _selectedAction,
+          from: _fromDate != null ? DateFormat('yyyy-MM-dd').format(_fromDate!) : null,
+          to: _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null,
+          page: page,
+          limit: 200,
+        );
+        if (res.error) {
+          if (!mounted) return;
+          setState(() => _isExporting = false);
+          AppUtils.showError(context, 'تعذر جمع السجلات من الخادم — أعد المحاولة');
+          return;
+        }
+        for (final item in res.items) {
+          rows.add([
+            _dateFormat.format(item.createdAt),
+            kAuditActionLabels[item.action] ?? item.action,
+            item.userName ?? 'النظام',
+            item.userEmail ?? '',
+            item.ipAddress ?? '',
+            item.summary,
+            item.recordHash ?? '',
+            item.previousHash ?? '',
+            item.id,
+          ]);
+        }
+        if (page >= res.totalPages || res.items.isEmpty) break;
+        if (rows.length >= _exportCap) {
+          truncated = true;
+          break;
+        }
+        page++;
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+    if (!mounted) return;
+    if (rows.length <= 1) {
+      AppUtils.showWarning(context, 'لا توجد سجلات مطابقة للفلاتر لتصديرها');
+      return;
+    }
+    final ok = await AppUtils.exportCsv(
+      context: context,
+      suggestedName: 'audit-logs-${DateFormat('yyyyMMdd-HHmm').format(DateTime.now())}.csv',
+      rows: rows,
+    );
+    if (ok && mounted) {
+      AppUtils.showSuccess(
+        context,
+        truncated
+            ? 'صُدِّر أول ${rows.length - 1} سجل (سقف التصدير) — ضيّق الفلاتر للوصول لسجلات أقدم'
+            : 'صُدِّر ${rows.length - 1} سجل تدقيق بنجاح',
+      );
+    }
+  }
+
   Future<void> _pickDate({required bool isFrom}) async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -175,14 +247,22 @@ class _AuditSystemViewState extends State<AuditSystemView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AdminTheme.bgLight,
       body: Column(
         children: [
           _buildToolbar(),
           // بطاقة تقرير فحص النزاهة الرقمية
           if (_integrityReport != null) _buildIntegrityBanner(_integrityReport!),
           Expanded(child: _buildBody()),
-          _buildPaginationBar(),
+          // شريط الترقيم الموحد من app_utils
+          if (!_isLoading && !_hasError && _logs.isNotEmpty)
+            PaginationBar(
+              currentPage: _page,
+              totalPages: _totalPages,
+              total: _total,
+              isLoading: _isLoading,
+              onPageChange: (p) => _loadLogs(page: p),
+            ),
         ],
       ),
     );
@@ -193,7 +273,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTheme.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +283,10 @@ class _AuditSystemViewState extends State<AuditSystemView> {
             children: [
               const Icon(Icons.security_rounded, color: AdminTheme.accent, size: 22),
               const SizedBox(width: 8),
-              const Text('سجل التدقيق والرقابة الأمنية', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text(
+                'سجل التدقيق والرقابة الأمنية',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
               const Spacer(),
               // زر فحص النزاهة الرقمية المشفرة
               FilledButton.icon(
@@ -237,6 +320,20 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 ),
               ),
               const SizedBox(width: 8),
+              // زر تصدير السجلات المطابقة للفلاتر إلى CSV
+              OutlinedButton.icon(
+                onPressed: _isExporting ? null : _exportCsv,
+                icon: _isExporting
+                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.download_rounded, size: 16),
+                label: const Text('تصدير CSV', style: TextStyle(fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AdminTheme.emerald,
+                  side: const BorderSide(color: AdminTheme.emerald),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, size: 20),
                 tooltip: 'تحديث السجل',
@@ -259,9 +356,11 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                       hintStyle: const TextStyle(fontSize: 12, color: AdminTheme.textMuted),
                       prefixIcon: const Icon(Icons.search_rounded, size: 18),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                      ),
                       filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
+                      fillColor: AdminTheme.bgLight,
                     ),
                     onSubmitted: (_) => _loadLogs(page: 1),
                   ),
@@ -292,7 +391,11 @@ class _AuditSystemViewState extends State<AuditSystemView> {
               const Spacer(),
               Text(
                 'إجمالي السجلات: $_total',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AdminTheme.textMuted,
+                ),
               ),
             ],
           ),
@@ -306,14 +409,14 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       height: 38,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AdminTheme.bgLight,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+        border: Border.all(color: AdminTheme.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedAction,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 12, color: AdminTheme.primary, fontWeight: FontWeight.w600),
           items: [
             const DropdownMenuItem(value: 'ALL', child: Text('كل أنواع الأحداث')),
             ...kAuditActionLabels.entries.map(
@@ -348,33 +451,22 @@ class _AuditSystemViewState extends State<AuditSystemView> {
   }
 
   Widget _buildBody() {
+    // حالة التحميل — ودجة موحدة من app_utils
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget(message: 'جارٍ تحميل سجل التدقيق...');
     }
+    // حالة الخطأ — ودجة موحدة من app_utils
     if (_hasError) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off_rounded, size: 44, color: AdminTheme.crimson),
-            const SizedBox(height: 10),
-            const Text('تعذر تحميل سجل التدقيق من الخادم', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () => _loadLogs(page: _page),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('إعادة المحاولة'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: 'تعذر تحميل سجل التدقيق من الخادم',
+        onRetry: () => _loadLogs(page: _page),
       );
     }
+    // حالة الفراغ — ودجة موحدة من app_utils
     if (_logs.isEmpty) {
-      return const Center(
-        child: Text(
-          'لا توجد سجلات تدقيق مطابقة للفلاتر المحددة',
-          style: TextStyle(color: AdminTheme.textMuted),
-        ),
+      return const EmptyStateWidget(
+        message: 'لا توجد سجلات تدقيق مطابقة للفلاتر المحددة',
+        icon: Icons.manage_search_rounded,
       );
     }
     return RefreshIndicator(
@@ -390,38 +482,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
     );
   }
 
-  Widget _buildPaginationBar() {
-    if (_isLoading || _hasError || _logs.isEmpty) return const SizedBox.shrink();
-    final canPrev = _page > 1;
-    final canNext = _page < _totalPages;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: Row(
-        children: [
-          Text(
-            'الصفحة $_page من $_totalPages',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.chevron_right_rounded),
-            tooltip: 'الصفحة السابقة',
-            onPressed: canPrev ? () => _loadLogs(page: _page - 1) : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
-            tooltip: 'الصفحة التالية',
-            onPressed: canNext ? () => _loadLogs(page: _page + 1) : null,
-          ),
-        ],
-      ),
-    );
-  }
-
+  /// بانر نتيجة فحص النزاهة التشفيرية بتصميم محسَّن
   Widget _buildIntegrityBanner(AuditIntegrityReport report) {
     final isOk = report.isTamperFree;
     final bannerColor = isOk ? AdminTheme.emerald : AdminTheme.crimson;
@@ -433,22 +494,24 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: bgLight,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
         border: Border.all(color: borderLight, width: 1.5),
+        boxShadow: AdminTheme.cardShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // أيقونة حالة النزاهة
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: bannerColor.withAlpha(30),
+              color: bannerColor.withAlpha(28),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isOk ? Icons.verified_rounded : Icons.gpp_maybe_rounded,
               color: bannerColor,
-              size: 24,
+              size: 22,
             ),
           ),
           const SizedBox(width: 12),
@@ -458,41 +521,33 @@ class _AuditSystemViewState extends State<AuditSystemView> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      isOk
-                          ? 'سلسلة التدقيق التشفيرية سليمة وغير قابلة للتلاعب 100%'
-                          : 'تحذير أمني: تم رصد انقطاع أو تلاعب في سجل التدقيق!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: bannerColor,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: bannerColor.withAlpha(25),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    Expanded(
                       child: Text(
-                        report.chainStatus,
+                        isOk
+                            ? 'سلسلة التدقيق التشفيرية سليمة وغير قابلة للتلاعب 100%'
+                            : 'تحذير أمني: تم رصد انقطاع أو تلاعب في سجل التدقيق!',
                         style: TextStyle(
-                          fontSize: 10,
                           fontWeight: FontWeight.bold,
+                          fontSize: 13,
                           color: bannerColor,
-                          fontFamily: 'monospace',
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    // شارة حالة السلسلة
+                    StatusBadge(
+                      text: report.chainStatus,
+                      color: bannerColor,
+                      fontSize: 10,
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
                   report.details,
                   style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 7),
                 Wrap(
                   spacing: 16,
                   runSpacing: 4,
@@ -503,20 +558,29 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                           : 'عدد السجلات المفحوصة: ${report.totalVerified}',
                       style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
                     ),
-                    Text(
+                    const Text(
                       'خوارزمية الإثبات: SHA-256 Merkle Chain',
-                      style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AdminTheme.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     if (report.brokenRecordId != null)
                       Text(
                         'السجل المنقطع: ${report.brokenRecordId}',
-                        style: const TextStyle(fontSize: 11, color: AdminTheme.crimson, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AdminTheme.crimson,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                   ],
                 ),
               ],
             ),
           ),
+          // زر إغلاق التقرير
           IconButton(
             icon: const Icon(Icons.close_rounded, size: 18, color: AdminTheme.textMuted),
             tooltip: 'إغلاق التقرير',
@@ -528,6 +592,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
   }
 
   Widget _buildLogCard(AuditLogItem item) {
+    // تحديد لون الإجراء حسب نوعه
     Color actionColor;
     if (item.action.contains('LOGIN') || item.action.contains('AUTH')) {
       actionColor = AdminTheme.purple;
@@ -541,26 +606,29 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       actionColor = AdminTheme.accent;
     }
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+        border: Border.all(color: AdminTheme.border),
+        // ظل موحد من AdminTheme
+        boxShadow: AdminTheme.cardShadow,
       ),
-      elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
         onTap: () => _showAuditDetails(item),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // أيقونة نوع الحدث
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: actionColor.withAlpha(20),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
                 ),
                 child: Icon(Icons.history_edu_rounded, size: 18, color: actionColor),
               ),
@@ -571,22 +639,8 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: actionColor.withAlpha(20),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            item.action,
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              color: actionColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                        // شارة نوع الإجراء — StatusBadge من app_utils
+                        StatusBadge(text: item.action, color: actionColor, fontSize: 10),
                         const SizedBox(width: 8),
                         Text(
                           item.userName ?? 'النظام',
@@ -613,14 +667,19 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                         if (item.ipAddress != null)
                           Text(
                             'IP: ${item.ipAddress}',
-                            style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AdminTheme.textMuted),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                              color: AdminTheme.textMuted,
+                            ),
                           ),
+                        // بصمة السجل الحالي
                         if (item.recordHash != null)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(4),
+                              color: AdminTheme.surface2,
+                              borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
                               border: Border.all(color: const Color(0xFFCBD5E1)),
                             ),
                             child: Row(
@@ -640,13 +699,14 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                               ],
                             ),
                           ),
+                        // بصمة السجل السابق
                         if (item.previousHash != null)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              color: AdminTheme.bgLight,
+                              borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+                              border: Border.all(color: AdminTheme.border),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -684,7 +744,10 @@ class _AuditSystemViewState extends State<AuditSystemView> {
           children: [
             const Icon(Icons.fingerprint_rounded, color: AdminTheme.primary),
             const SizedBox(width: 8),
-            const Text('تفاصيل حدث التدقيق والإثبات التشفيري', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const Text(
+              'تفاصيل حدث التدقيق والإثبات التشفيري',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: SizedBox(
@@ -701,26 +764,36 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 _detailTile('وقت التنفيذ', _dateFormat.format(item.createdAt)),
                 _detailTile('البيان والملخص', item.summary),
                 const Divider(height: 20),
-                const Text('الأدلة التشفيرية (Tamper-Proof Proofs):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                const Text(
+                  'الأدلة التشفيرية (Tamper-Proof Proofs):',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
                 const SizedBox(height: 6),
                 _hashBox('بصمة السجل الحالي (recordHash):', item.recordHash ?? 'غير متوفر (سجل قديم قبل التشفير)'),
                 const SizedBox(height: 6),
                 _hashBox('بصمة السجل السابق (previousHash):', item.previousHash ?? 'الجذر التأسيسي (GENESIS RECORD)'),
                 if (item.details != null && item.details!.isNotEmpty) ...[
                   const Divider(height: 20),
-                  const Text('البيانات الوصفية الإضافية (Metadata):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  const Text(
+                    'البيانات الوصفية الإضافية (Metadata):',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
                   const SizedBox(height: 6),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: AdminTheme.bgLight,
+                      borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                      border: Border.all(color: AdminTheme.border),
                     ),
                     child: Text(
                       item.details.toString(),
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Color(0xFF334155)),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: Color(0xFF334155),
+                      ),
                     ),
                   ),
                 ],
@@ -746,10 +819,16 @@ class _AuditSystemViewState extends State<AuditSystemView> {
         children: [
           SizedBox(
             width: 140,
-            child: Text(label, style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted, fontWeight: FontWeight.w600)),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted, fontWeight: FontWeight.w600),
+            ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF1E293B))),
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AdminTheme.primary),
+            ),
           ),
         ],
       ),
@@ -761,18 +840,26 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       width: double.infinity,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(6),
+        color: AdminTheme.surface2,
+        borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
         border: Border.all(color: const Color(0xFFCBD5E1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 2),
           SelectableText(
             hash,
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: AdminTheme.accent, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 11,
+              color: AdminTheme.accent,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
