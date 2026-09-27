@@ -99,7 +99,7 @@ export const SERVICE_SLUG_ICONS: Record<string, LucideIcon> = {
 };
 
 /* ===== فك أسماء الأيقونات القادمة من البيانات إلى مكونات lucide ===== */
-const FEATURE_ICONS: Record<ServiceIconName, LucideIcon> = {
+export const FEATURE_ICONS: Record<ServiceIconName, LucideIcon> = {
   Building2,
   Blocks,
   HardHat,

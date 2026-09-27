@@ -358,6 +358,17 @@ a, button, input, select, textarea {
   }
 }
 
+/* Ken Burns خفيف جداً لبطاقات الخدمات والقطاعات (scale 1 → 1.04 على ~6s)
+   يُفعَّل عبر animate-[showcase-kenburns_...] ويُعطَّل مع motion-reduce */
+@keyframes showcase-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
 /* Scroll-Reveal (تحسين تدريجي): الـ SSR مرئي دائماً؛ الإخفاء يحدث بعد الـ mount فقط */
 .reveal-hidden {
   opacity: 0;
