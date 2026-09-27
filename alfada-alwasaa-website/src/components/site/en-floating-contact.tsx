@@ -6,9 +6,10 @@
  */
 
 import { useState, useEffect } from "react";
-import { ArrowUp, Building2, MessageSquare, Phone, X } from "lucide-react";
+import { ArrowUp, Building2, Phone, X } from "lucide-react";
 import { EN_SITE_CONFIG } from "@/config/en-site";
 import { ThemeToggle } from "./theme-toggle";
+import { WhatsAppIcon } from "./whatsapp-icon";
 
 export function EnFloatingContact() {
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -73,7 +74,7 @@ export function EnFloatingContact() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1 rounded-xl bg-emerald-500/20 py-1.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/40 hover:bg-emerald-500 hover:text-white transition"
                 >
-                  <MessageSquare className="h-3 w-3" />
+                  <WhatsAppIcon className="h-3 w-3" />
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -99,7 +100,7 @@ export function EnFloatingContact() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1 rounded-xl bg-emerald-500/20 py-1.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/40 hover:bg-emerald-500 hover:text-white transition"
                 >
-                  <MessageSquare className="h-3 w-3" />
+                  <WhatsAppIcon className="h-3 w-3" />
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -119,7 +120,7 @@ export function EnFloatingContact() {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-4 w-4 rounded-full bg-emerald-400" />
         </span>
-        <MessageSquare className="h-7 w-7" />
+        <WhatsAppIcon className="h-7 w-7" />
       </button>
     </div>
   );

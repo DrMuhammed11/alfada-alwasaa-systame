@@ -44,7 +44,6 @@ import {
   Layers,
   LayoutGrid,
   MapPinned,
-  MessageSquare,
   Milestone,
   Mountain,
   Network,
@@ -86,6 +85,7 @@ import { EnFloatingContact } from "./en-floating-contact";
 import { ReadingProgress } from "./reading-progress";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
+import { WhatsAppIcon } from "./whatsapp-icon";
 
 /* ===== أيقونة كل خدمة (تُستعمل أيضاً في تبويبات الرئيسية) ===== */
 export const SERVICE_SLUG_ICONS: Record<string, LucideIcon> = {
@@ -296,7 +296,7 @@ export function ServiceDetailView({
 
             <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-12">
               {/* عمود المعلومات */}
-              <div className="lg:col-span-7">
+              <div className="lg:col-span-6 text-center">
                 <span
                   className="hero-fade-up inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-extrabold text-gold-light shadow-sm"
                   style={{ ["--hero-delay" as string]: "0.05s" }}
@@ -313,7 +313,7 @@ export function ServiceDetailView({
                 </h1>
 
                 <p
-                  className="hero-fade-up mt-4 max-w-2xl text-base leading-8 text-white/80 sm:text-lg sm:leading-9"
+                  className="hero-fade-up mx-auto mt-4 max-w-2xl text-base leading-8 text-white/80 sm:text-lg sm:leading-9"
                   style={{ ["--hero-delay" as string]: "0.2s" }}
                 >
                   {service.subtitle}
@@ -321,7 +321,7 @@ export function ServiceDetailView({
 
                 {/* أزرار الإجراءات المباشرة */}
                 <div
-                  className="hero-fade-up mt-7 flex flex-wrap items-center gap-3"
+                  className="hero-fade-up mt-7 flex flex-wrap items-center justify-center gap-3"
                   style={{ ["--hero-delay" as string]: "0.28s" }}
                 >
                   <a
@@ -330,7 +330,7 @@ export function ServiceDetailView({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-xs font-black text-navy-darker shadow-lg shadow-gold/25 transition-all duration-300 hover:scale-105 hover:bg-gold-light active:scale-95 sm:text-sm print:hidden"
                   >
-                    <MessageSquare className="h-4 w-4" aria-hidden />
+                    <WhatsAppIcon className="h-4 w-4" />
                     <span>{t.quote}</span>
                   </a>
 
@@ -366,7 +366,7 @@ export function ServiceDetailView({
               </div>
 
               {/* الصورة المميزة */}
-              <div className="hero-fade-up lg:col-span-5" style={{ ["--hero-delay" as string]: "0.2s" }}>
+              <div className="hero-fade-up lg:col-span-6" style={{ ["--hero-delay" as string]: "0.2s" }}>
                 <div className="relative">
                   {/* إطار ذهبي مزخرف خلفي */}
                   <div
@@ -378,7 +378,7 @@ export function ServiceDetailView({
                       src={service.image}
                       alt={service.title}
                       fill
-                      sizes="(max-width: 1024px) 100vw, 460px"
+                      sizes="(max-width: 1024px) 100vw, 580px"
                       className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                       priority
                     />
@@ -697,7 +697,7 @@ export function ServiceDetailView({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-xs font-black text-navy-darker shadow-lg shadow-gold/25 transition-all duration-300 hover:scale-105 hover:bg-gold-light active:scale-95 sm:text-sm print:hidden"
                     >
-                      <MessageSquare className="h-4 w-4" aria-hidden />
+                      <WhatsAppIcon className="h-4 w-4" />
                       <span>{t.ctaWhatsapp}</span>
                     </a>
                     <a

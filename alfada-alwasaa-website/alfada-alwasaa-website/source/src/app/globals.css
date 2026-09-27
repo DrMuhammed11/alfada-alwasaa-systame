@@ -338,13 +338,13 @@ a, button, input, select, textarea {
 
 /* Page Transition (CSS-only): يُرسَّر مرئياً في HTML الثابت — لا وميض أبيض ولا انتظار للـ hydration */
 .page-template {
-  animation: page-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: page-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(14px) scale(0.996);
   }
   to {
     opacity: 1;

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, ArrowUp, Phone, X, Building2, UserCheck } from "lucide-react";
+import { ArrowUp, Phone, X, Building2, UserCheck } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
 import { ThemeToggle } from "./theme-toggle";
+import { WhatsAppIcon } from "./whatsapp-icon";
 
 export function FloatingContact() {
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -74,7 +75,7 @@ export function FloatingContact() {
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-1.5 text-xs font-black text-white hover:bg-emerald-600 transition"
                 >
-                  <MessageSquare className="h-3.5 w-3.5" />
+                  <WhatsAppIcon className="h-3.5 w-3.5" />
                   <span>واتساب</span>
                 </a>
               </div>
@@ -100,7 +101,7 @@ export function FloatingContact() {
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-1.5 text-xs font-black text-white hover:bg-emerald-600 transition"
                 >
-                  <MessageSquare className="h-3.5 w-3.5" />
+                  <WhatsAppIcon className="h-3.5 w-3.5" />
                   <span>واتساب</span>
                 </a>
               </div>
@@ -129,7 +130,7 @@ export function FloatingContact() {
         className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.5)] transition hover:bg-emerald-600 hover:scale-105 active:scale-95"
       >
         <span className="absolute -inset-1 rounded-full bg-emerald-400/40 blur-sm animate-pulse" />
-        <MessageSquare className="relative h-7 w-7" />
+        <WhatsAppIcon className="relative h-7 w-7" />
 
         {/* Tooltip hint on hover (desktop) */}
         <span className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap rounded-xl bg-navy-darker px-3 py-1.5 text-xs font-bold text-white shadow-md ring-1 ring-white/10 md:group-hover:block">
