@@ -29,9 +29,41 @@ export interface EnSectorCmsItem {
   photos?: { src: string; alt?: string }[]; order?: number;
 }
 
-const FALLBACK_PHOTOS = [
-  { src: "/profile/site_telecom_tower.webp", alt: "Field operations" },
-  { src: "/profile/road_roller.webp", alt: "Site works" },
+/** Distinct default photos per sector — used when a CMS sector has no photos of
+ *  its own (matched by title, then an ordered pool so photos never repeat) */
+const SECTOR_PHOTOS: Record<string, { src: string; alt: string }[]> = {
+  "Telecom & IT": [
+    { src: "/profile/site_telecom_tower.webp", alt: "Field microwave towers and networks" },
+    { src: "/profile/site_solar_array.webp", alt: "Solar power systems for telecom stations" },
+  ],
+  "Telecom & Information Technology": [
+    { src: "/profile/site_telecom_tower.webp", alt: "Field microwave towers and networks" },
+    { src: "/profile/site_solar_array.webp", alt: "Solar power systems for telecom stations" },
+  ],
+  "General Contracting": [
+    { src: "/profile/site_mountain_station.webp", alt: "Building stations and towers in mountain sites" },
+    { src: "/profile/road_roller.webp", alt: "Road compaction and leveling works" },
+  ],
+  "General Supplies & Equipment": [
+    { src: "/profile/track_forklift.webp", alt: "Field supplies handled by forklifts" },
+    { src: "/profile/track_truck.webp", alt: "Trucks hauling equipment and supplies" },
+  ],
+  "Logistics Services": [
+    { src: "/profile/port_ship.webp", alt: "Sea freight at ports" },
+    { src: "/profile/container_truck.webp", alt: "Land container transport" },
+  ],
+  "Real Estate Marketing & Investments": [
+    { src: "/profile/site_hadramout_building.webp", alt: "Developed residential real estate projects" },
+    { src: "/profile/construction_building.webp", alt: "Real estate development sites" },
+  ],
+};
+
+const SECTOR_PHOTOS_ORDERED = [
+  SECTOR_PHOTOS["Telecom & IT"],
+  SECTOR_PHOTOS["General Contracting"],
+  SECTOR_PHOTOS["General Supplies & Equipment"],
+  SECTOR_PHOTOS["Logistics Services"],
+  SECTOR_PHOTOS["Real Estate Marketing & Investments"],
 ];
 
 const SECTOR_ICONS: Record<string, LucideIcon> = {
@@ -50,7 +82,11 @@ export function EnSectors({ items }: { items?: EnSectorCmsItem[] }) {
           num: String(s.order ?? i + 1).padStart(2, "0"),
           title: s.titleEn,
           services: s.services ?? (s.descEn ? [s.descEn] : []),
-          photos: s.photos && s.photos.length > 0 ? s.photos : FALLBACK_PHOTOS,
+          photos:
+            s.photos && s.photos.length > 0
+              ? s.photos
+              : SECTOR_PHOTOS[s.titleEn] ??
+                SECTOR_PHOTOS_ORDERED[i % SECTOR_PHOTOS_ORDERED.length],
         }))
       : EN_SITE_CONFIG.sectors;
   const filteredSectors =

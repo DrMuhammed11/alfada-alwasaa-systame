@@ -48,9 +48,41 @@ const SECTOR_HREF: Record<string, string> = {
   "التسويق العقاري والفرص الاستثمارية": "/services/marketing",
 };
 
-const DEFAULT_PHOTOS = [
-  { src: "/profile/site_telecom_tower.webp", alt: "عمليات ميدانية" },
-  { src: "/profile/road_roller.webp", alt: "أعمال مواقع" },
+/** صور افتراضية مميزة لكل قطاع — تُستخدم حين يأتي قطاع الـCMS بلا صور خاصة
+ *  (مطابقة بالعنوان، ثم مسبح مرتَّب بالفهرس لمنع تكرار الصور بين القطاعات) */
+const SECTOR_PHOTOS: Record<string, { src: string; alt: string }[]> = {
+  "الاتصالات والإنترنت": [
+    { src: "/profile/site_telecom_tower.webp", alt: "أبراج اتصالات وشبكات المايكروويف الميدانية" },
+    { src: "/profile/site_solar_array.webp", alt: "منظومة الطاقة الشمسية لتشغيل محطات الاتصالات" },
+  ],
+  "الاتصالات وتقنية المعلومات": [
+    { src: "/profile/site_telecom_tower.webp", alt: "أبراج اتصالات وشبكات المايكروويف الميدانية" },
+    { src: "/profile/site_solar_array.webp", alt: "منظومة الطاقة الشمسية لتشغيل محطات الاتصالات" },
+  ],
+  "المقاولات العامة": [
+    { src: "/profile/site_mountain_station.webp", alt: "أعمال إنشاء المحطات والأبراج في المواقع الجبلية" },
+    { src: "/profile/road_roller.webp", alt: "أعمال مدح وتسوية الطرق" },
+  ],
+  "التوريدات العامة والتجهيزات": [
+    { src: "/profile/track_forklift.webp", alt: "تجهيزات وتموينات ميدانية بالرافعات الشوكية" },
+    { src: "/profile/track_truck.webp", alt: "شاحنات نقل المعدات والتوريدات" },
+  ],
+  "الخدمات اللوجستية": [
+    { src: "/profile/port_ship.webp", alt: "شحن بحري في الموانئ" },
+    { src: "/profile/container_truck.webp", alt: "نقل الحاويات برًا" },
+  ],
+  "التسويق العقاري والفرص الاستثمارية": [
+    { src: "/profile/site_hadramout_building.webp", alt: "مشاريع عقارية سكنية مطورة" },
+    { src: "/profile/construction_building.webp", alt: "مواقع تطوير عقاري" },
+  ],
+};
+
+const SECTOR_PHOTOS_ORDERED = [
+  SECTOR_PHOTOS["الاتصالات وتقنية المعلومات"],
+  SECTOR_PHOTOS["المقاولات العامة"],
+  SECTOR_PHOTOS["التوريدات العامة والتجهيزات"],
+  SECTOR_PHOTOS["الخدمات اللوجستية"],
+  SECTOR_PHOTOS["التسويق العقاري والفرص الاستثمارية"],
 ];
 
 /** تحويل قطاعات الـ CMS إلى صيغة العرض — الأيقونة والرابط والصور ببدائل آمنة */
@@ -64,7 +96,8 @@ export function mapCmsToSectors(items: SectorCmsItem[]): Sector[] {
     photos:
       s.photos && s.photos.length > 0
         ? s.photos.map((ph) => ({ src: ph.src, alt: ph.alt ?? s.titleAr }))
-        : DEFAULT_PHOTOS,
+        : SECTOR_PHOTOS[s.titleAr] ??
+          SECTOR_PHOTOS_ORDERED[i % SECTOR_PHOTOS_ORDERED.length],
   }));
 }
 
