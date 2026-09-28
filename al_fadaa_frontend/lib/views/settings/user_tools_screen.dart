@@ -7,6 +7,9 @@ import '../delegation/delegations_screen.dart';
 import 'overdue_screen.dart';
 import 'change_password_dialog.dart';
 import '../notifications/notifications_center_screen.dart';
+import '../admin/audit_screen.dart';
+import '../admin/executive_reports_screen.dart';
+import '../admin/organization_management_screen.dart';
 
 /// بوابة أدوات المستخدم: الإشعارات، الوكالات، المتأخرات، كلمة المرور —
 /// شاشات كانت مبنية في الخادم لكن بلا مدخل واجهة.
@@ -64,6 +67,38 @@ class UserToolsScreen extends StatelessWidget {
               subtitle: 'وكيلك أثناء غيابك والوكالات الممنوحة لك',
               onTap: () => Navigator.push(context, EnterprisePageRoute(page: DelegationsScreen(user: user, canCreate: isAdminOrGM))),
             ),
+          // ─── الوحدة الإدارية — ADMIN/GM فقط ───
+          // شاشات مبنية بمدخل API كامل لكنها كانت بلا مدخل واجهة
+          if (isAdminOrGM) ...[
+            const SizedBox(height: 8),
+            _tile(
+              context,
+              icon: Icons.corporate_fare_rounded,
+              title: 'إدارة المستخدمين والأقسام',
+              subtitle: 'إنشاء الحسابات وتعيين الأدوار والأقسام وتفعيلها',
+              onTap: () => Navigator.push(
+                context,
+                EnterprisePageRoute(page: OrganizationManagementScreen(currentUser: user)),
+              ),
+            ),
+            _tile(
+              context,
+              icon: Icons.query_stats_rounded,
+              title: 'التقارير التنفيذية',
+              subtitle: 'مؤشرات الأداء وحجم المعاملات وأداء الأقسام',
+              onTap: () => Navigator.push(
+                context,
+                EnterprisePageRoute(page: ExecutiveReportsScreen(currentUser: user)),
+              ),
+            ),
+            _tile(
+              context,
+              icon: Icons.receipt_long_rounded,
+              title: 'سجل التدقيق',
+              subtitle: 'سلسلة الأحداث الموثقة بالهاش لكل ما يجري في النظام',
+              onTap: () => Navigator.push(context, EnterprisePageRoute(page: AuditScreen())),
+            ),
+          ],
           _tile(
             context,
             icon: Icons.lock_reset_rounded,

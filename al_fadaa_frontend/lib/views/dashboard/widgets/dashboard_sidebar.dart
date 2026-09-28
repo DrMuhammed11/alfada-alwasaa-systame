@@ -3,6 +3,9 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/page_transitions.dart';
 import '../../../models/user_model.dart';
+import '../../admin/audit_screen.dart';
+import '../../admin/executive_reports_screen.dart';
+import '../../admin/organization_management_screen.dart';
 import '../../correspondences/advanced_search_screen.dart';
 import '../../correspondences/create_incoming_dialog.dart';
 import '../../correspondences/create_internal_dialog.dart';
@@ -265,6 +268,41 @@ class DashboardSidebar extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // ─── الوحدة الإدارية — ADMIN/GM فقط ───
+                // شاشات كانت مبنية بمدخل API كامل لكنها بلا مدخل واجهة
+                if (isAdminOrGM) ...[
+                  const SizedBox(height: 12),
+                  _buildTile(
+                    title: 'إدارة المستخدمين والأقسام',
+                    icon: Icons.corporate_fare_rounded,
+                    isSelected: false,
+                    onTap: () => Navigator.push(
+                      context,
+                      EnterprisePageRoute(
+                        page: OrganizationManagementScreen(currentUser: user),
+                      ),
+                    ),
+                  ),
+                  _buildTile(
+                    title: 'التقارير التنفيذية',
+                    icon: Icons.query_stats_rounded,
+                    isSelected: false,
+                    onTap: () => Navigator.push(
+                      context,
+                      EnterprisePageRoute(page: ExecutiveReportsScreen(currentUser: user)),
+                    ),
+                  ),
+                  _buildTile(
+                    title: 'سجل التدقيق',
+                    icon: Icons.receipt_long_rounded,
+                    isSelected: false,
+                    onTap: () => Navigator.push(
+                      context,
+                      EnterprisePageRoute(page: AuditScreen()),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

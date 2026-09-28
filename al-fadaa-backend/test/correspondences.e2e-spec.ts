@@ -397,6 +397,30 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
     expect(remove.status).toBe(400); // مراسلة منتهية — المرفق محفوظ للأرشيف
   });
 
+  it('شجرة الأنساب تعمل مع إحالات ومهام فعلية — 200 ببنية المخطط الصحيحة', async () => {
+    // كانت تفشل 100%: NODE_INCLUDE كان يطلب notes و isDone غير الموجودين في المخطط
+    const res = await request(httpServer)
+      .get(`/api/v1/correspondences/${correspondenceId}/lineage`)
+      .set('Authorization', `Bearer ${gmToken}`);
+    expect(res.status).toBe(200);
+
+    const tree = res.body.tree;
+    expect(tree).toBeDefined();
+    expect(tree.refNumber).toBe(correspondenceRef);
+    // المعاملة تحمل إحالة ومهمة ومسودة رد من دورة الحياة الكاملة أعلاه
+    expect(tree.referrals.length).toBeGreaterThan(0);
+    expect(tree.tasks.length).toBeGreaterThan(0);
+    // بنية المخطط الفعلية: الإحالة note (وليس notes) — المهمة status/doneAt (لا isDone)
+    expect(tree.referrals[0]).toHaveProperty('note');
+    expect(tree.referrals[0]).not.toHaveProperty('notes');
+    expect(tree.tasks[0]).toHaveProperty('status');
+    expect(tree.tasks[0]).toHaveProperty('doneAt');
+    expect(tree.tasks[0]).not.toHaveProperty('isDone');
+    // مؤشرات الأنساب
+    expect(res.body.currentNodeId).toBe(correspondenceId);
+    expect(res.body.totalNodes).toBeGreaterThan(0);
+  });
+
   it('المدير العام يؤرشف المراسلة — نهاية الدورة', async () => {
     const res = await request(httpServer)
       .post(`/api/v1/correspondences/${correspondenceId}/archive`)

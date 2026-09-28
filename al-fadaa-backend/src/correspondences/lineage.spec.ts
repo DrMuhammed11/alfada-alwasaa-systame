@@ -107,6 +107,31 @@ describe('Document Lineage & Cascading Closure Safeguard (شجرة الأنسا�
     service = module.get<CorrespondencesService>(CorrespondencesService);
   });
 
+  it('يجب أن يطابق NODE_INCLUDE مخطط Prisma الفعلي — الإحالة note (وليس notes) والمهام بلا isDone', async () => {
+    // هذا الاختبار يمنع انحدار الخطأ الذي جعل /lineage يفشل 100%:
+    // استعلام حقلين غير موجودين في المخطط يرمي PrismaClientValidationError
+    await service.getLineage('child-corr-1', gmUser);
+
+    expect(mockPrisma.correspondence.findUnique).toHaveBeenCalled();
+    // ndاء الأنساب هو الذي يحمل NODE_INCLUDE — قبله نداءات تحقق أخرى بلا include
+    const includeCall = mockPrisma.correspondence.findUnique.mock.calls
+      .map((c) => c[0])
+      .find((arg) => arg?.include?.referrals);
+    expect(includeCall).toBeDefined();
+    const include = includeCall!.include;
+
+    // الإحالة: الحقل الفعلي note
+    expect(include.referrals.select).toHaveProperty('note');
+    expect(include.referrals.select).not.toHaveProperty('notes');
+    expect(include.referrals.select.fromUser).toBeDefined();
+
+    // المهمة: الحالة والإنجاز عبر status/doneAt — لا يوجد isDone في المخطط
+    expect(include.tasks.select).not.toHaveProperty('isDone');
+    expect(include.tasks.select).toHaveProperty('status');
+    expect(include.tasks.select).toHaveProperty('doneAt');
+    expect(include.tasks.select.assignedTo).toBeDefined();
+  });
+
   it('يجب استرجاع شجرة الأنساب الكاملة والمؤشرات البيانية للمعاملة', async () => {
     const lineage = await service.getLineage('child-corr-1', gmUser);
 

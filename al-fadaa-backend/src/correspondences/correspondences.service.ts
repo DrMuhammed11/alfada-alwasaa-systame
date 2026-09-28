@@ -1039,7 +1039,7 @@ export class CorrespondencesService {
           id: true,
           status: true,
           createdAt: true,
-          notes: true,
+          note: true, // حقل المخطط الفعلي — كان notes فيفشل الاستعلام دائماً
           fromUser: { select: { id: true, name: true } },
           toUser: { select: { id: true, name: true } },
         },
@@ -1050,8 +1050,7 @@ export class CorrespondencesService {
           title: true,
           status: true,
           dueDate: true,
-          doneAt: true,
-          isDone: true,
+          doneAt: true, // الإنجاز يُقرأ من status/doneAt — لا حقل isDone في المخطط
           assignedTo: { select: { id: true, name: true } },
         },
       },

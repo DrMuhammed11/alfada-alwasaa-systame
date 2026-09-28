@@ -6,9 +6,13 @@ import 'session_manager.dart';
 class AdminHttpClient {
   static final AdminHttpClient _instance = AdminHttpClient._internal();
   factory AdminHttpClient() => _instance;
-  AdminHttpClient._internal();
+  AdminHttpClient._internal() : _client = http.Client();
 
-  final http.Client _client = http.Client();
+  /// نسخة للاختبارات فقط — بعميل HTTP محقون بدل العميل الحقيقي
+  @visibleForTesting
+  AdminHttpClient.forTest(http.Client client) : _client = client;
+
+  final http.Client _client;
 
   Map<String, String> _buildHeaders([Map<String, String>? extra]) {
     final headers = <String, String>{
@@ -79,7 +83,9 @@ class AdminHttpClient {
   }
 
   /// تنفيذ الطلب مع تجديد صامت واحد عند 401:
-  /// فشل التجديد يعني انتهاء الجلسة فعليًا — تُمسح وتُبثّ لإعادة التوجيه لشاشة الدخول
+  /// نقطة موت الجلسة الوحيدة هي فشل التجديد — أي 401 بلا تجديد ناجح لا يمسح الجلسة.
+  /// (كان clearSession يُنفَّذ عند أول 401 فيُقتل refresh token قبل محاولة
+  /// التجديد فيُطرد المدير من الدخول كل انتهاء صلاحية access token — 15 دقيقة)
   Future<http.Response> _sendWithRefresh(Future<http.Response> Function() request) async {
     try {
       return await request();
@@ -89,14 +95,19 @@ class AdminHttpClient {
         await SessionManager().expireSession();
         rethrow;
       }
-      return await request();
+      // إعادة الطلب بالتوكن الجديد — وإن أعاد 401 فانتهت الجلسة فعلًا
+      try {
+        return await request();
+      } on UnauthorizedException {
+        await SessionManager().expireSession();
+        rethrow;
+      }
     }
   }
 
   void _check401(http.Response response) {
     if (response.statusCode == 401) {
-      debugPrint('Admin 401 Unauthorized received');
-      SessionManager().clearSession();
+      // لا نمسح الجلسة هنا — الحَكَم هو نتيجة التجديد الصامت في _sendWithRefresh
       throw UnauthorizedException();
     }
   }

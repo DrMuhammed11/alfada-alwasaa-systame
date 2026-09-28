@@ -100,17 +100,31 @@ class SessionManager {
     return completer.future;
   }
 
+  /// نقطة حقن للاختبارات — يعيد عميل HTTP مخصص لنداء التجديد (لا شيء في الإنتاج)
+  @visibleForTesting
+  static http.Client Function()? refreshClientOverride;
+
   Future<void> _doRefresh() async {
     final completer = _refreshCompleter;
     if (completer == null) return;
+    final override = refreshClientOverride;
     try {
-      final response = await http
-          .post(
-            Uri.parse('${ApiConstants.baseUrl}/auth/refresh'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'refreshToken': _refreshToken}),
-          )
-          .timeout(const Duration(seconds: 10));
+      // في الإنتاج: نداء المستوى الأعلى كالسابق — في الاختبارات: عميل محقون
+      final response = override != null
+          ? await override()
+              .post(
+                Uri.parse('${ApiConstants.baseUrl}/auth/refresh'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode({'refreshToken': _refreshToken}),
+              )
+              .timeout(const Duration(seconds: 10))
+          : await http
+              .post(
+                Uri.parse('${ApiConstants.baseUrl}/auth/refresh'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode({'refreshToken': _refreshToken}),
+              )
+              .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
