@@ -4,6 +4,23 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
+import { AppLogger } from './common/logger/app-logger';
+
+// ═══ شبكة أمان العملية: لا موت صامت إطلاقاً ═══
+// رفض وعد غير معالج (مثل رفض close() أثناء عواصف انقطاع IMAP) كان يُسقط Node
+// بصمت بلا أي أثر. الآن يُطبع بأعلى صوت مع أثر المكدس كاملاً:
+// في التطوير تستمر العملية بالخدمة، وفي الإنتاج تخرج برمز فشل بعد الطباعة
+// ليعيد النظام المستضيف تشغيلها — الموت مسموح لكن الصمت ممنوع.
+const isProdProcess = process.env.NODE_ENV === 'production';
+process.on('uncaughtException', (err: Error) => {
+  console.error('════════ [FATAL] uncaughtException ════════\n', err?.stack ?? String(err));
+  if (isProdProcess) process.exit(1);
+});
+process.on('unhandledRejection', (reason: unknown) => {
+  const asError = reason instanceof Error ? reason : new Error(String(reason));
+  console.error('════════ [FATAL] unhandledRejection ════════\n', asError.stack ?? String(reason));
+  if (isProdProcess) process.exit(1);
+});
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,6 +30,32 @@ async function bootstrap(): Promise<void> {
   app.set('trust proxy', 1);
 
   configureApp(app);
+
+  // وضع التطوير: طباعة كل شيء — كل طلب HTTP بالطريقة والحالة والزمن،
+  // وكل مستويات المسجل (debug/verbose) التي تخفيها المستويات الافتراضية
+  if (!isProdProcess) {
+    app.use(
+      (
+        req: { method: string; originalUrl: string },
+        res: { statusCode: number; on: (event: string, cb: () => void) => void },
+        next: () => void,
+      ) => {
+        const startedAt = Date.now();
+        res.on('finish', () => {
+          console.log(`[HTTP] ${req.method} ${req.originalUrl} → ${res.statusCode} (${Date.now() - startedAt}ms)`);
+        });
+        next();
+      },
+    );
+    app.useLogger(new AppLogger());
+    // تفعيل كل المستويات (debug/verbose) التي تخفيها المستويات الافتراضية —
+    // بالنمط الموثق في Nest: overrideLogger بمصفوفة [الخدمة، المستويات]،
+    // لأن setLogLevels في المسجل المركزي no-op عمداً (تدار مركزياً)
+    Logger.overrideLogger([
+      new AppLogger(),
+      ['log', 'error', 'warn', 'debug', 'verbose'],
+    ] as unknown as Parameters<typeof Logger.overrideLogger>[0]);
+  }
 
   // إغلاق لطيف عند SIGTERM — يوقف IMAP والمؤقتات ويفصل Prisma بشكل نظيف عند النشر
   app.enableShutdownHooks();

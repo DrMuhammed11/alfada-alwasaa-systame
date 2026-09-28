@@ -103,19 +103,25 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     await this.loadSystemUser();
 
     // تشغيل محرك IMAP IDLE Push للاستجابة اللحظية في غضون ثانية
-    await this.startIdleListener().catch(() => {});
+    await this.startIdleListener().catch((err: Error) => {
+      this.logger.warn(`فشل بدء مستمع IDLE: ${err?.message}`);
+    });
 
     // مؤقت فحص دوري أمان (Watchdog) كل 60 ثانية كضمانة ثانوية في حال انقطاع Socket
     const interval = this.config.get<number>('IMAP_POLL_INTERVAL_MS') ?? 60000;
     this.logger.log(`تم تفعيل صمام الأمان الدوري (Watchdog) — فحص احتياطي كل ${interval / 1000} ثانية`);
 
     this.pollTimer = setInterval(() => {
-      this.pollEmails().catch(() => {});
+      this.pollEmails().catch((err: Error) => {
+        this.logger.error(`خطأ غير متوقع في الدورة الدورية لسحب البريد: ${err?.stack ?? err?.message}`);
+      });
     }, interval);
 
     // فحص فوري بعد ثانيتين من تشغيل الخادم
     setTimeout(() => {
-      this.pollEmails().catch(() => {});
+      this.pollEmails().catch((err: Error) => {
+        this.logger.error(`خطأ غير متوقع في الفحص الفوري لسحب البريد: ${err?.stack ?? err?.message}`);
+      });
     }, 2000);
   }
 
@@ -215,7 +221,9 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
     if (this.idleReconnectTimer || this.isDestroyed) return;
     this.idleReconnectTimer = setTimeout(() => {
       this.idleReconnectTimer = null;
-      this.startIdleListener().catch(() => {});
+      this.startIdleListener().catch((err: Error) => {
+        this.logger.warn(`فشل إعادة اتصال IDLE المجدولة: ${err?.stack ?? err?.message}`);
+      });
     }, delayMs);
   }
 
@@ -229,10 +237,20 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
       this.idleReconnectTimer = null;
     }
     if (this.idleClient) {
-      try {
-        this.idleClient.close();
-      } catch {}
+      const client = this.idleClient;
       this.idleClient = null;
+      try {
+        // close() يعيد Promiseًا قد يرفض أثناء انقطاع Socket — إبطال الرفض
+        // إلزامي: الرفض غير المعالج كان يُسقط العملية بأكملها بصمت
+        const closing = client.close() as unknown;
+        if (closing instanceof Promise) {
+          closing.catch((err: Error) => {
+            this.logger.warn(`إغلاق اتصال IDLE انتهى بخطأ (أُبطل بأمان): ${err?.message}`);
+          });
+        }
+      } catch (err) {
+        this.logger.warn(`إغلاق اتصال IDLE رمى خطأ متزامنًا (أُبطل بأمان): ${(err as Error)?.message}`);
+      }
     }
   }
 
@@ -306,7 +324,9 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
       socketTimeout: 20000,
     });
 
-    client.on('error', () => {});
+    client.on('error', (err: Error) => {
+      this.logger.warn(`تنبيه اتصال الدورة الدورية لسحب البريد: ${err?.message}`);
+    });
 
     try {
       await client.connect();
@@ -408,8 +428,9 @@ export class IncomingMailService implements OnModuleInit, OnModuleDestroy {
       } finally {
         lock.release();
       }
-    } catch {
-      // انقطاع شبكي مؤقت — يتجاوزه النظام بهدوء
+    } catch (err) {
+      // انقطاع شبكي مؤقت — يُطبع لرصد أنماط الانقطاع بدل كتمه تمامًا
+      this.logger.warn(`فشلت دورة سحب البريد (انقطاع مؤقت متوقع): ${(err as Error)?.message}`);
     } finally {
       try {
         await client.logout();

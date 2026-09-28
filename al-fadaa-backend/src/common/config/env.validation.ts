@@ -71,6 +71,11 @@ export function validateEnv(config: Record<string, unknown>): Record<string, unk
 
   return {
     ...config,
+    // الافتراضيات المعلنة على الفئة يجب أن تصل للبيئة الفعلية — كانت تُنشأ على
+    // النسخة المتحقق منها ثم تُرمى، فيصل undefined لموقّع التوكنات عند غيابها
+    JWT_EXPIRES_IN: validatedConfig.JWT_EXPIRES_IN || '15m',
+    JWT_ACCESS_EXPIRES_IN: validatedConfig.JWT_ACCESS_EXPIRES_IN || '15m',
+    JWT_REFRESH_EXPIRES_IN_DAYS: validatedConfig.JWT_REFRESH_EXPIRES_IN_DAYS || '30',
     JWT_ISSUER: validatedConfig.JWT_ISSUER || 'alfadaa-api',
     JWT_AUDIENCE: validatedConfig.JWT_AUDIENCE || 'alfadaa-app',
   };

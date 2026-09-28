@@ -51,11 +51,13 @@ describe('validateEnv', () => {
     expect(() => validateEnv(invalidConfig)).toThrow('DATABASE_URL');
   });
 
-  it('يفشل ويلقي خطأ عند غياب JWT_EXPIRES_IN', () => {
-    const invalidConfig = {
+  // JWT_EXPIRES_IN اختياري منذ تخفيف تحقق البيئة (f1072ed) — يأخذ قيمة افتراضية 15m
+  it('يطبق القيمة الافتراضية 15m عند غياب JWT_EXPIRES_IN', () => {
+    const configWithoutExpiry = {
       DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
       JWT_SECRET: 'some-secret',
     };
-    expect(() => validateEnv(invalidConfig)).toThrow('JWT_EXPIRES_IN');
+    const result = validateEnv(configWithoutExpiry);
+    expect(result.JWT_EXPIRES_IN).toBe('15m');
   });
 });
