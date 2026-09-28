@@ -248,9 +248,13 @@ class CorrespondencesApi {
     }
   }
 
-  Future<Map<String, dynamic>> closeCorrespondence(String id) async {
+  Future<Map<String, dynamic>> closeCorrespondence(String id, {String? reason}) async {
     try {
-      final response = await _http.post(Uri.parse('${ApiConstants.correspondences}/$id/close'));
+      // سبب الإغلاق كان يُسجَّل في الأوفلاين فقط وينعدم في المسار الأونلاين
+      final response = await _http.post(
+        Uri.parse('${ApiConstants.correspondences}/$id/close'),
+        body: (reason == null || reason.isEmpty) ? null : jsonEncode({'reason': reason}),
+      );
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true};
       } else {

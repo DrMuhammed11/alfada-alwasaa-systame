@@ -20,7 +20,9 @@ class DashboardActionsHandler {
     final cur = vm.selectedItem;
     final res = await OfflineSyncEngine().executeAction(
       actionType: 'UPDATE_STATUS',
-      endpoint: '${ApiConstants.correspondences}/$id/status',
+      // نفس مسار المسار الأونلاين: PATCH على {correspondences}/$id —
+      // المسار الفرعي /status غير موجود في الخادم وكان يفشل 404 عند المزامنة
+      endpoint: '${ApiConstants.correspondences}/$id',
       httpMethod: 'PATCH',
       payload: {'status': 'UNDER_REVIEW'},
       entityId: id,
@@ -54,6 +56,10 @@ class DashboardActionsHandler {
           );
         }
       }
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? 'فشل بدء مراجعة المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+      );
     }
   }
 
@@ -103,7 +109,7 @@ class DashboardActionsHandler {
         payload: {'reason': noteCtrl.text.trim()},
         entityId: id,
         entitySummary: 'إغلاق المعاملة ${cur?.serialNumber ?? ""}',
-        onlineAction: () => ApiService().closeCorrespondence(id),
+        onlineAction: () => ApiService().closeCorrespondence(id, reason: noteCtrl.text.trim()),
         onOptimisticUpdate: () async {
           if (cur != null && cur.id == id) {
             final updated = cur.copyWith(status: 'CLOSED', closedAt: DateTime.now());
@@ -132,6 +138,10 @@ class DashboardActionsHandler {
             );
           }
         }
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'فشل إغلاق المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+        );
       }
     }
   }
@@ -174,6 +184,10 @@ class DashboardActionsHandler {
           );
         }
       }
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? 'فشلت أرشفة المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+      );
     }
   }
 
@@ -186,6 +200,14 @@ class DashboardActionsHandler {
       );
       return;
     }
+    // فحص الحجم قبل الإرسال — حد الخادم 15 م.ب والفحص كان غائباً في هذا المسار
+    final file = vm.pickedFile;
+    if (file != null && (file.bytes?.length ?? 0) > 15 * 1024 * 1024) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حجم المرفق يتجاوز 15 م.ب — اختر ملفاً أصغر'), backgroundColor: Color(0xFFDC2626)),
+      );
+      return;
+    }
 
     vm.isSendingReply = true;
     vm.updateUI();
@@ -193,13 +215,26 @@ class DashboardActionsHandler {
       final res = await ApiService().createReply(vm.selectedItem!.id, text);
       if (res['success'] == true) {
         final replyId = res['data']?['id'];
-        if (replyId != null && vm.pickedFile?.bytes != null) {
-          await ApiService().uploadReplyAttachment(replyId, vm.pickedFile!.bytes!, vm.pickedFile!.name);
+        if (replyId != null && file?.bytes != null) {
+          // نتيجة الرفع كانت تُهمل صمتاً — فيصل الرد بلا مرفقه بلا أي تنبيه
+          final upload = await ApiService().uploadReplyAttachment(replyId, file!.bytes!, file.name);
+          if (upload['success'] != true && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('حُفظت المسودة لكن تعذر رفع المرفق — عدّل الرد وأرفقه من جديد'),
+                backgroundColor: Color(0xFFD97706),
+              ),
+            );
+          }
         }
         vm.quickReplyController.clear();
         vm.pickedFile = null;
         await vm.selectItem(vm.selectedItem!);
         await vm.silentRefresh();
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'فشل حفظ المسودة'), backgroundColor: const Color(0xFFDC2626)),
+        );
       }
     } finally {
       vm.isSendingReply = false;
@@ -218,11 +253,23 @@ class DashboardActionsHandler {
       final res = await ApiService().updateReply(vm.editingReplyId!, text);
       if (res['success'] == true) {
         if (vm.pickedFile?.bytes != null) {
-          await ApiService().uploadReplyAttachment(vm.editingReplyId!, vm.pickedFile!.bytes!, vm.pickedFile!.name);
+          final upload = await ApiService().uploadReplyAttachment(vm.editingReplyId!, vm.pickedFile!.bytes!, vm.pickedFile!.name);
+          if (upload['success'] != true && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('حُفظ التعديل لكن تعذر رفع المرفق — أعد رفعه'),
+                backgroundColor: Color(0xFFD97706),
+              ),
+            );
+          }
         }
         vm.cancelEditingReply();
         if (vm.selectedItem != null) await vm.selectItem(vm.selectedItem!);
         await vm.silentRefresh();
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'فشل حفظ التعديل'), backgroundColor: const Color(0xFFDC2626)),
+        );
       }
     } finally {
       vm.isSendingReply = false;
@@ -235,6 +282,10 @@ class DashboardActionsHandler {
     if (res['success'] == true) {
       if (vm.selectedItem != null) await vm.selectItem(vm.selectedItem!);
       await vm.silentRefresh();
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? 'فشل رفع الرد للاعتماد'), backgroundColor: const Color(0xFFDC2626)),
+      );
     }
   }
 
@@ -283,6 +334,10 @@ class DashboardActionsHandler {
           );
         }
       }
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? 'فشل اعتماد الرد'), backgroundColor: const Color(0xFFDC2626)),
+      );
     }
   }
 
@@ -347,6 +402,10 @@ class DashboardActionsHandler {
           if (vm.selectedItem != null) await vm.selectItem(vm.selectedItem!);
           await vm.silentRefresh();
         }
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'فشل رفض الرد'), backgroundColor: const Color(0xFFDC2626)),
+        );
       }
     }
   }
@@ -361,6 +420,10 @@ class DashboardActionsHandler {
           const SnackBar(content: Text('تم إرسال الرد رسميًا إلى بريد العميل بنجاح'), backgroundColor: Color(0xFF059669)),
         );
       }
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? 'فشل إرسال الرد للعميل'), backgroundColor: const Color(0xFFDC2626)),
+      );
     }
   }
 
@@ -406,6 +469,10 @@ class DashboardActionsHandler {
         vm.pickedFile = null;
         await vm.selectItem(vm.selectedItem!);
         await vm.silentRefresh();
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'فشل الإرسال المباشر للعميل'), backgroundColor: const Color(0xFFDC2626)),
+        );
       }
     } finally {
       vm.isSendingReply = false;

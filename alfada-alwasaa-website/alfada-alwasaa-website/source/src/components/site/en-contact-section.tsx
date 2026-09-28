@@ -420,7 +420,7 @@ export function EnContactSection() {
                     Submit Proposal or Quotation Request
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                    Fill in project specifications. An atomic reference number will be generated immediately for live follow-up.
+                    Fill in project specifications. A unique reference number will be generated immediately for live follow-up.
                   </p>
 
                   {submitted && generatedRef ? (

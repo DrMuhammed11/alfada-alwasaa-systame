@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/app_events.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/user_model.dart';
 import '../../../core/utils/page_transitions.dart';
@@ -30,7 +31,23 @@ class UserToolsScreen extends StatelessWidget {
             icon: Icons.notifications_active_rounded,
             title: 'مركز الإشعارات',
             subtitle: 'كل إشعاراتك مع الترقيم والفلترة ووسم المقروء',
-            onTap: () => Navigator.push(context, EnterprisePageRoute(page: const NotificationsCenterScreen())),
+            onTap: () async {
+              // فتح المعاملة من الإشعار يوجَّه عبر AppEvents للوحة التحكم
+              // وتُغلق شاشة الأدوات مع المركز ليجد المستخدم المعاملة محدَّدة في اللوحة
+              String? openedId;
+              await Navigator.push(
+                context,
+                EnterprisePageRoute(
+                  page: NotificationsCenterScreen(
+                    onOpenCorrespondence: (id) {
+                      openedId = id;
+                      AppEvents().triggerOpenCorrespondence(id);
+                    },
+                  ),
+                ),
+              );
+              if (openedId != null && context.mounted) Navigator.of(context).pop();
+            },
           ),
           _tile(
             context,

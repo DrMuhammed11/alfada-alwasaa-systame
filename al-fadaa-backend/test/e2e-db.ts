@@ -43,6 +43,12 @@ export async function resetTestDatabase(): Promise<void> {
   const testUrl = await ensureTestDatabase();
   execSync('npx prisma migrate reset --force', {
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: testUrl },
+    env: {
+      ...process.env,
+      DATABASE_URL: testUrl,
+      // كلمة مرور ثابتة للبذرة تطابق ثابت PASSWORD في جناحي e2e —
+      // بدونها تُولَّد كلمة عشوائية ويفشل كل دخول بـ 401 (محليًا وفي CI)
+      SEED_PASSWORD: process.env.SEED_PASSWORD ?? 'Alfadaa@2026',
+    },
   });
 }

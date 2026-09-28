@@ -10,6 +10,7 @@ class AppEvents {
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   final _refreshBellController = StreamController<void>.broadcast();
   final _refreshCorrespondencesController = StreamController<void>.broadcast();
+  final _openCorrespondenceController = StreamController<String>.broadcast();
 
   bool isSseConnected = false;
 
@@ -35,5 +36,12 @@ class AppEvents {
   Stream<void> get onRefreshCorrespondences => _refreshCorrespondencesController.stream;
   void triggerCorrespondencesRefresh() {
     _refreshCorrespondencesController.add(null);
+  }
+
+  /// طلب فتح معاملة بمعرّفها — يصدر من شاشات بعيدة عن اللوحة
+  /// (مثل مركز الإشعارات داخل أدوات الحساب) لتختار اللوحة المعاملة عند العودة إليها
+  Stream<String> get onOpenCorrespondence => _openCorrespondenceController.stream;
+  void triggerOpenCorrespondence(String correspondenceId) {
+    _openCorrespondenceController.add(correspondenceId);
   }
 }

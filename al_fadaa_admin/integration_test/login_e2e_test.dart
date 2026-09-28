@@ -4,7 +4,11 @@
 //
 // التشغيل:
 //   flutter test integration_test/login_e2e_test.dart -d <device-id> \
-//     --dart-define=API_URL=https://alfada-alwasaa-systame.onrender.com/api/v1
+//     --dart-define=API_URL=https://alfada-alwasaa-systame.onrender.com/api/v1 \
+//     --dart-define=E2E_ADMIN_PASSWORD=<كلمة المرور الفعلية>
+//
+// كلمة المرور تُمرَّر وقت التشغيل فقط ولا تُخزَّن في المستودع —
+// بدونها يُتخطى اختبار الدخول الصحيح تلقائيًا ويبقى اختبار الرفض شغالًا.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +18,7 @@ import 'package:al_fadaa_admin/main.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  const e2eAdminPassword = String.fromEnvironment('E2E_ADMIN_PASSWORD');
 
   testWidgets('بيانات خاطئة → رسالة رفض صحيحة دون دخول', (tester) async {
     await tester.pumpWidget(const AlFadaaAdminApp());
@@ -44,41 +49,45 @@ void main() {
     expect(find.text('لوحة الإحصائيات والتحليلات'), findsNothing);
   });
 
-  testWidgets('بيانات صحيحة → دخول فعلي حتى لوحة الإحصائيات والتحليلات', (tester) async {
-    await tester.pumpWidget(const AlFadaaAdminApp());
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    // إن كانت جلسة سابقة مفتوحة فنجاح الدخول محسوم — نتحقق مباشرة
-    final alreadyIn = find.text('لوحة الإحصائيات والتحليلات').evaluate().isNotEmpty;
-    if (!alreadyIn) {
-      expect(find.text('دخول لوحة التحكم'), findsOneWidget);
-
-      await tester.enterText(find.byType(TextField).at(0), 'admin@al-fadaa.com');
-      await tester.enterText(find.byType(TextField).at(1), 'Alfadaa@2026');
+  testWidgets(
+    'بيانات صحيحة → دخول فعلي حتى لوحة الإحصائيات والتحليلات',
+    (tester) async {
+      await tester.pumpWidget(const AlFadaaAdminApp());
       await tester.pump();
-      await tester.tap(find.text('دخول لوحة التحكم'));
+      await tester.pump(const Duration(seconds: 1));
 
-      // انتظار round-trip الخادم السحابي + بناء اللوحة (حتى 30 ثانية)
-      var reached = false;
-      for (var i = 0; i < 30; i++) {
-        await tester.pump(const Duration(seconds: 1));
-        if (find.text('لوحة الإحصائيات والتحليلات').evaluate().isNotEmpty) {
-          reached = true;
-          break;
+      // إن كانت جلسة سابقة مفتوحة فنجاح الدخول محسوم — نتحقق مباشرة
+      final alreadyIn = find.text('لوحة الإحصائيات والتحليلات').evaluate().isNotEmpty;
+      if (!alreadyIn) {
+        expect(find.text('دخول لوحة التحكم'), findsOneWidget);
+
+        await tester.enterText(find.byType(TextField).at(0), 'admin@al-fadaa.com');
+        await tester.enterText(find.byType(TextField).at(1), e2eAdminPassword);
+        await tester.pump();
+        await tester.tap(find.text('دخول لوحة التحكم'));
+
+        // انتظار round-trip الخادم السحابي + بناء اللوحة (حتى 30 ثانية)
+        var reached = false;
+        for (var i = 0; i < 30; i++) {
+          await tester.pump(const Duration(seconds: 1));
+          if (find.text('لوحة الإحصائيات والتحليلات').evaluate().isNotEmpty) {
+            reached = true;
+            break;
+          }
+          // فشل صريح برسالة رفض يعني توقف المسار — نستمر بالضخ لالتقاط الحالة النهائية
         }
-        // فشل صريح برسالة رفض يعني توقف المسار — نستمر بالضخ لالتقاط الحالة النهائية
+        expect(
+          reached,
+          true,
+          reason: 'الدخول بالبيانات الصحيحة يجب أن يصل للوحة الإحصائيات خلال 30 ثانية',
+        );
       }
-      expect(
-        reached,
-        true,
-        reason: 'الدخول بالبيانات الصحيحة يجب أن يصل للوحة الإحصائيات خلال 30 ثانية',
-      );
-    }
 
-    // عناصر اللوحة الحقيقية بعد الدخول
-    await tester.pump(const Duration(seconds: 3));
-    expect(find.text('لوحة الإحصائيات والتحليلات'), findsOneWidget);
-    expect(find.text('الفترة:'), findsOneWidget);
-  });
+      // عناصر اللوحة الحقيقية بعد الدخول
+      await tester.pump(const Duration(seconds: 3));
+      expect(find.text('لوحة الإحصائيات والتحليلات'), findsOneWidget);
+      expect(find.text('الفترة:'), findsOneWidget);
+    },
+    skip: e2eAdminPassword.isEmpty,
+  );
 }

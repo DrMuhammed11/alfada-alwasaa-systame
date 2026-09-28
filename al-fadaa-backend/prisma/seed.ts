@@ -113,7 +113,7 @@ async function main() {
     // مراسلة واردة #1: وصلت للتو — بانتظار دراسة المدير العام
     const c1 = await prisma.correspondence.create({
       data: {
-        refNumber: `INC-${year}-00001`,
+        refNumber: `INC-${year}-000001`,
         type: CorrespondenceType.INCOMING,
         subject: 'طلب عرض سعر لتنفيذ أعمال العزل المائي',
         body: 'تحية طيبة،\n\nنرغب في الحصول على عرض سعر لتنفيذ أعمال العزل المائي لمشروعنا في منطقة العبدلي، على أن يشمل العرض الكميات والمدة الزمنية للتنفيذ.\n\nوتفضلوا بقبول فائق الاحترام،',
@@ -129,7 +129,7 @@ async function main() {
     // مراسلة واردة #2: محالة للقسم الهندسي + تكليف موظف + مسودة رد قيد الإعداد
     const c2 = await prisma.correspondence.create({
       data: {
-        refNumber: `INC-${year}-00002`,
+        refNumber: `INC-${year}-000002`,
         type: CorrespondenceType.INCOMING,
         subject: 'استفسار عن موعد تسليم المخططات التنفيذية',
         body: 'تحية طيبة،\n\nنرجو التكرم بإفادتنا بالموعد المتوقع لتسليم المخططات التنفيذية لمشروع برج الفضاء، وذلك لتنظيم جدول أعمال المقاول من الباطن.\n\nشاكرين لكم حسن تعاونكم،',
@@ -195,7 +195,7 @@ async function main() {
           action: AuditAction.CREATE,
           entityType: 'Correspondence',
           entityId: c2.id,
-          summary: `تم تسجيل مراسلة واردة برقم INC-${year}-00002 من مؤسسة النور التجارية`,
+          summary: `تم تسجيل مراسلة واردة برقم INC-${year}-000002 من مؤسسة النور التجارية`,
           createdAt: hoursAgo(49),
         },
         {
@@ -203,7 +203,7 @@ async function main() {
           action: AuditAction.REFER,
           entityType: 'Correspondence',
           entityId: c2.id,
-          summary: `أحال المدير العام المراسلة INC-${year}-00002 إلى مدير القسم الهندسي`,
+          summary: `أحال المدير العام المراسلة INC-${year}-000002 إلى مدير القسم الهندسي`,
           metadata: { note: 'للدراسة وإعداد الرد خلال يومي عمل' },
           createdAt: hoursAgo(48),
         },
@@ -212,7 +212,7 @@ async function main() {
           action: AuditAction.ASSIGN,
           entityType: 'Correspondence',
           entityId: c2.id,
-          summary: `كلّف مدير القسم الهندسي الموظف ${u.engEmp1.name} بإعداد رد على المراسلة INC-${year}-00002`,
+          summary: `كلّف مدير القسم الهندسي الموظف ${u.engEmp1.name} بإعداد رد على المراسلة INC-${year}-000002`,
           createdAt: hoursAgo(40),
         },
       ],

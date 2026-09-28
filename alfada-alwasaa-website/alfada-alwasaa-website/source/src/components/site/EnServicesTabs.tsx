@@ -177,7 +177,7 @@ export function EnServicesTabs() {
                     href="#contact"
                     className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-bold text-white ring-1 ring-white/15 hover:bg-white/20 hover:text-gold-light transition"
                   >
-                    <span>Request Quotation</span>
+                    <span>Request a Quote</span>
                   </a>
                   <a
                     href={`https://wa.me/${EN_SITE_CONFIG.contacts.general.waNumber}?text=${encodeURIComponent(

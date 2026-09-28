@@ -21,6 +21,7 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
 
   let gmToken = '';
   let adminToken = '';
+  let deputyToken = '';
   let engManagerToken = '';
   let employeeToken = '';
 
@@ -62,6 +63,7 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
 
     gmToken = await login('gm@al-fadaa.com');
     adminToken = await login('admin@al-fadaa.com');
+    deputyToken = await login('deputy@al-fadaa.com');
     engManagerToken = await login('eng.manager@al-fadaa.com');
     employeeToken = await login('eng.employee1@al-fadaa.com');
   });
@@ -87,13 +89,15 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
       .send({
         subject: 'طلب تعاون في مشروع برج الفضاء التجاري',
         body: 'نرغب بدراسة جدوى التعاون في تنفيذ البرج التجاري الجديد.',
-        senderName: 'شركة الأفق للمقاولات',
-        senderEmail: 'info@ofoq-contracting.com',
+        // مرسل فريد لا يطابق مرسلي seed — دمج رسائل نفس المرسل في خيط محادثة
+        // سلوك مقصود في التطبيق، وكان يخطف الرسالة إلى خيط seed برقم #1
+        senderName: 'شركة المسار للمقاولات',
+        senderEmail: 'info@almasar-contracting.com',
         priority: 'HIGH',
       });
 
     expect(res.status).toBe(201);
-    expect(res.body.refNumber).toBe(`INC-${year}-00003`); // الـ seed أنشأ 00001 و 00002
+    expect(res.body.refNumber).toBe(`INC-${year}-000003`); // الـ seed أنشأ 000001 و 000002
     expect(res.body.status).toBe('RECEIVED');
     correspondenceId = res.body.id;
     correspondenceRef = res.body.refNumber;
@@ -116,7 +120,9 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
     const res = await request(httpServer)
       .post(`/api/v1/correspondences/${correspondenceId}/attachments`)
       .set('Authorization', `Bearer ${gmToken}`)
-      .attach('file', Buffer.from('محتوى ملف تجريبي PDF'), 'ملف-العرض.pdf');
+      // امضاء PDF حقيقي — طبقة أمان المرفقات تفحص magic bytes وترفض
+      // النص العادي المنسوب لملف PDF (سلوك صحيح رفض الاختبار القديم)
+      .attach('file', Buffer.from('%PDF-1.4\nمحتوى ملف تجريبي'), 'ملف-العرض.pdf');
     // Multer يحصل على ال mimetype من الامتداد
     expect([201, 200]).toContain(res.status);
     expect(res.body.fileName).toContain('pdf');
@@ -259,14 +265,29 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
 
   // ────── المرحلة 5: الاعتماد ──────
 
-  it('مدير القسم يعتمد الرد — والمراسلة «معتمدة»', async () => {
+  it('مدير القسم يعتمد المستوى 1 — الأولوية HIGH تتطلب مستويين فيبقى الرد «مرفوعاً»', async () => {
     const res = await request(httpServer)
       .post(`/api/v1/replies/${replyId}/approve`)
       .set('Authorization', `Bearer ${engManagerToken}`)
       .send({});
     expect(res.status).toBe(201);
+    // مسار الأولوية HIGH الافتراضي: مستويان (مدير القسم ← نائب المدير العام)
+    // بعد المستوى الأول يبقى الرد SUBMITTED والمراسلة PENDING_APPROVAL
+    expect(res.body.status).toBe('SUBMITTED');
+
+    const corr = await request(httpServer)
+      .get(`/api/v1/correspondences/${correspondenceId}`)
+      .set('Authorization', `Bearer ${gmToken}`);
+    expect(corr.body.status).toBe('PENDING_APPROVAL');
+  });
+
+  it('نائب المدير العام يعتمد المستوى 2 — الرد «معتمد» والمراسلة «معتمدة»', async () => {
+    const res = await request(httpServer)
+      .post(`/api/v1/replies/${replyId}/approve`)
+      .set('Authorization', `Bearer ${deputyToken}`)
+      .send({});
+    expect(res.status).toBe(201);
     expect(res.body.status).toBe('APPROVED');
-    expect(res.body.approvedBy.email).toBe('eng.manager@al-fadaa.com');
 
     const corr = await request(httpServer)
       .get(`/api/v1/correspondences/${correspondenceId}`)
@@ -295,7 +316,7 @@ describe('دورة حياة المراسلة الكاملة (e2e)', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.sent).toBe(true);
-    expect(res.body.refNumber).toMatch(/^OUT-\d{4}-\d{5}$/);
+    expect(res.body.refNumber).toMatch(/^OUT-\d{4}-\d{6}$/);
     outgoingRef = res.body.refNumber;
 
     const corr = await request(httpServer)

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../core/network/app_events.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../models/user_model.dart';
 import '../settings/user_tools_screen.dart';
@@ -28,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   late final DashboardViewModel _vm;
   late final DashboardActionsHandler _actions;
   late final AnimationController _syncIconController;
+  StreamSubscription<String>? _openCorrespondenceSub;
   final ScrollController _listScrollController = ScrollController();
   final ScrollController _detailScrollController = ScrollController();
 
@@ -41,6 +44,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       duration: const Duration(milliseconds: 750),
     );
     _listScrollController.addListener(_onListScroll);
+    // إشعار فتح معاملة صادر من شاشات خارج اللوحة (أدوات الحساب ← مركز الإشعارات)
+    _openCorrespondenceSub = AppEvents().onOpenCorrespondence.listen((id) {
+      _vm.fetchCorrespondences(selectId: id);
+    });
     _vm.init();
   }
 
@@ -53,6 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   void dispose() {
+    _openCorrespondenceSub?.cancel();
     _listScrollController.dispose();
     _detailScrollController.dispose();
     _syncIconController.dispose();
@@ -109,7 +117,10 @@ class _DashboardScreenState extends State<DashboardScreen>
             tooltip: 'القائمة الرئيسية',
             onPressed: () => _showMobileSidebar(isAdminOrGM),
           ),
-          const NotificationsBell(),
+          // جرس الجوال كان const بلا رد نقر — النقر يعلّم مقروءاً فقط ولا يفتح المعاملة
+          NotificationsBell(
+            onNotificationTap: (id) => _vm.fetchCorrespondences(selectId: id),
+          ),
           IconButton(
             icon: const Icon(Icons.tune_rounded, color: Colors.white),
             tooltip: 'أدوات الحساب والرقابة',

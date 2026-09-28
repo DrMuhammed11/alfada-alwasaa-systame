@@ -152,12 +152,12 @@ class DashboardViewModel extends ChangeNotifier {
         );
 
         final networkItems = res['data'] as List<Correspondence>;
+        // القائمة الفارغة استجابة حقيقية من الخادم — كانت تُتجاهل فتبقى
+        // العناصر القديمة معروضة إلى الأبد بعد إفراغ النتائج من جهة أخرى
+        items = networkItems;
+        totalItems = (res['meta'] as Map<String, dynamic>)['total'] as int? ?? items.length;
+        hasMorePages = currentPage < ((res['meta'] as Map<String, dynamic>)['totalPages'] as int? ?? 1);
         if (networkItems.isNotEmpty) {
-          items = networkItems;
-          final meta = res['meta'] as Map<String, dynamic>;
-          totalItems = meta['total'] as int? ?? items.length;
-          final totalPages = meta['totalPages'] as int? ?? 1;
-          hasMorePages = currentPage < totalPages;
           await OfflineStorageService().cacheCorrespondences(networkItems);
           OfflineSyncEngine().setOnlineStatus(true);
         }
@@ -166,7 +166,20 @@ class DashboardViewModel extends ChangeNotifier {
       if (items.isNotEmpty) {
         if (selectId != null) {
           final target = items.where((i) => i.id == selectId);
-          await selectItem(target.isNotEmpty ? target.first : items.first);
+          if (target.isNotEmpty) {
+            await selectItem(target.first);
+          } else {
+            // إشعار عن معاملة خارج الصفحة الحالية — كانت تُختار أول عنصر
+            // خطأً فيهبط المستخدم على معاملة غير التي أخبره الإشعار عنها
+            final byId = await ApiService().getCorrespondenceById(selectId);
+            if (byId != null) {
+              selectedItem = byId;
+              await OfflineStorageService().updateCachedCorrespondence(byId);
+              notifyListeners();
+            } else {
+              await selectItem(items.first);
+            }
+          }
         } else if (selectedItem == null || !items.any((i) => i.id == selectedItem!.id)) {
           await selectItem(items.first);
         }
@@ -263,15 +276,20 @@ class DashboardViewModel extends ChangeNotifier {
         final res = await ApiService().getCorrespondencesPaginated(
           type: apiType,
           status: selectedStatus,
+          // الفلتر كان يضيع هنا — التحديث الصامت كل 60 ثانية يلغي اختيار
+          // "بريد الموقع" بصمت ويعيد كل القنوات
+          channel: isWebsiteFilter ? 'website' : null,
           search: searchController.text.trim(),
           page: 1,
           limit: 20,
         );
         final freshItems = res['data'] as List<Correspondence>;
+        // حتى لو فارغة: الحالة المعروضة يجب أن تتبع الخادم لا أن تتجمد
+        items = freshItems;
+        final meta = res['meta'] as Map<String, dynamic>;
+        totalItems = meta['total'] as int? ?? items.length;
+        hasMorePages = currentPage < (meta['totalPages'] as int? ?? 1);
         if (freshItems.isNotEmpty) {
-          items = freshItems;
-          final meta = res['meta'] as Map<String, dynamic>;
-          totalItems = meta['total'] as int? ?? items.length;
           await OfflineStorageService().cacheCorrespondences(freshItems);
         }
 

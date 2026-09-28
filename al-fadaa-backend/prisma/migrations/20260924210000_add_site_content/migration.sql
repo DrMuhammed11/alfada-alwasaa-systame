@@ -102,8 +102,8 @@ CREATE INDEX "SiteFaq_isActive_order_idx" ON "public"."SiteFaq"("isActive", "ord
 CREATE UNIQUE INDEX "SiteSetting_key_key" ON "public"."SiteSetting"("key");
 
 -- CreateIndex
-CREATE INDEX "Correspondence_parentId_idx" ON "public"."Correspondence"("parentId");
+CREATE INDEX IF NOT EXISTS "Correspondence_parentId_idx" ON "public"."Correspondence"("parentId");
 
 -- CreateIndex
-CREATE INDEX "Correspondence_updatedAt_idx" ON "public"."Correspondence"("updatedAt");
+CREATE INDEX IF NOT EXISTS "Correspondence_updatedAt_idx" ON "public"."Correspondence"("updatedAt");
 

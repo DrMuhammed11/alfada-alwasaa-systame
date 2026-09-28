@@ -175,8 +175,8 @@ class ApiService {
   Future<Map<String, dynamic>> updateCorrespondenceStatus(String correspondenceId, String status) =>
       _correspondences.updateCorrespondenceStatus(correspondenceId, status);
 
-  Future<Map<String, dynamic>> closeCorrespondence(String id) =>
-      _correspondences.closeCorrespondence(id);
+  Future<Map<String, dynamic>> closeCorrespondence(String id, {String? reason}) =>
+      _correspondences.closeCorrespondence(id, reason: reason);
 
   Future<Map<String, dynamic>> archiveCorrespondence(String id) =>
       _correspondences.archiveCorrespondence(id);

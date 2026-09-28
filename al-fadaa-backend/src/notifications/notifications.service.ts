@@ -149,7 +149,12 @@ export class NotificationsService {
         where: { userId, isRead: false },
       });
       this.sse.sendToUser(userId, 'unread-count', { count });
-    } catch {}
+    } catch (e) {
+      // بث العدّاد تحسين اختياري — فشله لا يمس الإشعار نفسه، لكن يُوثَّق للتشخيص
+      this.logger.warn(
+        `تعذّر بث عدد غير المقروء للمستخدم ${userId}: ${(e as Error).message}`,
+      );
+    }
   }
 
   // ─────────────── إشعارات دورة العمل (نقاط التكامل) ───────────────

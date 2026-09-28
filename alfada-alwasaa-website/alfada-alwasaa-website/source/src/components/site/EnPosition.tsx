@@ -54,7 +54,7 @@ export function EnPosition() {
 
               <div className="space-y-4 text-slate-700 dark:text-slate-200">
                 <h3 className="text-xl font-black text-navy dark:text-white leading-snug">
-                  Equilibrium of Rigor and Field Agility
+                  A Balance of Precision and Field Agility
                 </h3>
                 <p className="text-base leading-8 text-justify">
                   {EN_SITE_CONFIG.position.p2}

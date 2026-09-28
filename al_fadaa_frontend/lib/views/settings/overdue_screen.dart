@@ -26,11 +26,10 @@ class _OverdueScreenState extends State<OverdueScreen> {
   Future<void> _load() async {
     setState(() => _isLoading = true);
     final res = await ApiService().getCorrespondencesPaginated(page: 1, limit: 100);
-    final List list = (res['data'] as List?) ?? [];
-    final overdue = list
-        .where((e) => e is Map && e['isOverdue'] == true)
-        .map((e) => Correspondence.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    // getCorrespondencesPaginated تُعيد كائنات Correspondence محلَّلة مسبقاً —
+    // محاولة إعادة تحليلها من JSON كانت ترمي TypeError وتُبقي الشاشة دوّاحة إلى الأبد
+    final list = (res['data'] as List?) ?? const [];
+    final overdue = list.whereType<Correspondence>().where((e) => e.isOverdue).toList();
     // الأكثر تأخيراً أولًا
     overdue.sort((a, b) => b.overdueDays.compareTo(a.overdueDays));
     if (!mounted) return;

@@ -5,7 +5,11 @@ import '../../../core/theme/app_theme.dart';
 /// مركز الإشعارات الكامل — بترقيم صفحات وفلترة غير المقروء ووسم المقروء
 /// (كانت الإشعارات محصورة في قائمة منبثقة بـ 20 عنصرًا بلا ترقيم)
 class NotificationsCenterScreen extends StatefulWidget {
-  const NotificationsCenterScreen({super.key});
+  /// فتح المعاملة المرتبطة عند نقر الإشعار — يعاد توجيهها عبر AppEvents
+  /// ليعثر عليها مدخل اللوحة أياً كان شكل التوجيه في السياق الحالي
+  final void Function(String correspondenceId)? onOpenCorrespondence;
+
+  const NotificationsCenterScreen({super.key, this.onOpenCorrespondence});
 
   @override
   State<NotificationsCenterScreen> createState() => _NotificationsCenterScreenState();
@@ -66,9 +70,17 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen> {
   }
 
   Future<void> _open(Map<String, dynamic> n) async {
+    // وسم المقروء ثم فتح المعاملة المرتبطة — كان النقر طريقاً مسدوداً
+    // يعلّم مقروءاً ولا يذهب المستخدم لأي مكان
     if (n['readAt'] == null) {
       await ApiService().markNotificationRead(n['id'] ?? '');
       if (mounted) _load();
+    }
+    final entityId = n['entityId'] as String?;
+    final handler = widget.onOpenCorrespondence;
+    if (entityId != null && entityId.isNotEmpty && handler != null) {
+      handler(entityId);
+      if (mounted) Navigator.of(context).pop();
     }
   }
 
