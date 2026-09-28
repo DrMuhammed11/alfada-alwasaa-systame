@@ -5,6 +5,16 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// تقييد androidx.core لإصدار متوافق مع سلسلة الأدوات الحالية (AGP 8.3.2 / compileSdk 35) —
+// Gradle كان يسحب 1.18.0 تلقائياً وتفرض compileSdk 36 وAGP 8.9.1+ فيفشل checkDebugAarMetadata.
+// عند رفع سلسلة الأدوات مستقبلاً (AGP 8.9+/compileSdk 36) يمكن حذف هذا الإجبار.
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.core:core-ktx:1.13.1'
+        force 'androidx.core:core:1.13.1'
+    }
+}
+
 android {
     namespace = "com.example.al_fadaa_frontend"
     compileSdk = flutter.compileSdkVersion
