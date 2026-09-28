@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/network/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/user_model.dart';
+import '../../../core/widgets/app_max_width.dart';
 
 /// شاشة الوكالات (التفويض): وكيلك أثناء غيابك + الوكالات الممنوحة لك،
 /// مع إنشاء وكالة جديدة (لمن يملك إدارة المستخدمين) وإنهاء مبكر.
@@ -43,7 +44,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
     final candidates = users.where((u) => u.id != widget.user.id && u.isActive).toList();
     if (candidates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد موظفون متاحون للتفويض'), backgroundColor: Color(0xFFDC2626)),
+        const SnackBar(content: Text('لا يوجد موظفون متاحون للتفويض'), backgroundColor: AppTheme.crimson),
       );
       return;
     }
@@ -56,7 +57,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialog) => AlertDialog(
-          title: const Text('وكالة جديدة', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          title: const Text('وكالة جديدة', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
           content: SizedBox(
             width: 420,
             child: Column(
@@ -64,14 +65,14 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('الوكيل (ينوب عنك في الاعتماد والإشعارات أثناء الغياب):',
-                    style: TextStyle(fontSize: 11.5, color: Color(0xFF475569))),
+                    style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textMuted)),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<User>(
                   value: picked,
                   isExpanded: true,
                   decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
                   items: candidates
-                      .map((u) => DropdownMenuItem(value: u, child: Text('${u.fullName} (${u.role})', style: const TextStyle(fontSize: 12))))
+                      .map((u) => DropdownMenuItem(value: u, child: Text('${u.fullName} (${u.role})', style: const TextStyle(fontSize: AppTheme.fontSm))))
                       .toList(),
                   onChanged: (v) => setDialog(() => picked = v),
                 ),
@@ -80,7 +81,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.date_range_rounded, size: 15),
-                      label: Text('من: ${start.year}/${start.month}/${start.day}', style: const TextStyle(fontSize: 11)),
+                      label: Text('من: ${start.year}/${start.month}/${start.day}', style: const TextStyle(fontSize: AppTheme.fontXs)),
                       onPressed: () async {
                         final d = await showDatePicker(
                           context: ctx,
@@ -96,7 +97,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.date_range_rounded, size: 15),
-                      label: Text('إلى: ${end.year}/${end.month}/${end.day}', style: const TextStyle(fontSize: 11)),
+                      label: Text('إلى: ${end.year}/${end.month}/${end.day}', style: const TextStyle(fontSize: AppTheme.fontXs)),
                       onPressed: () async {
                         final d = await showDatePicker(
                           context: ctx,
@@ -139,7 +140,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(res['success'] == true ? 'تم إنشاء الوكالة بنجاح' : (res['message'] ?? 'فشل إنشاء الوكالة')),
-      backgroundColor: res['success'] == true ? const Color(0xFF059669) : const Color(0xFFDC2626),
+      backgroundColor: res['success'] == true ? AppTheme.emerald : AppTheme.crimson,
     ));
     if (res['success'] == true) _load();
   }
@@ -149,7 +150,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(res['success'] == true ? 'تم إنهاء الوكالة' : 'فشل إنهاء الوكالة'),
-      backgroundColor: res['success'] == true ? const Color(0xFF059669) : const Color(0xFFDC2626),
+      backgroundColor: res['success'] == true ? AppTheme.emerald : AppTheme.crimson,
     ));
     _load();
   }
@@ -160,7 +161,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
-        title: const Text('الوكالات (التفويض)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text('الوكالات (التفويض)', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
         actions: [
           if (widget.canCreate)
             IconButton(icon: const Icon(Icons.add_rounded, color: Colors.white), tooltip: 'وكالة جديدة', onPressed: _create),
@@ -168,7 +169,8 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
+          : AppMaxWidth(
+              child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 _sectionTitle('وكالات منحتها (${_grantedByMe.length})'),
@@ -184,12 +186,13 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
                   ..._grantedToMe.map(_card),
               ],
             ),
+            ),
     );
   }
 
   Widget _sectionTitle(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Text(t, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+        child: Text(t, style: const TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.textHeading)),
       );
 
   Widget _empty(String t) => Container(
@@ -198,10 +201,10 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(color: AppTheme.secondary.withAlpha(70)),
         ),
-        child: Text(t, style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
+        child: Text(t, style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary)),
       );
 
   Widget _card(Map<String, dynamic> d) {
@@ -213,7 +216,7 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(color: isActive ? const Color(0xFFA7F3D0) : AppTheme.secondary.withAlpha(70)),
       ),
       child: Row(
@@ -224,13 +227,13 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
               children: [
                 Text(
                   'من: $delegator ← إلى: $delegate',
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  style: const TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'من ${_fmt(d['startsAt'])} إلى ${_fmt(d['endsAt'])}'
                   '${(d['reason'] ?? '').toString().isNotEmpty ? ' — ${d['reason']}' : ''}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF475569)),
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                 ),
               ],
             ),
@@ -238,16 +241,16 @@ class _DelegationsScreenState extends State<DelegationsScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: (isActive ? const Color(0xFF059669) : const Color(0xFF94A3B8)).withAlpha(25),
-              borderRadius: BorderRadius.circular(6),
+              color: (isActive ? AppTheme.emerald : AppTheme.textTertiary).withAlpha(25),
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),
             child: Text(isActive ? 'نشطة' : 'منتهية',
-                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: isActive ? const Color(0xFF059669) : const Color(0xFF64748B))),
+                style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: isActive ? AppTheme.emerald : AppTheme.textTertiary)),
           ),
           if (isActive) ...[
             const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(Icons.cancel_outlined, size: 18, color: Color(0xFFDC2626)),
+              icon: const Icon(Icons.cancel_outlined, size: 18, color: AppTheme.crimson),
               tooltip: 'إنهاء مبكر',
               onPressed: () => _terminate(d['id']),
             ),

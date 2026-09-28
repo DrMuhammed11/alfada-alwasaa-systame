@@ -205,15 +205,16 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
 
   Widget _buildAuthErrorScreen() {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppTheme.primary,
       body: Center(
+        // قيد متجاوب — كانت العرض 440 ثابتة فتفيض على النوافذ الأضيق
         child: Container(
-          width: 440,
+          width: 440.0.clamp(0.0, MediaQuery.sizeOf(context).width * 0.9).toDouble(),
           margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(16),
+            color: AppTheme.textHeading,
+            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
             border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
@@ -243,7 +244,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
               const Text(
                 'تعذر التحقق من الجلسة',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: AppTheme.fontXxl,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -253,7 +254,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                 _authErrorMessage ?? 'الخادم يستغرق وقتًا أطول من المعتاد للاستجابة. يمكنك إعادة المحاولة دون فقدان جلستك.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: AppTheme.fontMd,
                   color: AppTheme.textOnLight,
                   height: 1.5,
                 ),
@@ -267,13 +268,13 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text(
                     'إعادة المحاولة',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.emerald,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                     ),
                   ),
                 ),
@@ -291,7 +292,7 @@ class _AlFadaaAppState extends State<AlFadaaApp> {
                   'تسجيل الخروج والعودة لشاشة الدخول',
                   style: TextStyle(
                     color: AppTheme.textMuted,
-                    fontSize: 13,
+                    fontSize: AppTheme.fontBase,
                   ),
                 ),
               ),

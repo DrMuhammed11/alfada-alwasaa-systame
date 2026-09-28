@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../models/admin_user_model.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 class UserDialog extends StatefulWidget {
   final AdminUser? userToEdit;
@@ -112,9 +113,9 @@ class _UserDialogState extends State<UserDialog> {
     final isEdit = widget.userToEdit != null;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminTheme.radiusLg)),
       child: Container(
-        width: 580,
+        width: ResponsiveDialog.maxWidth(context, 580),
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
@@ -133,7 +134,7 @@ class _UserDialogState extends State<UserDialog> {
                   const SizedBox(width: 10),
                   Text(
                     isEdit ? 'تعديل بيانات الموظف' : 'إضافة موظف ومستخدم جديد',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: AdminTheme.fontTitle, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
@@ -150,7 +151,7 @@ class _UserDialogState extends State<UserDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // الاسم الكامل
-                      const Text('الاسم الكامل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      const Text('الاسم الكامل', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _nameController,
@@ -164,7 +165,7 @@ class _UserDialogState extends State<UserDialog> {
                       const SizedBox(height: 14),
 
                       // البريد الإلكتروني
-                      const Text('البريد الإلكتروني', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      const Text('البريد الإلكتروني', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _emailController,
@@ -181,7 +182,7 @@ class _UserDialogState extends State<UserDialog> {
                       // كلمة المرور
                       Text(
                         isEdit ? 'إعادة تعيين كلمة المرور (اختياري)' : 'كلمة المرور الابتدائية',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
@@ -204,7 +205,7 @@ class _UserDialogState extends State<UserDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('المسمى / الدور الوظيفي', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                const Text('المسمى / الدور الوظيفي', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 6),
                                 DropdownButtonFormField<String>(
                                   value: _role,
@@ -229,7 +230,7 @@ class _UserDialogState extends State<UserDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('القسم / الإدارة التابع لها', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                const Text('القسم / الإدارة التابع لها', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 6),
                                 DropdownButtonFormField<String?>(
                                   value: _departmentId,
@@ -255,8 +256,8 @@ class _UserDialogState extends State<UserDialog> {
                       // حالة الحساب (نشط / معطل)
                       if (isEdit) ...[
                         SwitchListTile(
-                          title: const Text('حساب نشط ومفعل', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                          subtitle: const Text('التعطيل يُبطل جلسات المستخدم فورًا', style: TextStyle(fontSize: 11)),
+                          title: const Text('حساب نشط ومفعل', style: TextStyle(fontSize: AdminTheme.fontMd, fontWeight: FontWeight.bold)),
+                          subtitle: const Text('التعطيل يُبطل جلسات المستخدم فورًا', style: TextStyle(fontSize: AdminTheme.fontSm)),
                           value: _isActive,
                           activeColor: AdminTheme.emerald,
                           contentPadding: EdgeInsets.zero,

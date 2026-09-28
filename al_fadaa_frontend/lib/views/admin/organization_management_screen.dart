@@ -3,6 +3,7 @@ import '../../core/network/api_service.dart';
 import '../../models/user_model.dart';
 import 'widgets/departments_management_tab.dart';
 import 'widgets/users_management_tab.dart';
+import '../../core/theme/app_theme.dart';
 
 class OrganizationManagementScreen extends StatefulWidget {
   final User currentUser;
@@ -54,9 +55,9 @@ class _OrganizationManagementScreenState extends State<OrganizationManagementScr
     final activeUsers = _users.where((u) => u.isActive).length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Row(
@@ -65,17 +66,17 @@ class _OrganizationManagementScreenState extends State<OrganizationManagementScr
             SizedBox(width: 10),
             Text(
               'الهيكل المؤسسي — إدارة الموظفين والقطاعات والصلاحيات',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
             ),
           ],
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF0284C7),
+          indicatorColor: AppTheme.info,
           indicatorWeight: 3,
           labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFF94A3B8),
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          unselectedLabelColor: AppTheme.textTertiary,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase),
           tabs: [
             Tab(
               icon: const Icon(Icons.people_alt_rounded, size: 18),
@@ -95,18 +96,18 @@ class _OrganizationManagementScreenState extends State<OrganizationManagementScr
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: const BoxDecoration(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+              border: Border(bottom: BorderSide(color: AppTheme.borderLight)),
             ),
             child: Row(
               children: [
                 _buildStatItem('إجمالي الموظفين', '${_users.length}', Icons.badge_outlined),
                 const SizedBox(width: 24),
-                _buildStatItem('الحسابات النشطة', '$activeUsers', Icons.verified_user_outlined, color: const Color(0xFF10B981)),
+                _buildStatItem('الحسابات النشطة', '$activeUsers', Icons.verified_user_outlined, color: AppTheme.emerald),
                 const SizedBox(width: 24),
                 _buildStatItem('القطاعات المسجلة', '${_departments.length}', Icons.account_tree_outlined),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, size: 20, color: Color(0xFF64748B)),
+                  icon: const Icon(Icons.refresh_rounded, size: 20, color: AppTheme.textTertiary),
                   tooltip: 'تحديث البيانات',
                   onPressed: _loadAll,
                 ),
@@ -141,15 +142,15 @@ class _OrganizationManagementScreenState extends State<OrganizationManagementScr
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color ?? const Color(0xFF64748B)),
+        Icon(icon, size: 16, color: color ?? AppTheme.textTertiary),
         const SizedBox(width: 6),
-        Text('$label: ', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+        Text('$label: ', style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary)),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: AppTheme.fontBase,
             fontWeight: FontWeight.bold,
-            color: color ?? const Color(0xFF0F172A),
+            color: color ?? AppTheme.primary,
           ),
         ),
       ],

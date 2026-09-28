@@ -190,7 +190,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
               const SizedBox(width: 8),
               const Text('إدارة المستخدمين والصلاحيات',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14)),
+                      fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg)),
               const Spacer(),
               // عداد النتائج الكلي من الخادم
               Container(
@@ -204,7 +204,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                 child: Text(
                   '$_total مستخدم',
                   style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: AdminTheme.fontSm,
                       fontWeight: FontWeight.bold,
                       color: AdminTheme.textMuted),
                 ),
@@ -215,7 +215,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                 onPressed: _openCreateDialog,
                 icon: const Icon(Icons.person_add_rounded, size: 16),
                 label: const Text('إضافة موظف',
-                    style: TextStyle(fontSize: 12)),
+                    style: TextStyle(fontSize: AdminTheme.fontBase)),
                 style: FilledButton.styleFrom(
                   backgroundColor: AdminTheme.primary,
                   padding: const EdgeInsets.symmetric(
@@ -360,7 +360,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
         child: DropdownButton<String>(
           value: value,
           style: const TextStyle(
-              fontSize: 12,
+              fontSize: AdminTheme.fontBase,
               color: AdminTheme.textMain,
               fontWeight: FontWeight.w600),
           items: items.entries
@@ -421,7 +421,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                   style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18),
+                      fontSize: AdminTheme.fontXl),
                 ),
               ),
             ),
@@ -437,7 +437,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                         child: Text(
                           u.name,
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
+                              fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -462,7 +462,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                   Text(
                     u.email,
                     style: const TextStyle(
-                        fontSize: 12, color: AdminTheme.textMuted),
+                        fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 5),
@@ -477,7 +477,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                           child: Text(
                             u.department!.name,
                             style: const TextStyle(
-                                fontSize: 11,
+                                fontSize: AdminTheme.fontSm,
                                 color: AdminTheme.textMuted),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -491,7 +491,7 @@ class _UsersManagementViewState extends State<UsersManagementView> {
                       Text(
                         '${u.permissions.length} صلاحية',
                         style: const TextStyle(
-                            fontSize: 11, color: AdminTheme.textMuted),
+                            fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                       ),
                     ],
                   ),

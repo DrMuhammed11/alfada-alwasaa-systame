@@ -1,7 +1,9 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_formatters.dart';
 import '../../core/utils/app_utils.dart';
 import '../../models/admin_user_model.dart';
 import '../../models/analytics_model.dart';
@@ -208,7 +210,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                 const SizedBox(width: 8),
                 const Text('الفترة:',
                     style: TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold)),
+                        fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 8),
                 ...[
                   ('7 أيام', '7d'),
@@ -224,7 +226,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                 if (_hasCustomRange) ...[
                   const SizedBox(width: 6),
                   ActionChip(
-                    label: const Text('مسح النطاق', style: TextStyle(fontSize: 11, color: AdminTheme.crimson)),
+                    label: const Text('مسح النطاق', style: TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.crimson)),
                     avatar: const Icon(Icons.filter_alt_off_rounded, size: 15, color: AdminTheme.crimson),
                     side: BorderSide(color: AdminTheme.crimson.withAlpha(80)),
                     onPressed: _clearCustomRange,
@@ -263,7 +265,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                     child: DropdownButton<String>(
                       value: _selectedDepartmentId,
                       style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: AdminTheme.fontBase,
                           color: AdminTheme.textMain,
                           fontWeight: FontWeight.w600),
                       items: [
@@ -326,7 +328,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
           backgroundColor: AdminTheme.surface2,
           labelStyle: TextStyle(
             color: isSelected ? Colors.white : AdminTheme.textMuted,
-            fontSize: 11,
+            fontSize: AdminTheme.fontSm,
             fontWeight:
                 isSelected ? FontWeight.bold : FontWeight.w500,
           ),
@@ -355,7 +357,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
         ? (isFrom ? 'من تاريخ' : 'إلى تاريخ')
         : '${isFrom ? 'من' : 'إلى'}: ${DateFormat('yyyy/MM/dd').format(date)}';
     return ActionChip(
-      label: Text(label, style: const TextStyle(fontSize: 11)),
+      label: Text(label, style: const TextStyle(fontSize: AdminTheme.fontSm)),
       avatar: Icon(
         isFrom ? Icons.event_rounded : Icons.event_available_rounded,
         size: 15,
@@ -369,7 +371,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
     final kpis = [
       ('إجمالي المعاملات', summary.total, Icons.all_inbox_rounded, AdminTheme.accent),
       ('المعاملات النشطة', summary.active, Icons.pending_actions_rounded, AdminTheme.amber),
-      ('الوارد العام', summary.incoming, Icons.move_to_inbox_rounded, const Color(0xFF0369A1)),
+      ('الوارد العام', summary.incoming, Icons.move_to_inbox_rounded, AdminTheme.accent),
       ('المراسلات الصادرة', summary.outgoing, Icons.outbox_rounded, AdminTheme.emerald),
       ('الخطابات الداخلية', summary.internal, Icons.description_outlined, AdminTheme.purple),
       ('المغلقة والمؤرشفة', summary.closed + summary.archived, Icons.inventory_2_outlined, AdminTheme.textMuted),
@@ -467,7 +469,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                     '${sla.complianceRate.toStringAsFixed(0)}%',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: AdminTheme.fontLg,
                       color: color,
                     ),
                   ),
@@ -515,7 +517,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
             children: [
               const Text('0%',
                   style: TextStyle(
-                      fontSize: 9, color: AdminTheme.textLight)),
+                      fontSize: AdminTheme.fontXs, color: AdminTheme.textLight)),
               Text(
                 sla.complianceRate >= 85
                     ? 'جيد جداً'
@@ -523,13 +525,13 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                         ? 'متوسط'
                         : 'تحتاج تحسين'),
                 style: TextStyle(
-                    fontSize: 9,
+                    fontSize: AdminTheme.fontXs,
                     color: color,
                     fontWeight: FontWeight.bold),
               ),
               const Text('100%',
                   style: TextStyle(
-                      fontSize: 9, color: AdminTheme.textLight)),
+                      fontSize: AdminTheme.fontXs, color: AdminTheme.textLight)),
             ],
           ),
         ],
@@ -582,13 +584,13 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
             Expanded(
               child: Text(label,
                   style: const TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AdminTheme.fontBase,
                       color: AdminTheme.textMain)),
             ),
             Text(
               '$count',
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AdminTheme.fontBase,
                   fontWeight: FontWeight.bold,
                   color: color),
             ),
@@ -615,10 +617,10 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
       children: [
         Text(label,
             style: const TextStyle(
-                fontSize: 11.5, color: AdminTheme.textMuted)),
+                fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted)),
         Text(value,
             style: TextStyle(
-                fontSize: 12,
+                fontSize: AdminTheme.fontBase,
                 fontWeight: FontWeight.bold,
                 color: color ?? AdminTheme.textMain)),
       ],
@@ -646,13 +648,16 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
   Widget _buildTrendChart(List<TrendPoint> rawTrend) {
     final trend = _bucketTrend(rawTrend);
     final isBucketed = trend.length != rawTrend.length;
-    // حساب أقصى قيمة لمقياس أبعاد الأعمدة
+    // السلسلة كاملة بلا اقتطاع — التجميع الأسبوعي يضمن ملاءمة العرض دائماً
     final maxTotal = trend.isEmpty
         ? 1
         : trend
             .map((p) => p.incoming + p.outgoing + p.closed)
             .reduce((a, b) => a > b ? a : b)
             .clamp(1, 99999);
+    final bottomInterval =
+        (trend.length / 6).ceil().clamp(1, trend.isEmpty ? 1 : trend.length);
+    final axisInterval = (maxTotal / 4).clamp(1, 99999).toDouble();
 
     return _sectionCard(
       icon: Icons.show_chart_rounded,
@@ -668,70 +673,189 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                 icon: Icons.insert_chart_outlined_rounded,
               ),
             )
-          : SizedBox(
-              height: 140,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: trend.take(30).map((pt) {
-                  final total = pt.incoming + pt.outgoing + pt.closed;
-                  final heightFactor =
-                      (total / maxTotal).clamp(0.05, 1.0);
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 1.5),
-                      child: Tooltip(
-                        message:
-                            '${pt.date}\nوارد: ${pt.incoming} | صادر: ${pt.outgoing} | مغلق: ${pt.closed}',
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (total > 0)
-                              Text(
-                                '$total',
-                                style: const TextStyle(
-                                    fontSize: 8,
-                                    color: AdminTheme.textMuted),
-                              ),
-                            const SizedBox(height: 2),
-                            // عمود بتدرج لوني
-                            Container(
-                              height: 90 * heightFactor,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AdminTheme.accent
-                                        .withAlpha(180),
-                                    AdminTheme.accent,
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                                borderRadius: const BorderRadius
-                                    .vertical(
-                                    top: Radius.circular(3)),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              pt.date.length >= 5
-                                  ? pt.date.substring(5)
-                                  : pt.date,
-                              style: const TextStyle(
-                                  fontSize: 7,
-                                  color: AdminTheme.textMuted),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 220,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: (maxTotal * 1.15).toDouble(),
+                      gridData: FlGridData(
+                        drawVerticalLine: false,
+                        horizontalInterval: axisInterval,
+                        getDrawingHorizontalLine: (value) => const FlLine(
+                          color: AdminTheme.border,
+                          strokeWidth: 1,
                         ),
                       ),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 42,
+                            interval: axisInterval,
+                            getTitlesWidget: (value, meta) => SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              child: Text(
+                                AppFormatters.number(value.toInt()),
+                                style: const TextStyle(
+                                  fontSize: AdminTheme.fontXs,
+                                  color: AdminTheme.textMuted,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            interval: bottomInterval.toDouble(),
+                            getTitlesWidget: (value, meta) {
+                              final index = value.toInt();
+                              if (index < 0 || index >= trend.length) {
+                                return const SizedBox.shrink();
+                              }
+                              final d = trend[index].date;
+                              return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                                child: Text(
+                                  d.length >= 5 ? d.substring(5) : d,
+                                  style: const TextStyle(
+                                    fontSize: AdminTheme.fontXs,
+                                    color: AdminTheme.textMuted,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipColor: (_) => AdminTheme.textHeading,
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            if (groupIndex < 0 || groupIndex >= trend.length) {
+                              return null;
+                            }
+                            final pt = trend[groupIndex];
+                            return BarTooltipItem(
+                              pt.date,
+                              const TextStyle(
+                                color: Colors.white,
+                                fontSize: AdminTheme.fontSm,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              children: [
+                                const TextSpan(text: '\n'),
+                                _tooltipRow('وارد', pt.incoming),
+                                _tooltipRow('صادر', pt.outgoing),
+                                _tooltipRow('مغلق', pt.closed),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      barGroups: [
+                        for (var i = 0; i < trend.length; i++)
+                          BarChartGroupData(
+                            x: i,
+                            barRods: [
+                              BarChartRodData(
+                                toY: (trend[i].incoming +
+                                        trend[i].outgoing +
+                                        trend[i].closed)
+                                    .toDouble(),
+                                width: trend.length > 40 ? 6 : 14,
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(3)),
+                                rodStackItems: [
+                                  BarChartRodStackItem(
+                                    0,
+                                    trend[i].incoming.toDouble(),
+                                    AdminTheme.accent,
+                                  ),
+                                  BarChartRodStackItem(
+                                    trend[i].incoming.toDouble(),
+                                    (trend[i].incoming + trend[i].outgoing)
+                                        .toDouble(),
+                                    AdminTheme.emerald,
+                                  ),
+                                  BarChartRodStackItem(
+                                    (trend[i].incoming + trend[i].outgoing)
+                                        .toDouble(),
+                                    (trend[i].incoming +
+                                            trend[i].outgoing +
+                                            trend[i].closed)
+                                        .toDouble(),
+                                    AdminTheme.slate,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                ),
+                const SizedBox(height: AdminTheme.spaceSm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _legendDot(AdminTheme.accent, 'واردة'),
+                    const SizedBox(width: AdminTheme.spaceLg),
+                    _legendDot(AdminTheme.emerald, 'صادرة'),
+                    const SizedBox(width: AdminTheme.spaceLg),
+                    _legendDot(AdminTheme.slate, 'مغلقة'),
+                  ],
+                ),
+              ],
             ),
     );
   }
+
+  static TextSpan _tooltipRow(String label, int value) => TextSpan(
+        children: [
+          TextSpan(
+            text: '$label: ',
+            style: const TextStyle(
+                color: Colors.white70, fontSize: AdminTheme.fontXs),
+          ),
+          TextSpan(
+            text: AppFormatters.number(value),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: AdminTheme.fontSm,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const TextSpan(text: '   '),
+        ],
+      );
+
+  static Widget _legendDot(Color color, String label) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+                fontSize: AdminTheme.fontXs, color: AdminTheme.textMuted),
+          ),
+        ],
+      );
 
   Widget _buildDepartmentPerformanceTable(
       List<DepartmentStat> depts) {
@@ -754,37 +878,37 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                       label: Text('القسم',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('الكود',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('المراسلات',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('إجمالي المهام',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('منجز',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('معلق',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                   DataColumn(
                       label: Text('نسبة الإنجاز',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                 ],
                 rows: depts.map((d) {
                   final color =
@@ -794,25 +918,25 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                       DataCell(Text(d.name,
                           style: const TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                       DataCell(Text(d.code,
                           style: const TextStyle(
                               fontFamily: 'monospace',
-                              fontSize: 11,
+                              fontSize: AdminTheme.fontSm,
                               color: AdminTheme.textMuted))),
                       DataCell(Text('${d.correspondences}',
-                          style: const TextStyle(fontSize: 12))),
+                          style: const TextStyle(fontSize: AdminTheme.fontBase))),
                       DataCell(Text('${d.tasksTotal}',
-                          style: const TextStyle(fontSize: 12))),
+                          style: const TextStyle(fontSize: AdminTheme.fontBase))),
                       DataCell(Text('${d.tasksCompleted}',
                           style: const TextStyle(
                               color: AdminTheme.emerald,
                               fontWeight: FontWeight.bold,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                       DataCell(Text('${d.tasksPending}',
                           style: const TextStyle(
                               color: AdminTheme.amber,
-                              fontSize: 12))),
+                              fontSize: AdminTheme.fontBase))),
                       DataCell(
                         SizedBox(
                           width: 100,
@@ -827,7 +951,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
                                 style: TextStyle(
                                     color: color,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 11),
+                                    fontSize: AdminTheme.fontSm),
                               ),
                               const SizedBox(height: 3),
                               ClipRRect(
@@ -886,7 +1010,7 @@ class _AnalyticsDashboardViewState extends State<AnalyticsDashboardView>
               const SizedBox(width: 8),
               Text(title,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13)),
+                      fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd)),
             ],
           ),
           const SizedBox(height: 14),

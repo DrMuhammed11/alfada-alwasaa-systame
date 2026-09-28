@@ -80,7 +80,7 @@ class SyncStatusBanner extends StatelessWidget {
                         Text(
                           title,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppTheme.fontBase,
                             fontWeight: FontWeight.bold,
                             color: textColor,
                           ),
@@ -91,12 +91,12 @@ class SyncStatusBanner extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
                             decoration: BoxDecoration(
                               color: textColor.withAlpha(30),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                             ),
                             child: Text(
                               '$pending معلق',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: AppTheme.fontXs,
                                 fontWeight: FontWeight.bold,
                                 color: textColor,
                               ),
@@ -108,7 +108,7 @@ class SyncStatusBanner extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: TextStyle(fontSize: 11.5, color: textColor.withAlpha(220)),
+                      style: TextStyle(fontSize: AppTheme.fontSm, color: textColor.withAlpha(220)),
                     ),
                   ],
                 ),
@@ -123,7 +123,7 @@ class SyncStatusBanner extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.list_alt_rounded, size: 15),
-                  label: const Text('طابور العمليات', style: TextStyle(fontSize: 11.5)),
+                  label: const Text('طابور العمليات', style: TextStyle(fontSize: AppTheme.fontSm)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: textColor,
                     side: BorderSide(color: borderColor),
@@ -137,7 +137,7 @@ class SyncStatusBanner extends StatelessWidget {
                 icon: const Icon(Icons.sync_rounded, size: 15),
                 label: Text(
                   isSyncing ? 'جاري المزامنة' : 'مزامنة الآن',
-                  style: const TextStyle(fontSize: 11.5),
+                  style: const TextStyle(fontSize: AppTheme.fontSm),
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: textColor,

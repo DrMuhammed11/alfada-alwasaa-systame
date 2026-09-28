@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/network/api_service.dart';
+import '../../../core/widgets/app_max_width.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// مركز الإشعارات الكامل — بترقيم صفحات وفلترة غير المقروء ووسم المقروء
@@ -95,16 +96,16 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen> {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
-        title: const Text('مركز الإشعارات', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text('مركز الإشعارات', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
         actions: [
           // فلتر غير المقروء
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: FilterChip(
-              label: const Text('غير المقروء', style: TextStyle(fontSize: 11)),
+              label: const Text('غير المقروء', style: TextStyle(fontSize: AppTheme.fontXs)),
               selected: _unreadOnly,
               selectedColor: AppTheme.accent,
-              labelStyle: TextStyle(color: _unreadOnly ? Colors.white : Colors.white70, fontSize: 11),
+              labelStyle: TextStyle(color: _unreadOnly ? Colors.white : Colors.white70, fontSize: AppTheme.fontXs),
               checkmarkColor: Colors.white,
               onSelected: (v) {
                 _unreadOnly = v;
@@ -122,8 +123,9 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _items.isEmpty
-              ? const Center(child: Text('لا توجد إشعارات', style: TextStyle(color: Color(0xFF64748B))))
-              : ListView.builder(
+              ? const Center(child: Text('لا توجد إشعارات', style: TextStyle(color: AppTheme.textTertiary)))
+              : AppMaxWidth(
+                  child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(12),
                   itemCount: _items.length + (_isLoadingMore ? 1 : 0),
@@ -140,26 +142,26 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
                         color: isUnread ? AppTheme.accent.withAlpha(12) : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                         border: Border.all(color: isUnread ? AppTheme.accent.withAlpha(90) : AppTheme.secondary.withAlpha(70)),
                       ),
                       child: ListTile(
                         leading: Icon(
                           isUnread ? Icons.mark_email_unread_rounded : Icons.mail_outline_rounded,
-                          color: isUnread ? AppTheme.accent : const Color(0xFF94A3B8),
+                          color: isUnread ? AppTheme.accent : AppTheme.textTertiary,
                           size: 20,
                         ),
                         title: Text(
                           n['title'] ?? '',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppTheme.fontBase,
                             fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
-                            color: const Color(0xFF1E293B),
+                            color: AppTheme.textHeading,
                           ),
                         ),
                         subtitle: Text(
                           n['body'] ?? '',
-                          style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                          style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textMuted),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -170,6 +172,7 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen> {
                       ),
                     );
                   },
+                ),
                 ),
     );
   }

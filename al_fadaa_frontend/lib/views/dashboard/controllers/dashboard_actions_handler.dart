@@ -8,6 +8,7 @@ import '../../../models/correspondence_model.dart';
 import '../../auth/login_screen.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../widgets/work_dossier_dialog.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// معالج العمليات التنفيذية ونوافذ التأكيد في لوحة التحكم
 class DashboardActionsHandler {
@@ -52,13 +53,13 @@ class DashboardActionsHandler {
         await vm.fetchCorrespondences(selectId: id);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم قبول الطلب كمعاملة رسمية بنجاح'), backgroundColor: Color(0xFF10B981)),
+            const SnackBar(content: Text('تم قبول الطلب كمعاملة رسمية بنجاح'), backgroundColor: AppTheme.emerald),
           );
         }
       }
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشل بدء مراجعة المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+        SnackBar(content: Text(res['message'] ?? 'فشل بدء مراجعة المعاملة'), backgroundColor: AppTheme.crimson),
       );
     }
   }
@@ -92,7 +93,7 @@ class DashboardActionsHandler {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('تأكيد الإغلاق'),
           ),
@@ -134,13 +135,13 @@ class DashboardActionsHandler {
           await vm.fetchCorrespondences();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تم إغلاق المعاملة بنجاح'), backgroundColor: Color(0xFF10B981)),
+              const SnackBar(content: Text('تم إغلاق المعاملة بنجاح'), backgroundColor: AppTheme.emerald),
             );
           }
         }
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'فشل إغلاق المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+          SnackBar(content: Text(res['message'] ?? 'فشل إغلاق المعاملة'), backgroundColor: AppTheme.crimson),
         );
       }
     }
@@ -180,13 +181,13 @@ class DashboardActionsHandler {
         await vm.fetchCorrespondences();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تمت أرشفة المعاملة بنجاح'), backgroundColor: Color(0xFF10B981)),
+            const SnackBar(content: Text('تمت أرشفة المعاملة بنجاح'), backgroundColor: AppTheme.emerald),
           );
         }
       }
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشلت أرشفة المعاملة'), backgroundColor: const Color(0xFFDC2626)),
+        SnackBar(content: Text(res['message'] ?? 'فشلت أرشفة المعاملة'), backgroundColor: AppTheme.crimson),
       );
     }
   }
@@ -196,7 +197,7 @@ class DashboardActionsHandler {
     final text = vm.quickReplyController.text.trim();
     if (text.length < 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى كتابة نص المسودة قبل الحفظ'), backgroundColor: Color(0xFFDC2626)),
+        const SnackBar(content: Text('يرجى كتابة نص المسودة قبل الحفظ'), backgroundColor: AppTheme.crimson),
       );
       return;
     }
@@ -204,7 +205,7 @@ class DashboardActionsHandler {
     final file = vm.pickedFile;
     if (file != null && (file.bytes?.length ?? 0) > 15 * 1024 * 1024) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حجم المرفق يتجاوز 15 م.ب — اختر ملفاً أصغر'), backgroundColor: Color(0xFFDC2626)),
+        const SnackBar(content: Text('حجم المرفق يتجاوز 15 م.ب — اختر ملفاً أصغر'), backgroundColor: AppTheme.crimson),
       );
       return;
     }
@@ -233,7 +234,7 @@ class DashboardActionsHandler {
         await vm.silentRefresh();
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'فشل حفظ المسودة'), backgroundColor: const Color(0xFFDC2626)),
+          SnackBar(content: Text(res['message'] ?? 'فشل حفظ المسودة'), backgroundColor: AppTheme.crimson),
         );
       }
     } finally {
@@ -268,7 +269,7 @@ class DashboardActionsHandler {
         await vm.silentRefresh();
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'فشل حفظ التعديل'), backgroundColor: const Color(0xFFDC2626)),
+          SnackBar(content: Text(res['message'] ?? 'فشل حفظ التعديل'), backgroundColor: AppTheme.crimson),
         );
       }
     } finally {
@@ -284,7 +285,7 @@ class DashboardActionsHandler {
       await vm.silentRefresh();
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشل رفع الرد للاعتماد'), backgroundColor: const Color(0xFFDC2626)),
+        SnackBar(content: Text(res['message'] ?? 'فشل رفع الرد للاعتماد'), backgroundColor: AppTheme.crimson),
       );
     }
   }
@@ -330,13 +331,13 @@ class DashboardActionsHandler {
         await vm.silentRefresh();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم اعتماد الرد بنجاح'), backgroundColor: Color(0xFF10B981)),
+            const SnackBar(content: Text('تم اعتماد الرد بنجاح'), backgroundColor: AppTheme.emerald),
           );
         }
       }
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشل اعتماد الرد'), backgroundColor: const Color(0xFFDC2626)),
+        SnackBar(content: Text(res['message'] ?? 'فشل اعتماد الرد'), backgroundColor: AppTheme.crimson),
       );
     }
   }
@@ -351,7 +352,7 @@ class DashboardActionsHandler {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.crimson, foregroundColor: Colors.white),
             onPressed: () {
               if (noteCtrl.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },
@@ -404,7 +405,7 @@ class DashboardActionsHandler {
         }
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'فشل رفض الرد'), backgroundColor: const Color(0xFFDC2626)),
+          SnackBar(content: Text(res['message'] ?? 'فشل رفض الرد'), backgroundColor: AppTheme.crimson),
         );
       }
     }
@@ -417,12 +418,12 @@ class DashboardActionsHandler {
       await vm.silentRefresh();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم إرسال الرد رسميًا إلى بريد العميل بنجاح'), backgroundColor: Color(0xFF059669)),
+          const SnackBar(content: Text('تم إرسال الرد رسميًا إلى بريد العميل بنجاح'), backgroundColor: AppTheme.emerald),
         );
       }
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message'] ?? 'فشل إرسال الرد للعميل'), backgroundColor: const Color(0xFFDC2626)),
+        SnackBar(content: Text(res['message'] ?? 'فشل إرسال الرد للعميل'), backgroundColor: AppTheme.crimson),
       );
     }
   }
@@ -432,7 +433,7 @@ class DashboardActionsHandler {
     final text = vm.quickReplyController.text.trim();
     if (text.length < 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى كتابة نص الرد قبل الإرسال'), backgroundColor: Color(0xFFDC2626)),
+        const SnackBar(content: Text('يرجى كتابة نص الرد قبل الإرسال'), backgroundColor: AppTheme.crimson),
       );
       return;
     }
@@ -455,7 +456,7 @@ class DashboardActionsHandler {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(upload['message'] ?? 'تعذر رفع المرفق — لم يُرسل الرد'),
-                backgroundColor: const Color(0xFFDC2626),
+                backgroundColor: AppTheme.crimson,
               ),
             );
             return;
@@ -471,7 +472,7 @@ class DashboardActionsHandler {
         await vm.silentRefresh();
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'فشل الإرسال المباشر للعميل'), backgroundColor: const Color(0xFFDC2626)),
+          SnackBar(content: Text(res['message'] ?? 'فشل الإرسال المباشر للعميل'), backgroundColor: AppTheme.crimson),
         );
       }
     } finally {

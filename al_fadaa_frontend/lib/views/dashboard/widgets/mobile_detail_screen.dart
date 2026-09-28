@@ -4,6 +4,7 @@ import '../../../models/user_model.dart';
 import '../controllers/dashboard_actions_handler.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import 'conversation_detail_pane.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// شاشة تفاصيل المحادثة على الموبايل — full screen route
 class MobileDetailScreen extends StatelessWidget {
@@ -32,9 +33,9 @@ class MobileDetailScreen extends StatelessWidget {
         final currentItem = vm.selectedItem ?? item;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
+          backgroundColor: AppTheme.backgroundLight,
           appBar: AppBar(
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: AppTheme.primary,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
@@ -46,11 +47,11 @@ class MobileDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   currentItem.serialNumber,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                  style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontMd, fontWeight: FontWeight.w700),
                 ),
                 Text(
                   currentItem.subject,
-                  style: const TextStyle(color: Colors.white70, fontSize: 11),
+                  style: const TextStyle(color: Colors.white70, fontSize: AppTheme.fontXs),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -4,6 +4,7 @@ import '../../../core/network/api_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/correspondence_model.dart';
 import '../../../models/user_model.dart';
+import '../../../core/widgets/app_max_width.dart';
 
 /// شاشة البحث المتقدم والأرشيف لمراسلات المؤسسة
 class AdvancedSearchScreen extends StatefulWidget {
@@ -191,7 +192,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         title: const Row(
           children: [
@@ -225,7 +226,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
           _buildResultsHeader(),
 
           // قائمة النتائج
-          Expanded(child: _buildResultsList()),
+          Expanded(child: AppMaxWidth(child: _buildResultsList())),
         ],
       ),
     );
@@ -235,7 +236,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AppTheme.borderLight)),
         boxShadow: [
           BoxShadow(
             color: Color(0x0A000000),
@@ -258,8 +259,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'ابحث في العنوان، المحتوى، رقم القيد، أو جهة الإرسال...',
-                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+                      hintStyle: const TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textTertiary),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppTheme.textTertiary),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear_rounded, size: 18),
@@ -270,18 +271,18 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                             )
                           : null,
                       filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
+                      fillColor: AppTheme.backgroundLight,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        borderSide: const BorderSide(color: AppTheme.borderLight),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         borderSide: const BorderSide(color: AppTheme.accent, width: 1.5),
                       ),
                     ),
@@ -300,7 +301,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                   foregroundColor: Colors.white,
                   elevation: 0,
                   minimumSize: const Size(80, 42),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                 ),
               ),
             ],
@@ -379,28 +380,28 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
               // فلتر المرفقات
               FilterChip(
                 selected: _hasAttachmentsOnly,
-                label: const Text('مع مرفقات فقط', style: TextStyle(fontSize: 12)),
+                label: const Text('مع مرفقات فقط', style: TextStyle(fontSize: AppTheme.fontSm)),
                 avatar: Icon(
                   Icons.attach_file_rounded,
                   size: 16,
-                  color: _hasAttachmentsOnly ? Colors.white : const Color(0xFF64748B),
+                  color: _hasAttachmentsOnly ? Colors.white : AppTheme.textTertiary,
                 ),
                 selectedColor: AppTheme.accent,
                 checkmarkColor: Colors.white,
                 labelStyle: TextStyle(
-                  color: _hasAttachmentsOnly ? Colors.white : const Color(0xFF334155),
+                  color: _hasAttachmentsOnly ? Colors.white : AppTheme.secondary,
                   fontWeight: FontWeight.w600,
                 ),
                 backgroundColor: const Color(0xFFF1F5F9),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                 onSelected: (val) => setState(() => _hasAttachmentsOnly = val),
               ),
 
               // زر تصفير الفلاتر
               TextButton.icon(
                 onPressed: _resetFilters,
-                icon: const Icon(Icons.clear_all_rounded, size: 16, color: Color(0xFF64748B)),
-                label: const Text('إعادة ضبط', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                icon: const Icon(Icons.clear_all_rounded, size: 16, color: AppTheme.textTertiary),
+                label: const Text('إعادة ضبط', style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary)),
               ),
             ],
           ),
@@ -419,17 +420,17 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           items: items,
           onChanged: onChanged,
-          icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF64748B)),
-          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+          icon: const Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textTertiary),
+          style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textHeading, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -447,17 +448,17 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedDepartmentId,
           items: items,
           onChanged: (val) => setState(() => _selectedDepartmentId = val ?? 'ALL'),
-          icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF64748B)),
-          style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B), fontWeight: FontWeight.w600),
+          icon: const Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textTertiary),
+          style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textHeading, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -471,15 +472,15 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
       child: Container(
         height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accent.withAlpha(25) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(6),
+          color: isSelected ? AppTheme.accent.withAlpha(25) : AppTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           border: Border.all(
-            color: isSelected ? AppTheme.accent : const Color(0xFFE2E8F0),
+            color: isSelected ? AppTheme.accent : AppTheme.borderLight,
           ),
         ),
         child: Row(
@@ -488,14 +489,14 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
             Icon(
               Icons.calendar_today_rounded,
               size: 14,
-              color: isSelected ? AppTheme.accent : const Color(0xFF64748B),
+              color: isSelected ? AppTheme.accent : AppTheme.textTertiary,
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? AppTheme.accent : const Color(0xFF334155),
+                fontSize: AppTheme.fontSm,
+                color: isSelected ? AppTheme.accent : AppTheme.secondary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
@@ -503,7 +504,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
               const SizedBox(width: 4),
               GestureDetector(
                 onTap: onClear,
-                child: const Icon(Icons.close_rounded, size: 14, color: Color(0xFF64748B)),
+                child: const Icon(Icons.close_rounded, size: 14, color: AppTheme.textTertiary),
               ),
             ],
           ],
@@ -518,16 +519,16 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
       color: const Color(0xFFF1F5F9),
       child: Row(
         children: [
-          const Icon(Icons.list_alt_rounded, size: 18, color: Color(0xFF64748B)),
+          const Icon(Icons.list_alt_rounded, size: 18, color: AppTheme.textTertiary),
           const SizedBox(width: 8),
           Text(
             _hasSearched
                 ? 'نتائج البحث: تم العثور على $_totalCount معاملة'
                 : 'أدخل كلمات البحث أو حدد الفلاتر ثم اضغط "بحث"',
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: AppTheme.fontSm,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF334155),
+              color: AppTheme.secondary,
             ),
           ),
           const Spacer(),
@@ -550,7 +551,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 12),
-            Text('جاري البحث والفرز في الأرشيف...', style: TextStyle(color: Color(0xFF64748B))),
+            Text('جاري البحث والفرز في الأرشيف...', style: TextStyle(color: AppTheme.textTertiary)),
           ],
         ),
       );
@@ -572,12 +573,12 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
             const SizedBox(height: 16),
             const Text(
               'محرك البحث المتقدم في المعاملات والأرشيف',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+              style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.textDark),
             ),
             const SizedBox(height: 8),
             const Text(
               'يمكنك البحث برقم القيد، الموضوع، اسم الجهة، الأقسام، أو نطاق التواريخ',
-              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textTertiary),
             ),
           ],
         ),
@@ -593,12 +594,12 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
             const SizedBox(height: 12),
             const Text(
               'لم يتم العثور على معاملات مطابقة',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+              style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
             ),
             const SizedBox(height: 6),
             const Text(
               'جرّب تعديل كلمات البحث أو تخفيف محددات الفلاتر',
-              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+              style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
@@ -633,11 +634,11 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     String typeText;
     switch (item.type) {
       case 'INCOMING':
-        typeColor = const Color(0xFF0284C7);
+        typeColor = AppTheme.info;
         typeText = 'وارد';
         break;
       case 'OUTGOING':
-        typeColor = const Color(0xFF16A34A);
+        typeColor = AppTheme.emerald;
         typeText = 'صادر';
         break;
       case 'INTERNAL':
@@ -645,7 +646,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
         typeText = 'داخلي';
         break;
       default:
-        typeColor = const Color(0xFF64748B);
+        typeColor = AppTheme.textTertiary;
         typeText = item.type;
     }
 
@@ -653,7 +654,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     String priorityText;
     switch (item.priority) {
       case 'URGENT':
-        priorityColor = const Color(0xFFDC2626);
+        priorityColor = AppTheme.crimson;
         priorityText = 'عاجل';
         break;
       case 'HIGH':
@@ -661,23 +662,23 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
         priorityText = 'مهم';
         break;
       case 'LOW':
-        priorityColor = const Color(0xFF64748B);
+        priorityColor = AppTheme.textTertiary;
         priorityText = 'عادي';
         break;
       default:
-        priorityColor = const Color(0xFF3B82F6);
+        priorityColor = AppTheme.info;
         priorityText = 'عادي';
     }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       elevation: 0,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         onTap: () => _handleItemTap(item),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -691,12 +692,12 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: typeColor.withAlpha(25),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                       border: Border.all(color: typeColor.withAlpha(80)),
                     ),
                     child: Text(
                       typeText,
-                      style: TextStyle(color: typeColor, fontSize: 11, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: typeColor, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -704,11 +705,11 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: priorityColor.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                     ),
                     child: Text(
                       priorityText,
-                      style: TextStyle(color: priorityColor, fontSize: 11, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: priorityColor, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -716,16 +717,16 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                     item.serialNumber.isNotEmpty ? item.serialNumber : 'بدون رقم قيد',
                     style: const TextStyle(
                       fontFamily: 'monospace',
-                      fontSize: 12,
+                      fontSize: AppTheme.fontSm,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF475569),
+                      color: AppTheme.textMuted,
                     ),
                   ),
                   const Spacer(),
                   // التاريخ
                   Text(
                     _dateFormat.format(item.createdAt),
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                    style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                   ),
                 ],
               ),
@@ -735,9 +736,9 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
               Text(
                 item.subject,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: AppTheme.fontMd,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: AppTheme.primary,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -747,7 +748,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                 const SizedBox(height: 6),
                 Text(
                   item.body!,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), height: 1.4),
+                  style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary, height: 1.4),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -759,22 +760,22 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
               Row(
                 children: [
                   if (item.senderName != null && item.senderName!.isNotEmpty) ...[
-                    const Icon(Icons.person_outline_rounded, size: 14, color: Color(0xFF64748B)),
+                    const Icon(Icons.person_outline_rounded, size: 14, color: AppTheme.textTertiary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         item.senderName!,
-                        style: const TextStyle(fontSize: 11, color: Color(0xFF475569)),
+                        style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ] else if (item.department != null) ...[
-                    const Icon(Icons.corporate_fare_rounded, size: 14, color: Color(0xFF64748B)),
+                    const Icon(Icons.corporate_fare_rounded, size: 14, color: AppTheme.textTertiary),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         item.department!.name,
-                        style: const TextStyle(fontSize: 11, color: Color(0xFF475569)),
+                        style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -785,16 +786,16 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.attach_file_rounded, size: 13, color: Color(0xFF64748B)),
+                          const Icon(Icons.attach_file_rounded, size: 13, color: AppTheme.textTertiary),
                           const SizedBox(width: 2),
                           Text(
                             '${item.attachments.length}',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                            style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.textTertiary),
                           ),
                         ],
                       ),
@@ -806,23 +807,23 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.reply_rounded, size: 13, color: Color(0xFF64748B)),
+                          const Icon(Icons.reply_rounded, size: 13, color: AppTheme.textTertiary),
                           const SizedBox(width: 2),
                           Text(
                             '${item.repliesCount}',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                            style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.textTertiary),
                           ),
                         ],
                       ),
                     ),
                   ],
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Color(0xFF94A3B8)),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppTheme.textTertiary),
                 ],
               ),
             ],
@@ -862,7 +863,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                 height: 4,
                 decoration: BoxDecoration(
                   color: const Color(0xFFCBD5E1),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                 ),
               ),
             ),
@@ -872,7 +873,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                 Expanded(
                   child: Text(
                     item.subject,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
@@ -884,26 +885,26 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
             const SizedBox(height: 8),
             Text(
               'رقم القيد: ${item.serialNumber} | التاريخ: ${_dateFormat.format(item.createdAt)}',
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+              style: const TextStyle(color: AppTheme.textTertiary, fontSize: AppTheme.fontSm),
             ),
             const Divider(height: 24),
             if (item.body != null && item.body!.isNotEmpty) ...[
               const Text(
                 'نص المعاملة:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase),
               ),
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  color: AppTheme.backgroundLight,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  border: Border.all(color: AppTheme.borderLight),
                 ),
                 child: Text(
                   item.body!,
-                  style: const TextStyle(fontSize: 13, height: 1.5),
+                  style: const TextStyle(fontSize: AppTheme.fontBase, height: 1.5),
                 ),
               ),
               const SizedBox(height: 16),
@@ -922,7 +923,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                 ),
                 child: const Text('فتح في لوحة المراسلات الرئيسية'),
               ),

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/utils/app_formatters.dart';
 import '../../core/utils/app_utils.dart';
+import '../../core/widgets/stat_tile.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 /// شاشة التشغيل الإداري: صندوق البريد الصادر، مسارات الاعتماد،
 /// الكيانات اليتيمة، سجل الوكالات، وحالة النسخ الاحتياطي.
@@ -31,7 +34,7 @@ class OperationsView extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text(
                     'إدارة التشغيل والرقابة',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
                   ),
                   const SizedBox(width: 24),
                   const Expanded(
@@ -40,7 +43,7 @@ class OperationsView extends StatelessWidget {
                       labelColor: AdminTheme.primary,
                       unselectedLabelColor: AdminTheme.textMuted,
                       indicatorColor: AdminTheme.primary,
-                      labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      labelStyle: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold),
                       dividerColor: Colors.transparent,
                       tabs: [
                         Tab(icon: Icon(Icons.outbox_rounded, size: 16), text: 'صندوق الصادر'),
@@ -79,7 +82,7 @@ final DateFormat _dtFormat = DateFormat('yyyy/MM/dd HH:mm', 'ar');
 Color _statusColor(String s) => switch (s) {
       'SENT'   => AdminTheme.emerald,
       'QUEUED' => AdminTheme.amber,
-      'PAUSED' => const Color(0xFF8B5CF6),
+      'PAUSED' => AdminTheme.purple,
       'FAILED' => AdminTheme.crimson,
       _        => AdminTheme.textMuted,
     };
@@ -167,18 +170,18 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
             children: [
               Text(
                 'العدد: $_total',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted),
+                style: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold, color: AdminTheme.textMuted),
               ),
               const Spacer(),
               ..._kinds.entries.map((e) => Padding(
                     padding: const EdgeInsets.only(left: 6),
                     child: ChoiceChip(
-                      label: Text(e.value, style: const TextStyle(fontSize: 11)),
+                      label: Text(e.value, style: const TextStyle(fontSize: AdminTheme.fontSm)),
                       selected: _status == e.key,
                       selectedColor: AdminTheme.primary,
                       labelStyle: TextStyle(
                         color: _status == e.key ? Colors.white : AdminTheme.textMuted,
-                        fontSize: 11,
+                        fontSize: AdminTheme.fontSm,
                       ),
                       visualDensity: VisualDensity.compact,
                       onSelected: (_) {
@@ -241,8 +244,8 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                             style: const TextStyle(
                                               fontFamily: 'monospace',
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                              color: Color(0xFF334155),
+                                              fontSize: AdminTheme.fontBase,
+                                              color: AdminTheme.borderDark,
                                             ),
                                           ),
                                           const SizedBox(width: 8),
@@ -261,12 +264,12 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                         const SizedBox(height: 4),
                                         Text(
                                           'إلى: ${m['to'] ?? '-'}',
-                                          style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                                          style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
                                         ),
                                         if ((m['lastError'] ?? '').toString().isNotEmpty)
                                           Text(
                                             'الخطأ: ${m['lastError']}',
-                                            style: const TextStyle(fontSize: 10.5, color: AdminTheme.crimson),
+                                            style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.crimson),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -277,7 +280,7 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                     OutlinedButton.icon(
                                       onPressed: () => _action(m['id'], true),
                                       icon: const Icon(Icons.replay_rounded, size: 14),
-                                      label: const Text('إعادة', style: TextStyle(fontSize: 11)),
+                                      label: const Text('إعادة', style: TextStyle(fontSize: AdminTheme.fontSm)),
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: AdminTheme.primary,
                                         side: const BorderSide(color: AdminTheme.primary),
@@ -288,10 +291,10 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
                                     OutlinedButton.icon(
                                       onPressed: () => _action(m['id'], false),
                                       icon: const Icon(Icons.pause_rounded, size: 14),
-                                      label: const Text('إيقاف', style: TextStyle(fontSize: 11)),
+                                      label: const Text('إيقاف', style: TextStyle(fontSize: AdminTheme.fontSm)),
                                       style: OutlinedButton.styleFrom(
-                                        foregroundColor: const Color(0xFF8B5CF6),
-                                        side: const BorderSide(color: Color(0xFF8B5CF6)),
+                                        foregroundColor: AdminTheme.purple,
+                                        side: const BorderSide(color: AdminTheme.purple),
                                       ),
                                     ),
                                   ],
@@ -313,7 +316,7 @@ class _OutboxTabState extends State<_OutboxTab> with AutomaticKeepAliveClientMix
             child: Row(children: [
               Text(
                 'الصفحة $_page من $_totalPages',
-                style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
               ),
               const Spacer(),
               IconButton(
@@ -436,13 +439,13 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: AdminTheme.surfaceInfo,
             borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
-            border: Border.all(color: const Color(0xFFBFDBFE)),
+            border: Border.all(color: AdminTheme.borderInfo),
           ),
           child: const Text(
             'مسار الاعتماد يحدد مستويات الموافقة الإلزامية قبل إرسال الرد، حسب درجة أولوية المراسلة. التعديل يسري على الردود المرفوعة لاحقًا فقط.',
-            style: TextStyle(fontSize: 11.5, color: Color(0xFF1E40AF)),
+            style: TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.accent),
           ),
         ),
         const SizedBox(height: 12),
@@ -480,7 +483,7 @@ class _WorkflowsTabState extends State<_WorkflowsTab> with AutomaticKeepAliveCli
                                 : Map<String, dynamic>.from(e.value));
                             return 'م${e.key + 1}: ${_roles[s['requiredRole']] ?? s['requiredRole']}';
                           }).join(' ← '),
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                    style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.borderDark),
                   ),
                 ),
                 IconButton(
@@ -555,28 +558,33 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
       child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Row(
-          children: [
-            _statCard('إحالات مفتوحة على مراسلات مغلقة', summary['openReferralsCount'], AdminTheme.crimson),
-            const SizedBox(width: 10),
-            _statCard('تكليفات معلقة على مراسلات مغلقة', summary['pendingTasksCount'], AdminTheme.amber),
-            const SizedBox(width: 10),
-            _statCard('مسودات ردود على مراسلات مغلقة', summary['draftRepliesCount'], const Color(0xFF8B5CF6)),
-          ],
-        ),
+        // صف إحصاءات متجاوب — يلتف بدل أن ينكسر في النوافذ الضيقة
+        LayoutBuilder(builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final cardWidth = w > 700 ? (w - 20) / 3 : w > 480 ? (w - 10) / 2 : w;
+          return Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              SizedBox(width: cardWidth, child: _statCard('إحالات مفتوحة على مراسلات مغلقة', summary['openReferralsCount'], AdminTheme.crimson)),
+              SizedBox(width: cardWidth, child: _statCard('تكليفات معلقة على مراسلات مغلقة', summary['pendingTasksCount'], AdminTheme.amber)),
+              SizedBox(width: cardWidth, child: _statCard('مسودات ردود على مراسلات مغلقة', summary['draftRepliesCount'], AdminTheme.purple)),
+            ],
+          );
+        }),
         const SizedBox(height: 12),
         // بطاقة ملخص النزاهة البنيوية
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: (summary['totalOrphans'] ?? 0) == 0
-                ? const Color(0xFFECFDF5)
-                : const Color(0xFFFEF2F2),
+                ? AdminTheme.surfaceSuccess
+                : AdminTheme.surfaceDanger,
             borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
             border: Border.all(
               color: (summary['totalOrphans'] ?? 0) == 0
-                  ? const Color(0xFFA7F3D0)
-                  : const Color(0xFFFECACA),
+                  ? AdminTheme.borderSuccess
+                  : AdminTheme.borderDanger,
             ),
             boxShadow: AdminTheme.cardShadow,
           ),
@@ -585,7 +593,7 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
                 ? 'لا توجد كيانات يتيمة — سلامة بنيوية كاملة'
                 : 'رُصدت ${(summary['totalOrphans'] ?? 0)} كيانات يتيمة تحتاج معالجة يدوية (فتح المراسلة وإتمام دورتها)',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AdminTheme.fontBase,
               fontWeight: FontWeight.bold,
               color: (summary['totalOrphans'] ?? 0) == 0 ? AdminTheme.emerald : AdminTheme.crimson,
             ),
@@ -594,7 +602,7 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
         const SizedBox(height: 10),
         Text(
           'آخر فحص: ${_lastCheckedAt != null ? _dtFormat.format(_lastCheckedAt!) : '—'}',
-          style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+          style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
         ),
       ],
         ),
@@ -602,28 +610,12 @@ class _OrphansTabState extends State<_OrphansTab> with AutomaticKeepAliveClientM
   }
 
   Widget _statCard(String label, dynamic value, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
-          border: Border.all(color: AdminTheme.border),
-          boxShadow: AdminTheme.cardShadow,
-        ),
-        child: Column(children: [
-          Text(
-            '$value',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
-          ),
-        ]),
-      ),
+    // بطاقة موحّدة عبر StatTile — كانت نسخة خاصة بحشوة 12 وقيمة 20px
+    // تخالف بطاقات الـKPI (حشوة 16 وقيمة 26px)
+    return StatTile(
+      label: label,
+      value: AppFormatters.number((value ?? 0) as num),
+      color: color,
     );
   }
 }
@@ -711,7 +703,7 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
             color: Colors.white,
             borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
             border: Border.all(
-              color: isActive ? const Color(0xFFA7F3D0) : AdminTheme.border,
+              color: isActive ? AdminTheme.borderSuccess : AdminTheme.border,
             ),
             boxShadow: AdminTheme.cardShadow,
           ),
@@ -724,7 +716,7 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
                     Text(
                       'المفوِّض: ${_nameOf(d, 'delegator')} → الوكيل: ${_nameOf(d, 'delegate')}',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: AdminTheme.fontBase,
                         fontWeight: FontWeight.bold,
                         color: AdminTheme.primary,
                       ),
@@ -750,7 +742,7 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
                 OutlinedButton.icon(
                   onPressed: () => _terminate(d),
                   icon: const Icon(Icons.cancel_outlined, size: 14),
-                  label: const Text('إنهاء', style: TextStyle(fontSize: 11)),
+                  label: const Text('إنهاء', style: TextStyle(fontSize: AdminTheme.fontSm)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AdminTheme.crimson,
                     side: const BorderSide(color: AdminTheme.crimson),
@@ -778,7 +770,7 @@ class _DelegationsTabState extends State<_DelegationsTab> with AutomaticKeepAliv
         borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
         border: Border.all(color: AdminTheme.border),
       ),
-      child: Text(text, style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted)),
+      child: Text(text, style: const TextStyle(fontSize: AdminTheme.fontXs, color: AdminTheme.textMuted)),
     );
   }
 }
@@ -893,19 +885,19 @@ class _BackupTabState extends State<_BackupTab> with AutomaticKeepAliveClientMix
                       f['name'],
                       style: const TextStyle(
                         fontFamily: 'monospace',
-                        fontSize: 11.5,
-                        color: Color(0xFF334155),
+                        fontSize: AdminTheme.fontBase,
+                        color: AdminTheme.borderDark,
                       ),
                     ),
                   ),
                   Text(
                     _sizeOf((f['sizeBytes'] as num?) ?? 0),
-                    style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                    style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     _dtFormat.format(DateTime.parse(f['modifiedAt']).toLocal()),
-                    style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+                    style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                   ),
                 ]),
               )),
@@ -969,17 +961,17 @@ class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
     return AlertDialog(
       title: Text(
         'مسار اعتماد: ${widget.priorityLabel}',
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: AdminTheme.fontTitle, fontWeight: FontWeight.bold),
       ),
       content: SizedBox(
-        width: 460,
+        width: ResponsiveDialog.maxWidth(context, 460),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'اختر أدوار الاعتماد بالتسلسل — الترتيب المذكور هو ترتيب الموافقة (المستوى 1 أولًا):',
-              style: TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+              style: TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
             ),
             const SizedBox(height: 10),
             // التسلسل الحالي
@@ -994,7 +986,7 @@ class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
                 ),
                 child: const Text(
                   'لم يُختر أي دور بعد — أضف من الأدوار المتاحة أدناه',
-                  style: TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                  style: TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                 ),
               )
             else
@@ -1014,7 +1006,7 @@ class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
                       Expanded(
                         child: Text(
                           _roles[_steps[i]] ?? _steps[i],
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600),
                         ),
                       ),
                       IconButton(
@@ -1041,7 +1033,7 @@ class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
             const SizedBox(height: 8),
             const Text(
               'الأدوار المتاحة — انقر للإضافة أو الإزالة:',
-              style: TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+              style: TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
             ),
             const SizedBox(height: 6),
             Wrap(
@@ -1050,7 +1042,7 @@ class _WorkflowStepsDialogState extends State<_WorkflowStepsDialog> {
               children: [
                 for (final e in _roles.entries)
                   FilterChip(
-                    label: Text(e.value, style: const TextStyle(fontSize: 11)),
+                    label: Text(e.value, style: const TextStyle(fontSize: AdminTheme.fontSm)),
                     selected: _steps.contains(e.key),
                     onSelected: (_) => _toggle(e.key),
                     visualDensity: VisualDensity.compact,

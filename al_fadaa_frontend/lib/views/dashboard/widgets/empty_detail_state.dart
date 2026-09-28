@@ -30,7 +30,7 @@ class EmptyDetailState extends StatelessWidget {
             const Text(
               'اختر مراسلة لعرض التفاصيل',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppTheme.fontXl,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.textDark,
               ),
@@ -40,7 +40,7 @@ class EmptyDetailState extends StatelessWidget {
               'يمكنك إدارة سلسلة المحادثة، مراجعة واعتماد مسودات الردود، وتكليف القطاعات.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppTheme.fontBase,
                 color: AppTheme.textMuted,
                 height: 1.6,
               ),

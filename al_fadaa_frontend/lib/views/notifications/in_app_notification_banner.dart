@@ -96,19 +96,19 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
   Color _getTypeColor(String type) {
     switch (type) {
       case 'NEW_INCOMING':
-        return const Color(0xFF0284C7);
+        return AppTheme.info;
       case 'NEW_REFERRAL':
         return const Color(0xFF7C3AED);
       case 'NEW_TASK':
         return const Color(0xFFD97706);
       case 'TASK_CANCELLED':
-        return const Color(0xFF64748B);
+        return AppTheme.textTertiary;
       case 'REPLY_SUBMITTED':
-        return const Color(0xFF2563EB);
+        return AppTheme.info;
       case 'REPLY_APPROVED':
-        return const Color(0xFF059669);
+        return AppTheme.emerald;
       case 'REPLY_REJECTED':
-        return const Color(0xFFDC2626);
+        return AppTheme.crimson;
       case 'REPLY_SENT':
         return const Color(0xFF0D9488);
       default:
@@ -132,8 +132,8 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
         width: 440,
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.circular(12),
+          color: AppTheme.primary,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
           border: Border.all(color: iconColor.withValues(alpha: 0.35), width: 1.2),
           boxShadow: [
             BoxShadow(
@@ -195,7 +195,7 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
                                     title,
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 13.5,
+                                      fontSize: AppTheme.fontMd,
                                       fontWeight: FontWeight.bold,
                                       height: 1.2,
                                     ),
@@ -208,13 +208,13 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: iconColor.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                                   ),
                                   child: const Text(
                                     'الآن',
                                     style: TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 10,
+                                      fontSize: AppTheme.fontXs,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -226,8 +226,8 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
                               Text(
                                 body,
                                 style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 12,
+                                  color: AppTheme.textTertiary,
+                                  fontSize: AppTheme.fontSm,
                                   height: 1.4,
                                 ),
                                 maxLines: 2,
@@ -241,7 +241,7 @@ class _InAppNotificationBannerState extends State<InAppNotificationBanner> with 
 
                       // زر الإغلاق
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 16, color: Color(0xFF64748B)),
+                        icon: const Icon(Icons.close_rounded, size: 16, color: AppTheme.textTertiary),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                         tooltip: 'إغلاق',

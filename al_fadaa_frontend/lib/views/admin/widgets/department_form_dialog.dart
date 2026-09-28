@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../models/user_model.dart';
+import '../../../core/theme/app_theme.dart';
 
 class DepartmentFormDialog extends StatefulWidget {
   final Department? department;
@@ -69,14 +70,14 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isEdit ? 'تم تحديث بيانات القطاع بنجاح' : 'تمت إضافة القطاع بنجاح'),
-              backgroundColor: const Color(0xFF10B981),
+              backgroundColor: AppTheme.emerald,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(res['message'] ?? 'فشلت العملية'),
-              backgroundColor: const Color(0xFFDC2626),
+              backgroundColor: AppTheme.crimson,
             ),
           );
         }
@@ -91,9 +92,9 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(isEdit ? Icons.edit_rounded : Icons.add_business_rounded, color: const Color(0xFF0F172A)),
+          Icon(isEdit ? Icons.edit_rounded : Icons.add_business_rounded, color: AppTheme.primary),
           const SizedBox(width: 8),
-          Text(isEdit ? 'تعديل بيانات القطاع' : 'إضافة قطاع / قسم جديد', style: const TextStyle(fontSize: 16)),
+          Text(isEdit ? 'تعديل بيانات القطاع' : 'إضافة قطاع / قسم جديد', style: const TextStyle(fontSize: AppTheme.fontLg)),
         ],
       ),
       content: SizedBox(
@@ -135,7 +136,7 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
                 items: [
                   const DropdownMenuItem<String>(
                     value: null,
-                    child: Text('بدون تعيين مدير حالياً', style: TextStyle(color: Color(0xFF94A3B8))),
+                    child: Text('بدون تعيين مدير حالياً', style: TextStyle(color: AppTheme.textTertiary)),
                   ),
                   ...widget.availableUsers.map((u) => DropdownMenuItem<String>(
                         value: u.id,
@@ -155,7 +156,7 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
           ),
           onPressed: _isLoading ? null : _submit,

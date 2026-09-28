@@ -52,7 +52,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusXl)),
       child: Container(
         width: 760,
         height: 680,
@@ -67,7 +67,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: AppTheme.accent.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
                   child: const Icon(Icons.account_tree_rounded, color: AppTheme.accent, size: 24),
                 ),
@@ -77,11 +77,11 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                   children: [
                     Text(
                       'شجرة أنساب المعاملة والترابط البياني',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+                      style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.textDark),
                     ),
                     Text(
                       'تتبع تسلسل المحادثات والتفرعات وحوكمة الإغلاق المترابط',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                      style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                     ),
                   ],
                 ),
@@ -108,7 +108,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                         children: [
                           CircularProgressIndicator(),
                           SizedBox(height: 12),
-                          Text('جاري فحص وتجميع شجرة المعاملات...', style: TextStyle(color: Color(0xFF64748B))),
+                          Text('جاري فحص وتجميع شجرة المعاملات...', style: TextStyle(color: AppTheme.textTertiary)),
                         ],
                       ),
                     )
@@ -146,10 +146,10 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: canClose ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
-            borderRadius: BorderRadius.circular(10),
+            color: canClose ? AppTheme.surfaceSuccess : AppTheme.surfaceDanger,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
             border: Border.all(
-              color: canClose ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA),
+              color: canClose ? const Color(0xFFA7F3D0) : AppTheme.borderDanger,
             ),
           ),
           child: Row(
@@ -157,7 +157,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
             children: [
               Icon(
                 canClose ? Icons.verified_user_rounded : Icons.lock_outline_rounded,
-                color: canClose ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                color: canClose ? AppTheme.emerald : AppTheme.crimson,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -171,7 +171,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                           : 'المعاملة محجوبة عن الإغلاق المترابط (حماية الالتزامات المؤسسية) 🔒',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: AppTheme.fontBase,
                         color: canClose ? const Color(0xFF065F46) : const Color(0xFF991B1B),
                       ),
                     ),
@@ -179,12 +179,12 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                     if (canClose)
                       const Text(
                         'كافة التفرعات والمعاملات التابعة والمهام والإحالات منجزة بالكامل، لا يوجد أي عمل معلق.',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF047857)),
+                        style: TextStyle(fontSize: AppTheme.fontXs, color: Color(0xFF047857)),
                       )
                     else ...[
                       const Text(
                         'لا يمكن إغلاق هذه المعاملة حالياً لوجود التزامات معلقة تتطلب الإنجاز أولاً:',
-                        style: TextStyle(fontSize: 11, color: Color(0xFFB91C1C), fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: AppTheme.fontXs, color: Color(0xFFB91C1C), fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       ...blockingReasons.map(
@@ -192,11 +192,11 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                           padding: const EdgeInsets.only(bottom: 2),
                           child: Row(
                             children: [
-                              const Text('• ', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.bold)),
+                              const Text('• ', style: TextStyle(color: AppTheme.crimson, fontWeight: FontWeight.bold)),
                               Expanded(
                                 child: Text(
                                   reason,
-                                  style: const TextStyle(fontSize: 11, color: Color(0xFF7F1D1D)),
+                                  style: const TextStyle(fontSize: AppTheme.fontXs, color: Color(0xFF7F1D1D)),
                                 ),
                               ),
                             ],
@@ -217,7 +217,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -239,8 +239,8 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: SingleChildScrollView(
                     child: _buildTreeNode(tree, 0),
@@ -255,15 +255,15 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF64748B)),
+        Icon(icon, size: 16, color: AppTheme.textTertiary),
         const SizedBox(width: 6),
         Text(
           '$label: ',
-          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+          style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
         ),
         Text(
           count,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+          style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textDark),
         ),
       ],
     );
@@ -287,11 +287,11 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
     String typeLabel;
     switch (type) {
       case 'INCOMING':
-        typeColor = const Color(0xFF0284C7);
+        typeColor = AppTheme.info;
         typeLabel = 'وارد';
         break;
       case 'OUTGOING':
-        typeColor = const Color(0xFF16A34A);
+        typeColor = AppTheme.emerald;
         typeLabel = 'صادر';
         break;
       case 'INTERNAL':
@@ -299,7 +299,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
         typeLabel = 'داخلي';
         break;
       default:
-        typeColor = const Color(0xFF64748B);
+        typeColor = AppTheme.textTertiary;
         typeLabel = type;
     }
 
@@ -326,14 +326,14 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                             widget.onSelectCorrespondence!(nodeId);
                           }
                         },
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isCurrent ? AppTheme.accent.withAlpha(15) : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(10),
+                      color: isCurrent ? AppTheme.accent.withAlpha(15) : AppTheme.backgroundLight,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                       border: Border.all(
-                        color: isCurrent ? AppTheme.accent : const Color(0xFFE2E8F0),
+                        color: isCurrent ? AppTheme.accent : AppTheme.borderLight,
                         width: isCurrent ? 2 : 1,
                       ),
                     ),
@@ -346,11 +346,11 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: typeColor.withAlpha(25),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                               ),
                               child: Text(
                                 typeLabel,
-                                style: TextStyle(color: typeColor, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: typeColor, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -358,9 +358,9 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                               refNumber,
                               style: const TextStyle(
                                 fontFamily: 'monospace',
-                                fontSize: 12,
+                                fontSize: AppTheme.fontSm,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF334155),
+                                color: AppTheme.secondary,
                               ),
                             ),
                             if (isCurrent) ...[
@@ -369,11 +369,11 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: AppTheme.accent,
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                 ),
                                 child: const Text(
                                   'المعاملة الحالية',
-                                  style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.white, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -381,12 +381,12 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE2E8F0),
-                                borderRadius: BorderRadius.circular(4),
+                                color: AppTheme.borderLight,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                               ),
                               child: Text(
                                 status,
-                                style: const TextStyle(fontSize: 10, color: Color(0xFF475569), fontWeight: FontWeight.w600),
+                                style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
@@ -395,7 +395,7 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                         Text(
                           subject,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppTheme.fontBase,
                             fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
                             color: AppTheme.textDark,
                           ),
@@ -406,31 +406,31 @@ class _CorrespondenceLineageDialogState extends State<CorrespondenceLineageDialo
                         Row(
                           children: [
                             if (department != null) ...[
-                              const Icon(Icons.corporate_fare_rounded, size: 12, color: Color(0xFF64748B)),
+                              const Icon(Icons.corporate_fare_rounded, size: 12, color: AppTheme.textTertiary),
                               const SizedBox(width: 4),
-                              Text(department, style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                              Text(department, style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
                               const SizedBox(width: 12),
                             ],
                             if (referralsCount > 0) ...[
-                              const Icon(Icons.reply_all_rounded, size: 12, color: Color(0xFF64748B)),
+                              const Icon(Icons.reply_all_rounded, size: 12, color: AppTheme.textTertiary),
                               const SizedBox(width: 3),
-                              Text('$referralsCount إحالة', style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                              Text('$referralsCount إحالة', style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
                               const SizedBox(width: 10),
                             ],
                             if (tasksCount > 0) ...[
-                              const Icon(Icons.task_alt_rounded, size: 12, color: Color(0xFF64748B)),
+                              const Icon(Icons.task_alt_rounded, size: 12, color: AppTheme.textTertiary),
                               const SizedBox(width: 3),
-                              Text('$tasksCount مهام', style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                              Text('$tasksCount مهام', style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
                               const SizedBox(width: 10),
                             ],
                             if (repliesCount > 0) ...[
-                              const Icon(Icons.comment_outlined, size: 12, color: Color(0xFF64748B)),
+                              const Icon(Icons.comment_outlined, size: 12, color: AppTheme.textTertiary),
                               const SizedBox(width: 3),
-                              Text('$repliesCount ردود', style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                              Text('$repliesCount ردود', style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
                             ],
                             if (!isCurrent) ...[
                               const Spacer(),
-                              const Text('فتح المعاملة ⬅', style: TextStyle(fontSize: 10, color: AppTheme.accent, fontWeight: FontWeight.bold)),
+                              const Text('فتح المعاملة ⬅', style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.accent, fontWeight: FontWeight.bold)),
                             ],
                           ],
                         ),

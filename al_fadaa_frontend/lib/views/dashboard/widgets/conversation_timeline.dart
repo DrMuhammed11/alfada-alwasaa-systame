@@ -70,7 +70,7 @@ class ConversationTimeline extends StatelessWidget {
           ? item.body!
           : 'لا يوجد نص مرفق مع الرسالة',
       'badge': item.type == 'INCOMING' ? 'رسالة العميل (وارد أساسي)' : 'خطاب رسمي أصلي',
-      'badgeColor': item.type == 'INCOMING' ? const Color(0xFF0284C7) : const Color(0xFF10B981),
+      'badgeColor': item.type == 'INCOMING' ? AppTheme.info : AppTheme.emerald,
       'attachments': item.attachments.where((a) => a.replyId == null).toList(),
     });
 
@@ -92,7 +92,7 @@ class ConversationTimeline extends StatelessWidget {
         'date': child.receivedAt ?? child.createdAt,
         'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : 'لا يوجد نص',
         'badge': isChildClient ? 'رسالة إضافية من العميل' : 'رسالة فرعية تابعة',
-        'badgeColor': isChildClient ? const Color(0xFF0284C7) : const Color(0xFF059669),
+        'badgeColor': isChildClient ? AppTheme.info : AppTheme.emerald,
         'attachments': child.attachments,
       });
     }

@@ -15,6 +15,7 @@ import 'widgets/empty_detail_state.dart';
 import 'widgets/master_list_pane.dart';
 import 'widgets/mobile_detail_screen.dart';
 import 'widgets/sync_status_banner.dart';
+import '../../core/theme/app_theme.dart';
 
 /// الشاشة الرئيسية للنظام — مصممة بنظام الأعمدة الثلاثية المتوازنة RTL للشاشات الواسعة ونمط Master-Detail للموبايل
 class DashboardScreen extends StatefulWidget {
@@ -103,13 +104,13 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// تخطيط الموبايل والشاشات الضيقة (< 860px) بنمط Master-Detail
   Widget _buildMobileLayout(bool isAdminOrGM) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         title: Text(
           _getMobileTitle(_vm.selectedNav),
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontLg, fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -195,7 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         },
         icon: const Icon(Icons.add_rounded),
         label: const Text('وارد جديد'),
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
       ),
     );
@@ -212,7 +213,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     final role = widget.user.role.toUpperCase();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           const SyncStatusBanner(),
@@ -326,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           maxHeight: MediaQuery.of(ctx).size.height * 0.85,
         ),
         decoration: const BoxDecoration(
-          color: Color(0xFF0F172A),
+          color: AppTheme.primary,
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: ClipRRect(

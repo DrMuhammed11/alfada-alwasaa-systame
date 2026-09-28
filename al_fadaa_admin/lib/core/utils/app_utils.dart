@@ -3,16 +3,21 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/admin_theme.dart';
+import 'app_formatters.dart';
 
 /// أدوات مساعدة مشتركة للتطبيق
 class AppUtils {
   AppUtils._();
 
-  /// تنسيق الأرقام الكبيرة بالفواصل العربية
+  /// تنسيق الأرقام الكبيرة بالسياسة الموحدة (أرقام هندية-عربية ١٢٣)
   static String formatNumber(num value) {
-    if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)} م';
-    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)} ألف';
-    return value.toInt().toString();
+    if (value >= 1000000) {
+      return '${AppFormatters.arabicDigits((value / 1000000).toStringAsFixed(1))} م';
+    }
+    if (value >= 1000) {
+      return '${AppFormatters.arabicDigits((value / 1000).toStringAsFixed(1))} ألف';
+    }
+    return AppFormatters.number(value);
   }
 
   /// لون حسب نسبة الأداء
@@ -99,7 +104,7 @@ class AppUtils {
             Expanded(child: Text(title)),
           ],
         ),
-        content: Text(message, style: const TextStyle(fontSize: 13, color: AdminTheme.textMuted)),
+        content: Text(message, style: const TextStyle(fontSize: AdminTheme.fontMd, color: AdminTheme.textMuted)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -263,7 +268,7 @@ class KpiCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AdminTheme.fontBase,
                       color: AdminTheme.textMuted,
                       fontWeight: FontWeight.w600,
                     ),
@@ -286,7 +291,7 @@ class KpiCard extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                fontSize: 26,
+                fontSize: AdminTheme.fontDisplay,
                 fontWeight: FontWeight.bold,
                 color: AdminTheme.textMain,
                 height: 1.1,
@@ -295,7 +300,7 @@ class KpiCard extends StatelessWidget {
             if (subtitle != null)
               Text(
                 subtitle!,
-                style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted),
+                style: const TextStyle(fontSize: AdminTheme.fontXs, color: AdminTheme.textMuted),
               ),
           ],
         ),
@@ -337,7 +342,7 @@ class EmptyStateWidget extends StatelessWidget {
           Text(
             message,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: AdminTheme.fontLg,
               color: AdminTheme.textMuted,
               fontWeight: FontWeight.w500,
             ),
@@ -385,13 +390,13 @@ class ErrorStateWidget extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             message,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           const Text(
             'تحقق من الاتصال بالإنترنت أو اتصل بالمدير التقني',
-            style: TextStyle(fontSize: 12, color: AdminTheme.textMuted),
+            style: TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -431,7 +436,7 @@ class LoadingWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               message!,
-              style: const TextStyle(color: AdminTheme.textMuted, fontSize: 13),
+              style: const TextStyle(color: AdminTheme.textMuted, fontSize: AdminTheme.fontMd),
             ),
           ],
         ],
@@ -468,9 +473,9 @@ class PaginationBar extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'إجمالي: $total  |  الصفحة $currentPage من $totalPages',
+            'إجمالي: ${AppFormatters.number(total)}  |  الصفحة ${AppFormatters.number(currentPage)} من ${AppFormatters.number(totalPages)}',
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: AdminTheme.fontBase,
               fontWeight: FontWeight.w600,
               color: AdminTheme.textMuted,
             ),
@@ -498,8 +503,8 @@ class PaginationBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
             ),
             child: Text(
-              '$currentPage',
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+              AppFormatters.number(currentPage),
+              style: const TextStyle(color: Colors.white, fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold),
             ),
           ),
           // الصفحة التالية

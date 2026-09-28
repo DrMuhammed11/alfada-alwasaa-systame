@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../models/user_model.dart';
 import 'department_form_dialog.dart';
+import '../../../core/theme/app_theme.dart';
 
 class DepartmentsManagementTab extends StatelessWidget {
   final List<Department> departments;
@@ -37,7 +38,7 @@ class DepartmentsManagementTab extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.crimson, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('تأكيد الحذف'),
           ),
@@ -51,11 +52,11 @@ class DepartmentsManagementTab extends StatelessWidget {
         if (res['success'] == true) {
           onRefresh();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم حذف القطاع بنجاح'), backgroundColor: Color(0xFF10B981)),
+            const SnackBar(content: Text('تم حذف القطاع بنجاح'), backgroundColor: AppTheme.emerald),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(res['message'] ?? 'فشل حذف القطاع'), backgroundColor: const Color(0xFFDC2626)),
+            SnackBar(content: Text(res['message'] ?? 'فشل حذف القطاع'), backgroundColor: AppTheme.crimson),
           );
         }
       }
@@ -72,19 +73,19 @@ class DepartmentsManagementTab extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: [
-              const Icon(Icons.corporate_fare_rounded, size: 22, color: Color(0xFF0F172A)),
+              const Icon(Icons.corporate_fare_rounded, size: 22, color: AppTheme.primary),
               const SizedBox(width: 8),
               Text(
                 'القطاعات والإدارات التنظيمية (${departments.length})',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontMd),
               ),
               const Spacer(),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
+                  backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                 ),
                 icon: const Icon(Icons.add_business_rounded, size: 18),
                 label: const Text('إضافة قطاع جديد'),
@@ -100,7 +101,7 @@ class DepartmentsManagementTab extends StatelessWidget {
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : departments.isEmpty
-                  ? const Center(child: Text('لا توجد قطاعات مسجلة حالياً', style: TextStyle(color: Color(0xFF94A3B8))))
+                  ? const Center(child: Text('لا توجد قطاعات مسجلة حالياً', style: TextStyle(color: AppTheme.textTertiary)))
                   : GridView.builder(
                       padding: const EdgeInsets.all(16),
                       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -116,8 +117,8 @@ class DepartmentsManagementTab extends StatelessWidget {
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            border: Border.all(color: AppTheme.borderLight),
                             boxShadow: [
                               BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 4, offset: const Offset(0, 2)),
                             ],
@@ -130,29 +131,29 @@ class DepartmentsManagementTab extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0F172A).withAlpha(15),
-                                      borderRadius: BorderRadius.circular(4),
+                                      color: AppTheme.primary.withAlpha(15),
+                                      borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                     ),
                                     child: Text(
                                       dept.code,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF0F172A)),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontSm, color: AppTheme.primary),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       dept.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontMd),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.edit_rounded, size: 18, color: Color(0xFF64748B)),
+                                    icon: const Icon(Icons.edit_rounded, size: 18, color: AppTheme.textTertiary),
                                     tooltip: 'تعديل القطاع',
                                     onPressed: () => _openDepartmentDialog(context, dept),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFDC2626)),
+                                    icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.crimson),
                                     tooltip: 'حذف القطاع',
                                     onPressed: () => _deleteDepartment(context, dept),
                                   ),
@@ -161,14 +162,14 @@ class DepartmentsManagementTab extends StatelessWidget {
                               const Spacer(),
                               Row(
                                 children: [
-                                  const Icon(Icons.person_pin_rounded, size: 16, color: Color(0xFF64748B)),
+                                  const Icon(Icons.person_pin_rounded, size: 16, color: AppTheme.textTertiary),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       dept.managerName != null ? 'المدير: ${dept.managerName}' : 'بدون مدير معين',
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        color: dept.managerName != null ? const Color(0xFF334155) : const Color(0xFF94A3B8),
+                                        fontSize: AppTheme.fontSm,
+                                        color: dept.managerName != null ? AppTheme.secondary : AppTheme.textTertiary,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -177,11 +178,11 @@ class DepartmentsManagementTab extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFF1F5F9),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                                     ),
                                     child: Text(
                                       '${dept.usersCount} موظف',
-                                      style: const TextStyle(fontSize: 11, color: Color(0xFF475569), fontWeight: FontWeight.bold),
+                                      style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],

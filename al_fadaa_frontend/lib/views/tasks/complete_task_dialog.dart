@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../core/network/api_service.dart';
 import '../../models/task_model.dart';
+import '../../core/theme/app_theme.dart';
 
 class CompleteTaskDialog extends StatefulWidget {
   final TaskItem task;
@@ -38,7 +39,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('حجم الملف يتجاوز الحد المسموح (15MB)'),
-                backgroundColor: Color(0xFFDC2626),
+                backgroundColor: AppTheme.crimson,
               ),
             );
           }
@@ -122,8 +123,8 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -140,10 +141,10 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF059669).withAlpha(20),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.emerald.withAlpha(20),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       ),
-                      child: const Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 24),
+                      child: const Icon(Icons.check_circle_rounded, color: AppTheme.emerald, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -152,11 +153,11 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                         children: [
                           const Text(
                             'تأكيد إنجاز المهمة بواسطة القطاع',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                           Text(
                             widget.task.title,
-                            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                            style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -164,7 +165,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                      icon: const Icon(Icons.close_rounded, size: 20, color: AppTheme.textTertiary),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -177,7 +178,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: widget.task.slaBgColor,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                       border: Border.all(color: widget.task.slaColor.withAlpha(70)),
                     ),
                     child: Row(
@@ -187,7 +188,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                         const SizedBox(width: 8),
                         Text(
                           'مهلة الإنجاز (SLA): ${widget.task.slaLabel}',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: widget.task.slaColor),
+                          style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: widget.task.slaColor),
                         ),
                       ],
                     ),
@@ -202,18 +203,18 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    color: AppTheme.backgroundLight,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, color: Color(0xFF0284C7), size: 18),
+                      Icon(Icons.info_outline_rounded, color: AppTheme.info, size: 18),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'عند تأكيد الإنجاز، سيتم تسجيل إثباتات الإنجاز وإعادة المعاملة لتكون جاهزة للاعتماد والرد على العميل.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.4),
+                          style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.secondary, height: 1.4),
                         ),
                       ),
                     ],
@@ -223,7 +224,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
 
                 const Text(
                   'ملاحظة أو تقرير الإنجاز (اختياري):',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  style: TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -231,53 +232,53 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                   maxLines: 3,
                   decoration: InputDecoration(
                     hintText: 'اكتب تفاصيل ما تم إنجازه بواسطة القطاع ليظهر في كشف المعاملة والرد...',
-                    hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                    hintStyle: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
                     contentPadding: const EdgeInsets.all(12),
                     filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
+                    fillColor: AppTheme.backgroundLight,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      borderSide: const BorderSide(color: AppTheme.borderLight),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                      borderSide: const BorderSide(color: AppTheme.borderLight),
                     ),
                     focusedBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
-                      borderSide: BorderSide(color: Color(0xFF059669), width: 1.5),
+                      borderSide: BorderSide(color: AppTheme.emerald, width: 1.5),
                     ),
                   ),
-                  style: const TextStyle(fontSize: 13),
+                  style: const TextStyle(fontSize: AppTheme.fontBase),
                 ),
                 const SizedBox(height: 16),
 
                 // إرفاق مستند أو تقرير إنجاز (ملفات / PDF / صور / عروض أسعار)
                 const Text(
                   'إرفاق إثبات الإنجاز / تقرير فني / عرض سعر (اختياري):',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  style: TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                 ),
                 const SizedBox(height: 8),
                 if (_pickedFile == null) ...[
                   InkWell(
                     onTap: _isLoading ? null : _pickFile,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.backgroundLight,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         border: Border.all(color: const Color(0xFFCBD5E1), style: BorderStyle.solid),
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.upload_file_rounded, size: 20, color: Color(0xFF0284C7)),
+                          Icon(Icons.upload_file_rounded, size: 20, color: AppTheme.info),
                           SizedBox(width: 8),
                           Text(
                             'اختر ملفاً لإرفاقه (عرض سعر، تقرير فني، إيصال، PDF، صورة)',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF0284C7), fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.info, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -288,12 +289,12 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       border: Border.all(color: const Color(0xFF86EFAC)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.attach_file_rounded, color: Color(0xFF16A34A), size: 18),
+                        const Icon(Icons.attach_file_rounded, color: AppTheme.emerald, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -301,13 +302,13 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                             children: [
                               Text(
                                 _pickedFile!.name,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF166534)),
+                                style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: Color(0xFF166534)),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 _formatFileSize(_pickedFile!.size),
-                                style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                                style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                               ),
                             ],
                           ),
@@ -333,9 +334,9 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF059669),
+                      backgroundColor: AppTheme.emerald,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                       elevation: 0,
                     ),
                     icon: _isLoading
@@ -347,7 +348,7 @@ class _CompleteTaskDialogState extends State<CompleteTaskDialog> {
                         : const Icon(Icons.check_rounded, size: 18),
                     label: const Text(
                       'تأكيد الإنجاز وإعادة المعاملة للرد',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase),
                     ),
                   ),
                 ),

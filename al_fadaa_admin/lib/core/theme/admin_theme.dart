@@ -20,9 +20,20 @@ class AdminTheme {
   static const Color border       = Color(0xFFE2E8F0);
   static const Color borderDark   = Color(0xFF334155);
   static const Color textMain     = Color(0xFF0F172A);
+  static const Color textHeading  = Color(0xFF1E293B);
   static const Color textMuted    = Color(0xFF64748B);
   static const Color textLight    = Color(0xFF94A3B8);
   static const Color surface2     = Color(0xFFF1F5F9);
+
+  // ─── أسطح وحدود الشارات الدلالية ───
+  static const Color surfaceSuccess = Color(0xFFECFDF5);
+  static const Color borderSuccess  = Color(0xFFA7F3D0);
+  static const Color surfaceDanger  = Color(0xFFFEF2F2);
+  static const Color borderDanger   = Color(0xFFFECACA);
+  static const Color surfaceInfo    = Color(0xFFE0F2FE);
+  static const Color borderInfo     = Color(0xFFBAE6FD);
+  static const Color surfaceWarning = Color(0xFFFFFBEB);
+  static const Color borderWarning  = Color(0xFFFDE68A);
 
   // ─── التدرجات اللونية ───
   static const LinearGradient accentGradient = LinearGradient(
@@ -80,9 +91,45 @@ class AdminTheme {
   static const double radiusLg = 14;
   static const double radiusXl = 20;
 
+  // ─── مقياس الخطوط (المقياس الوحيد — لا أنصاف ولا قيم تحت 10) ───
+  static const double fontXs = 10;
+  static const double fontSm = 11;
+  static const double fontBase = 12;
+  static const double fontMd = 13;
+  static const double fontLg = 14;
+  static const double fontTitle = 16;
+  static const double fontXl = 18;
+  static const double fontXxl = 22;
+  static const double fontDisplay = 26;
+
+  // ─── مقياس الحشوات ───
+  static const double spaceXs = 4;
+  static const double spaceSm = 8;
+  static const double spaceMd = 12;
+  static const double spaceLg = 16;
+  static const double spaceXl = 24;
+  static const double spaceXxl = 32;
+
+  // ─── أحجام الأيقونات ───
+  static const double iconXs = 14;
+  static const double iconSm = 16;
+  static const double iconMd = 20;
+  static const double iconLg = 24;
+
+  // ─── عتبات الاستجابة (بدل الأرقام السحرية 800/900/600/700) ───
+  static const double bpCompact = 800;   // تحت هذا: شريط تنقل سفلي
+  static const double bpMedium = 1100;   // شبكات KPI 3→2 أعمدة
+  static const double bpWide = 1400;     // عرض المحتوى الأقصى مع توسيط
+
+  // أرقام جدولية ثابتة العرض — الأرقام العربية-الهندية والغربية لا تهتز في الأعمدة
+  static TextStyle _tabular(TextStyle s) =>
+      s.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
   static ThemeData get lightTheme {
     final baseTextTheme = ThemeData.light().textTheme.apply(
           fontFamily: fontFamily,
+          bodyColor: textMain,
+          displayColor: textMain,
         );
 
     return ThemeData(
@@ -99,11 +146,34 @@ class AdminTheme {
         surface: cardBg,
         error: crimson,
         onSurface: textMain,
+        onSurfaceVariant: textMuted,
         outline: border,
+        outlineVariant: border,
+        surfaceContainerHighest: surface2,
+        tertiary: purple,
       ),
-      textTheme: baseTextTheme.apply(
-        bodyColor: textMain,
-        displayColor: textMain,
+      // مقياس نصي حقيقي بأرقام جدولية ثابتة العرض — يمنع اهتزاز أعمدة الأرقام
+      textTheme: baseTextTheme.copyWith(
+        headlineSmall: _tabular(baseTextTheme.headlineSmall!).copyWith(
+            fontSize: fontXxl, fontWeight: FontWeight.w800, color: textMain),
+        titleLarge: _tabular(baseTextTheme.titleLarge!).copyWith(
+            fontSize: fontXl, fontWeight: FontWeight.w700, color: textMain),
+        titleMedium: _tabular(baseTextTheme.titleMedium!).copyWith(
+            fontSize: fontLg, fontWeight: FontWeight.w700, color: textHeading),
+        titleSmall: _tabular(baseTextTheme.titleSmall!).copyWith(
+            fontSize: fontMd, fontWeight: FontWeight.w600, color: textHeading),
+        bodyLarge: _tabular(baseTextTheme.bodyLarge!)
+            .copyWith(fontSize: fontLg, color: textMain),
+        bodyMedium: _tabular(baseTextTheme.bodyMedium!)
+            .copyWith(fontSize: fontMd, color: textMain),
+        bodySmall: _tabular(baseTextTheme.bodySmall!)
+            .copyWith(fontSize: fontBase, color: textMuted),
+        labelLarge: _tabular(baseTextTheme.labelLarge!).copyWith(
+            fontSize: fontBase, fontWeight: FontWeight.w600, color: textMain),
+        labelMedium: _tabular(baseTextTheme.labelMedium!)
+            .copyWith(fontSize: fontSm, color: textMuted),
+        labelSmall: _tabular(baseTextTheme.labelSmall!)
+            .copyWith(fontSize: fontXs, color: textMuted),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: primary,
@@ -228,6 +298,45 @@ class AdminTheme {
         horizontalMargin: 14,
         columnSpacing: 20,
         dividerThickness: 1,
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: const TextStyle(fontFamily: fontFamily, fontSize: fontMd, color: textMain),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(cardBg),
+          elevation: WidgetStateProperty.all(4),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusSm)),
+          ),
+          side: WidgetStateProperty.all(const BorderSide(color: border)),
+        ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: accent,
+        linearTrackColor: surface2,
+        circularTrackColor: surface2,
+      ),
+      scrollbarTheme: ScrollbarThemeData(
+        thickness: WidgetStateProperty.all(6),
+        radius: const Radius.circular(3),
+        thumbColor: WidgetStateProperty.all(textLight.withAlpha(130)),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primary;
+          return Colors.white;
+        }),
+        side: const BorderSide(color: border, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return accent;
+          return border;
+        }),
       ),
     );
   }

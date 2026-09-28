@@ -100,7 +100,7 @@ class DashboardSidebar extends StatelessWidget {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: AppTheme.accent.withAlpha(50),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                         ),
                         child: const Icon(Icons.mark_email_unread_rounded, color: AppTheme.accent, size: 20),
                       ),
@@ -112,12 +112,12 @@ class DashboardSidebar extends StatelessWidget {
                           children: [
                             Text(
                               'شركة الفضاء الواسع',
-                              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: Colors.white, fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'نظام المراسلات المؤسسي',
-                              style: TextStyle(color: AppTheme.textOnLight, fontSize: 10),
+                              style: TextStyle(color: AppTheme.textOnLight, fontSize: AppTheme.fontXs),
                             ),
                           ],
                         ),
@@ -164,7 +164,7 @@ class DashboardSidebar extends StatelessWidget {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                     ),
                     child: isCollapsed
                         ? const Tooltip(
@@ -176,7 +176,7 @@ class DashboardSidebar extends StatelessWidget {
                             children: [
                               Icon(Icons.add_rounded, size: 18),
                               SizedBox(width: 6),
-                              Text('وارد جديد', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              Text('وارد جديد', style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold)),
                             ],
                           ),
                   ),
@@ -198,10 +198,10 @@ class DashboardSidebar extends StatelessWidget {
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: AppTheme.secondary),
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                       ),
                       icon: const Icon(Icons.description_outlined, size: 15, color: AppTheme.textOnLight),
-                      label: const Text('خطاب داخلي', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                      label: const Text('خطاب داخلي', style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -275,7 +275,7 @@ class DashboardSidebar extends StatelessWidget {
             margin: EdgeInsets.all(isCollapsed ? 6 : 8),
             decoration: BoxDecoration(
               color: AppTheme.secondary.withAlpha(60),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
               border: Border.all(color: AppTheme.secondary),
             ),
             child: isCollapsed
@@ -309,7 +309,7 @@ class DashboardSidebar extends StatelessWidget {
                       const Expanded(
                         child: Text(
                           'خادم البريد: متصل',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.white, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -352,7 +352,7 @@ class DashboardSidebar extends StatelessWidget {
                             backgroundColor: AppTheme.accent,
                             child: Text(
                               user.fullName.isNotEmpty ? user.fullName[0] : 'U',
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: AppTheme.fontXs),
                             ),
                           ),
                         ),
@@ -374,7 +374,7 @@ class DashboardSidebar extends StatelessWidget {
                         backgroundColor: AppTheme.accent,
                         child: Text(
                           user.fullName.isNotEmpty ? user.fullName[0] : 'U',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: AppTheme.fontSm),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -385,12 +385,12 @@ class DashboardSidebar extends StatelessWidget {
                           children: [
                             Text(
                               user.fullName,
-                              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                              style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               ApiConstants.getRoleName(user.role),
-                              style: const TextStyle(color: AppTheme.textOnLight, fontSize: 9),
+                              style: const TextStyle(color: AppTheme.textOnLight, fontSize: AppTheme.fontXs),
                             ),
                           ],
                         ),
@@ -425,13 +425,13 @@ class DashboardSidebar extends StatelessWidget {
             onTap();
             onNavigate?.call();
           },
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 3),
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               color: isSelected ? AppTheme.accent.withAlpha(40) : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),
             child: Icon(
               icon,
@@ -447,7 +447,7 @@ class DashboardSidebar extends StatelessWidget {
       dense: true,
       visualDensity: VisualDensity.compact,
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
       selected: isSelected,
       selectedTileColor: AppTheme.accent.withAlpha(35),
       leading: Icon(
@@ -459,7 +459,7 @@ class DashboardSidebar extends StatelessWidget {
         title,
         style: TextStyle(
           color: isSelected ? Colors.white : AppTheme.textOnLight,
-          fontSize: 12,
+          fontSize: AppTheme.fontSm,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
@@ -468,11 +468,11 @@ class DashboardSidebar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: isSelected ? AppTheme.accent : AppTheme.secondary.withAlpha(80),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
               ),
               child: Text(
                 '$count',
-                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
               ),
             )
           : null,

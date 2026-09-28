@@ -52,8 +52,8 @@ class _CreateInternalDialogState extends State<CreateInternalDialog> {
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
@@ -72,10 +72,10 @@ class _CreateInternalDialogState extends State<CreateInternalDialog> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF059669).withAlpha(20),
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppTheme.emerald.withAlpha(20),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         ),
-                        child: const Icon(Icons.description_outlined, color: Color(0xFF059669), size: 22),
+                        child: const Icon(Icons.description_outlined, color: AppTheme.emerald, size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Column(
@@ -83,17 +83,17 @@ class _CreateInternalDialogState extends State<CreateInternalDialog> {
                         children: [
                           Text(
                             'إنشاء خطاب داخلي / تعميم',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                           Text(
                             'إصدار تعميم أو مذكرة داخلية في النظام',
-                            style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                            style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                           ),
                         ],
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                        icon: const Icon(Icons.close_rounded, size: 20, color: AppTheme.textTertiary),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -148,7 +148,7 @@ class _CreateInternalDialogState extends State<CreateInternalDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                       ),
                       icon: _isLoading
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

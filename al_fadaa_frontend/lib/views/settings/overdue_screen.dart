@@ -45,7 +45,7 @@ class _OverdueScreenState extends State<OverdueScreen> {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
-        title: const Text('المتأخرات عن موعد الاستحقاق', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text('المتأخرات عن موعد الاستحقاق', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20), onPressed: _load),
         ],
@@ -57,9 +57,9 @@ class _OverdueScreenState extends State<OverdueScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.verified_rounded, color: Color(0xFF059669), size: 44),
+                      Icon(Icons.verified_rounded, color: AppTheme.emerald, size: 44),
                       SizedBox(height: 10),
-                      Text('لا توجد معاملات متأخرة — التزام كامل بالمواعيد', style: TextStyle(color: Color(0xFF64748B))),
+                      Text('لا توجد معاملات متأخرة — التزام كامل بالمواعيد', style: TextStyle(color: AppTheme.textTertiary)),
                     ],
                   ),
                 )
@@ -69,18 +69,18 @@ class _OverdueScreenState extends State<OverdueScreen> {
                       margin: const EdgeInsets.all(12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF2F2),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFFECACA)),
+                        color: AppTheme.surfaceDanger,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        border: Border.all(color: AppTheme.borderDanger),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 20),
+                          const Icon(Icons.warning_amber_rounded, color: AppTheme.crimson, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               '${_items.length} معاملة متأخرة — الأقدم تأخيراً تتصدر القائمة',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF991B1B)),
+                              style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: Color(0xFF991B1B)),
                             ),
                           ),
                         ],
@@ -97,20 +97,20 @@ class _OverdueScreenState extends State<OverdueScreen> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFFFECACA)),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                              border: Border.all(color: AppTheme.borderDanger),
                             ),
                             child: Row(
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFDC2626).withAlpha(20),
-                                    borderRadius: BorderRadius.circular(8),
+                                    color: AppTheme.crimson.withAlpha(20),
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                                   ),
                                   child: Text(
                                     '${c.overdueDays} ي',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFDC2626)),
+                                    style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.crimson),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -120,14 +120,14 @@ class _OverdueScreenState extends State<OverdueScreen> {
                                     children: [
                                       Text(
                                         '${c.refNumber} — ${c.subject}',
-                                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                        style: const TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
                                         'أولوية: ${c.priority} — الحالة: ${c.status}',
-                                        style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                        style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                                       ),
                                     ],
                                   ),

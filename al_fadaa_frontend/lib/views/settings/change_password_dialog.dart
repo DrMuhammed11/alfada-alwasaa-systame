@@ -55,7 +55,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم تغيير كلمة المرور — سجّل الدخول من جديد'),
-          backgroundColor: Color(0xFF059669),
+          backgroundColor: AppTheme.emerald,
         ),
       );
       // الجلسات أُبطلت في الخادم — خروج محلي + توجيه لشاشة الدخول عبر حدث انتهاء الجلسة
@@ -69,7 +69,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('تغيير كلمة المرور', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      title: const Text('تغيير كلمة المرور', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -80,12 +80,12 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 border: Border.all(color: const Color(0xFFBFDBFE)),
               ),
               child: const Text(
                 'سيتم إبطال كل جلساتك الأخرى ويلزم تسجيل الدخول من جديد بكلمة المرور الجديدة.',
-                style: TextStyle(fontSize: 11, color: Color(0xFF1E40AF)),
+                style: TextStyle(fontSize: AppTheme.fontXs, color: Color(0xFF1E40AF)),
               ),
             ),
             const SizedBox(height: 12),
@@ -112,7 +112,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 10),
-              Text(_error!, style: const TextStyle(fontSize: 11.5, color: Color(0xFFDC2626), fontWeight: FontWeight.bold)),
+              Text(_error!, style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.crimson, fontWeight: FontWeight.bold)),
             ],
           ],
         ),

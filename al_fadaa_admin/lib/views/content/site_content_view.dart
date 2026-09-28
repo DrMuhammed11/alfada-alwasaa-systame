@@ -5,6 +5,7 @@ import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../core/utils/app_utils.dart';
 import '../../models/site_content_model.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 /// إدارة محتويات الموقع الإلكتروني: الخدمات، القطاعات، سابقة الأعمال،
 /// الأسئلة الشائعة، والإعدادات العامة — بصلاحية إدارة المحتوى (ADMIN)
@@ -16,7 +17,7 @@ class SiteContentView extends StatelessWidget {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: AdminTheme.bgLight,
         body: Column(
           children: [
             Container(
@@ -27,15 +28,15 @@ class SiteContentView extends StatelessWidget {
                   const SizedBox(width: 16),
                   const Icon(Icons.web_rounded, color: AdminTheme.accent, size: 22),
                   const SizedBox(width: 8),
-                  const Text('إدارة محتويات الموقع الإلكتروني', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const Text('إدارة محتويات الموقع الإلكتروني', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg)),
                   const SizedBox(width: 24),
                   Expanded(
                     child: TabBar(
                       isScrollable: true,
                       labelColor: AdminTheme.primary,
-                      unselectedLabelColor: const Color(0xFF64748B),
+                      unselectedLabelColor: AdminTheme.textMuted,
                       indicatorColor: AdminTheme.primary,
-                      labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      labelStyle: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold),
                       tabs: const [
                         Tab(icon: Icon(Icons.miscellaneous_services_rounded, size: 16), text: 'الخدمات'),
                         Tab(icon: Icon(Icons.domain_rounded, size: 16), text: 'القطاعات'),
@@ -195,12 +196,12 @@ class _CollectionTabState extends State<_CollectionTab> with AutomaticKeepAliveC
           color: Colors.white,
           child: Row(
             children: [
-              Text('العدد: ${_items.length}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
+              Text('العدد: ${_items.length}', style: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
               const Spacer(),
               OutlinedButton.icon(
                 onPressed: () => _openEditor(),
                 icon: const Icon(Icons.add_rounded, size: 16),
-                label: Text(widget.addLabel, style: const TextStyle(fontSize: 12)),
+                label: Text(widget.addLabel, style: const TextStyle(fontSize: AdminTheme.fontBase)),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AdminTheme.primary,
                   side: const BorderSide(color: AdminTheme.primary),
@@ -302,21 +303,21 @@ class _Field extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+          Text(label, style: const TextStyle(fontSize: AdminTheme.fontSm, fontWeight: FontWeight.w600, color: AdminTheme.textMuted)),
           const SizedBox(height: 4),
           TextField(
             controller: controller,
             maxLines: maxLines,
             enabled: enabled,
-            style: const TextStyle(fontSize: 13),
+            style: const TextStyle(fontSize: AdminTheme.fontMd),
             decoration: InputDecoration(
               isDense: true,
               hintText: hint,
-              hintStyle: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+              hintStyle: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
               contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(AdminTheme.radiusMd)),
               filled: !enabled,
-              fillColor: enabled ? null : const Color(0xFFF1F5F9),
+              fillColor: enabled ? null : AdminTheme.surface2,
             ),
           ),
         ],
@@ -357,9 +358,9 @@ class _ImageField extends StatelessWidget {
                     width: 64,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: AdminTheme.bgLight,
+                      borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
+                      border: Border.all(color: AdminTheme.border),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: isUrl
@@ -384,7 +385,7 @@ class _ImageField extends StatelessWidget {
                       isUrl
                           ? 'معاينة مباشرة للرابط أعلاه'
                           : 'مسار نسبي لأصول الموقع — أدخل رابطاً مطلقاً (http/https) لمعاينته هنا',
-                      style: const TextStyle(fontSize: 10.5, color: AdminTheme.textMuted),
+                      style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                     ),
                   ),
                 ],
@@ -419,7 +420,7 @@ class _OrderAndActive extends StatelessWidget {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           dense: true,
-          title: const Text('مفعّل للعرض في الموقع', style: TextStyle(fontSize: 12)),
+          title: const Text('مفعّل للعرض في الموقع', style: TextStyle(fontSize: AdminTheme.fontBase)),
           value: isActive,
           activeColor: AdminTheme.emerald,
           onChanged: onChanged,
@@ -436,9 +437,9 @@ Widget _editorDialogScaffold({
   required VoidCallback onSave,
 }) {
   return AlertDialog(
-    title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+    title: Text(title, style: const TextStyle(fontSize: AdminTheme.fontTitle, fontWeight: FontWeight.bold)),
     content: SizedBox(
-      width: 560,
+      width: ResponsiveDialog.maxWidth(context, 560),
       child: SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children)),
     ),
     actions: [
@@ -472,8 +473,8 @@ class _ServicesTab extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: s.isActive ? const Color(0xFFE2E8F0) : const Color(0xFFFECACA)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(color: s.isActive ? AdminTheme.border : AdminTheme.borderDanger),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,21 +484,21 @@ class _ServicesTab extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(4),
+                      color: AdminTheme.surface2,
+                      borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
                     ),
-                    child: Text(s.slug, style: const TextStyle(fontFamily: 'monospace', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                    child: Text(s.slug, style: const TextStyle(fontFamily: 'monospace', fontSize: AdminTheme.fontXs, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
                   ),
                   const SizedBox(width: 8),
-                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
+                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
                   const SizedBox(width: 6),
-                  Text(s.titleEn, style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted)),
+                  Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted)),
                   const SizedBox(width: 120),
                 ],
               ),
               if (s.shortAr != null && s.shortAr!.isNotEmpty) ...[
                 const SizedBox(height: 6),
-                Text(s.shortAr!, style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(s.shortAr!, style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               const SizedBox(height: 6),
               Row(
@@ -523,11 +524,11 @@ Widget _metaChip(String text) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
     decoration: BoxDecoration(
-      color: const Color(0xFFF8FAFC),
-      borderRadius: BorderRadius.circular(4),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
+      color: AdminTheme.bgLight,
+      borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+      border: Border.all(color: AdminTheme.border),
     ),
-    child: Text(text, style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+    child: Text(text, style: const TextStyle(fontSize: AdminTheme.fontXs, color: AdminTheme.textMuted)),
   );
 }
 
@@ -615,23 +616,23 @@ class _SectorsTab extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: s.isActive ? const Color(0xFFE2E8F0) : const Color(0xFFFECACA)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(color: s.isActive ? AdminTheme.border : AdminTheme.borderDanger),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
+                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
                   const SizedBox(width: 6),
-                  Text(s.titleEn, style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted)),
+                  Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted)),
                   const SizedBox(width: 120),
                 ],
               ),
               if (s.descAr != null && s.descAr!.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(s.descAr!, style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(s.descAr!, style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               const SizedBox(height: 6),
               Row(
@@ -721,8 +722,8 @@ class _ProjectsTab extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: p.isActive ? const Color(0xFFE2E8F0) : const Color(0xFFFECACA)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(color: p.isActive ? AdminTheme.border : AdminTheme.borderDanger),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -734,14 +735,14 @@ class _ProjectsTab extends StatelessWidget {
                     const SizedBox(width: 8),
                   ],
                   Expanded(
-                    child: Text(p.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
+                    child: Text(p.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
                   ),
                   const SizedBox(width: 100),
                 ],
               ),
               if (p.scopeAr != null && p.scopeAr!.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(p.scopeAr!, style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(p.scopeAr!, style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               const SizedBox(height: 6),
               Row(
@@ -837,8 +838,8 @@ class _FaqsTab extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: f.isActive ? const Color(0xFFE2E8F0) : const Color(0xFFFECACA)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(color: f.isActive ? AdminTheme.border : AdminTheme.borderDanger),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -848,7 +849,7 @@ class _FaqsTab extends StatelessWidget {
                   Expanded(
                     child: Text(
                       f.questionAr,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF1E293B)),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -859,7 +860,7 @@ class _FaqsTab extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 f.answerAr,
-                style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -988,7 +989,7 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
           if ((setting['description'] ?? '').toString().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Text(setting['description'], style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569))),
+              child: Text(setting['description'], style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted)),
             ),
           _Field(controller: descController, label: 'شرح المفتاح (يظهر في اللوحة)'),
           _Field(controller: valueController, label: 'محتوى الإعداد (JSON)', maxLines: 12),
@@ -1043,8 +1044,8 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusMd),
+            border: Border.all(color: AdminTheme.border),
           ),
           child: Row(
             children: [
@@ -1054,16 +1055,16 @@ class _SettingsTabState extends State<_SettingsTab> with AutomaticKeepAliveClien
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(s['key'] ?? '', style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF1E293B))),
+                    Text(s['key'] ?? '', style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: AdminTheme.fontBase, color: AdminTheme.textHeading)),
                     if (s['description'] != null)
-                      Text(s['description'], style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted)),
+                      Text(s['description'], style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted)),
                   ],
                 ),
               ),
               OutlinedButton.icon(
                 onPressed: () => _openEditor(s),
                 icon: const Icon(Icons.edit_rounded, size: 14),
-                label: const Text('تحرير JSON', style: TextStyle(fontSize: 11)),
+                label: const Text('تحرير JSON', style: TextStyle(fontSize: AdminTheme.fontSm)),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AdminTheme.primary,
                   side: const BorderSide(color: AdminTheme.primary),

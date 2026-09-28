@@ -31,14 +31,14 @@ class WorkDossierDialog extends StatelessWidget {
     final statusColor = AppTheme.getStatusColor(item.status);
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
       child: Container(
         width: 960,
         height: 780,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         child: Column(
           children: [
@@ -46,7 +46,7 @@ class WorkDossierDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: const BoxDecoration(
-                color: Color(0xFF0F172A),
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -58,7 +58,7 @@ class WorkDossierDialog extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white.withAlpha(25),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     ),
                     child: const Icon(Icons.assignment_rounded, color: Colors.white, size: 22),
                   ),
@@ -71,7 +71,7 @@ class WorkDossierDialog extends StatelessWidget {
                           'شركة الفضاء الواسع — كشف إنجاز وسجل المعاملة الكامل',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 15,
+                            fontSize: AppTheme.fontLg,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -82,7 +82,7 @@ class WorkDossierDialog extends StatelessWidget {
                               'رقم الطلبية الموحد: ${item.serialNumber}',
                               style: const TextStyle(
                                 color: AppTheme.textOnLight,
-                                fontSize: 12,
+                                fontSize: AppTheme.fontSm,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -108,13 +108,13 @@ class WorkDossierDialog extends StatelessWidget {
                       backgroundColor: AppTheme.accent,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     ),
                     icon: const Icon(Icons.print_rounded, size: 16),
                     label: const Text(
                       'طباعة الكشف / حفظ كـ PDF',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -140,9 +140,9 @@ class WorkDossierDialog extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: AppTheme.backgroundLight,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        border: Border.all(color: AppTheme.borderLight),
                       ),
                       child: Column(
                         children: [
@@ -204,15 +204,15 @@ class WorkDossierDialog extends StatelessWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF64748B)),
+                            Icon(Icons.info_outline_rounded, size: 16, color: AppTheme.textTertiary),
                             SizedBox(width: 8),
                             Text(
                               'تمت معالجة وإنجاز الطلب مباشرة عبر الإدارة العامة (لا توجد تكليفات لقطاعات فرعية).',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                              style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textMuted),
                             ),
                           ],
                         ),
@@ -263,15 +263,15 @@ class WorkDossierDialog extends StatelessWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         ),
-                        child: const Text('لا توجد مرفقات مرتبطة بهذه المعاملة.', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                        child: const Text('لا توجد مرفقات مرتبطة بهذه المعاملة.', style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary)),
                       )
                     else
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.borderLight),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         ),
                         child: Column(
                           children: allAttachments.map((att) => _buildAttachmentRow(att)).toList(),
@@ -288,8 +288,8 @@ class WorkDossierDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
-                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+                color: AppTheme.backgroundLight,
+                border: Border(top: BorderSide(color: AppTheme.borderLight)),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12),
@@ -299,7 +299,7 @@ class WorkDossierDialog extends StatelessWidget {
                 children: [
                   const Text(
                     'وثيقة عمل رسمية موثقة بسجل التدقيق لنظام شركة الفضاء الواسع.',
-                    style: TextStyle(fontSize: 11, color: AppTheme.textOnLight),
+                    style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textOnLight),
                   ),
                   const Spacer(),
                   TextButton(
@@ -318,14 +318,14 @@ class WorkDossierDialog extends StatelessWidget {
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF1E293B)),
+        Icon(icon, size: 18, color: AppTheme.textHeading),
         const SizedBox(width: 8),
         Text(
           title,
           style: const TextStyle(
-            fontSize: 13.5,
+            fontSize: AppTheme.fontMd,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
+            color: AppTheme.primary,
           ),
         ),
       ],
@@ -336,14 +336,14 @@ class WorkDossierDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+        Text(label, style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
         const SizedBox(height: 3),
         Text(
           value,
           style: TextStyle(
-            fontSize: 12.5,
+            fontSize: AppTheme.fontBase,
             fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-            color: const Color(0xFF0F172A),
+            color: AppTheme.primary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -356,18 +356,18 @@ class WorkDossierDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+        Text(label, style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
         const SizedBox(height: 3),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: color.withAlpha(20),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
             border: Border.all(color: color.withAlpha(60)),
           ),
           child: Text(
             value,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: color),
           ),
         ),
       ],
@@ -381,7 +381,7 @@ class WorkDossierDialog extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDone ? const Color(0xFFF0FDF4) : const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
           color: isDone ? const Color(0xFFBBF7D0) : const Color(0xFFFDE68A),
         ),
@@ -401,7 +401,7 @@ class WorkDossierDialog extends StatelessWidget {
                 child: Text(
                   'المهمة: ${task.title}',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppTheme.fontBase,
                     fontWeight: FontWeight.bold,
                     color: isDone ? const Color(0xFF166534) : const Color(0xFF92400E),
                   ),
@@ -411,7 +411,7 @@ class WorkDossierDialog extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: task.slaBgColor,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                   border: Border.all(color: task.slaColor.withAlpha(80)),
                 ),
                 child: Row(
@@ -422,7 +422,7 @@ class WorkDossierDialog extends StatelessWidget {
                     Text(
                       task.slaLabel,
                       style: TextStyle(
-                        fontSize: 10.5,
+                        fontSize: AppTheme.fontXs,
                         fontWeight: FontWeight.bold,
                         color: task.slaColor,
                       ),
@@ -435,7 +435,7 @@ class WorkDossierDialog extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'المسؤول المكلف: ${task.assignedTo?.fullName ?? 'القطاع'}  |  تاريخ التكليف: ${_formatDateTime(task.createdAt)}',
-            style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+            style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
           ),
           if (task.description != null && task.description!.trim().isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -443,12 +443,12 @@ class WorkDossierDialog extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                border: Border.all(color: AppTheme.borderLight),
               ),
               child: Text(
                 task.description!.trim(),
-                style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155), height: 1.4),
+                style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.secondary, height: 1.4),
               ),
             ),
           ],
@@ -466,17 +466,17 @@ class WorkDossierDialog extends StatelessWidget {
     bool isOfficialReply = false,
   }) {
     final borderColor = isOfficialReply
-        ? const Color(0xFF10B981)
-        : (isClient ? const Color(0xFFBAE6FD) : const Color(0xFFE2E8F0));
+        ? AppTheme.emerald
+        : (isClient ? const Color(0xFFBAE6FD) : AppTheme.borderLight);
     final bgColor = isOfficialReply
         ? const Color(0xFFF0FDF4)
-        : (isClient ? const Color(0xFFF8FAFC) : Colors.white);
+        : (isClient ? AppTheme.backgroundLight : Colors.white);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -498,13 +498,13 @@ class WorkDossierDialog extends StatelessWidget {
                 Icon(
                   isClient ? Icons.person_rounded : Icons.business_rounded,
                   size: 15,
-                  color: isClient ? const Color(0xFF0284C7) : const Color(0xFF059669),
+                  color: isClient ? AppTheme.info : AppTheme.emerald,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppTheme.fontSm,
                     fontWeight: FontWeight.bold,
                     color: isClient ? const Color(0xFF0369A1) : const Color(0xFF047857),
                   ),
@@ -512,7 +512,7 @@ class WorkDossierDialog extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '$sender  •  ${_formatDateTime(date)}',
-                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                 ),
               ],
             ),
@@ -521,7 +521,7 @@ class WorkDossierDialog extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: SelectableText(
               body,
-              style: const TextStyle(fontSize: 12.5, color: Color(0xFF1E293B), height: 1.5),
+              style: const TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textHeading, height: 1.5),
             ),
           ),
         ],
@@ -537,7 +537,7 @@ class WorkDossierDialog extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.insert_drive_file_outlined, size: 18, color: Color(0xFF64748B)),
+          const Icon(Icons.insert_drive_file_outlined, size: 18, color: AppTheme.textTertiary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -545,12 +545,12 @@ class WorkDossierDialog extends StatelessWidget {
               children: [
                 Text(
                   att.fileName,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                  style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.w600, color: AppTheme.primary),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   'الحجم: ${(att.size / 1024).toStringAsFixed(1)} KB',
-                  style: const TextStyle(fontSize: 10.5, color: AppTheme.textOnLight),
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textOnLight),
                 ),
               ],
             ),
@@ -563,7 +563,7 @@ class WorkDossierDialog extends StatelessWidget {
             ),
             onPressed: () => onDownloadAttachment(att),
             icon: const Icon(Icons.download_rounded, size: 14),
-            label: const Text('تنزيل', style: TextStyle(fontSize: 11)),
+            label: const Text('تنزيل', style: TextStyle(fontSize: AppTheme.fontXs)),
           ),
         ],
       ),

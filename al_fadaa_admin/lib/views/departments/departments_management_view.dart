@@ -120,7 +120,7 @@ class _DepartmentsManagementViewState
               const SizedBox(width: 8),
               const Text('الهيكل التنظيمي والأقسام',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14)),
+                      fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg)),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -133,7 +133,7 @@ class _DepartmentsManagementViewState
                 child: Text(
                   '${_departments.length}',
                   style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: AdminTheme.fontSm,
                       fontWeight: FontWeight.bold,
                       color: AdminTheme.accent),
                 ),
@@ -143,7 +143,7 @@ class _DepartmentsManagementViewState
                 onPressed: _openCreateDialog,
                 icon: const Icon(Icons.add_business_rounded, size: 16),
                 label: const Text('إضافة قسم',
-                    style: TextStyle(fontSize: 12)),
+                    style: TextStyle(fontSize: AdminTheme.fontBase)),
                 style: FilledButton.styleFrom(
                   backgroundColor: AdminTheme.primary,
                   padding: const EdgeInsets.symmetric(
@@ -263,7 +263,7 @@ class _DepartmentsManagementViewState
                           style: TextStyle(
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
-                            fontSize: 11,
+                            fontSize: AdminTheme.fontSm,
                             color: cardColor,
                           ),
                         ),
@@ -274,7 +274,7 @@ class _DepartmentsManagementViewState
                           d.name,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13),
+                              fontSize: AdminTheme.fontMd),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -316,7 +316,7 @@ class _DepartmentsManagementViewState
                               ? 'المدير: ${d.managerName}'
                               : 'بدون مدير معيّن',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: AdminTheme.fontSm,
                             color: d.managerName != null
                                 ? AdminTheme.textMuted
                                 : AdminTheme.crimson,
@@ -361,7 +361,7 @@ class _DepartmentsManagementViewState
         const SizedBox(width: 4),
         Text(label,
             style: TextStyle(
-                fontSize: 10.5,
+                fontSize: AdminTheme.fontSm,
                 fontWeight: FontWeight.bold,
                 color: color)),
       ],

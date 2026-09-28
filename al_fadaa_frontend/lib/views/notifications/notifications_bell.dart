@@ -15,7 +15,7 @@ class NotificationsBell extends StatefulWidget {
   const NotificationsBell({
     super.key,
     this.onNotificationTap,
-    this.iconColor = const Color(0xFF94A3B8),
+    this.iconColor = AppTheme.textTertiary,
     this.iconSize = 18,
   });
 
@@ -218,8 +218,8 @@ class NotificationsBellState extends State<NotificationsBell> {
       ),
       elevation: 8,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       color: Colors.white,
       items: [
@@ -244,9 +244,9 @@ class NotificationsBellState extends State<NotificationsBell> {
                           const Text(
                             'التنبيهات والإشعارات',
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: AppTheme.fontBase,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF0F172A),
+                              color: AppTheme.primary,
                             ),
                           ),
                           if (_unreadCount > 0) ...[
@@ -255,13 +255,13 @@ class NotificationsBellState extends State<NotificationsBell> {
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEF4444),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                               ),
                               child: Text(
                                 '$_unreadCount جديد',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 10,
+                                  fontSize: AppTheme.fontXs,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -281,13 +281,13 @@ class NotificationsBellState extends State<NotificationsBell> {
                               },
                               child: const Text(
                                 'تحديد الكل كمقروء',
-                                style: TextStyle(fontSize: 11, color: AppTheme.accent),
+                                style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.accent),
                               ),
                             ),
                         ],
                       ),
                     ),
-                    const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                    const Divider(height: 1, color: AppTheme.borderLight),
 
                     // قائمة الإشعارات
                     if (_isLoading)
@@ -305,7 +305,7 @@ class NotificationsBellState extends State<NotificationsBell> {
                             SizedBox(height: 8),
                             Text(
                               'لا توجد إشعارات حتى الآن',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                              style: TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
                             ),
                           ],
                         ),
@@ -359,9 +359,9 @@ class NotificationsBellState extends State<NotificationsBell> {
                                                 child: Text(
                                                   title,
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: AppTheme.fontSm,
                                                     fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
-                                                    color: isRead ? const Color(0xFF334155) : const Color(0xFF0F172A),
+                                                    color: isRead ? AppTheme.secondary : AppTheme.primary,
                                                   ),
                                                 ),
                                               ),
@@ -370,7 +370,7 @@ class NotificationsBellState extends State<NotificationsBell> {
                                                   width: 7,
                                                   height: 7,
                                                   decoration: const BoxDecoration(
-                                                    color: Color(0xFF0284C7),
+                                                    color: AppTheme.info,
                                                     shape: BoxShape.circle,
                                                   ),
                                                 ),
@@ -381,8 +381,8 @@ class NotificationsBellState extends State<NotificationsBell> {
                                             Text(
                                               body,
                                               style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xFF64748B),
+                                                fontSize: AppTheme.fontXs,
+                                                color: AppTheme.textTertiary,
                                                 height: 1.3,
                                               ),
                                               maxLines: 2,
@@ -393,7 +393,7 @@ class NotificationsBellState extends State<NotificationsBell> {
                                             const SizedBox(height: 4),
                                             Text(
                                               _formatTimeAgo(date),
-                                              style: const TextStyle(fontSize: 9.5, color: Color(0xFF94A3B8)),
+                                              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                                             ),
                                           ],
                                         ],
@@ -442,19 +442,19 @@ class NotificationsBellState extends State<NotificationsBell> {
   Color _getTypeColor(String type) {
     switch (type) {
       case 'NEW_INCOMING':
-        return const Color(0xFF0284C7);
+        return AppTheme.info;
       case 'NEW_REFERRAL':
         return const Color(0xFF7C3AED);
       case 'NEW_TASK':
         return const Color(0xFFD97706);
       case 'TASK_CANCELLED':
-        return const Color(0xFF64748B);
+        return AppTheme.textTertiary;
       case 'REPLY_SUBMITTED':
-        return const Color(0xFF2563EB);
+        return AppTheme.info;
       case 'REPLY_APPROVED':
-        return const Color(0xFF059669);
+        return AppTheme.emerald;
       case 'REPLY_REJECTED':
-        return const Color(0xFFDC2626);
+        return AppTheme.crimson;
       case 'REPLY_SENT':
         return const Color(0xFF0D9488);
       default:
@@ -500,15 +500,15 @@ class NotificationsBellState extends State<NotificationsBell> {
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF0F172A), width: 1),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    border: Border.all(color: AppTheme.primary, width: 1),
                   ),
                   constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
                   child: Text(
                     _unreadCount > 99 ? '99+' : '$_unreadCount',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 8.5,
+                      fontSize: AppTheme.fontXs,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,

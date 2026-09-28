@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.1),
         border: Border.all(color: Colors.orange, width: 1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),
       child: Row(
         children: [
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const Expanded(
             child: Text(
               'وضع التطوير — البيانات التجريبية معبّأة. لا تستخدم في الإنتاج.',
-              style: TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppTheme.fontSm, color: Colors.orange, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -118,15 +118,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppTheme.primary,
       body: Container(
         decoration: const BoxDecoration(
           gradient: RadialGradient(
             center: Alignment(0.7, -0.6),
             radius: 1.2,
             colors: [
-              Color(0xFF1E293B),
-              Color(0xFF0F172A),
+              AppTheme.textHeading,
+              AppTheme.primary,
             ],
           ),
         ),
@@ -139,8 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                    border: Border.all(color: AppTheme.borderLight),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x25000000),
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 64,
                           decoration: BoxDecoration(
                             color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
                             boxShadow: [
                               BoxShadow(
                                 color: AppTheme.primary.withAlpha(50),
@@ -180,8 +180,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           'شركة الفضاء الواسع',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                            color: Color(0xFF0F172A),
+                            fontSize: AppTheme.fontXxl,
+                            color: AppTheme.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'نظام إدارة المراسلات والمعاملات المؤسسي',
                           style: TextStyle(
                             color: AppTheme.textMuted,
-                            fontSize: 13,
+                            fontSize: AppTheme.fontBase,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -201,18 +201,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFEF2F2),
-                              borderRadius: BorderRadius.circular(8),
+                              color: AppTheme.surfaceDanger,
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                               border: Border.all(color: const Color(0xFFFCA5A5)),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline_rounded, color: Color(0xFFDC2626), size: 18),
+                                const Icon(Icons.error_outline_rounded, color: AppTheme.crimson, size: 18),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     _errorMessage!,
-                                    style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(color: AppTheme.crimson, fontSize: AppTheme.fontSm, fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -254,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                               elevation: 0,
                             ),
                             child: _isLoading
@@ -265,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   )
                                 : const Text(
                                     'تسجيل الدخول إلى النظام',
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                                   ),
                           ),
                         ),
@@ -279,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: EdgeInsets.symmetric(horizontal: 12),
                                 child: Text(
                                   'تسجيل دخول تجريبي سريع بحسب الدور',
-                                  style: TextStyle(fontSize: 11, color: AppTheme.textOnLight, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textOnLight, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Expanded(child: Divider()),
@@ -293,13 +293,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             runSpacing: 8,
                             alignment: WrapAlignment.center,
                             children: [
-                              _QuickRoleChip(label: 'المدير العام', email: 'gm@al-fadaa.com', icon: Icons.account_balance_rounded, color: const Color(0xFF0284C7), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'المدير العام', email: 'gm@al-fadaa.com', icon: Icons.account_balance_rounded, color: AppTheme.info, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'نائب المدير', email: 'deputy@al-fadaa.com', icon: Icons.military_tech_rounded, color: AppTheme.accent, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'مدير إدارة', email: 'eng.manager@al-fadaa.com', icon: Icons.business_center_rounded, color: const Color(0xFF0D9488), onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'المالية', email: 'fin.manager@al-fadaa.com', icon: Icons.payments_outlined, color: AppTheme.emerald, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'الاستقبال', email: 'reception@al-fadaa.com', icon: Icons.desk_rounded, color: AppTheme.amber, onSelect: _quickSwitch),
                               _QuickRoleChip(label: 'خدمة العملاء', email: 'cs.manager@al-fadaa.com', icon: Icons.support_agent_rounded, color: const Color(0xFFEA580C), onSelect: _quickSwitch),
-                              _QuickRoleChip(label: 'موظف تنفيذي', email: 'eng.employee1@al-fadaa.com', icon: Icons.badge_outlined, color: const Color(0xFF475569), onSelect: _quickSwitch),
+                              _QuickRoleChip(label: 'موظف تنفيذي', email: 'eng.employee1@al-fadaa.com', icon: Icons.badge_outlined, color: AppTheme.textMuted, onSelect: _quickSwitch),
                             ],
                           ),
                         ],
@@ -335,13 +335,13 @@ class _QuickRoleChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => onSelect(email),
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          color: AppTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          border: Border.all(color: AppTheme.borderLight),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -350,7 +350,7 @@ class _QuickRoleChip extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+              style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.w600, color: AppTheme.secondary),
             ),
           ],
         ),

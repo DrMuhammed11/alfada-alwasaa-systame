@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/widgets/lazy_indexed_stack.dart';
 import '../../core/network/session_manager.dart';
 import '../../core/theme/admin_theme.dart';
 import '../analytics/analytics_dashboard_view.dart';
@@ -143,19 +144,33 @@ class _AdminMainScreenState extends State<AdminMainScreen>
                           color: AdminTheme.borderDark,
                         ),
                       ),
-                    // المحتوى الرئيسي
+                    // المحتوى الرئيسي — كسول محفوظ الحالة + عرض أقصى مع توسيط
                     Expanded(
-                      child: AnimatedSwitcher(
-                        duration: AdminTheme.fast,
-                        child: KeyedSubtree(
-                          key: ValueKey(_selectedIndex),
-                          child: current.view,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                              maxWidth: AdminTheme.bpWide),
+                          child: LazyIndexedStack(
+                            index: _selectedIndex,
+                            children: [
+                              for (final s in sections) s.view,
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
                 )
-              : current.view,
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                        maxWidth: AdminTheme.bpWide),
+                    child: LazyIndexedStack(
+                      index: _selectedIndex,
+                      children: [for (final s in sections) s.view],
+                    ),
+                  ),
+                ),
           bottomNavigationBar: !isWide
               ? _buildBottomNav(sections)
               : null,
@@ -211,12 +226,12 @@ class _AdminMainScreenState extends State<AdminMainScreen>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold),
+                      fontSize: AdminTheme.fontLg, fontWeight: FontWeight.bold),
                 ),
                 const Text(
                   'نظام الفضاء الواسع — بوابة الإدارة العليا',
                   style: TextStyle(
-                      fontSize: 10,
+                      fontSize: AdminTheme.fontXs,
                       color: AdminTheme.textLight),
                 ),
               ],
@@ -269,7 +284,7 @@ class _AdminMainScreenState extends State<AdminMainScreen>
                     ? user.name[0].toUpperCase()
                     : 'A',
                 style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: AdminTheme.fontMd,
                     color: Colors.white,
                     fontWeight: FontWeight.bold),
               ),
@@ -283,14 +298,14 @@ class _AdminMainScreenState extends State<AdminMainScreen>
               Text(
                 user.name,
                 style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: AdminTheme.fontBase,
                     fontWeight: FontWeight.bold,
                     color: Colors.white),
               ),
               Text(
                 ApiConstants.getRoleName(user.role),
                 style: const TextStyle(
-                    fontSize: 10, color: AdminTheme.textLight),
+                    fontSize: AdminTheme.fontXs, color: AdminTheme.textLight),
               ),
             ],
           ),
@@ -320,7 +335,7 @@ class _AdminMainScreenState extends State<AdminMainScreen>
                 const Text(
                   'قائمة التنقل',
                   style: TextStyle(
-                      fontSize: 10,
+                      fontSize: AdminTheme.fontXs,
                       color: AdminTheme.textLight,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.5),
@@ -365,15 +380,15 @@ class _AdminMainScreenState extends State<AdminMainScreen>
             section.icon,
             color: isSelected
                 ? Colors.white
-                : const Color(0xFF94A3B8),
+                : AdminTheme.textLight,
             size: 18,
           ),
         ),
         title: Text(
           section.sidebarLabel,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
-            fontSize: 12,
+            color: isSelected ? Colors.white : AdminTheme.textLight,
+            fontSize: AdminTheme.fontBase,
             fontWeight:
                 isSelected ? FontWeight.bold : FontWeight.w500,
           ),
@@ -408,13 +423,13 @@ class _AdminMainScreenState extends State<AdminMainScreen>
                   'الخادم: متصل',
                   style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 11,
+                      fontSize: AdminTheme.fontSm,
                       fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'API v1 • آمن',
                   style: TextStyle(
-                      color: AdminTheme.textLight, fontSize: 9),
+                      color: AdminTheme.textLight, fontSize: AdminTheme.fontXs),
                 ),
               ],
             ),

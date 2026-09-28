@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_service.dart';
 import '../../models/user_model.dart';
+import '../../core/theme/app_theme.dart';
 
 class CreateTaskDialog extends StatefulWidget {
   final String correspondenceId;
@@ -132,8 +133,8 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
@@ -160,7 +161,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFD97706).withAlpha(20),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                               ),
                               child: const Icon(Icons.domain_add_rounded, color: Color(0xFFD97706), size: 22),
                             ),
@@ -170,17 +171,17 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                               children: [
                                 Text(
                                   'تكليف قطاع / قسم بالمهمة',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                                  style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                                 ),
                                 Text(
                                   'إحالة وتكليف القطاع المختص بالمعاملة حتى إنجازها ثم الرد على العميل',
-                                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                  style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                                 ),
                               ],
                             ),
                             const Spacer(),
                             IconButton(
-                              icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                              icon: const Icon(Icons.close_rounded, size: 20, color: AppTheme.textTertiary),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                           ],
@@ -195,9 +196,9 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                           decoration: InputDecoration(
                             labelText: 'القطاع / الإدارة المختصة',
                             hintText: 'اختر القطاع المعني بالمهمة',
-                            prefixIcon: const Icon(Icons.business_rounded, size: 18, color: Color(0xFF64748B)),
+                            prefixIcon: const Icon(Icons.business_rounded, size: 18, color: AppTheme.textTertiary),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                           ),
                           items: [
                             const DropdownMenuItem<String?>(
@@ -225,9 +226,9 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                           value: _selectedUserId,
                           decoration: InputDecoration(
                             labelText: 'المسؤول / الموظف المكلف في القطاع *',
-                            prefixIcon: const Icon(Icons.person_outline_rounded, size: 18, color: Color(0xFF64748B)),
+                            prefixIcon: const Icon(Icons.person_outline_rounded, size: 18, color: AppTheme.textTertiary),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                           ),
                           items: _filteredUsers.map((u) {
                             final deptName = u.department?.name != null ? ' - ${u.department!.name}' : '';
@@ -244,7 +245,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                         // قوالب سريعة لعنوان المهمة
                         const Text(
                           'نماذج سريعة لعنوان التكليف:',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                          style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
                         ),
                         const SizedBox(height: 6),
                         Wrap(
@@ -252,7 +253,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                           runSpacing: 6,
                           children: _quickTemplates.map((tpl) {
                             return ActionChip(
-                              label: Text(tpl, style: const TextStyle(fontSize: 11)),
+                              label: Text(tpl, style: const TextStyle(fontSize: AppTheme.fontXs)),
                               backgroundColor: const Color(0xFFF1F5F9),
                               side: const BorderSide(color: Color(0xFFCBD5E1)),
                               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -273,7 +274,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                             labelText: 'عنوان المهمة المطلوب تنفيذها *',
                             hintText: 'مثال: فحص الطلب وإعداد العرض الفني للعميل',
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                           ),
                           validator: (v) => v == null || v.trim().isEmpty ? 'يرجى إدخال عنوان المهمة' : null,
                         ),
@@ -287,7 +288,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                             labelText: 'تفاصيل واشتراطات التكليف (اختياري)',
                             hintText: 'اكتب التوجيهات أو الملاحظات التي يحتاجها القطاع لإنجاز العمل...',
                             contentPadding: const EdgeInsets.all(12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -298,9 +299,9 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                             OutlinedButton.icon(
                               onPressed: _pickDueDate,
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF475569),
+                                foregroundColor: AppTheme.textMuted,
                                 side: const BorderSide(color: Color(0xFFCBD5E1)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               ),
                               icon: const Icon(Icons.calendar_today_rounded, size: 16),
@@ -308,13 +309,13 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                                 _selectedDueDate != null
                                     ? 'الموعد: ${_selectedDueDate!.year}/${_selectedDueDate!.month}/${_selectedDueDate!.day}'
                                     : 'تحديد موعد متوقع للإنجاز (اختياري)',
-                                style: const TextStyle(fontSize: 11.5),
+                                style: const TextStyle(fontSize: AppTheme.fontSm),
                               ),
                             ),
                             if (_selectedDueDate != null) ...[
                               const SizedBox(width: 8),
                               IconButton(
-                                icon: const Icon(Icons.clear, size: 16, color: Color(0xFF94A3B8)),
+                                icon: const Icon(Icons.clear, size: 16, color: AppTheme.textTertiary),
                                 tooltip: 'إلغاء الموعد',
                                 onPressed: () => setState(() => _selectedDueDate = null),
                               ),
@@ -332,7 +333,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFD97706),
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                               elevation: 0,
                             ),
                             icon: _isLoading
@@ -344,7 +345,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                                 : const Icon(Icons.assignment_turned_in_rounded, size: 18),
                             label: const Text(
                               'تكليف القطاع والبدء بالمعالجة',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase),
                             ),
                           ),
                         ),

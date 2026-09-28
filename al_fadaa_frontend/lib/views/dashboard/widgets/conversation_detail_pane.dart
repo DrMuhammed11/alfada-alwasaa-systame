@@ -81,8 +81,8 @@ class ConversationDetailPane extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 480),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(color: AppTheme.borderLight),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(8),
@@ -100,20 +100,20 @@ class ConversationDetailPane extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AppTheme.borderLight),
                 ),
-                child: const Icon(Icons.mark_email_read_outlined, size: 32, color: Color(0xFF64748B)),
+                child: const Icon(Icons.mark_email_read_outlined, size: 32, color: AppTheme.textTertiary),
               ),
               const SizedBox(height: 18),
               const Text(
                 'اختر مراسلة لاستعراض تفاصيلها والرد عليها',
-                style: TextStyle(color: Color(0xFF0F172A), fontSize: 15, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppTheme.primary, fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               const Text(
                 'يمكنك إدارة سلسلة المحادثة، مراجعة واعتماد مسودات الردود، تكليف القطاعات، ومتابعة سجل التدقيق الموثق.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 12, height: 1.5),
+                style: TextStyle(color: AppTheme.textTertiary, fontSize: AppTheme.fontSm, height: 1.5),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -126,7 +126,7 @@ class ConversationDetailPane extends StatelessWidget {
     final priorityColor = AppTheme.getPriorityColor(item.priority);
 
     return Container(
-      color: const Color(0xFFF8FAFC),
+      color: AppTheme.backgroundLight,
       child: Column(
         children: [
           // شريط المحادثة العلوي بنمط واتساب
@@ -165,8 +165,8 @@ class ConversationDetailPane extends StatelessWidget {
                             margin: const EdgeInsets.only(bottom: 14),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                              border: Border.all(color: AppTheme.borderLight),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

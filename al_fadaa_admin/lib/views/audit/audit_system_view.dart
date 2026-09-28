@@ -4,6 +4,7 @@ import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../core/utils/app_utils.dart';
 import '../../models/audit_model.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 /// تسميات عربية لأنواع أحداث التدقيق — يجب أن تطابق enum AuditAction في الخادم
 const Map<String, String> kAuditActionLabels = {
@@ -285,7 +286,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
               const SizedBox(width: 8),
               const Text(
                 'سجل التدقيق والرقابة الأمنية',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
               ),
               const Spacer(),
               // زر فحص النزاهة الرقمية المشفرة
@@ -298,7 +299,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.verified_user_rounded, size: 16),
-                label: const Text('فحص النزاهة الرقمية (SHA-256)', style: TextStyle(fontSize: 12)),
+                label: const Text('فحص النزاهة الرقمية (SHA-256)', style: TextStyle(fontSize: AdminTheme.fontBase)),
                 style: FilledButton.styleFrom(
                   backgroundColor: AdminTheme.emerald,
                   foregroundColor: Colors.white,
@@ -312,7 +313,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 icon: _isActionRunning
                     ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.forward_to_inbox_rounded, size: 16),
-                label: const Text('إعادة إرسال البريد المعلق', style: TextStyle(fontSize: 12)),
+                label: const Text('إعادة إرسال البريد المعلق', style: TextStyle(fontSize: AdminTheme.fontBase)),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AdminTheme.primary,
                   side: const BorderSide(color: AdminTheme.primary),
@@ -326,7 +327,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 icon: _isExporting
                     ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.download_rounded, size: 16),
-                label: const Text('تصدير CSV', style: TextStyle(fontSize: 12)),
+                label: const Text('تصدير CSV', style: TextStyle(fontSize: AdminTheme.fontBase)),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AdminTheme.emerald,
                   side: const BorderSide(color: AdminTheme.emerald),
@@ -353,7 +354,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: 'ابحث في السجل بالإجراء، اسم المستخدم، البصمة، أو العنوان...',
-                      hintStyle: const TextStyle(fontSize: 12, color: AdminTheme.textMuted),
+                      hintStyle: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
                       prefixIcon: const Icon(Icons.search_rounded, size: 18),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                       border: OutlineInputBorder(
@@ -382,7 +383,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
               if (_hasActiveFilters) ...[
                 const SizedBox(width: 8),
                 ActionChip(
-                  label: const Text('مسح الفلاتر', style: TextStyle(fontSize: 11, color: AdminTheme.crimson)),
+                  label: const Text('مسح الفلاتر', style: TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.crimson)),
                   avatar: const Icon(Icons.filter_alt_off_rounded, size: 15, color: AdminTheme.crimson),
                   side: BorderSide(color: AdminTheme.crimson.withAlpha(80)),
                   onPressed: _clearFilters,
@@ -392,7 +393,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
               Text(
                 'إجمالي السجلات: $_total',
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: AdminTheme.fontBase,
                   fontWeight: FontWeight.bold,
                   color: AdminTheme.textMuted,
                 ),
@@ -416,7 +417,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedAction,
-          style: const TextStyle(fontSize: 12, color: AdminTheme.primary, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.primary, fontWeight: FontWeight.w600),
           items: [
             const DropdownMenuItem(value: 'ALL', child: Text('كل أنواع الأحداث')),
             ...kAuditActionLabels.entries.map(
@@ -440,7 +441,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
         ? (isFrom ? 'من تاريخ' : 'إلى تاريخ')
         : '${isFrom ? 'من' : 'إلى'}: ${DateFormat('yyyy/MM/dd').format(date)}';
     return ActionChip(
-      label: Text(label, style: const TextStyle(fontSize: 11)),
+      label: Text(label, style: const TextStyle(fontSize: AdminTheme.fontSm)),
       avatar: Icon(
         isFrom ? Icons.event_rounded : Icons.event_available_rounded,
         size: 15,
@@ -486,8 +487,8 @@ class _AuditSystemViewState extends State<AuditSystemView> {
   Widget _buildIntegrityBanner(AuditIntegrityReport report) {
     final isOk = report.isTamperFree;
     final bannerColor = isOk ? AdminTheme.emerald : AdminTheme.crimson;
-    final bgLight = isOk ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2);
-    final borderLight = isOk ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA);
+    final bgLight = isOk ? AdminTheme.surfaceSuccess : AdminTheme.surfaceDanger;
+    final borderLight = isOk ? AdminTheme.borderSuccess : AdminTheme.borderDanger;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -528,7 +529,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                             : 'تحذير أمني: تم رصد انقطاع أو تلاعب في سجل التدقيق!',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: AdminTheme.fontMd,
                           color: bannerColor,
                         ),
                       ),
@@ -538,14 +539,14 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                     StatusBadge(
                       text: report.chainStatus,
                       color: bannerColor,
-                      fontSize: 10,
+                      fontSize: AdminTheme.fontXs,
                     ),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Text(
                   report.details,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                  style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.borderDark),
                 ),
                 const SizedBox(height: 7),
                 Wrap(
@@ -556,12 +557,12 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                       report.totalRecords > report.totalVerified
                           ? 'التغطية: ${report.totalVerified} من أصل ${report.totalRecords} سجل (الأحدث)'
                           : 'عدد السجلات المفحوصة: ${report.totalVerified}',
-                      style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                      style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                     ),
                     const Text(
                       'خوارزمية الإثبات: SHA-256 Merkle Chain',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AdminTheme.fontSm,
                         color: AdminTheme.textMuted,
                         fontWeight: FontWeight.w600,
                       ),
@@ -570,7 +571,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                       Text(
                         'السجل المنقطع: ${report.brokenRecordId}',
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: AdminTheme.fontSm,
                           color: AdminTheme.crimson,
                           fontWeight: FontWeight.bold,
                         ),
@@ -640,23 +641,23 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                     Row(
                       children: [
                         // شارة نوع الإجراء — StatusBadge من app_utils
-                        StatusBadge(text: item.action, color: actionColor, fontSize: 10),
+                        StatusBadge(text: item.action, color: actionColor, fontSize: AdminTheme.fontXs),
                         const SizedBox(width: 8),
                         Text(
                           item.userName ?? 'النظام',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontBase),
                         ),
                         const Spacer(),
                         Text(
                           _dateFormat.format(item.createdAt),
-                          style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted),
+                          style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
                       item.summary,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                      style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.borderDark),
                     ),
                     const SizedBox(height: 6),
                     Wrap(
@@ -668,7 +669,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                           Text(
                             'IP: ${item.ipAddress}',
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: AdminTheme.fontXs,
                               fontFamily: 'monospace',
                               color: AdminTheme.textMuted,
                             ),
@@ -680,7 +681,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                             decoration: BoxDecoration(
                               color: AdminTheme.surface2,
                               borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
-                              border: Border.all(color: const Color(0xFFCBD5E1)),
+                              border: Border.all(color: AdminTheme.textLight),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -691,8 +692,8 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                                   'SHA-256: ${item.recordHash!.length > 12 ? "${item.recordHash!.substring(0, 12)}..." : item.recordHash}',
                                   style: const TextStyle(
                                     fontFamily: 'monospace',
-                                    fontSize: 9.5,
-                                    color: Color(0xFF475569),
+                                    fontSize: AdminTheme.fontXs,
+                                    color: AdminTheme.textMuted,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -717,7 +718,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                                   'Prev: ${item.previousHash!.length > 10 ? "${item.previousHash!.substring(0, 10)}..." : item.previousHash}',
                                   style: const TextStyle(
                                     fontFamily: 'monospace',
-                                    fontSize: 9.5,
+                                    fontSize: AdminTheme.fontXs,
                                     color: AdminTheme.textMuted,
                                   ),
                                 ),
@@ -746,12 +747,12 @@ class _AuditSystemViewState extends State<AuditSystemView> {
             const SizedBox(width: 8),
             const Text(
               'تفاصيل حدث التدقيق والإثبات التشفيري',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdminTheme.fontLg, fontWeight: FontWeight.bold),
             ),
           ],
         ),
         content: SizedBox(
-          width: 550,
+          width: ResponsiveDialog.maxWidth(ctx, 550),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -766,7 +767,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                 const Divider(height: 20),
                 const Text(
                   'الأدلة التشفيرية (Tamper-Proof Proofs):',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontBase),
                 ),
                 const SizedBox(height: 6),
                 _hashBox('بصمة السجل الحالي (recordHash):', item.recordHash ?? 'غير متوفر (سجل قديم قبل التشفير)'),
@@ -776,7 +777,7 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                   const Divider(height: 20),
                   const Text(
                     'البيانات الوصفية الإضافية (Metadata):',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontBase),
                   ),
                   const SizedBox(height: 6),
                   Container(
@@ -791,8 +792,8 @@ class _AuditSystemViewState extends State<AuditSystemView> {
                       item.details.toString(),
                       style: const TextStyle(
                         fontFamily: 'monospace',
-                        fontSize: 11,
-                        color: Color(0xFF334155),
+                        fontSize: AdminTheme.fontSm,
+                        color: AdminTheme.borderDark,
                       ),
                     ),
                   ),
@@ -821,13 +822,13 @@ class _AuditSystemViewState extends State<AuditSystemView> {
             width: 140,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 11, color: AdminTheme.textMuted, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted, fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AdminTheme.primary),
+              style: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w500, color: AdminTheme.primary),
             ),
           ),
         ],
@@ -842,21 +843,21 @@ class _AuditSystemViewState extends State<AuditSystemView> {
       decoration: BoxDecoration(
         color: AdminTheme.surface2,
         borderRadius: BorderRadius.circular(AdminTheme.radiusSm),
-        border: Border.all(color: const Color(0xFFCBD5E1)),
+        border: Border.all(color: AdminTheme.textLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 10, color: AdminTheme.textMuted, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: AdminTheme.fontXs, color: AdminTheme.textMuted, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 2),
           SelectableText(
             hash,
             style: const TextStyle(
               fontFamily: 'monospace',
-              fontSize: 11,
+              fontSize: AdminTheme.fontSm,
               color: AdminTheme.accent,
               fontWeight: FontWeight.w600,
             ),

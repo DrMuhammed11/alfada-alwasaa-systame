@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/api_service.dart';
 import '../../models/user_model.dart';
+import '../../core/theme/app_theme.dart';
 
 class ReferralDialog extends StatefulWidget {
   final String correspondenceId;
@@ -83,8 +84,8 @@ class _ReferralDialogState extends State<ReferralDialog> {
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        side: const BorderSide(color: AppTheme.borderLight),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -104,7 +105,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: const Color(0xFF7C3AED).withAlpha(20),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         ),
                         child: const Icon(Icons.swap_horiz_rounded, color: Color(0xFF7C3AED), size: 22),
                       ),
@@ -114,17 +115,17 @@ class _ReferralDialogState extends State<ReferralDialog> {
                         children: [
                           Text(
                             'إحالة وتوجيه المراسلة',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                           Text(
                             'إحالة المراسلة لنائب المدير العام أو مدير الإدارة المختصة',
-                            style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                            style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                           ),
                         ],
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                        icon: const Icon(Icons.close_rounded, size: 20, color: AppTheme.textTertiary),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -159,8 +160,8 @@ class _ReferralDialogState extends State<ReferralDialog> {
                           ? 'تحديد موعد نهائي للإنجاز (اختياري)'
                           : 'الموعد النهائي: ${_dueDate!.year}-${_dueDate!.month.toString().padLeft(2, '0')}-${_dueDate!.day.toString().padLeft(2, '0')}',
                       style: TextStyle(
-                        fontSize: 13,
-                        color: _dueDate == null ? const Color(0xFF64748B) : const Color(0xFF0F172A),
+                        fontSize: AppTheme.fontBase,
+                        color: _dueDate == null ? AppTheme.textTertiary : AppTheme.primary,
                         fontWeight: _dueDate == null ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
@@ -210,7 +211,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7C3AED),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                       ),
                       icon: _isLoading
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

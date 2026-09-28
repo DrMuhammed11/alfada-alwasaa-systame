@@ -90,7 +90,7 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       color: AppTheme.purple.withAlpha(40),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     ),
                     child: const Icon(Icons.security_rounded, color: Colors.purpleAccent, size: 20),
                   ),
@@ -101,11 +101,11 @@ class _AuditScreenState extends State<AuditScreen> {
                     children: [
                       Text(
                         'الأمان والرقابة الإدارية',
-                        style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: Colors.white70, fontSize: AppTheme.fontXs, fontWeight: FontWeight.w500),
                       ),
                       Text(
                         'سجل التدقيق وتتبع العمليات (Audit Logs)',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -143,8 +143,8 @@ class _AuditScreenState extends State<AuditScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: Row(
                     children: [
@@ -155,32 +155,32 @@ class _AuditScreenState extends State<AuditScreen> {
                             onChanged: (v) => setState(() => _searchFilter = v.trim()),
                             decoration: InputDecoration(
                               hintText: 'بحث باسم المستخدم، الإجراء، أو التفاصيل...',
-                              hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-                              prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+                              hintStyle: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
+                              prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppTheme.textTertiary),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                               filled: true,
-                              fillColor: const Color(0xFFF8FAFC),
+                              fillColor: AppTheme.backgroundLight,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                borderSide: const BorderSide(color: AppTheme.borderLight),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                borderSide: const BorderSide(color: AppTheme.borderLight),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                                 borderSide: const BorderSide(color: AppTheme.accent, width: 1.5),
                               ),
                             ),
-                            style: const TextStyle(fontSize: 13),
+                            style: const TextStyle(fontSize: AppTheme.fontBase),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
                         'إجمالي السجلات: ${filtered.length}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                        style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textTertiary),
                       ),
                     ],
                   ),
@@ -191,15 +191,15 @@ class _AuditScreenState extends State<AuditScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(6),
+                    color: AppTheme.borderLight,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                   ),
                   child: const Row(
                     children: [
-                      SizedBox(width: 130, child: Text('نوع الإجراء', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF475569)))),
-                      SizedBox(width: 160, child: Text('المستخدم والصفة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF475569)))),
-                      Expanded(child: Text('البيان وتفاصيل الحركة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF475569)))),
-                      SizedBox(width: 140, child: Text('التوقيت والتاريخ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF475569)))),
+                      SizedBox(width: 130, child: Text('نوع الإجراء', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontXs, color: AppTheme.textMuted))),
+                      SizedBox(width: 160, child: Text('المستخدم والصفة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontXs, color: AppTheme.textMuted))),
+                      Expanded(child: Text('البيان وتفاصيل الحركة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontXs, color: AppTheme.textMuted))),
+                      SizedBox(width: 140, child: Text('التوقيت والتاريخ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontXs, color: AppTheme.textMuted))),
                     ],
                   ),
                 ),
@@ -211,15 +211,15 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 80),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                      border: Border.all(color: AppTheme.borderLight),
                     ),
                     child: const Center(
                       child: Column(
                         children: [
                           CircularProgressIndicator(strokeWidth: 2.5),
                           SizedBox(height: 14),
-                          Text('جارِ جلب سجلات التدقيق والأمان...', style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+                          Text('جارِ جلب سجلات التدقيق والأمان...', style: TextStyle(color: AppTheme.textTertiary, fontSize: AppTheme.fontBase)),
                         ],
                       ),
                     ),
@@ -229,15 +229,15 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 60),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                      border: Border.all(color: AppTheme.borderLight),
                     ),
                     child: const Center(
                       child: Column(
                         children: [
                           Icon(Icons.security_outlined, size: 52, color: Color(0xFFCBD5E1)),
                           SizedBox(height: 12),
-                          Text('لا توجد سجلات مطابقة', style: TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                          Text('لا توجد سجلات مطابقة', style: TextStyle(fontSize: AppTheme.fontMd, color: AppTheme.textTertiary, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -262,9 +262,9 @@ class _AuditScreenState extends State<AuditScreen> {
 
     return Row(
       children: [
-        _buildMetricItem('إجمالي الحركات', '$total', Icons.history_rounded, const Color(0xFF0284C7)),
+        _buildMetricItem('إجمالي الحركات', '$total', Icons.history_rounded, AppTheme.info),
         const SizedBox(width: 12),
-        _buildMetricItem('عمليات الإنشاء والوارد', '$creates', Icons.add_circle_outline_rounded, const Color(0xFF059669)),
+        _buildMetricItem('عمليات الإنشاء والوارد', '$creates', Icons.add_circle_outline_rounded, AppTheme.emerald),
         const SizedBox(width: 12),
         _buildMetricItem('التعديلات والتحديثات', '$updates', Icons.edit_note_rounded, const Color(0xFFD97706)),
         const SizedBox(width: 12),
@@ -279,8 +279,8 @@ class _AuditScreenState extends State<AuditScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          border: Border.all(color: AppTheme.borderLight),
         ),
         child: Row(
           children: [
@@ -289,7 +289,7 @@ class _AuditScreenState extends State<AuditScreen> {
               height: 42,
               decoration: BoxDecoration(
                 color: color.withAlpha(20),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               ),
               child: Icon(icon, color: color, size: 20),
             ),
@@ -297,8 +297,8 @@ class _AuditScreenState extends State<AuditScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(count, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-                Text(title, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                Text(count, style: TextStyle(fontSize: AppTheme.fontXxl, fontWeight: FontWeight.bold, color: color)),
+                Text(title, style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary, fontWeight: FontWeight.w600)),
               ],
             ),
           ],
@@ -334,10 +334,10 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
         ? widget.item['createdAt'].toString().replaceAll('T', ' ').split('.')[0]
         : '-';
 
-    Color actionColor = const Color(0xFF64748B);
-    if (action.contains('CREATE')) actionColor = const Color(0xFF059669);
-    if (action.contains('APPROVE') || action.contains('SEND')) actionColor = const Color(0xFF0284C7);
-    if (action.contains('REJECT')) actionColor = const Color(0xFFDC2626);
+    Color actionColor = AppTheme.textTertiary;
+    if (action.contains('CREATE')) actionColor = AppTheme.emerald;
+    if (action.contains('APPROVE') || action.contains('SEND')) actionColor = AppTheme.info;
+    if (action.contains('REJECT')) actionColor = AppTheme.crimson;
     if (action.contains('REFER') || action.contains('ASSIGN')) actionColor = const Color(0xFF7C3AED);
 
     return MouseRegion(
@@ -349,9 +349,9 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: _isHovered ? const Color(0xFFFAFAFA) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(
-            color: _isHovered ? actionColor.withAlpha(120) : const Color(0xFFE2E8F0),
+            color: _isHovered ? actionColor.withAlpha(120) : AppTheme.borderLight,
             width: _isHovered ? 1.5 : 1,
           ),
           boxShadow: [
@@ -373,7 +373,7 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: actionColor.withAlpha(15),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                       border: Border.all(color: actionColor.withAlpha(40)),
                     ),
                     child: Text(
@@ -381,7 +381,7 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
-                        fontSize: 11,
+                        fontSize: AppTheme.fontXs,
                         color: actionColor,
                       ),
                     ),
@@ -396,8 +396,8 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  Text(userRole, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
+                  Text(user, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase)),
+                  Text(userRole, style: const TextStyle(color: AppTheme.textTertiary, fontSize: AppTheme.fontXs)),
                 ],
               ),
             ),
@@ -406,7 +406,7 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
             Expanded(
               child: Text(
                 details.toString(),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                style: const TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textHeading),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -417,7 +417,7 @@ class _AuditRowWidgetState extends State<_AuditRowWidget> {
               width: 140,
               child: Text(
                 dateStr,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontFamily: 'monospace'),
+                style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary, fontFamily: 'monospace'),
               ),
             ),
           ],

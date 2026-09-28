@@ -21,7 +21,7 @@ class UserToolsScreen extends StatelessWidget {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
-        title: const Text('أدوات الحساب والرقابة', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text('أدوات الحساب والرقابة', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -86,18 +86,18 @@ class UserToolsScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(color: AppTheme.secondary.withAlpha(70)),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppTheme.accent.withAlpha(30), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: AppTheme.accent.withAlpha(30), borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
           child: Icon(icon, color: AppTheme.accent, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-        trailing: const Icon(Icons.chevron_left_rounded, color: Color(0xFF94A3B8)),
+        title: Text(title, style: const TextStyle(fontSize: AppTheme.fontMd, fontWeight: FontWeight.bold, color: AppTheme.textHeading)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary)),
+        trailing: const Icon(Icons.chevron_left_rounded, color: AppTheme.textTertiary),
         onTap: onTap,
       ),
     );

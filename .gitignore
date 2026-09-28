@@ -23,3 +23,6 @@ Thumbs.db
 
 .idea/
 screenshots/
+
+# حالة أداة ZCode المحلية
+.zcode/

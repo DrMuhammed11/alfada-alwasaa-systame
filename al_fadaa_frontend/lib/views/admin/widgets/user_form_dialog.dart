@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../models/user_model.dart';
+import '../../../core/theme/app_theme.dart';
 
 class UserFormDialog extends StatefulWidget {
   final User? user;
@@ -103,12 +104,12 @@ class _UserFormDialogState extends State<UserFormDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(isEdit ? 'تم تحديث بيانات وصلاحيات الموظف' : 'تمت إضافة الموظف بنجاح'),
-              backgroundColor: const Color(0xFF10B981),
+              backgroundColor: AppTheme.emerald,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(res['message'] ?? 'فشلت العملية'), backgroundColor: const Color(0xFFDC2626)),
+            SnackBar(content: Text(res['message'] ?? 'فشلت العملية'), backgroundColor: AppTheme.crimson),
           );
         }
       }
@@ -124,9 +125,9 @@ class _UserFormDialogState extends State<UserFormDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(isEdit ? Icons.manage_accounts_rounded : Icons.person_add_alt_1_rounded, color: const Color(0xFF0F172A)),
+          Icon(isEdit ? Icons.manage_accounts_rounded : Icons.person_add_alt_1_rounded, color: AppTheme.primary),
           const SizedBox(width: 8),
-          Text(isEdit ? 'تعديل بيانات وصلاحيات الموظف' : 'إضافة موظف جديد وتعيين صلاحياته', style: const TextStyle(fontSize: 16)),
+          Text(isEdit ? 'تعديل بيانات وصلاحيات الموظف' : 'إضافة موظف جديد وتعيين صلاحياته', style: const TextStyle(fontSize: AppTheme.fontLg)),
         ],
       ),
       content: SizedBox(
@@ -219,19 +220,19 @@ class _UserFormDialogState extends State<UserFormDialog> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    color: AppTheme.backgroundLight,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.verified_user_rounded, size: 16, color: Color(0xFF0F172A)),
+                          const Icon(Icons.verified_user_rounded, size: 16, color: AppTheme.primary),
                           const SizedBox(width: 6),
                           Text('الصلاحيات الممنوحة لدور ($_selectedRole):',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                              style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.primary)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -242,16 +243,16 @@ class _UserFormDialogState extends State<UserFormDialog> {
                             .map((p) => Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFECFDF5),
-                                    borderRadius: BorderRadius.circular(4),
+                                    color: AppTheme.surfaceSuccess,
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                     border: Border.all(color: const Color(0xFFA7F3D0)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.check_circle_rounded, size: 12, color: Color(0xFF059669)),
+                                      const Icon(Icons.check_circle_rounded, size: 12, color: AppTheme.emerald),
                                       const SizedBox(width: 4),
-                                      Text(p, style: const TextStyle(fontSize: 11, color: Color(0xFF065F46), fontWeight: FontWeight.bold)),
+                                      Text(p, style: const TextStyle(fontSize: AppTheme.fontXs, color: Color(0xFF065F46), fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                 ))
@@ -263,10 +264,10 @@ class _UserFormDialogState extends State<UserFormDialog> {
                 if (isEdit) ...[
                   const SizedBox(height: 10),
                   SwitchListTile(
-                    title: const Text('حالة الحساب نشط', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                    subtitle: Text(_isActive ? 'الحساب مفعّل ويمكنه تسجيل الدخول' : 'الحساب معطّل مؤقتًا', style: const TextStyle(fontSize: 11)),
+                    title: const Text('حالة الحساب نشط', style: TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold)),
+                    subtitle: Text(_isActive ? 'الحساب مفعّل ويمكنه تسجيل الدخول' : 'الحساب معطّل مؤقتًا', style: const TextStyle(fontSize: AppTheme.fontXs)),
                     value: _isActive,
-                    activeColor: const Color(0xFF10B981),
+                    activeColor: AppTheme.emerald,
                     onChanged: (val) => setState(() => _isActive = val),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -279,7 +280,7 @@ class _UserFormDialogState extends State<UserFormDialog> {
       actions: [
         TextButton(onPressed: _isLoading ? null : () => Navigator.pop(context), child: const Text('إلغاء')),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white),
+          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
           onPressed: _isLoading ? null : _submit,
           child: _isLoading
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

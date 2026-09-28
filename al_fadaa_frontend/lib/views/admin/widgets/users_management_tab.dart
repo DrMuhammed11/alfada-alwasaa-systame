@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/network/api_service.dart';
 import '../../../../models/user_model.dart';
 import 'user_form_dialog.dart';
+import '../../../core/theme/app_theme.dart';
 
 class UsersManagementTab extends StatefulWidget {
   final List<Department> departments;
@@ -74,7 +75,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: user.isActive ? const Color(0xFFDC2626) : const Color(0xFF10B981),
+              backgroundColor: user.isActive ? AppTheme.crimson : AppTheme.emerald,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -95,11 +96,11 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
 
   Color _getRoleColor(String role) {
     switch (role) {
-      case 'ADMIN': return const Color(0xFFDC2626);
+      case 'ADMIN': return AppTheme.crimson;
       case 'GM': return const Color(0xFF7C3AED);
-      case 'DEPUTY_GM': return const Color(0xFF2563EB);
-      case 'DEPT_MANAGER': return const Color(0xFF059669);
-      default: return const Color(0xFF64748B);
+      case 'DEPUTY_GM': return AppTheme.info;
+      case 'DEPT_MANAGER': return AppTheme.emerald;
+      default: return AppTheme.textTertiary;
     }
   }
 
@@ -141,7 +142,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                     hintText: 'بحث بالاسم، البريد، أو الرقم الوظيفي...',
                     prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     isDense: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                   ),
                   onChanged: (v) => setState(() => _search = v.trim()),
                 ),
@@ -154,7 +155,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                   ),
                   items: const [
                     DropdownMenuItem(value: 'ALL', child: Text('جميع الأدوار')),
@@ -175,10 +176,10 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
               const SizedBox(width: 12),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
+                  backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                 ),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
                 label: const Text('إضافة موظف جديد'),
@@ -194,7 +195,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : filtered.isEmpty
-                  ? const Center(child: Text('لا يوجد موظفون مطابقون للشروط', style: TextStyle(color: Color(0xFF94A3B8))))
+                  ? const Center(child: Text('لا يوجد موظفون مطابقون للشروط', style: TextStyle(color: AppTheme.textTertiary)))
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: filtered.length,
@@ -207,8 +208,8 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            border: Border.all(color: AppTheme.borderLight),
                           ),
                           child: Row(
                             children: [
@@ -217,7 +218,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                                 backgroundColor: roleColor.withAlpha(25),
                                 child: Text(
                                   user.fullName.isNotEmpty ? user.fullName[0] : 'U',
-                                  style: TextStyle(color: roleColor, fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(color: roleColor, fontWeight: FontWeight.bold, fontSize: AppTheme.fontLg),
                                 ),
                               ),
                               const SizedBox(width: 14),
@@ -227,34 +228,34 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                        Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontMd)),
                                         const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: roleColor.withAlpha(20),
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                             border: Border.all(color: roleColor.withAlpha(60)),
                                           ),
                                           child: Text(_getRoleArabic(user.role),
-                                              style: TextStyle(color: roleColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                                              style: TextStyle(color: roleColor, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold)),
                                         ),
                                         if (user.employeeNumber != null) ...[
                                           const SizedBox(width: 8),
-                                          Text('#${user.employeeNumber}', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                          Text('#${user.employeeNumber}', style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary)),
                                         ],
                                         const Spacer(),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: user.isActive ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: user.isActive ? AppTheme.surfaceSuccess : AppTheme.surfaceDanger,
+                                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                           ),
                                           child: Text(
                                             user.isActive ? 'نشط' : 'معطل',
                                             style: TextStyle(
-                                              color: user.isActive ? const Color(0xFF059669) : const Color(0xFFDC2626),
-                                              fontSize: 11,
+                                              color: user.isActive ? AppTheme.emerald : AppTheme.crimson,
+                                              fontSize: AppTheme.fontXs,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -266,11 +267,11 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                                       children: [
                                         Icon(Icons.email_outlined, size: 14, color: Colors.grey.shade500),
                                         const SizedBox(width: 4),
-                                        Text(user.email, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                        Text(user.email, style: TextStyle(fontSize: AppTheme.fontSm, color: Colors.grey.shade600)),
                                         const SizedBox(width: 16),
                                         Icon(Icons.corporate_fare_rounded, size: 14, color: Colors.grey.shade500),
                                         const SizedBox(width: 4),
-                                        Text(user.department?.name ?? 'بدون قطاع', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                        Text(user.department?.name ?? 'بدون قطاع', style: TextStyle(fontSize: AppTheme.fontSm, color: Colors.grey.shade600)),
                                       ],
                                     ),
                                   ],
@@ -280,7 +281,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.manage_accounts_rounded, size: 20, color: Color(0xFF2563EB)),
+                                    icon: const Icon(Icons.manage_accounts_rounded, size: 20, color: AppTheme.info),
                                     tooltip: 'تعديل الدور والصلاحيات والبيانات',
                                     onPressed: () => _openUserDialog(user),
                                   ),
@@ -288,7 +289,7 @@ class _UsersManagementTabState extends State<UsersManagementTab> {
                                     icon: Icon(
                                       user.isActive ? Icons.block_rounded : Icons.check_circle_outline_rounded,
                                       size: 20,
-                                      color: user.isActive ? const Color(0xFFDC2626) : const Color(0xFF10B981),
+                                      color: user.isActive ? AppTheme.crimson : AppTheme.emerald,
                                     ),
                                     tooltip: user.isActive ? 'تعطيل الحساب' : 'تفعيل الحساب',
                                     onPressed: () => _toggleDeactivate(user),

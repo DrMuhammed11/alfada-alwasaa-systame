@@ -59,7 +59,7 @@ class MasterListPane extends StatelessWidget {
                     controller: searchController,
                     decoration: InputDecoration(
                       hintText: 'بحث في الموضوع، الاسم، أو البريد...',
-                      hintStyle: const TextStyle(fontSize: 12, color: AppTheme.textOnLight),
+                      hintStyle: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textOnLight),
                       prefixIcon: const Icon(Icons.search_rounded, size: 18, color: AppTheme.textMuted),
                       suffixIcon: searchController.text.isNotEmpty
                           ? IconButton(
@@ -74,11 +74,11 @@ class MasterListPane extends StatelessWidget {
                       filled: true,
                       fillColor: AppTheme.backgroundLight,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                         borderSide: const BorderSide(color: AppTheme.borderLight),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                         borderSide: const BorderSide(color: AppTheme.borderLight),
                       ),
                       focusedBorder: const OutlineInputBorder(
@@ -86,7 +86,7 @@ class MasterListPane extends StatelessWidget {
                         borderSide: BorderSide(color: AppTheme.primary, width: 1.2),
                       ),
                     ),
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: AppTheme.fontSm),
                     onSubmitted: (_) => onSearchSubmitted(),
                   ),
                 ),
@@ -118,7 +118,7 @@ class MasterListPane extends StatelessWidget {
               children: [
                 Text(
                   'المحادثات ($totalItems)',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
+                  style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
                 ),
                 const Spacer(),
                 IconButton(
@@ -141,7 +141,7 @@ class MasterListPane extends StatelessWidget {
                     ? const Center(
                         child: Text(
                           'لا توجد محادثات مطابقة',
-                          style: TextStyle(color: AppTheme.textOnLight, fontSize: 13),
+                          style: TextStyle(color: AppTheme.textOnLight, fontSize: AppTheme.fontBase),
                         ),
                       )
                     : Scrollbar(
@@ -201,15 +201,15 @@ class MasterListPane extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(width: 100, height: 12, decoration: BoxDecoration(color: AppTheme.borderLight, borderRadius: BorderRadius.circular(4))),
+                      Container(width: 100, height: 12, decoration: BoxDecoration(color: AppTheme.borderLight, borderRadius: BorderRadius.circular(AppTheme.radiusXs))),
                       const Spacer(),
-                      Container(width: 40, height: 10, decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(3))),
+                      Container(width: 40, height: 10, decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(AppTheme.radiusXs))),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Container(width: 180, height: 11, decoration: BoxDecoration(color: AppTheme.borderLight, borderRadius: BorderRadius.circular(4))),
+                  Container(width: 180, height: 11, decoration: BoxDecoration(color: AppTheme.borderLight, borderRadius: BorderRadius.circular(AppTheme.radiusXs))),
                   const SizedBox(height: 6),
-                  Container(width: 120, height: 9, decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(3))),
+                  Container(width: 120, height: 9, decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(AppTheme.radiusXs))),
                 ],
               ),
             ),
@@ -230,7 +230,7 @@ class MasterListPane extends StatelessWidget {
         backgroundColor: AppTheme.backgroundLight,
         labelStyle: TextStyle(
           color: isSelected ? Colors.white : AppTheme.textMuted,
-          fontSize: 11,
+          fontSize: AppTheme.fontXs,
           fontWeight: FontWeight.bold,
         ),
         visualDensity: VisualDensity.compact,
@@ -248,7 +248,7 @@ class MasterListPane extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 6),
       child: FilterChip(
-        avatar: const Text('🌐', style: TextStyle(fontSize: 11)),
+        avatar: const Text('🌐', style: TextStyle(fontSize: AppTheme.fontXs)),
         label: const Text('وارد الموقع'),
         selected: isWebsiteFilter,
         selectedColor: AppTheme.emerald.withAlpha(30),
@@ -260,7 +260,7 @@ class MasterListPane extends StatelessWidget {
         ),
         labelStyle: TextStyle(
           color: isWebsiteFilter ? AppTheme.emerald : AppTheme.textMuted,
-          fontSize: 11,
+          fontSize: AppTheme.fontXs,
           fontWeight: FontWeight.bold,
         ),
         visualDensity: VisualDensity.compact,

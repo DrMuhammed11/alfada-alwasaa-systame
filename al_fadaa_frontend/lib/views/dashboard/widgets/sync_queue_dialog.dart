@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/offline/offline_storage_service.dart';
 import '../../../../core/offline/offline_sync_engine.dart';
 import '../../../../core/offline/sync_queue_model.dart';
+import '../../../core/theme/app_theme.dart';
 
 class SyncQueueDialog extends StatefulWidget {
   const SyncQueueDialog({super.key});
@@ -42,7 +43,7 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
         children: [
           const Icon(Icons.sync_problem_rounded, color: Color(0xFFD97706), size: 22),
           const SizedBox(width: 10),
-          const Text('طابور العمليات المؤجلة (Offline Sync Queue)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Text('طابور العمليات المؤجلة (Offline Sync Queue)', style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold)),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, size: 20),
@@ -63,9 +64,9 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
                       children: [
                         Icon(Icons.cloud_done_rounded, size: 52, color: Colors.green.shade400),
                         const SizedBox(height: 12),
-                        const Text('كافة العمليات متزامنة بالكامل!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const Text('كافة العمليات متزامنة بالكامل!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontMd)),
                         const SizedBox(height: 4),
-                        const Text('لا توجد أي إجراءات معلقة بانتظار الرفع إلى السحابة.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        const Text('لا توجد أي إجراءات معلقة بانتظار الرفع إلى السحابة.', style: TextStyle(color: Colors.grey, fontSize: AppTheme.fontSm)),
                       ],
                     ),
                   )
@@ -102,15 +103,15 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
 
     switch (item.status) {
       case 'SYNCING':
-        statusColor = const Color(0xFF2563EB);
+        statusColor = AppTheme.info;
         statusText = 'جاري المزامنة';
         break;
       case 'FAILED':
-        statusColor = const Color(0xFFDC2626);
+        statusColor = AppTheme.crimson;
         statusText = 'تعذر الرفع';
         break;
       case 'COMPLETED':
-        statusColor = const Color(0xFF16A34A);
+        statusColor = AppTheme.emerald;
         statusText = 'مكتمل';
         break;
       default:
@@ -127,7 +128,7 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: statusColor.withAlpha(25),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
             ),
             child: Icon(_getActionIcon(item.actionType), size: 20, color: statusColor),
           ),
@@ -140,38 +141,38 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
                   children: [
                     Text(
                       item.actionTitleArabic,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AppTheme.fontBase),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                       decoration: BoxDecoration(
                         color: statusColor.withAlpha(20),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                         border: Border.all(color: statusColor.withAlpha(60)),
                       ),
                       child: Text(
                         statusText,
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: statusColor),
+                        style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: statusColor),
                       ),
                     ),
                     const Spacer(),
                     Text(
                       _dateFormat.format(item.createdAt),
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: const TextStyle(fontSize: AppTheme.fontXs, color: Colors.grey),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item.entitySummary,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                  style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.secondary),
                 ),
                 if (item.lastError != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     'الخطأ: ${item.lastError}',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFFDC2626), fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.crimson, fontWeight: FontWeight.w600),
                   ),
                 ],
               ],
@@ -180,7 +181,7 @@ class _SyncQueueDialogState extends State<SyncQueueDialog> {
           const SizedBox(width: 8),
           if (item.status == 'FAILED')
             IconButton(
-              icon: const Icon(Icons.replay_rounded, size: 18, color: Color(0xFF2563EB)),
+              icon: const Icon(Icons.replay_rounded, size: 18, color: AppTheme.info),
               tooltip: 'إعادة المحاولة',
               onPressed: () async {
                 await OfflineSyncEngine().retryFailedItem(item.id);

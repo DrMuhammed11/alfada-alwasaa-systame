@@ -35,20 +35,20 @@ class AttachmentsPreview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.attach_file_rounded, size: 14, color: Color(0xFF64748B)),
+              const Icon(Icons.attach_file_rounded, size: 14, color: AppTheme.textTertiary),
               const SizedBox(width: 6),
               Text(
                 'المرفقات (${attachments.length})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
               ),
             ],
           ),
@@ -83,7 +83,7 @@ class AttachmentsPreview extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     border: Border.all(color: const Color(0xFFCBD5E1)),
                   ),
                   child: Row(
@@ -99,19 +99,19 @@ class AttachmentsPreview extends StatelessWidget {
                         constraints: const BoxConstraints(maxWidth: 160),
                         child: Text(
                           att.fileName,
-                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                          style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '(${att.formattedSize})',
-                        style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+                        style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                       ),
                       const SizedBox(width: 6),
                       if (pdf)
                         IconButton(
-                          icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Color(0xFF0284C7)),
+                          icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppTheme.info),
                           tooltip: 'فتح / معاينة في تبويب جديد',
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -125,7 +125,7 @@ class AttachmentsPreview extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : IconButton(
-                              icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF475569)),
+                              icon: const Icon(Icons.download_rounded, size: 16, color: AppTheme.textMuted),
                               tooltip: 'تحميل المرفق',
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -252,13 +252,13 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
                   Expanded(
                     child: Text(
                       widget.attachment.fileName,
-                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     widget.attachment.formattedSize,
-                    style: const TextStyle(color: AppTheme.textOnLight, fontSize: 11),
+                    style: const TextStyle(color: AppTheme.textOnLight, fontSize: AppTheme.fontXs),
                   ),
                   const SizedBox(width: 12),
                   IconButton(
@@ -301,13 +301,13 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: _bytes != null ? () => _showFullImage(context) : null,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: Container(
         width: 180,
         height: 130,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(color: AppTheme.borderLight),
           boxShadow: [
             BoxShadow(
@@ -340,7 +340,7 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
                                 padding: const EdgeInsets.symmetric(horizontal: 6),
                                 child: Text(
                                   widget.attachment.fileName,
-                                  style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -381,12 +381,12 @@ class _ImageThumbnailCardState extends State<_ImageThumbnailCard> {
                         children: [
                           Text(
                             widget.attachment.fileName,
-                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: const TextStyle(color: Colors.white, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             widget.attachment.formattedSize,
-                            style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 9),
+                            style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: AppTheme.fontXs),
                           ),
                         ],
                       ),

@@ -44,7 +44,7 @@ class EmailComposer extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(color: AppTheme.borderLight),
         boxShadow: [
           BoxShadow(
@@ -64,7 +64,7 @@ class EmailComposer extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: AppTheme.amber.withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 border: Border.all(color: AppTheme.amber.withAlpha(60)),
               ),
               child: Row(
@@ -74,7 +74,7 @@ class EmailComposer extends StatelessWidget {
                   const Expanded(
                     child: Text(
                       'أنت الآن في وضع تعديل مسودة الرد — عدّل النص أدناه ثم اضغط «حفظ التعديلات»',
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.amber),
+                      style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.amber),
                     ),
                   ),
                   TextButton.icon(
@@ -84,7 +84,7 @@ class EmailComposer extends StatelessWidget {
                     ),
                     onPressed: onCancelEdit,
                     icon: const Icon(Icons.close_rounded, size: 14),
-                    label: const Text('إلغاء التعديل', style: TextStyle(fontSize: 11)),
+                    label: const Text('إلغاء التعديل', style: TextStyle(fontSize: AppTheme.fontXs)),
                   ),
                 ],
               ),
@@ -98,7 +98,7 @@ class EmailComposer extends StatelessWidget {
                   (role == 'GM' || role == 'DEPUTY_GM' || role == 'ADMIN')
                       ? 'الرد على المحادثة والعميل:'
                       : 'إعداد وصياغة مسودة رد على المحادثة:',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                  style: const TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: AppTheme.primary),
                 ),
                 const Spacer(),
                 if (item.senderEmail != null)
@@ -106,7 +106,7 @@ class EmailComposer extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppTheme.backgroundLight,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -115,7 +115,7 @@ class EmailComposer extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           item.senderEmail!,
-                          style: const TextStyle(fontSize: 11, color: AppTheme.secondary, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.secondary, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -131,7 +131,7 @@ class EmailComposer extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: AppTheme.emerald.withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 border: Border.all(color: AppTheme.emerald.withAlpha(80)),
               ),
               child: Row(
@@ -144,12 +144,12 @@ class EmailComposer extends StatelessWidget {
                       children: [
                         Text(
                           'تم إنجاز المهمة بواسطة القطاع: «${doneTasks.first.title}»',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.emerald),
+                          style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.emerald),
                         ),
                         if (doneTasks.first.description != null && doneTasks.first.description!.trim().isNotEmpty)
                           Text(
                             doneTasks.first.description!.trim(),
-                            style: const TextStyle(fontSize: 11, color: AppTheme.emerald),
+                            style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.emerald),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -165,7 +165,7 @@ class EmailComposer extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     icon: const Icon(Icons.auto_fix_high_rounded, size: 14),
-                    label: const Text('تعبئة نص الرد بالإنجاز', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    label: const Text('تعبئة نص الرد بالإنجاز', style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold)),
                     onPressed: () {
                       final note = doneTasks.first.description ?? '';
                       controller.text = 'السلام عليكم ورحمة الله وبركاته،\n\n'
@@ -183,7 +183,7 @@ class EmailComposer extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: AppTheme.amber.withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 border: Border.all(color: AppTheme.amber.withAlpha(60)),
               ),
               child: Row(
@@ -193,7 +193,7 @@ class EmailComposer extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'المعاملة حالياً قيد المعالجة لدى: ${activeTasks.first.assignedTo?.fullName ?? 'القطاع'} — يمكنك إرسال استفسار أو مراسلة العميل في أي وقت.',
-                      style: const TextStyle(fontSize: 11.5, color: AppTheme.amber),
+                      style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.amber),
                     ),
                   ),
                 ],
@@ -208,14 +208,14 @@ class EmailComposer extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    const Text('قوالب سريعة:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+                    const Text('قوالب سريعة:', style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
                     const SizedBox(width: 8),
                     ActionChip(
                       avatar: const Icon(Icons.bolt_rounded, size: 14, color: AppTheme.accent),
                       backgroundColor: AppTheme.accent.withAlpha(20),
                       side: BorderSide(color: AppTheme.accent.withAlpha(60), width: 0.8),
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                      label: const Text('رد مبدئي (تأكيد استلام)', style: TextStyle(fontSize: 10.5, color: AppTheme.accent, fontWeight: FontWeight.bold)),
+                      label: const Text('رد مبدئي (تأكيد استلام)', style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.accent, fontWeight: FontWeight.bold)),
                       onPressed: () {
                         controller.text = 'السلام عليكم ورحمة الله وبركاته،\n\n'
                             'نود إفادتكم باستلام رسالتكم واستفساركم بنجاح (معاملة رقم: ${item.serialNumber}). '
@@ -229,7 +229,7 @@ class EmailComposer extends StatelessWidget {
                       backgroundColor: AppTheme.amber.withAlpha(20),
                       side: BorderSide(color: AppTheme.amber.withAlpha(60), width: 0.8),
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                      label: const Text('طلب نواقص / تفاصيل', style: TextStyle(fontSize: 10.5, color: AppTheme.amber, fontWeight: FontWeight.bold)),
+                      label: const Text('طلب نواقص / تفاصيل', style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.amber, fontWeight: FontWeight.bold)),
                       onPressed: () {
                         controller.text = 'السلام عليكم ورحمة الله وبركاته،\n\n'
                             'بخصوص طلبكم الوارد إلينا (معاملة رقم: ${item.serialNumber})، '
@@ -254,24 +254,24 @@ class EmailComposer extends StatelessWidget {
                   : ((role == 'GM' || role == 'DEPUTY_GM' || role == 'ADMIN')
                       ? 'اكتب نص الرد للعميل هنا... (يُرسل مباشرة للعميل عبر البريد بنمط واتساب)'
                       : 'اكتب نص المسودة المقترحة للرد على هذه المراسلة (10 أحرف على الأقل)...'),
-              hintStyle: const TextStyle(fontSize: 12, color: AppTheme.textOnLight),
+              hintStyle: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textOnLight),
               contentPadding: const EdgeInsets.all(12),
               filled: true,
               fillColor: AppTheme.backgroundLight,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 borderSide: const BorderSide(color: AppTheme.borderLight),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 borderSide: const BorderSide(color: AppTheme.borderLight),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 borderSide: const BorderSide(color: AppTheme.accent, width: 1.5),
               ),
             ),
-            style: const TextStyle(fontSize: 13, height: 1.5),
+            style: const TextStyle(fontSize: AppTheme.fontBase, height: 1.5),
           ),
           if (pickedFile != null) ...[
             const SizedBox(height: 8),
@@ -279,7 +279,7 @@ class EmailComposer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTheme.accent.withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 border: Border.all(color: AppTheme.accent.withAlpha(60)),
               ),
               child: Row(
@@ -290,7 +290,7 @@ class EmailComposer extends StatelessWidget {
                   Flexible(
                     child: Text(
                       '${pickedFile!.name} (${(pickedFile!.size / 1024).toStringAsFixed(1)} KB)',
-                      style: const TextStyle(fontSize: 11.5, color: AppTheme.accent, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.accent, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -315,7 +315,7 @@ class EmailComposer extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.amber,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
@@ -324,7 +324,7 @@ class EmailComposer extends StatelessWidget {
                       : const Icon(Icons.check_rounded, size: 15),
                   label: const Text(
                     'حفظ تعديلات المسودة',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -334,7 +334,7 @@ class EmailComposer extends StatelessWidget {
                     foregroundColor: AppTheme.textMuted,
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
-                  child: const Text('إلغاء', style: TextStyle(fontSize: 12)),
+                  child: const Text('إلغاء', style: TextStyle(fontSize: AppTheme.fontSm)),
                 ),
                 const SizedBox(width: 10),
                 // زر إرفاق ملف أثناء التعديل
@@ -343,11 +343,11 @@ class EmailComposer extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.textMuted,
                     side: const BorderSide(color: AppTheme.borderLight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   icon: const Icon(Icons.attach_file_rounded, size: 16),
-                  label: const Text('إرفاق ملف', style: TextStyle(fontSize: 12)),
+                  label: const Text('إرفاق ملف', style: TextStyle(fontSize: AppTheme.fontSm)),
                 ),
               ] else ...[
                 // زر الإرسال المباشر الفوري للعميل (للإدارة العليا ومسؤول النظام)
@@ -357,7 +357,7 @@ class EmailComposer extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.accent,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
@@ -366,7 +366,7 @@ class EmailComposer extends StatelessWidget {
                         : const Icon(Icons.send_rounded, size: 15),
                     label: const Text(
                       'إرسال الرد للعميل الآن عبر البريد',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -378,13 +378,13 @@ class EmailComposer extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.textMuted,
                     side: const BorderSide(color: AppTheme.borderLight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
                   icon: const Icon(Icons.save_outlined, size: 15),
                   label: const Text(
                     'حفظ كمسودة رد للاعتماد',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -395,11 +395,11 @@ class EmailComposer extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.textMuted,
                     side: const BorderSide(color: AppTheme.borderLight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   icon: const Icon(Icons.attach_file_rounded, size: 16),
-                  label: const Text('إرفاق ملف', style: TextStyle(fontSize: 12)),
+                  label: const Text('إرفاق ملف', style: TextStyle(fontSize: AppTheme.fontSm)),
                 ),
               ],
             ],

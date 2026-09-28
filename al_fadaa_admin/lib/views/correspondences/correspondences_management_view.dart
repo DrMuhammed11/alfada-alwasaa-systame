@@ -4,6 +4,7 @@ import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../core/utils/app_utils.dart';
 import '../../models/correspondence_model.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 /// إدارة المراسلات — نطاق الإدارة العليا (كل المراسلات)
 /// فلاتر: النوع، الحالة، الأولوية، القسم، بحث نصي — مع ترقيم صفحات وتفاصيل كاملة
@@ -106,7 +107,7 @@ class _CorrespondencesManagementViewState
 
   // ─── ألوان النوع ───
   Color _typeColor(String type) => switch (type) {
-        'INCOMING' => const Color(0xFF0284C7),
+        'INCOMING' => AdminTheme.accent,
         'OUTGOING' => AdminTheme.emerald,
         'INTERNAL' => AdminTheme.purple,
         _ => AdminTheme.textMuted,
@@ -197,7 +198,7 @@ class _CorrespondencesManagementViewState
                 'إدارة المراسلات — النطاق الكامل',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: AdminTheme.fontLg,
                   color: AdminTheme.textMain,
                 ),
               ),
@@ -213,7 +214,7 @@ class _CorrespondencesManagementViewState
                 child: Text(
                   'الإجمالي: $_total',
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: AdminTheme.fontSm,
                     fontWeight: FontWeight.bold,
                     color: AdminTheme.textMuted,
                   ),
@@ -241,7 +242,7 @@ class _CorrespondencesManagementViewState
                       hintText:
                           'ابحث بالموضوع، الرقم المرجعي، أو اسم المرسل...',
                       hintStyle: const TextStyle(
-                          fontSize: 12, color: AdminTheme.textLight),
+                          fontSize: AdminTheme.fontBase, color: AdminTheme.textLight),
                       prefixIcon:
                           const Icon(Icons.search_rounded, size: 17),
                       contentPadding:
@@ -327,7 +328,7 @@ class _CorrespondencesManagementViewState
                 ActionChip(
                   label: const Text(
                     'مسح الفلاتر',
-                    style: TextStyle(fontSize: 11, color: AdminTheme.crimson),
+                    style: TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.crimson),
                   ),
                   avatar: const Icon(Icons.filter_alt_off_rounded,
                       size: 14, color: AdminTheme.crimson),
@@ -361,7 +362,7 @@ class _CorrespondencesManagementViewState
         child: DropdownButton<String>(
           value: value,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: AdminTheme.fontBase,
             color: AdminTheme.textMain,
             fontWeight: FontWeight.w600,
           ),
@@ -464,7 +465,7 @@ class _CorrespondencesManagementViewState
                         c.refNumber,
                         style: const TextStyle(
                           fontFamily: 'monospace',
-                          fontSize: 10,
+                          fontSize: AdminTheme.fontXs,
                           fontWeight: FontWeight.bold,
                           color: AdminTheme.textMuted,
                           letterSpacing: 0.5,
@@ -490,7 +491,7 @@ class _CorrespondencesManagementViewState
                     Text(
                       _dateFormat.format(c.updatedAt),
                       style: const TextStyle(
-                        fontSize: 10,
+                        fontSize: AdminTheme.fontXs,
                         color: AdminTheme.textLight,
                       ),
                     ),
@@ -502,7 +503,7 @@ class _CorrespondencesManagementViewState
                   c.subject,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13.5,
+                    fontSize: AdminTheme.fontLg,
                     color: AdminTheme.textMain,
                     height: 1.4,
                   ),
@@ -526,7 +527,7 @@ class _CorrespondencesManagementViewState
                     StatusBadge(
                       text: priorityLabel(c.priority),
                       color: priorityColor,
-                      fontSize: 10,
+                      fontSize: AdminTheme.fontXs,
                     ),
                     const SizedBox(width: 10),
                     // اسم المرسل
@@ -539,7 +540,7 @@ class _CorrespondencesManagementViewState
                         child: Text(
                           c.senderName!,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: AdminTheme.fontSm,
                             color: AdminTheme.textMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -556,7 +557,7 @@ class _CorrespondencesManagementViewState
                         child: Text(
                           c.departmentName!,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: AdminTheme.fontSm,
                             color: AdminTheme.textMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -594,7 +595,7 @@ class _CorrespondencesManagementViewState
         const SizedBox(width: 2),
         Text(
           '$count $label',
-          style: const TextStyle(fontSize: 10, color: AdminTheme.textLight),
+          style: const TextStyle(fontSize: AdminTheme.fontXs, color: AdminTheme.textLight),
         ),
       ],
     );
@@ -644,7 +645,7 @@ class _CorrespondencesManagementViewState
                       const Text(
                         'تعذر تحميل تفاصيل المراسلة',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14),
+                            fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
                       ),
                       const SizedBox(height: 16),
                       OutlinedButton(
@@ -658,7 +659,7 @@ class _CorrespondencesManagementViewState
 
               // ─── محتوى نافذة التفاصيل ───
               return SizedBox(
-                width: 740,
+                width: ResponsiveDialog.maxWidth(ctx, 740),
                 height: 660,
                 child: Column(
                   children: [
@@ -674,7 +675,7 @@ class _CorrespondencesManagementViewState
                             d.subject,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 17,
+                              fontSize: AdminTheme.fontTitle,
                               color: AdminTheme.textMain,
                               height: 1.4,
                             ),
@@ -848,7 +849,7 @@ class _CorrespondencesManagementViewState
             style: const TextStyle(
               fontFamily: 'monospace',
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: AdminTheme.fontBase,
               color: AdminTheme.textMuted,
               letterSpacing: 0.5,
             ),
@@ -903,7 +904,7 @@ class _CorrespondencesManagementViewState
             title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 13,
+              fontSize: AdminTheme.fontMd,
               color: AdminTheme.textMain,
             ),
           ),
@@ -935,7 +936,7 @@ class _CorrespondencesManagementViewState
                       Text(
                         p.$1,
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: AdminTheme.fontXs,
                           color: AdminTheme.textLight,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.3,
@@ -945,7 +946,7 @@ class _CorrespondencesManagementViewState
                       Text(
                         p.$2,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: AdminTheme.fontBase,
                           fontWeight: FontWeight.w600,
                           color: AdminTheme.textMain,
                         ),
@@ -972,7 +973,7 @@ class _CorrespondencesManagementViewState
       child: SelectableText(
         text,
         style: const TextStyle(
-          fontSize: 13,
+          fontSize: AdminTheme.fontMd,
           height: 1.7,
           color: AdminTheme.textMain,
         ),
@@ -1017,7 +1018,7 @@ class _CorrespondencesManagementViewState
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: AdminTheme.fontBase,
                     fontWeight: FontWeight.bold,
                     color: AdminTheme.textMain,
                   ),
@@ -1026,7 +1027,7 @@ class _CorrespondencesManagementViewState
                 SelectableText(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AdminTheme.fontBase,
                     color: AdminTheme.textMuted,
                     height: 1.5,
                   ),
@@ -1036,7 +1037,7 @@ class _CorrespondencesManagementViewState
                   Text(
                     extra,
                     style: const TextStyle(
-                        fontSize: 10.5, color: AdminTheme.textLight),
+                        fontSize: AdminTheme.fontSm, color: AdminTheme.textLight),
                   ),
                 ],
               ],
@@ -1065,7 +1066,7 @@ class _CorrespondencesManagementViewState
           Text(
             text,
             style: const TextStyle(
-                fontSize: 11.5, color: AdminTheme.textMuted),
+                fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted),
           ),
         ],
       ),

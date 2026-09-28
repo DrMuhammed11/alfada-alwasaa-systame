@@ -65,7 +65,7 @@ class MasterListItemTile extends StatelessWidget {
                 style: TextStyle(
                   color: isSelected ? Colors.white : AppTheme.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13.5,
+                  fontSize: AppTheme.fontMd,
                 ),
               ),
             ),
@@ -86,7 +86,7 @@ class MasterListItemTile extends StatelessWidget {
                               child: Text(
                                 senderDisplayName,
                                 style: const TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: AppTheme.fontMd,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.primary,
                                 ),
@@ -99,13 +99,13 @@ class MasterListItemTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                               decoration: BoxDecoration(
                                 color: AppTheme.backgroundLight,
-                                borderRadius: BorderRadius.circular(3),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                 border: Border.all(color: AppTheme.borderLight, width: 0.8),
                               ),
                               child: Text(
                                 item.serialNumber,
                                 style: const TextStyle(
-                                  fontSize: 9.5,
+                                  fontSize: AppTheme.fontXs,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.textMuted,
                                 ),
@@ -117,7 +117,7 @@ class MasterListItemTile extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                 decoration: BoxDecoration(
                                   color: AppTheme.emerald.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(3),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                   border: Border.all(color: AppTheme.emerald.withAlpha(80), width: 0.8),
                                 ),
                                 child: const Row(
@@ -128,7 +128,7 @@ class MasterListItemTile extends StatelessWidget {
                                     Text(
                                       'الموقع',
                                       style: TextStyle(
-                                        fontSize: 9,
+                                        fontSize: AppTheme.fontXs,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.emerald,
                                       ),
@@ -143,7 +143,7 @@ class MasterListItemTile extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: AppTheme.crimson.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(3),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                   border: Border.all(color: AppTheme.crimson.withAlpha(80), width: 0.8),
                                 ),
                                 child: Row(
@@ -154,7 +154,7 @@ class MasterListItemTile extends StatelessWidget {
                                     Text(
                                       item.overdueDays > 0 ? 'متأخر بـ${item.overdueDays} يوم' : 'متأخر',
                                       style: const TextStyle(
-                                        fontSize: 8.5,
+                                        fontSize: AppTheme.fontXs,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.crimson,
                                       ),
@@ -170,7 +170,7 @@ class MasterListItemTile extends StatelessWidget {
                       Text(
                         AppDateFormatter.formatListDate(displayDate),
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: AppTheme.fontXs,
                           color: AppTheme.textOnLight,
                           fontWeight: FontWeight.w500,
                         ),
@@ -183,7 +183,7 @@ class MasterListItemTile extends StatelessWidget {
                   Text(
                     item.subject,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppTheme.fontSm,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                       color: isSelected ? AppTheme.textDark : AppTheme.secondary,
                     ),
@@ -199,7 +199,7 @@ class MasterListItemTile extends StatelessWidget {
                         child: Text(
                           snippet,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: AppTheme.fontXs,
                             color: AppTheme.textMuted,
                             height: 1.25,
                           ),
@@ -213,12 +213,12 @@ class MasterListItemTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
                             color: AppTheme.accent.withAlpha(20),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                           ),
                           child: Text(
                             '$totalMessages',
                             style: const TextStyle(
-                              fontSize: 9,
+                              fontSize: AppTheme.fontXs,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.accent,
                             ),
@@ -230,12 +230,12 @@ class MasterListItemTile extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: statusColor.withAlpha(14),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                           border: Border.all(color: statusColor.withAlpha(45), width: 0.8),
                         ),
                         child: Text(
                           ApiConstants.getStatusLabel(item.status),
-                          style: TextStyle(color: statusColor, fontSize: 9, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: statusColor, fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 /// تغيير كلمة المرور الذاتي
 class ChangePasswordDialog extends StatefulWidget {
@@ -37,7 +38,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     return switch (_strength) {
       0 || 1 => AdminTheme.crimson,
       2 => AdminTheme.amber,
-      3 => const Color(0xFFEAB308),
+      3 => AdminTheme.amber,
       _ => AdminTheme.emerald,
     };
   }
@@ -104,11 +105,11 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
           Icon(Icons.lock_reset_rounded, color: AdminTheme.accent, size: 22),
           SizedBox(width: 8),
           Text('تغيير كلمة المرور',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: AdminTheme.fontTitle, fontWeight: FontWeight.bold)),
         ],
       ),
       content: SizedBox(
-        width: 440,
+        width: ResponsiveDialog.maxWidth(context, 440),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,21 +117,21 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: AdminTheme.surfaceInfo,
                 borderRadius:
                     BorderRadius.circular(AdminTheme.radiusSm),
-                border: Border.all(color: const Color(0xFFBFDBFE)),
+                border: Border.all(color: AdminTheme.borderInfo),
               ),
               child: const Row(
                 children: [
                   Icon(Icons.info_outline_rounded,
-                      size: 16, color: Color(0xFF1E40AF)),
+                      size: 16, color: AdminTheme.accent),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'سيتم إبطال كل جلساتك الأخرى ويلزم تسجيل الدخول من جديد.',
                       style: TextStyle(
-                          fontSize: 11, color: Color(0xFF1E40AF)),
+                          fontSize: AdminTheme.fontSm, color: AdminTheme.accent),
                     ),
                   ),
                 ],
@@ -173,7 +174,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                   Text(
                     _strengthLabel,
                     style: TextStyle(
-                        fontSize: 10,
+                        fontSize: AdminTheme.fontXs,
                         color: _strengthColor,
                         fontWeight: FontWeight.bold),
                   ),
@@ -208,7 +209,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                       child: Text(
                         _error!,
                         style: const TextStyle(
-                            fontSize: 11.5,
+                            fontSize: AdminTheme.fontBase,
                             color: AdminTheme.crimson,
                             fontWeight: FontWeight.bold),
                       ),

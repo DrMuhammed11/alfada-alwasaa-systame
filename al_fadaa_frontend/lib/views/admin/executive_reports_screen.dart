@@ -3,6 +3,7 @@ import '../../core/network/api_service.dart';
 import '../../core/utils/download_helper.dart';
 import '../../models/correspondence_model.dart';
 import '../../models/user_model.dart';
+import '../../core/theme/app_theme.dart';
 
 class ExecutiveReportsScreen extends StatefulWidget {
   final User? currentUser;
@@ -338,20 +339,20 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Row(
           children: [
-            Icon(Icons.analytics_rounded, color: Color(0xFF0284C7), size: 22),
+            Icon(Icons.analytics_rounded, color: AppTheme.info, size: 22),
             SizedBox(width: 10),
             Text(
               'لوحة التقارير والتحليلات التنفيذية',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: AppTheme.fontLg,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: AppTheme.primary,
               ),
             ),
           ],
@@ -363,14 +364,14 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              border: Border.all(color: AppTheme.borderLight),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedPeriod,
-                icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF475569)),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                icon: const Icon(Icons.arrow_drop_down, color: AppTheme.textMuted),
+                style: const TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.textHeading),
                 items: const [
                   DropdownMenuItem(value: 'ALL', child: Text('كافة الفترات')),
                   DropdownMenuItem(value: 'TODAY', child: Text('اليوم')),
@@ -387,7 +388,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
 
           // زر التحديث
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF475569)),
+            icon: const Icon(Icons.refresh_rounded, color: AppTheme.textMuted),
             tooltip: 'تحديث البيانات',
             onPressed: _loadReportData,
           ),
@@ -398,9 +399,9 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0284C7),
+                backgroundColor: AppTheme.info,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
@@ -408,7 +409,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
               icon: const Icon(Icons.print_rounded, size: 16),
               label: const Text(
                 'طباعة التقرير التنفيذي / PDF',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -426,11 +427,11 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                        colors: [AppTheme.primary, AppTheme.textHeading],
                         begin: Alignment.topRight,
                         end: Alignment.bottomLeft,
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                     ),
                     child: Row(
                       children: [
@@ -438,7 +439,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.white.withAlpha(20),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                           ),
                           child: const Icon(Icons.speed_rounded, color: Colors.white, size: 28),
                         ),
@@ -449,12 +450,12 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                             children: [
                               Text(
                                 'مؤشرات الأداء العامة وسير العمل في القطاعات',
-                                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: Colors.white, fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 4),
                               Text(
                                 'بيانات تحليلية مباشرة لحركة الطلبيات، المعاملات، والتكليفات ونسب الالتزام بمهلة SLA.',
-                                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                                style: TextStyle(color: AppTheme.textTertiary, fontSize: AppTheme.fontSm),
                               ),
                             ],
                           ),
@@ -467,7 +468,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                   // ─── شبكة المؤشرات الكلية ───
                   const Text(
                     'المؤشرات الكلية للمعاملات والطلبيات',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                   ),
                   const SizedBox(height: 12),
                   LayoutBuilder(
@@ -485,7 +486,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                             title: 'إجمالي المعاملات والطلبيات',
                             value: '$_totalCorrespondences',
                             icon: Icons.all_inbox_rounded,
-                            color: const Color(0xFF0284C7),
+                            color: AppTheme.info,
                             subtitle: '$_incomingCount طلب وارد من العملاء',
                           ),
                           _buildKpiCard(
@@ -499,14 +500,14 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                             title: 'المكتملة والمعتمدة',
                             value: '$_completedCount',
                             icon: Icons.check_circle_outline_rounded,
-                            color: const Color(0xFF16A34A),
+                            color: AppTheme.emerald,
                             subtitle: 'جاهزة أو تم إرسال ردها',
                           ),
                           _buildKpiCard(
                             title: 'المغلقة والمؤرشفة',
                             value: '$_closedOrArchivedCount',
                             icon: Icons.inventory_2_outlined,
-                            color: const Color(0xFF64748B),
+                            color: AppTheme.textTertiary,
                             subtitle: 'تم إنهاء معاملتها بالكامل',
                           ),
                         ],
@@ -518,7 +519,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                   // ─── مؤشرات المهام والـ SLA ───
                   const Text(
                     'مؤشرات أداء المهام والتكليفات (SLA Compliance)',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                   ),
                   const SizedBox(height: 12),
                   LayoutBuilder(
@@ -543,14 +544,14 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                             title: 'المهام المنجزة بنجاح',
                             value: '$_doneTasks',
                             icon: Icons.task_alt_rounded,
-                            color: const Color(0xFF059669),
+                            color: AppTheme.emerald,
                             subtitle: 'تم تسليم تقاريرها من القطاع',
                           ),
                           _buildKpiCard(
                             title: 'المهام المتأخرة عن SLA',
                             value: '$_overdueTasks',
                             icon: Icons.warning_amber_rounded,
-                            color: const Color(0xFFDC2626),
+                            color: AppTheme.crimson,
                             subtitle: 'تجاوزت الموعد النهائي',
                           ),
                           _buildKpiCard(
@@ -571,12 +572,12 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                     children: [
                       const Text(
                         'أداء القطاعات والإدارات التنفيذية',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: AppTheme.primary),
                       ),
                       const Spacer(),
                       Text(
                         'إجمالي الإدارات: ${_departments.length}',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                        style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary),
                       ),
                     ],
                   ),
@@ -584,13 +585,13 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                      border: Border.all(color: AppTheme.borderLight),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                       child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+                        headingRowColor: WidgetStateProperty.all(AppTheme.backgroundLight),
                         horizontalMargin: 20,
                         columnSpacing: 24,
                         columns: const [
@@ -615,13 +616,13 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0284C7).withAlpha(20),
-                                      borderRadius: BorderRadius.circular(6),
+                                      color: AppTheme.info.withAlpha(20),
+                                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                                     ),
-                                    child: const Icon(Icons.business_rounded, color: Color(0xFF0284C7), size: 16),
+                                    child: const Icon(Icons.business_rounded, color: AppTheme.info, size: 16),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textHeading)),
                                 ],
                               ),
                             ),
@@ -630,29 +631,29 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                 ),
-                                child: Text(code, style: const TextStyle(fontSize: 11, fontFamily: 'monospace')),
+                                child: Text(code, style: const TextStyle(fontSize: AppTheme.fontXs, fontFamily: 'monospace')),
                               ),
                             ),
-                            DataCell(Text(manager, style: const TextStyle(fontSize: 12, color: Color(0xFF475569)))),
-                            DataCell(Text('$usersCount موظف', style: const TextStyle(fontSize: 12))),
+                            DataCell(Text(manager, style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textMuted))),
+                            DataCell(Text('$usersCount موظف', style: const TextStyle(fontSize: AppTheme.fontSm))),
                             DataCell(
                               Text(
                                 '$corrCount معاملة',
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.info),
                               ),
                             ),
                             DataCell(
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF16A34A).withAlpha(20),
-                                  borderRadius: BorderRadius.circular(4),
+                                  color: AppTheme.emerald.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                 ),
                                 child: const Text(
                                   'نشطة ومفعلة ✅',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                                  style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.emerald),
                                 ),
                               ),
                             ),
@@ -678,8 +679,8 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppTheme.borderLight),
       ),
       child: Row(
         children: [
@@ -687,7 +688,7 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: color.withAlpha(20),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
             ),
             child: Icon(icon, color: color, size: 24),
           ),
@@ -699,19 +700,19 @@ class _ExecutiveReportsScreenState extends State<ExecutiveReportsScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.textTertiary, fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color),
+                  style: TextStyle(fontSize: AppTheme.fontXxl, fontWeight: FontWeight.bold, color: color),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

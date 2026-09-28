@@ -149,7 +149,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
         const Text(
           'شركة الفضاء الواسع',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: AdminTheme.fontDisplay,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 0.5,
@@ -160,12 +160,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
             color: AdminTheme.accent.withAlpha(25),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AdminTheme.radiusXl),
             border: Border.all(color: AdminTheme.accent.withAlpha(60)),
           ),
           child: const Text(
             'بوابة الإدارة والرقابة العليا (Admin Portal)',
-            style: TextStyle(fontSize: 12, color: AdminTheme.accentLight),
+            style: TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.accentLight),
           ),
         ),
       ],
@@ -217,8 +217,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
     return Text(
       label,
       style: const TextStyle(
-        color: Color(0xFFCBD5E1),
-        fontSize: 12,
+        color: AdminTheme.textLight,
+        fontSize: AdminTheme.fontBase,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -231,7 +231,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       onSubmitted: (_) => _passwordFocus.requestFocus(),
-      style: const TextStyle(color: Colors.white, fontSize: 13),
+      style: const TextStyle(color: Colors.white, fontSize: AdminTheme.fontMd),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.mail_outline_rounded,
             color: AdminTheme.textLight, size: 19),
@@ -261,7 +261,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
       textInputAction: TextInputAction.done,
       // إرسال النموذج عند الضغط على Enter في حقل كلمة المرور
       onSubmitted: (_) => _isLoading ? null : _handleLogin(),
-      style: const TextStyle(color: Colors.white, fontSize: 13),
+      style: const TextStyle(color: Colors.white, fontSize: AdminTheme.fontMd),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.lock_outline_rounded,
             color: AdminTheme.textLight, size: 19),
@@ -340,7 +340,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
                             'دخول لوحة التحكم',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: AdminTheme.fontLg,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.3,
                             ),
@@ -374,7 +374,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
             child: Text(
               message,
               style: const TextStyle(
-                  color: Colors.white, fontSize: 12.5, height: 1.4),
+                  color: Colors.white, fontSize: AdminTheme.fontMd, height: 1.4),
             ),
           ),
           // زر إغلاق رسالة الخطأ
@@ -401,7 +401,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'حسابات التجربة',
-                style: TextStyle(color: AdminTheme.textLight, fontSize: 11),
+                style: TextStyle(color: AdminTheme.textLight, fontSize: AdminTheme.fontSm),
               ),
             ),
             Expanded(child: Divider(color: AdminTheme.borderDark)),
@@ -432,12 +432,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
   Widget _buildDemoChip(String label, String email, Color color) {
     return InkWell(
       onTap: () => _quickFill(email),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(AdminTheme.radiusXl),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: color.withAlpha(20),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AdminTheme.radiusXl),
           border: Border.all(color: color.withAlpha(80)),
         ),
         child: Row(
@@ -449,7 +449,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
               label,
               style: TextStyle(
                   color: color,
-                  fontSize: 11,
+                  fontSize: AdminTheme.fontSm,
                   fontWeight: FontWeight.bold),
             ),
           ],
@@ -464,7 +464,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF1E293B)
+      ..color = AdminTheme.textHeading
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
 
@@ -482,7 +482,7 @@ class _GridPainter extends CustomPainter {
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFF0284C7).withAlpha(30),
+          AdminTheme.accent.withAlpha(30),
           Colors.transparent,
         ],
       ).createShader(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/network/admin_api_service.dart';
 import '../../core/theme/admin_theme.dart';
 import '../../models/admin_user_model.dart';
+import '../../core/widgets/responsive_dialog.dart';
 
 class DepartmentDialog extends StatefulWidget {
   final Department? departmentToEdit;
@@ -79,9 +80,9 @@ class _DepartmentDialogState extends State<DepartmentDialog> {
     final isEdit = widget.departmentToEdit != null;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AdminTheme.radiusLg)),
       child: Container(
-        width: 480,
+        width: ResponsiveDialog.maxWidth(context, 480),
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
@@ -99,7 +100,7 @@ class _DepartmentDialogState extends State<DepartmentDialog> {
                   const SizedBox(width: 10),
                   Text(
                     isEdit ? 'تعديل بيانات القسم والقطاع' : 'إضافة قسم / قطاع جديد',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: AdminTheme.fontTitle, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
@@ -111,7 +112,7 @@ class _DepartmentDialogState extends State<DepartmentDialog> {
               const Divider(height: 24),
 
               // اسم القسم
-              const Text('اسم القسم / الإدارة', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              const Text('اسم القسم / الإدارة', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _nameController,
@@ -125,7 +126,7 @@ class _DepartmentDialogState extends State<DepartmentDialog> {
               const SizedBox(height: 14),
 
               // كود القسم
-              const Text('رمز القسم (Code)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              const Text('رمز القسم (Code)', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _codeController,
@@ -140,7 +141,7 @@ class _DepartmentDialogState extends State<DepartmentDialog> {
               const SizedBox(height: 14),
 
               // تعيين مدير القسم
-              const Text('مدير القسم المعين', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              const Text('مدير القسم المعين', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               DropdownButtonFormField<String?>(
                 value: _managerId,

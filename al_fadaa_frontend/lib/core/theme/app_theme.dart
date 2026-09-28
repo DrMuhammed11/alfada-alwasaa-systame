@@ -7,7 +7,8 @@ class AppTheme {
   static const Color onPrimary = Color(0xFFFFFFFF);       // White on primary
   static const Color secondary = Color(0xFF334155);       // Slate — Secondary
   static const Color accent = Color(0xFF0369A1);          // Corporate Blue — CTA / Accent
-  static const Color emerald = Color(0xFF10B981);         // Success
+  static const Color info = Color(0xFF0284C7);            // Sky — informational (توحيد 4 أزرق سابقًا)
+  static const Color emerald = Color(0xFF059669);         // Success (توحيد 3 أخضر سابقًا)
   static const Color amber = Color(0xFFB45309);           // Warning — أغمق لتحقيق التباين
   static const Color crimson = Color(0xFFDC2626);         // Destructive / Urgent
   static const Color purple = Color(0xFF8B5CF6);          // Referral / Special
@@ -19,13 +20,52 @@ class AppTheme {
 
   // ✅ تباين AA: 7.4:1 على backgroundLight
   static const Color textDark = Color(0xFF020617);         // Foreground text
+  static const Color textHeading = Color(0xFF1E293B);      // Slate-800 — عناوين الكروت
   static const Color textMuted = Color(0xFF475569);        // ✅ رفعنا من #64748B إلى #475569 (7.4:1)
   static const Color textTertiary = Color(0xFF64748B);      // ✅ جديد — للنصوص الثانوية فقط على خلفيات فاتحة
 
   // ✅ تباين AA: 4.6:1 على أبيض
   static const Color textOnLight = Color(0xFF64748B);      // للـ timestamps (سابقاً #94A3B8)
 
+  // ─── أسطح وحدود الشارات الدلالية (pill surfaces) ───
+  static const Color surfaceSuccess = Color(0xFFECFDF5);
+  static const Color surfaceDanger = Color(0xFFFEF2F2);
+  static const Color borderDanger = Color(0xFFFECACA);
+  static const Color surfaceInfo = Color(0xFFE0F2FE);
+  static const Color surfaceWarning = Color(0xFFFFFBEB);
+  static const Color borderWarning = Color(0xFFFDE68A);
+
   static const Color ring = Color(0xFF0F172A);             // Focus ring
+
+  // ─── Type Scale (المقياس الوحيد للأحجام — لا أنصاف) ───
+  static const double fontXs = 11;
+  static const double fontSm = 12;
+  static const double fontBase = 13;
+  static const double fontMd = 14;
+  static const double fontLg = 16;
+  static const double fontXl = 18;
+  static const double fontXxl = 22;
+  static const double fontDisplay = 28;
+
+  // ─── Radius Scale ───
+  static const double radiusXs = 4;
+  static const double radiusSm = 6;
+  static const double radiusMd = 8;
+  static const double radiusLg = 12;
+  static const double radiusXl = 16;
+
+  // ─── Spacing Scale ───
+  static const double spaceXs = 4;
+  static const double spaceSm = 8;
+  static const double spaceMd = 12;
+  static const double spaceLg = 16;
+  static const double spaceXl = 24;
+  static const double spaceXxl = 32;
+
+  // ─── Breakpoints (مطابقة عتبات لوحة التحكم 860/1100/1350) ───
+  static const double breakpointCompact = 860;
+  static const double breakpointMedium = 1100;
+  static const double breakpointWide = 1350;
 
   static ThemeData get lightTheme {
     final baseTextTheme = GoogleFonts.notoSansArabicTextTheme(
@@ -42,6 +82,12 @@ class AppTheme {
         onPrimary: onPrimary,
         secondary: accent,
         surface: cardLight,
+        onSurface: textDark,
+        onSurfaceVariant: textMuted,
+        outline: borderLight,
+        outlineVariant: borderLight,
+        surfaceContainerHighest: muted,
+        tertiary: purple,
         error: crimson,
       ),
       textTheme: baseTextTheme.apply(
@@ -122,6 +168,99 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: primary,
+        contentTextStyle: GoogleFonts.notoSansArabic(
+          color: Colors.white,
+          fontSize: fontSm,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMd),
+        ),
+        actionTextColor: const Color(0xFF7DD3FC),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: cardLight,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusXl),
+          side: const BorderSide(color: borderLight),
+        ),
+        titleTextStyle: GoogleFonts.notoSansArabic(
+          color: textHeading,
+          fontSize: fontLg,
+          fontWeight: FontWeight.w700,
+        ),
+        contentTextStyle: GoogleFonts.notoSansArabic(
+          color: textMuted,
+          fontSize: fontBase,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primary,
+          side: const BorderSide(color: borderLight),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusMd),
+          ),
+          textStyle: GoogleFonts.notoSansArabic(
+            fontSize: fontMd,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: accent,
+          textStyle: GoogleFonts.notoSansArabic(
+            fontSize: fontMd,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: primary,
+        unselectedLabelColor: textTertiary,
+        labelStyle: GoogleFonts.notoSansArabic(
+          fontSize: fontSm,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: GoogleFonts.notoSansArabic(
+          fontSize: fontSm,
+          fontWeight: FontWeight.w500,
+        ),
+        indicatorColor: primary,
+        dividerColor: borderLight,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: textHeading,
+          borderRadius: BorderRadius.circular(radiusXs),
+        ),
+        textStyle: GoogleFonts.notoSansArabic(
+          color: Colors.white,
+          fontSize: fontXs,
+        ),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        side: const BorderSide(color: borderLight, width: 1.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusXs - 2),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: cardLight,
+        elevation: 0,
+        shadowColor: const Color(0x14000000),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMd),
+          side: const BorderSide(color: borderLight),
+        ),
+        textStyle: GoogleFonts.notoSansArabic(color: textDark, fontSize: fontBase),
+      ),
       extensions: const [
         AppElevation.light,
         AppSpacing(),
@@ -150,7 +289,7 @@ class AppTheme {
   static Color getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'RECEIVED':
-        return const Color(0xFF3B82F6);
+        return info;
       case 'UNDER_REVIEW':
         return amber;
       case 'REFERRED':
@@ -164,7 +303,7 @@ class AppTheme {
       case 'SENT':
         return const Color(0xFF06B6D4);
       case 'CLOSED':
-        return const Color(0xFF475569);
+        return textMuted;
       case 'ARCHIVED':
         return textMuted;
       default:
@@ -176,9 +315,9 @@ class AppTheme {
   static Color getReferralStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'OPEN':
-        return const Color(0xFF7C3AED);
+        return purple;
       case 'ANSWERED':
-        return const Color(0xFF0284C7);
+        return info;
       case 'CLOSED':
         return textMuted;
       default:

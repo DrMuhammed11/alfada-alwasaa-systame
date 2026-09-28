@@ -75,14 +75,14 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
       child: Container(
         width: 850,
         height: 650,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         child: Column(
           children: [
@@ -90,7 +90,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: const BoxDecoration(
-                color: Color(0xFF0F172A),
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -102,7 +102,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       color: Colors.white.withAlpha(25),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     ),
                     child: const Icon(Icons.history_rounded, color: Colors.white, size: 20),
                   ),
@@ -114,18 +114,18 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                         children: [
                           const Text(
                             'سجل إصدارات الرد والمقارنة السطرية',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(fontSize: AppTheme.fontLg, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(width: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB).withAlpha(180),
-                              borderRadius: BorderRadius.circular(4),
+                              color: AppTheme.info.withAlpha(180),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                             ),
                             child: Text(
                               'الإصدار الحالي v${widget.reply.version}',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ),
                         ],
@@ -133,7 +133,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                       const SizedBox(height: 2),
                       Text(
                         'متابعة تطور صياغة مسودة الرد وفروق التعديل بين النسخ المتعاقبة',
-                        style: TextStyle(fontSize: 11, color: Colors.white.withAlpha(180)),
+                        style: TextStyle(fontSize: AppTheme.fontXs, color: Colors.white.withAlpha(180)),
                       ),
                     ],
                   ),
@@ -148,13 +148,13 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
 
             // ─── Tab Bar ───
             Container(
-              color: const Color(0xFFF8FAFC),
+              color: AppTheme.backgroundLight,
               child: TabBar(
                 controller: _tabController,
-                indicatorColor: const Color(0xFF2563EB),
-                labelColor: const Color(0xFF2563EB),
-                unselectedLabelColor: const Color(0xFF64748B),
-                labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                indicatorColor: AppTheme.info,
+                labelColor: AppTheme.info,
+                unselectedLabelColor: AppTheme.textTertiary,
+                labelStyle: const TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold),
                 tabs: const [
                   Tab(icon: Icon(Icons.list_alt_rounded, size: 18), text: 'قائمة الإصدارات والنسخ'),
                   Tab(icon: Icon(Icons.difference_outlined, size: 18), text: 'فروق التغييرات (Line Diff)'),
@@ -185,7 +185,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
       return const Center(
         child: Text(
           'لا توجد إصدارات مؤرشفة لهذا الرد',
-          style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          style: TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textTertiary),
         ),
       );
     }
@@ -197,12 +197,12 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
           width: 280,
           child: Container(
             decoration: const BoxDecoration(
-              border: Border(left: BorderSide(color: Color(0xFFE2E8F0))),
-              color: Color(0xFFF8FAFC),
+              border: Border(left: BorderSide(color: AppTheme.borderLight)),
+              color: AppTheme.backgroundLight,
             ),
             child: ListView.separated(
               itemCount: _versions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              separatorBuilder: (_, __) => const Divider(height: 1, color: AppTheme.borderLight),
               itemBuilder: (context, index) {
                 final v = _versions[index];
                 final isSelected = _selectedVersion?.id == v.id;
@@ -220,12 +220,12 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                                borderRadius: BorderRadius.circular(4),
+                                color: isSelected ? AppTheme.info : AppTheme.textTertiary,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                               ),
                               child: Text(
                                 'v${v.versionNumber}',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: Colors.white),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -233,9 +233,9 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                               child: Text(
                                 v.reason,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: AppTheme.fontSm,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF334155),
+                                  color: isSelected ? const Color(0xFF1E3A8A) : AppTheme.secondary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -249,12 +249,12 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                             const SizedBox(width: 4),
                             Text(
                               v.createdBy?.fullName ?? 'غير محدد',
-                              style: const TextStyle(fontSize: 11, color: AppTheme.textDark),
+                              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textDark),
                             ),
                             const Spacer(),
                             Text(
                               '${v.createdAt.year}/${v.createdAt.month}/${v.createdAt.day}',
-                              style: const TextStyle(fontSize: 10, color: AppTheme.textOnLight),
+                              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textOnLight),
                             ),
                           ],
                         ),
@@ -280,7 +280,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                         children: [
                           Text(
                             'نص الإصدار v${_selectedVersion!.versionNumber} — ${_selectedVersion!.reason}',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            style: const TextStyle(fontSize: AppTheme.fontMd, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                           const Spacer(),
                           IconButton(
@@ -301,14 +301,14 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            color: AppTheme.backgroundLight,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                            border: Border.all(color: AppTheme.borderLight),
                           ),
                           child: SingleChildScrollView(
                             child: SelectableText(
                               _selectedVersion!.body,
-                              style: const TextStyle(fontSize: 13, height: 1.6, color: Color(0xFF1E293B)),
+                              style: const TextStyle(fontSize: AppTheme.fontBase, height: 1.6, color: AppTheme.textHeading),
                             ),
                           ),
                         ),
@@ -331,7 +331,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
             SizedBox(height: 12),
             Text(
               'يتطلب عرض الفروق وجود نسختين على الأقل من هذا الرد',
-              style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+              style: TextStyle(fontSize: AppTheme.fontBase, color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -345,16 +345,16 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: const BoxDecoration(
             color: Color(0xFFF1F5F9),
-            border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+            border: Border(bottom: BorderSide(color: AppTheme.borderLight)),
           ),
           child: Row(
             children: [
-              const Text('مقارنة النسخة: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
+              const Text('مقارنة النسخة: ', style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.secondary)),
               DropdownButton<int>(
                 value: _diffV1,
                 isDense: true,
                 items: _versions
-                    .map((v) => DropdownMenuItem(value: v.versionNumber, child: Text('v${v.versionNumber} (${v.reason})', style: const TextStyle(fontSize: 12))))
+                    .map((v) => DropdownMenuItem(value: v.versionNumber, child: Text('v${v.versionNumber} (${v.reason})', style: const TextStyle(fontSize: AppTheme.fontSm))))
                     .toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -364,12 +364,12 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                 },
               ),
               const SizedBox(width: 16),
-              const Text('مع النسخة: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
+              const Text('مع النسخة: ', style: TextStyle(fontSize: AppTheme.fontSm, fontWeight: FontWeight.bold, color: AppTheme.secondary)),
               DropdownButton<int>(
                 value: _diffV2,
                 isDense: true,
                 items: _versions
-                    .map((v) => DropdownMenuItem(value: v.versionNumber, child: Text('v${v.versionNumber} (${v.reason})', style: const TextStyle(fontSize: 12))))
+                    .map((v) => DropdownMenuItem(value: v.versionNumber, child: Text('v${v.versionNumber} (${v.reason})', style: const TextStyle(fontSize: AppTheme.fontSm))))
                     .toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -382,13 +382,13 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
               // دليل الألوان
               Row(
                 children: [
-                  Container(width: 10, height: 10, color: const Color(0xFFDC2626)),
+                  Container(width: 10, height: 10, color: AppTheme.crimson),
                   const SizedBox(width: 4),
-                  const Text('محذوف (-)', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                  const Text('محذوف (-)', style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted)),
                   const SizedBox(width: 12),
-                  Container(width: 10, height: 10, color: const Color(0xFF16A34A)),
+                  Container(width: 10, height: 10, color: AppTheme.emerald),
                   const SizedBox(width: 4),
-                  const Text('مضاف (+)', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                  const Text('مضاف (+)', style: TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted)),
                 ],
               ),
             ],
@@ -407,7 +407,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                       itemBuilder: (context, index) {
                         final line = _diffResult!.lines[index];
                         Color bgColor = Colors.transparent;
-                        Color textColor = const Color(0xFF334155);
+                        Color textColor = AppTheme.secondary;
                         String prefix = '  ';
 
                         if (line.type == 'added') {
@@ -425,7 +425,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                           margin: const EdgeInsets.only(bottom: 2),
                           decoration: BoxDecoration(
                             color: bgColor,
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,7 +434,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                                 prefix,
                                 style: TextStyle(
                                   fontFamily: 'monospace',
-                                  fontSize: 12,
+                                  fontSize: AppTheme.fontSm,
                                   fontWeight: FontWeight.bold,
                                   color: textColor,
                                 ),
@@ -444,7 +444,7 @@ class _ReplyVersionsDialogState extends State<ReplyVersionsDialog> with SingleTi
                                   line.text,
                                   style: TextStyle(
                                     fontFamily: 'monospace',
-                                    fontSize: 12,
+                                    fontSize: AppTheme.fontSm,
                                     color: textColor,
                                   ),
                                 ),

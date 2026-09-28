@@ -49,7 +49,7 @@ class MessageCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: eventColor.withAlpha(12),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(color: eventColor.withAlpha(60)),
         ),
         child: Row(
@@ -71,20 +71,20 @@ class MessageCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: eventColor),
+                    style: TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: eventColor),
                   ),
                   if (subtitle != null && subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                      style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                     ),
                   ],
                   if (description != null && description.trim().isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       description.trim(),
-                      style: const TextStyle(fontSize: 11.5, color: AppTheme.secondary, height: 1.35),
+                      style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.secondary, height: 1.35),
                     ),
                   ],
                 ],
@@ -93,7 +93,7 @@ class MessageCard extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               AppDateFormatter.formatListDate(date),
-              style: const TextStyle(fontSize: 10, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -119,7 +119,7 @@ class MessageCard extends StatelessWidget {
         color: isDraft
             ? AppTheme.amber.withAlpha(12)
             : (isClient ? Colors.white : AppTheme.backgroundLight),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
           color: isDraft
               ? AppTheme.amber.withAlpha(50)
@@ -185,7 +185,7 @@ class MessageCard extends StatelessWidget {
                             child: Text(
                               senderName,
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: AppTheme.fontBase,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.primary,
                               ),
@@ -198,13 +198,13 @@ class MessageCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: badgeColor.withAlpha(25),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                               border: Border.all(color: badgeColor.withAlpha(60), width: 0.8),
                             ),
                             child: Text(
                               msg['badge'] as String,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: AppTheme.fontXs,
                                 fontWeight: FontWeight.bold,
                                 color: badgeColor,
                               ),
@@ -218,12 +218,12 @@ class MessageCard extends StatelessWidget {
                                 context: context,
                                 builder: (_) => ReplyVersionsDialog(reply: replyItem),
                               ),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: AppTheme.purple.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                   border: Border.all(color: AppTheme.purple.withAlpha(80)),
                                 ),
                                 child: Row(
@@ -233,7 +233,7 @@ class MessageCard extends StatelessWidget {
                                     const SizedBox(width: 3),
                                     Text(
                                       'v${replyItem.version}',
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.purple),
+                                      style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.purple),
                                     ),
                                   ],
                                 ),
@@ -248,7 +248,7 @@ class MessageCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: AppTheme.amber.withAlpha(20),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                                 border: Border.all(color: AppTheme.amber.withAlpha(60)),
                               ),
                               child: const Row(
@@ -258,7 +258,7 @@ class MessageCard extends StatelessWidget {
                                   SizedBox(width: 3),
                                   Text(
                                     'وكالة',
-                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.amber),
+                                    style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.amber),
                                   ),
                                 ],
                               ),
@@ -270,7 +270,7 @@ class MessageCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           senderEmail,
-                          style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                          style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -283,7 +283,7 @@ class MessageCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.white.withAlpha(200),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusXs),
                     border: Border.all(color: AppTheme.borderLight),
                   ),
                   child: Row(
@@ -294,7 +294,7 @@ class MessageCard extends StatelessWidget {
                       Text(
                         AppDateFormatter.formatFullDateTime(date),
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: AppTheme.fontXs,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.secondary,
                         ),
@@ -377,7 +377,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
         child: SelectableText(
           widget.body,
           style: const TextStyle(
-            fontSize: 13.5,
+            fontSize: AppTheme.fontMd,
             color: AppTheme.textDark,
             height: 1.65,
           ),
@@ -395,7 +395,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
             SelectableText(
               parsed.introText!.trim(),
               style: const TextStyle(
-                fontSize: 13.5,
+                fontSize: AppTheme.fontMd,
                 color: AppTheme.textDark,
                 height: 1.65,
               ),
@@ -407,7 +407,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
           Container(
             decoration: BoxDecoration(
               color: AppTheme.backgroundLight,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               border: Border.all(color: AppTheme.borderLight),
             ),
             child: Column(
@@ -416,7 +416,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                 // رأس بطاقة التوجيه
                 InkWell(
                   onTap: () => setState(() => _showDetails = !_showDetails),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     child: Row(
@@ -430,7 +430,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                               Text(
                                 'رسالة بريد إلكتروني موجهة: ${parsed.subject ?? "بدون موضوع"}',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: AppTheme.fontSm,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.primary,
                                 ),
@@ -440,7 +440,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                               if (parsed.from != null && parsed.from!.isNotEmpty)
                                 Text(
                                   'من: ${parsed.from}${parsed.date != null ? " | ${parsed.date}" : ""}',
-                                  style: const TextStyle(fontSize: 10.5, color: AppTheme.textMuted),
+                                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -449,7 +449,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
                         ),
                         Text(
                           _showDetails ? 'إخفاء التفاصيل' : 'عرض التفاصيل',
-                          style: const TextStyle(fontSize: 10.5, color: AppTheme.accent, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.accent, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 4),
                         Icon(
@@ -489,7 +489,7 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
           SelectableText(
             parsed.cleanBody,
             style: const TextStyle(
-              fontSize: 13.5,
+              fontSize: AppTheme.fontMd,
               color: AppTheme.textDark,
               height: 1.65,
             ),
@@ -509,13 +509,13 @@ class _ForwardedEmailBlockState extends State<_ForwardedEmailBlock> {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
+              style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
             ),
           ),
           Expanded(
             child: SelectableText(
               value,
-              style: const TextStyle(fontSize: 11, color: AppTheme.textDark),
+              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textDark),
             ),
           ),
         ],

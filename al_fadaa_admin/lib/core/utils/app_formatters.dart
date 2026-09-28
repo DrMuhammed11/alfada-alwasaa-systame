@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../theme/admin_theme.dart';
 
 /// أدوات التنسيق والترجمة العربية الموحّدة
 /// يُستخدم عبر جميع الشاشات بدلاً من تكرار DateFormat و switch في كل مكان
@@ -11,6 +13,18 @@ class AppFormatters {
   static final _timeOnlyFormat = DateFormat('HH:mm', 'ar');
   static final _shortDateFormat = DateFormat('MM/dd', 'ar');
   static final _apiDateFormat = DateFormat('yyyy-MM-dd');
+
+  /// السياسة الموحدة للأرقام: هندية-عربية (١٢٣) مطابقة للتواريخ
+  static final _numberFormat = NumberFormat('ar');
+
+  /// تحويل الأرقام الغربية في أي نص إلى هندية-عربية
+  static String arabicDigits(String input) => input.replaceAllMapped(
+        RegExp(r'[0-9]'),
+        (m) => const ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'][int.parse(m.group(0)!)],
+      );
+
+  /// تنسيق أي رقم بعدد بالسياسة الموحدة
+  static String number(num value) => _numberFormat.format(value);
 
   /// تنسيق التاريخ والوقت معاً
   static String dateTime(DateTime dt) => _dateTimeFormat.format(dt.toLocal());
@@ -29,13 +43,13 @@ class AppFormatters {
 
   /// تنسيق نسبة مئوية
   static String percentage(double value, {int decimals = 0}) =>
-      '${value.toStringAsFixed(decimals)}%';
+      '${arabicDigits(value.toStringAsFixed(decimals))}٪';
 
   /// حجم الملف
   static String fileSize(num bytes) {
-    if (bytes >= 1024 * 1024) return '${(bytes / 1024 / 1024).toStringAsFixed(1)} ميغ';
-    if (bytes >= 1024) return '${(bytes / 1024).toStringAsFixed(1)} ك.بايت';
-    return '$bytes بايت';
+    if (bytes >= 1024 * 1024) return '${arabicDigits((bytes / 1024 / 1024).toStringAsFixed(1))} ميغ';
+    if (bytes >= 1024) return '${arabicDigits((bytes / 1024).toStringAsFixed(1))} ك.بايت';
+    return '${number(bytes)} بايت';
   }
 
   /// الأولوية بالعربية
@@ -47,12 +61,12 @@ class AppFormatters {
         _ => priority,
       };
 
-  /// لون الأولوية
-  static String priorityColor(String priority) => switch (priority.toUpperCase()) {
-        'URGENT' => 'crimson',
-        'HIGH' => 'amber',
-        'NORMAL' => 'accent',
-        _ => 'muted',
+  /// لون الأولوية — Color مباشرة (كانت ترجع String فيجبر كل مستدعٍ على switch خاص)
+  static Color priorityColor(String priority) => switch (priority.toUpperCase()) {
+        'URGENT' => AdminTheme.crimson,
+        'HIGH' => AdminTheme.amber,
+        'NORMAL' => AdminTheme.accent,
+        _ => AdminTheme.textMuted,
       };
 
   /// حالة المراسلة بالعربية
