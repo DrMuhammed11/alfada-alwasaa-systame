@@ -43,7 +43,9 @@ class _DepartmentsManagementViewState
     // شاشة الإدارة نفسها: تجاوز الكاش دائماً لتظهر التعديلات فوراً
     final deptsRes = await AdminApiService().getDepartments(forceRefresh: true);
     // قائمة الموظفين لاختيار مدير القسم — صفحة موسعة لأنها قائمة دعم
-    final usersRes = await AdminApiService().getUsers(page: 1, limit: 200);
+    // (الخادم يقيد limit بـ100 كنتيجة واحدة فيرفض 200 بخطأ 400
+    //  وكان هذا يُظهر شاشة «تعذر تحميل بيانات الأقسام» رغم نجاح الأقسام)
+    final usersRes = await AdminApiService().getUsers(page: 1, limit: 100);
     if (mounted) {
       setState(() {
         _departments = deptsRes.items;

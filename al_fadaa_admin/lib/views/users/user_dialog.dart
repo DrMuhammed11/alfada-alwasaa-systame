@@ -198,59 +198,72 @@ class _UserDialogState extends State<UserDialog> {
                       ),
                       const SizedBox(height: 14),
 
-                      // الصف: الدور الوظيفي + القسم
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('المسمى / الدور الوظيفي', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
-                                const SizedBox(height: 6),
-                                DropdownButtonFormField<String>(
-                                  value: _role,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  ),
-                                  items: const [
-                                    DropdownMenuItem(value: 'ADMIN', child: Text('مدير النظام (Admin)')),
-                                    DropdownMenuItem(value: 'GM', child: Text('المدير العام (GM)')),
-                                    DropdownMenuItem(value: 'DEPUTY_GM', child: Text('نائب المدير العام')),
-                                    DropdownMenuItem(value: 'DEPT_MANAGER', child: Text('مدير إدارة / قطاع')),
-                                    DropdownMenuItem(value: 'EMPLOYEE', child: Text('موظف تنفيذي')),
-                                  ],
-                                  onChanged: (val) => setState(() => _role = val ?? 'EMPLOYEE'),
+                      // الصف: الدور الوظيفي + القسم — يتراكب عموديًا على الشاشات الضيقة
+                      // (عمودان ثابتان كانا يتداخلان تحت عرض الهاتف فيتقاطع النص مع القوائم)
+                      LayoutBuilder(builder: (context, constraints) {
+                        final isWide = constraints.maxWidth >= 560;
+                        final roleField = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('المسمى / الدور الوظيفي', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 6),
+                            DropdownButtonFormField<String>(
+                              value: _role,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'ADMIN', child: Text('مدير النظام (Admin)')),
+                                DropdownMenuItem(value: 'GM', child: Text('المدير العام (GM)')),
+                                DropdownMenuItem(value: 'DEPUTY_GM', child: Text('نائب المدير العام')),
+                                DropdownMenuItem(value: 'DEPT_MANAGER', child: Text('مدير إدارة / قطاع')),
+                                DropdownMenuItem(value: 'EMPLOYEE', child: Text('موظف تنفيذي')),
+                              ],
+                              onChanged: (val) => setState(() => _role = val ?? 'EMPLOYEE'),
+                            ),
+                          ],
+                        );
+                        final deptField = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('القسم / الإدارة التابع لها', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 6),
+                            DropdownButtonFormField<String?>(
+                              value: _departmentId,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              items: [
+                                const DropdownMenuItem(value: null, child: Text('بدون قسم محدد')),
+                                ...widget.departments.map(
+                                  (d) => DropdownMenuItem(value: d.id, child: Text(d.name)),
                                 ),
                               ],
+                              onChanged: (val) => setState(() => _departmentId = val),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('القسم / الإدارة التابع لها', style: TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.w600)),
-                                const SizedBox(height: 6),
-                                DropdownButtonFormField<String?>(
-                                  value: _departmentId,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  ),
-                                  items: [
-                                    const DropdownMenuItem(value: null, child: Text('بدون قسم محدد')),
-                                    ...widget.departments.map(
-                                      (d) => DropdownMenuItem(value: d.id, child: Text(d.name)),
-                                    ),
-                                  ],
-                                  onChanged: (val) => setState(() => _departmentId = val),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        );
+                        if (isWide) {
+                          return Row(
+                            children: [
+                              Expanded(child: roleField),
+                              const SizedBox(width: 12),
+                              Expanded(child: deptField),
+                            ],
+                          );
+                        }
+                        return Column(
+                          children: [
+                            roleField,
+                            const SizedBox(height: 14),
+                            deptField,
+                          ],
+                        );
+                      }),
                       const SizedBox(height: 14),
 
                       // حالة الحساب (نشط / معطل)

@@ -8,7 +8,11 @@ class CorrListItem {
   final String priority; // LOW / NORMAL / HIGH / URGENT
   final String status; // RECEIVED / ... / ARCHIVED
   final String? senderName;
+  final String? senderEmail;
+  final String? senderPhone;
+  final String? channel;
   final String? departmentName;
+  final String? body;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isOverdue;
@@ -17,6 +21,7 @@ class CorrListItem {
   final int tasksCount;
   final int repliesCount;
   final int attachmentsCount;
+  final int childrenCount;
   final String? latestChildBody;
 
   CorrListItem({
@@ -27,7 +32,11 @@ class CorrListItem {
     required this.priority,
     required this.status,
     this.senderName,
+    this.senderEmail,
+    this.senderPhone,
+    this.channel,
     this.departmentName,
+    this.body,
     required this.createdAt,
     required this.updatedAt,
     this.isOverdue = false,
@@ -36,6 +45,7 @@ class CorrListItem {
     this.tasksCount = 0,
     this.repliesCount = 0,
     this.attachmentsCount = 0,
+    this.childrenCount = 0,
     this.latestChildBody,
   });
 
@@ -48,7 +58,11 @@ class CorrListItem {
       priority: json['priority'] ?? 'NORMAL',
       status: json['status'] ?? '',
       senderName: json['senderName'],
+      senderEmail: json['senderEmail'],
+      senderPhone: json['senderPhone'],
+      channel: json['channel'],
       departmentName: json['department']?['name'],
+      body: json['body'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       isOverdue: json['isOverdue'] == true,
@@ -57,10 +71,20 @@ class CorrListItem {
       tasksCount: json['_count']?['tasks'] ?? 0,
       repliesCount: json['_count']?['replies'] ?? 0,
       attachmentsCount: json['_count']?['attachments'] ?? 0,
+      childrenCount: json['_count']?['children'] ?? 0,
       latestChildBody: (json['children'] as List?)?.isNotEmpty == true
           ? (json['children'].first['body']?.toString())
           : null,
     );
+  }
+
+  /// نص آخر رسالة في المحادثة (التعقيب الأخير أو النص الأصلي)
+  String get lastMessagePreview {
+    final t = (latestChildBody != null && latestChildBody!.trim().isNotEmpty)
+        ? latestChildBody!
+        : (body ?? '');
+    // إزالة الأسطر الجديدة والمسافات المتكررة لعرض سطر واحد
+    return t.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 }
 
@@ -76,6 +100,7 @@ class CorrReferral {
   final String? note;
   final String status;
   final DateTime? dueDate;
+  final DateTime? createdAt;
   final String fromName;
   final String toName;
   CorrReferral({
@@ -83,6 +108,7 @@ class CorrReferral {
     this.note,
     required this.status,
     this.dueDate,
+    this.createdAt,
     required this.fromName,
     required this.toName,
   });
@@ -92,6 +118,7 @@ class CorrReferral {
         note: json['note'],
         status: json['status'] ?? 'OPEN',
         dueDate: json['dueDate'] != null ? DateTime.tryParse(json['dueDate']) : null,
+        createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
         fromName: json['fromUser']?['name'] ?? '-',
         toName: json['toUser']?['name'] ?? '-',
       );
@@ -102,6 +129,7 @@ class CorrTask {
   final String title;
   final String status;
   final DateTime? dueDate;
+  final DateTime? createdAt;
   final String assignedToName;
   final String assignedByName;
   CorrTask({
@@ -109,6 +137,7 @@ class CorrTask {
     required this.title,
     required this.status,
     this.dueDate,
+    this.createdAt,
     required this.assignedToName,
     required this.assignedByName,
   });
@@ -118,6 +147,7 @@ class CorrTask {
         title: json['title'] ?? '',
         status: json['status'] ?? 'PENDING',
         dueDate: json['dueDate'] != null ? DateTime.tryParse(json['dueDate']) : null,
+        createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
         assignedToName: json['assignedTo']?['name'] ?? '-',
         assignedByName: json['assignedBy']?['name'] ?? '-',
       );
@@ -166,6 +196,80 @@ class CorrAttachment {
       );
 }
 
+/// رسالة واحدة داخل سلسلة المحادثة — الجذر أو أحد التعقيبات (الأبناء)
+/// الخادم يجمع رسائل البريد الواردة من نفس البريد والردود الصادرة المرسلة
+/// للعميل كأبناء للجذر (parentId) فتُعرض كلها في محادثة واحدة
+class CorrThreadMessage {
+  final String id;
+  final String refNumber;
+  final String subject;
+  final String? body;
+  final String type; // INCOMING (واردة من العميل) / OUTGOING (مرسلة للعميل) / INTERNAL
+  final String status;
+  final String? senderName;
+  final String? senderEmail;
+
+  /// معرف سجل الرد الداخلي الذي وُلِّد منه الصادر — لمنع تكرار الرد نفسه مرتين
+  final String? sourceReplyId;
+
+  /// أحفاد الجذر: ردود صادرة قديمة أُلصقت تحت ابن قبل توحيد التعليق على
+  /// الجذر في الخادم — الخادم يعيدها الآن ضمن كل ابن ليعرضها الخيط كاملاً
+  final List<CorrThreadMessage> children;
+  final DateTime? receivedAt;
+  final DateTime? sentAt;
+  final DateTime createdAt;
+  final List<CorrAttachment> attachments;
+
+  /// اتجاه الرسالة في الدردشة: واردة (من العميل) أو صادرة (إلى العميل)
+  bool get isIncoming => type.toUpperCase() != 'OUTGOING';
+
+  /// وقت العرض: التاريخ الفعلي للبريد إن توفر وإلا تاريخ الإنشاء
+  DateTime get displayTime => receivedAt ?? sentAt ?? createdAt;
+
+  CorrThreadMessage({
+    required this.id,
+    required this.refNumber,
+    required this.subject,
+    this.body,
+    required this.type,
+    required this.status,
+    this.senderName,
+    this.senderEmail,
+    this.sourceReplyId,
+    this.children = const [],
+    this.receivedAt,
+    this.sentAt,
+    required this.createdAt,
+    this.attachments = const [],
+  });
+
+  factory CorrThreadMessage.fromJson(Map<String, dynamic> json) =>
+      CorrThreadMessage(
+        id: json['id'] ?? '',
+        refNumber: json['refNumber'] ?? '',
+        subject: json['subject'] ?? '',
+        body: json['body'],
+        type: json['type'] ?? 'INCOMING',
+        status: json['status'] ?? '',
+        senderName: json['senderName'],
+        senderEmail: json['senderEmail'],
+        sourceReplyId: json['sourceReplyId'],
+        children: json['children'] is List
+            ? (json['children'] as List)
+                .map((e) => CorrThreadMessage.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
+            : const [],
+        receivedAt: json['receivedAt'] != null ? DateTime.tryParse(json['receivedAt']) : null,
+        sentAt: json['sentAt'] != null ? DateTime.tryParse(json['sentAt']) : null,
+        createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+        attachments: json['attachments'] is List
+            ? (json['attachments'] as List)
+                .map((a) => CorrAttachment.fromJson(Map<String, dynamic>.from(a)))
+                .toList()
+            : const [],
+      );
+}
+
 class CorrDetail {
   final String id;
   final String refNumber;
@@ -184,6 +288,8 @@ class CorrDetail {
   final DateTime? sentAt;
   final DateTime? closedAt;
   final DateTime createdAt;
+  final CorrThreadMessage? parent;
+  final List<CorrThreadMessage> children;
   final List<CorrReferral> referrals;
   final List<CorrTask> tasks;
   final List<CorrReply> replies;
@@ -207,6 +313,8 @@ class CorrDetail {
     this.sentAt,
     this.closedAt,
     required this.createdAt,
+    this.parent,
+    this.children = const [],
     required this.referrals,
     required this.tasks,
     required this.replies,
@@ -235,6 +343,14 @@ class CorrDetail {
       sentAt: json['sentAt'] != null ? DateTime.tryParse(json['sentAt']) : null,
       closedAt: json['closedAt'] != null ? DateTime.tryParse(json['closedAt']) : null,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      parent: json['parent'] is Map
+          ? CorrThreadMessage.fromJson(Map<String, dynamic>.from(json['parent']))
+          : null,
+      children: json['children'] is List
+          ? (json['children'] as List)
+              .map((e) => CorrThreadMessage.fromJson(Map<String, dynamic>.from(e)))
+              .toList()
+          : const [],
       referrals: parseList(json['referrals'], CorrReferral.fromJson),
       tasks: parseList(json['tasks'], CorrTask.fromJson),
       replies: parseList(json['replies'], CorrReply.fromJson),

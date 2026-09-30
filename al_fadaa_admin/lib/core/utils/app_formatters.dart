@@ -14,17 +14,18 @@ class AppFormatters {
   static final _shortDateFormat = DateFormat('MM/dd', 'ar');
   static final _apiDateFormat = DateFormat('yyyy-MM-dd');
 
-  /// السياسة الموحدة للأرقام: هندية-عربية (١٢٣) مطابقة للتواريخ
-  static final _numberFormat = NumberFormat('ar');
-
   /// تحويل الأرقام الغربية في أي نص إلى هندية-عربية
   static String arabicDigits(String input) => input.replaceAllMapped(
         RegExp(r'[0-9]'),
         (m) => const ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'][int.parse(m.group(0)!)],
       );
 
-  /// تنسيق أي رقم بعدد بالسياسة الموحدة
-  static String number(num value) => _numberFormat.format(value);
+  /// السياسة الموحدة للأرقام: هندية-عربية (١٢٣) مطابقة للتواريخ
+  /// التنبيه: الوسيط الموضعي في NumberFormat هو «النمط» وليس اللغة —
+  /// NumberFormat('ar') كان يطبع "ar" حرفيًا قبل الرقم (ar4) وdecimalPattern('ar')
+  /// يطبع أرقامًا غربية لأن بيانات intl للـar تستخدم ZERO_DIGIT='0'
+  /// فاعتمادنا المحوّل المحلي arabicDigits بلا اعتماد على بيانات لغة
+  static String number(num value) => arabicDigits(value.toString());
 
   /// تنسيق التاريخ والوقت معاً
   static String dateTime(DateTime dt) => _dateTimeFormat.format(dt.toLocal());

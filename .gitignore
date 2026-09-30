@@ -26,3 +26,6 @@ screenshots/
 
 # حالة أداة ZCode المحلية
 .zcode/
+
+# مجلد اختبار الواجهة المؤقت
+/tmp_ui_test/

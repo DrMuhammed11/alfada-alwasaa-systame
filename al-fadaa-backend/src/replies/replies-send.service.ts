@@ -186,6 +186,8 @@ export class RepliesSendService {
       outMessageId = `<${outRefNumber.toLowerCase()}.${Date.now()}@${mailDomain}>`;
 
       // سجل الصادر الرسمي المرتبط بالوارد مع ربط بنيوي بسجل الرد (sourceReplyId)
+      // يُعلَّق على جذر الخيط لا على الابن الذي صيغ منه الرد — وإلا اختفى من
+      // خيط المحادثة في كل التطبيقات (التفاصيل تجلب أبناء الجذر المباشرين فقط)
       const outCorr = await tx.correspondence.create({
         data: {
           refNumber: outRefNumber,
@@ -196,7 +198,7 @@ export class RepliesSendService {
           status: CorrespondenceStatus.SENT,
           senderName: 'شركة الفضاء الواسع',
           senderEmail: this.config.get<string>('MAIL_FROM') ?? 'info@al-fadaa.com',
-          parentId: corr.id,
+          parentId: rootCorr.id,
           createdById: user.id,
           departmentId: corr.departmentId,
           sentAt: now,
@@ -453,6 +455,7 @@ export class RepliesSendService {
       });
 
       // 2. إنشاء مراسلة فرعية صادرة برقم صادر رسمي مع ربط بنيوي بسجل الرد
+      // على جذر الخيط أيضًا — نفس سبب إصلاح المسار الأول
       const outCorr = await tx.correspondence.create({
         data: {
           refNumber: outRefNumber,
@@ -463,7 +466,7 @@ export class RepliesSendService {
           status: CorrespondenceStatus.SENT,
           senderName: 'شركة الفضاء الواسع',
           senderEmail: this.config.get<string>('MAIL_FROM') ?? 'info@al-fadaa.com',
-          parentId: corr.id,
+          parentId: rootCorr.id,
           createdById: user.id,
           departmentId: corr.departmentId,
           sentAt: now,

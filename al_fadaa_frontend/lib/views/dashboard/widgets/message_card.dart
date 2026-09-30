@@ -37,6 +37,7 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // أحداث النظام (تكليف/إنجاز/إحالة) — كبسولة مركزية بنمط دردشة واتساب
     if (msg['isSystemEvent'] == true) {
       final Color eventColor = (msg['eventColor'] as Color?) ?? AppTheme.textMuted;
       final String title = msg['title'] as String;
@@ -44,58 +45,79 @@ class MessageCard extends StatelessWidget {
       final String? description = msg['description'] as String?;
       final DateTime date = msg['date'] as DateTime;
 
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: eventColor.withAlpha(12),
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          border: Border.all(color: eventColor.withAlpha(60)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              title.contains('✅')
-                  ? Icons.check_circle_rounded
-                  : (title.contains('↪️')
-                      ? Icons.swap_horiz_rounded
-                      : Icons.assignment_rounded),
-              color: eventColor,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          constraints: const BoxConstraints(maxWidth: 520),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(color: eventColor.withAlpha(60)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(6),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: AppTheme.fontBase, fontWeight: FontWeight.bold, color: eventColor),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: eventColor.withAlpha(15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      title.contains('✅')
+                          ? Icons.check_circle_rounded
+                          : (title.contains('↪️')
+                              ? Icons.swap_horiz_rounded
+                              : Icons.assignment_rounded),
+                      color: eventColor,
+                      size: 14,
+                    ),
                   ),
-                  if (subtitle != null && subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                          fontSize: AppTheme.fontSm,
+                          fontWeight: FontWeight.bold,
+                          color: eventColor),
                     ),
-                  ],
-                  if (description != null && description.trim().isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      description.trim(),
-                      style: const TextStyle(fontSize: AppTheme.fontSm, color: AppTheme.secondary, height: 1.35),
-                    ),
-                  ],
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              AppDateFormatter.formatListDate(date),
-              style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
-            ),
-          ],
+              if (subtitle != null && subtitle.isNotEmpty) ...[
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
+                ),
+              ],
+              if (description != null && description.trim().isNotEmpty) ...[
+                const SizedBox(height: 3),
+                Text(
+                  description.trim(),
+                  style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.secondary, height: 1.4),
+                ),
+              ],
+              const SizedBox(height: 3),
+              Text(
+                AppDateFormatter.formatListDate(date),
+                style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -110,245 +132,225 @@ class MessageCard extends StatelessWidget {
     final ReplyItem? replyItem = msg['replyItem'] as ReplyItem?;
     final List<AttachmentItem> attachments =
         (msg['attachments'] as List<AttachmentItem>?) ?? [];
+    final String? corrStatus = msg['corrStatus'] as String?;
+
+    // الصادرة المرسلة فعلاً للعميل تأخذ علامة الإرسال المزدوجة
+    final bool sentToClient = !isClient && !isDraft &&
+        (corrStatus == 'SENT' ||
+            replyItem?.status == 'SENT' ||
+            replyItem?.isApproved == true);
 
     final canApprove = role == 'GM' || role == 'DEPUTY_GM' || role == 'DEPT_MANAGER' || role == 'ADMIN';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: isDraft
-            ? AppTheme.amber.withAlpha(12)
-            : (isClient ? Colors.white : AppTheme.backgroundLight),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(
-          color: isDraft
-              ? AppTheme.amber.withAlpha(50)
-              : AppTheme.borderLight,
-          width: isClient ? 1.2 : 1.0,
-        ),
-        boxShadow: isClient
-            ? [
-                BoxShadow(
-                  color: AppTheme.accent.withAlpha(8),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                )
-              ]
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // رأس الرسالة (Sender Bar)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDraft
-                  ? AppTheme.amber.withAlpha(20)
-                  : (isClient ? AppTheme.accent.withAlpha(15) : AppTheme.backgroundLight),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: isDraft ? AppTheme.amber.withAlpha(50) : AppTheme.borderLight,
-                ),
-              ),
+    // اتجاه الفقاعة: الواردة من العميل عند بداية السطر (يمين في RTL)
+    // وردود الشركة ومسوداتها الداخلية عند نهايته (يسار في RTL)
+    final Color bubbleColor = isClient
+        ? Colors.white
+        : (isDraft ? AppTheme.surfaceWarning : AppTheme.surfaceInfo);
+    final Color bubbleBorder = isClient
+        ? AppTheme.borderLight
+        : (isDraft ? AppTheme.borderWarning : AppTheme.info.withAlpha(60));
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Align(
+        alignment:
+            isClient ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 640),
+          decoration: BoxDecoration(
+            color: bubbleColor,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(AppTheme.radiusLg),
+              topRight: const Radius.circular(AppTheme.radiusLg),
+              bottomLeft: Radius.circular(isClient ? AppTheme.radiusXs : AppTheme.radiusLg),
+              bottomRight: Radius.circular(isClient ? AppTheme.radiusLg : AppTheme.radiusXs),
             ),
-            child: Row(
-              children: [
-                // أفاتار المرسل
-                CircleAvatar(
-                  radius: 17,
-                  backgroundColor: isClient
-                      ? AppTheme.accent.withAlpha(25)
-                      : (isDraft ? AppTheme.amber.withAlpha(25) : AppTheme.emerald.withAlpha(25)),
-                  child: Icon(
-                    isClient ? Icons.person_rounded : (isDraft ? Icons.edit_note_rounded : Icons.business_rounded),
-                    size: 16,
-                    color: isClient
-                        ? AppTheme.accent
-                        : (isDraft ? AppTheme.amber : AppTheme.emerald),
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                // اسم المرسل والبريد والشارة
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              senderName,
-                              style: const TextStyle(
-                                fontSize: AppTheme.fontBase,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // شارة نوع الرسالة
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withAlpha(25),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                              border: Border.all(color: badgeColor.withAlpha(60), width: 0.8),
-                            ),
-                            child: Text(
-                              msg['badge'] as String,
-                              style: TextStyle(
-                                fontSize: AppTheme.fontXs,
-                                fontWeight: FontWeight.bold,
-                                color: badgeColor,
-                              ),
-                            ),
-                          ),
-                          // شارة الإصدار إن وُجدت
-                          if (replyItem != null) ...[
-                            const SizedBox(width: 6),
-                            InkWell(
-                              onTap: () => showDialog(
-                                context: context,
-                                builder: (_) => ReplyVersionsDialog(reply: replyItem),
-                              ),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.purple.withAlpha(20),
-                                  borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                                  border: Border.all(color: AppTheme.purple.withAlpha(80)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.history_rounded, size: 11, color: AppTheme.purple),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      'v${replyItem.version}',
-                                      style: const TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.purple),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          // شارة الوكالة إن كانت المعاملة قد اعتُمدت بتفويض
-                          if (replyItem != null &&
-                              replyItem.approvalSteps.any((s) => s.decidedBy != null && s.decidedBy?.role != s.requiredRole)) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppTheme.amber.withAlpha(20),
-                                borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                                border: Border.all(color: AppTheme.amber.withAlpha(60)),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.supervised_user_circle_outlined, size: 11, color: AppTheme.amber),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    'وكالة',
-                                    style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.amber),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (senderEmail != null && senderEmail.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          senderEmail,
-                          style: const TextStyle(fontSize: AppTheme.fontXs, color: AppTheme.textMuted),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-
-                // التوقيت الفعلي
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(200),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                    border: Border.all(color: AppTheme.borderLight),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.access_time_rounded, size: 12, color: AppTheme.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        AppDateFormatter.formatFullDateTime(date),
-                        style: const TextStyle(
-                          fontSize: AppTheme.fontXs,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.secondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // زر النسخ
-                IconButton(
-                  icon: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.textOnLight),
-                  tooltip: 'نسخ نص الرسالة',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: body));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم نسخ نص الرسالة')),
-                    );
-                  },
-                ),
-              ],
-            ),
+            border: Border.all(color: bubbleBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(6),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-
-          // نص الرسالة الفعلي المنظم مع كشف رسائل إعادة التوجيه
-          _ForwardedEmailBlock(body: body),
-
-          // قائمة المرفقات
-          if (attachments.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: AttachmentsPreview(
-                attachments: attachments,
-                downloadingAttachmentIds: downloadingAttachmentIds,
-                onDownloadAttachment: onDownloadAttachment,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // رأس الفقاعة: المرسل + شارات الحالة
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    Icon(
+                      isClient ? Icons.south_west_rounded : Icons.north_east_rounded,
+                      size: 13,
+                      color: isDraft ? AppTheme.amber : badgeColor,
+                    ),
+                    Text(
+                      senderName,
+                      style: TextStyle(
+                        fontSize: AppTheme.fontSm,
+                        fontWeight: FontWeight.bold,
+                        color: isDraft ? AppTheme.amber : badgeColor,
+                      ),
+                    ),
+                    if (senderEmail != null && senderEmail.isNotEmpty && isClient)
+                      Text(
+                        senderEmail,
+                        style: const TextStyle(
+                            fontSize: AppTheme.fontXs, color: AppTheme.textTertiary),
+                      ),
+                    // شارة نوع الرسالة (للمسودات والردود المرسلة فقط — الواردة واضحة بذاتها)
+                    if (isDraft || replyItem != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withAlpha(25),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                          border: Border.all(color: badgeColor.withAlpha(60), width: 0.8),
+                        ),
+                        child: Text(
+                          msg['badge'] as String,
+                          style: TextStyle(
+                            fontSize: AppTheme.fontXs,
+                            fontWeight: FontWeight.bold,
+                            color: badgeColor,
+                          ),
+                        ),
+                      ),
+                    // شارة الإصدار إن وُجدت
+                    if (replyItem != null)
+                      InkWell(
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (_) => ReplyVersionsDialog(reply: replyItem),
+                        ),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.purple.withAlpha(20),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                            border: Border.all(color: AppTheme.purple.withAlpha(80)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.history_rounded, size: 11, color: AppTheme.purple),
+                              const SizedBox(width: 3),
+                              Text(
+                                'v${replyItem.version}',
+                                style: const TextStyle(
+                                    fontSize: AppTheme.fontXs,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.purple),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    // شارة الوكالة إن كانت المعاملة قد اعتُمدت بتفويض
+                    if (replyItem != null &&
+                        replyItem.approvalSteps
+                            .any((s) => s.decidedBy != null && s.decidedBy?.role != s.requiredRole))
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.amber.withAlpha(20),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXs),
+                          border: Border.all(color: AppTheme.amber.withAlpha(60)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.supervised_user_circle_outlined, size: 11, color: AppTheme.amber),
+                            SizedBox(width: 3),
+                            Text(
+                              'وكالة',
+                              style: TextStyle(fontSize: AppTheme.fontXs, fontWeight: FontWeight.bold, color: AppTheme.amber),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
 
-          // شريط أزرار اتخاذ القرار الخاصة بالمسودات
-          if (replyItem != null)
-            DraftActionBar(
-              replyItem: replyItem,
-              currentUserId: currentUserId,
-              role: role,
-              canApprove: canApprove,
-              onEditDraft: onEditDraft,
-              onSubmitReply: onSubmitReply,
-              onApproveReply: onApproveReply,
-              onRejectReply: onRejectReply,
-              onSendReply: onSendReply,
-            ),
-        ],
+              // نص الرسالة الفعلي المنظم مع كشف رسائل إعادة التوجيه
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: _ForwardedEmailBlock(body: body),
+              ),
+
+              // قائمة المرفقات
+              if (attachments.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+                  child: AttachmentsPreview(
+                    attachments: attachments,
+                    downloadingAttachmentIds: downloadingAttachmentIds,
+                    onDownloadAttachment: onDownloadAttachment,
+                  ),
+                ),
+
+              // شريط أزرار اتخاذ القرار الخاصة بالمسودات
+              if (replyItem != null)
+                DraftActionBar(
+                  replyItem: replyItem,
+                  currentUserId: currentUserId,
+                  role: role,
+                  canApprove: canApprove,
+                  onEditDraft: onEditDraft,
+                  onSubmitReply: onSubmitReply,
+                  onApproveReply: onApproveReply,
+                  onRejectReply: onRejectReply,
+                  onSendReply: onSendReply,
+                ),
+
+              // تذييل الفقاعة: الوقت + علامة الإرسال + نسخ النص
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 2, 8, 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppDateFormatter.formatFullDateTime(date),
+                      style: const TextStyle(
+                        fontSize: AppTheme.fontXs,
+                        color: AppTheme.textTertiary,
+                      ),
+                    ),
+                    if (sentToClient) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.done_all_rounded,
+                          size: 14, color: AppTheme.info),
+                    ],
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.copy_rounded,
+                          size: 14, color: AppTheme.textTertiary),
+                      tooltip: 'نسخ نص الرسالة',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: body));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم نسخ نص الرسالة')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

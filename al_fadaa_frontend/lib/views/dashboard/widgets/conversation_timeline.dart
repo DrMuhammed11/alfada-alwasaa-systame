@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_date_formatter.dart';
 import '../../../models/correspondence_model.dart';
 import 'email_composer.dart';
 import 'message_card.dart';
@@ -74,31 +75,39 @@ class ConversationTimeline extends StatelessWidget {
       'attachments': item.attachments.where((a) => a.replyId == null).toList(),
     });
 
-    // ب) الرسائل الفرعية التابعة لنفس الموضوع (رسائل بريد تابعة واردة من العميل)
+    // ب) الرسائل الفرعية التابعة لنفس الموضوع — واردة من العميل أو صادرة مرسلة له.
+    // كل الأبناء تُعرض: الصادر المرسل له مصدر رد (sourceReplyId) هو نفسه
+    // الرسالة التي وصلت العميل فروعده هنا يمنع اختفاء الردود المرسلة،
+    // بينما يُستثنى سجل الرد الداخلي المطابق لاحقًا بمنع التكرار.
     for (final child in item.children) {
-      // إذا كانت المراسلة الفرعية ناتجة عن رد مرسل، فهي ممثلة بالفعل ضمن replies
-      if (child.sourceReplyId != null) continue;
+      _addCorrMessage(messages, child,
+          rootSenderName: item.senderName,
+          nonClientBadge: 'رد مرسل للعميل بالبريد');
+    }
 
-      final isChildClient = child.type == 'INCOMING';
-      messages.add({
-        'id': child.id,
-        'isRoot': false,
-        'isClient': isChildClient,
-        'type': isChildClient ? 'CHILD_EMAIL' : child.type,
-        'senderName': (child.senderName != null && child.senderName!.trim().isNotEmpty)
-            ? child.senderName!
-            : (item.senderName ?? 'العميل (رد إضافي)'),
-        'senderEmail': child.senderEmail ?? item.senderEmail,
-        'date': child.receivedAt ?? child.createdAt,
-        'body': (child.body != null && child.body!.trim().isNotEmpty) ? child.body! : 'لا يوجد نص',
-        'badge': isChildClient ? 'رسالة إضافية من العميل' : 'رسالة فرعية تابعة',
-        'badgeColor': isChildClient ? AppTheme.info : AppTheme.emerald,
-        'attachments': child.attachments,
-      });
+    // ب-2) أحفاد الجذر: ردود صادرة قديمة أُلصقت تحت ابن قبل توحيد التعليق
+    // على الجذر في الخادم — بدون هذا المشي تختفي عن الخيط بعد جلسة جديدة
+    for (final child in item.children) {
+      for (final grand in child.children) {
+        _addCorrMessage(messages, grand,
+            rootSenderName: item.senderName,
+            nonClientBadge: 'رد مرسل للعميل بالبريد');
+      }
     }
 
     // ج) ردود ومسودات موظفي الشركة (مسودات داخلية أو معتمدة أو مرسلة)
+    // الرد الذي وُلِّد منه بريد صادر فعلي (sourceReplyId) يظهر أصلاً كفقاعة
+    // صادرة ضمن الأبناء فنُخفي نسخته هنا منعًا للتكرار
+    final sentReplyIds = {
+      for (final c in item.children) ...[
+        if (c.sourceReplyId != null) c.sourceReplyId!,
+        for (final g in c.children)
+          if (g.sourceReplyId != null) g.sourceReplyId!,
+      ],
+    };
     for (final reply in item.replies) {
+      if (sentReplyIds.contains(reply.id)) continue;
+
       final bool canView = role == 'ADMIN' ||
           role == 'GM' ||
           role == 'DEPUTY_GM' ||
@@ -202,23 +211,35 @@ class ConversationTimeline extends StatelessWidget {
     // فرز الرسائل ترتيباً زمنياً تصاعدياً (من الأقدم إلى الأحدث مثل واتساب وبريد Gmail)
     messages.sort((a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
 
+    // فواصل الأيام بنمط الدردشة — بين كل مجموعة رسائل من يوم مختلف
+    final List<Widget> timelineWidgets = [];
+    DateTime? lastDay;
+    for (final msg in messages) {
+      final msgDate = msg['date'] as DateTime;
+      final day = DateTime(msgDate.year, msgDate.month, msgDate.day);
+      if (lastDay == null || day != lastDay) {
+        timelineWidgets.add(_DaySeparator(date: msgDate));
+        lastDay = day;
+      }
+      timelineWidgets.add(MessageCard(
+        msg: msg,
+        item: item,
+        currentUserId: currentUserId,
+        role: role,
+        downloadingAttachmentIds: downloadingAttachmentIds,
+        onEditDraft: onEditDraft,
+        onSubmitReply: onSubmitReply,
+        onApproveReply: onApproveReply,
+        onRejectReply: onRejectReply,
+        onSendReply: onSendReply,
+        onDownloadAttachment: onDownloadAttachment,
+      ));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // بطاقات الرسائل المتتالية
-        ...messages.map((msg) => MessageCard(
-              msg: msg,
-              item: item,
-              currentUserId: currentUserId,
-              role: role,
-              downloadingAttachmentIds: downloadingAttachmentIds,
-              onEditDraft: onEditDraft,
-              onSubmitReply: onSubmitReply,
-              onApproveReply: onApproveReply,
-              onRejectReply: onRejectReply,
-              onSendReply: onSendReply,
-              onDownloadAttachment: onDownloadAttachment,
-            )),
+        ...timelineWidgets,
 
         const SizedBox(height: 14),
 
@@ -238,6 +259,79 @@ class ConversationTimeline extends StatelessWidget {
           onRemoveFile: onRemoveFile,
         ),
       ],
+    );
+  }
+
+  /// إضافة مراسلة (ابن أو حفيد) كرسالة دردشة موحدة — الواردة من العميل
+  /// والصادرة المرسلة إليه على حد سواء، فكلاهما جزء من محادثة واحدة
+  void _addCorrMessage(
+    List<Map<String, dynamic>> messages,
+    Correspondence corr, {
+    String? rootSenderName,
+    required String nonClientBadge,
+  }) {
+    final isClient = corr.type == 'INCOMING';
+    messages.add({
+      'id': corr.id,
+      'isRoot': false,
+      'isClient': isClient,
+      'type': isClient ? 'CHILD_EMAIL' : corr.type,
+      'senderName': (corr.senderName != null && corr.senderName!.trim().isNotEmpty)
+          ? corr.senderName!
+          : (isClient ? (rootSenderName ?? 'العميل (رد إضافي)') : 'شركة الفضاء الواسع'),
+      'senderEmail': corr.senderEmail,
+      'date': corr.receivedAt ?? corr.sentAt ?? corr.createdAt,
+      'body': (corr.body != null && corr.body!.trim().isNotEmpty) ? corr.body! : 'لا يوجد نص',
+      'badge': isClient ? 'رسالة إضافية من العميل' : nonClientBadge,
+      'badgeColor': isClient ? AppTheme.info : AppTheme.emerald,
+      'attachments': corr.attachments,
+      'corrStatus': corr.status,
+    });
+  }
+}
+
+/// فاصل يوم داخل الخط الزمني — كبسولة مركزية بنمط واتساب
+class _DaySeparator extends StatelessWidget {
+  final DateTime date;
+  const _DaySeparator({required this.date});
+
+  String _label(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(d.year, d.month, d.day);
+    final diff = today.difference(day).inDays;
+    if (diff == 0) return 'اليوم';
+    if (diff == 1) return 'أمس';
+    return AppDateFormatter.formatListDate(d);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          border: Border.all(color: AppTheme.borderLight),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(6),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          _label(date),
+          style: const TextStyle(
+            fontSize: AppTheme.fontXs,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textMuted,
+          ),
+        ),
+      ),
     );
   }
 }

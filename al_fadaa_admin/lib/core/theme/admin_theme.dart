@@ -25,6 +25,10 @@ class AdminTheme {
   static const Color textLight    = Color(0xFF94A3B8);
   static const Color surface2     = Color(0xFFF1F5F9);
 
+  // ─── خلفية شاشة الدردشة (نمط المراسلات كمحادثات) ───
+  // أدكن قليلاً من bgLight لتبرز فقاعات الرسائل البيضاء والزرقاء
+  static const Color chatBg       = Color(0xFFE7EDF3);
+
   // ─── أسطح وحدود الشارات الدلالية ───
   static const Color surfaceSuccess = Color(0xFFECFDF5);
   static const Color borderSuccess  = Color(0xFFA7F3D0);
