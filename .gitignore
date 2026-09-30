@@ -29,3 +29,8 @@ screenshots/
 
 # مجلد اختبار الواجهة المؤقت
 /tmp_ui_test/
+
+# مخلفات فحص الموقع الحي
+/chunks*.txt
+/dep2.html
+/live*.html
