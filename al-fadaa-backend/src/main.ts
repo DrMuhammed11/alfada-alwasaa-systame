@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
+import { attach, enableTelemetry } from './vendor/boosthis-kit';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
 import { AppLogger } from './common/logger/app-logger';
@@ -20,6 +21,17 @@ process.on('unhandledRejection', (reason: unknown) => {
   const asError = reason instanceof Error ? reason : new Error(String(reason));
   console.error('════════ [FATAL] unhandledRejection ════════\n', asError.stack ?? String(reason));
   if (isProdProcess) process.exit(1);
+});
+
+// ═══ قياس الأداء Boosthis — يجب أن يعمل قبل إنشاء الخادم ليطال كل طلب ═══
+// المفتاح من البيئة BOOSTHIS_INVITE_KEY (ملف .env، غير مرفوع للمستودع)؛
+// غيابه يبقي القياس محلياً بلا تسجيل بعيد.
+attach();
+enableTelemetry({
+  installId: 'e7f7f17e-f2e5-4b1f-8a61-b337ec38e890',
+  inviteKey: process.env.BOOSTHIS_INVITE_KEY,
+  endpoint: 'https://www.boosthis.com/api',
+  appName: 'al-fadaa-backend',
 });
 
 async function bootstrap(): Promise<void> {

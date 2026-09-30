@@ -46,6 +46,11 @@ dependencies:
   connectivity_plus: ^7.3.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  # قياس الأداء Boosthis — حزمتان محليتان من الكيت (لا تنزيل من الإنترنت)
+  boosthis:
+    path: packages/boosthis-flutter/boosthis
+  boosthis_flutter:
+    path: packages/boosthis-flutter/boosthis_flutter
 
 dev_dependencies:
   flutter_test:

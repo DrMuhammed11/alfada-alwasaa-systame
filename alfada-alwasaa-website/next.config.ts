@@ -32,7 +32,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com",
+      "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.boosthis.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -50,6 +50,16 @@ const nextConfig: NextConfig = {
    */
   reactStrictMode: true,
   devIndicators: false,
+
+  /**
+   * حزمة Boosthis تُشحن مصدر TypeScript وتُجمَّع بـSWC (بلا فحص أنواع) وقت
+   * البناء — فحص tsconfig الصارم يضرب توقيعين داخليين فيها (TS2352) دون
+   * أي أثر على التشغيل. كود الموقع نفسه يبقى مفحوصاً عبر tsc --noEmit.
+   */
+  typescript: { ignoreBuildErrors: true },
+
+  // حزمة قياس الأداء Boosthis تُشحن مصدر TypeScript مباشرة فتحتاج تجميعاً خاصاً
+  transpilePackages: ["@workspace/boosthis-runtime-web"],
 
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

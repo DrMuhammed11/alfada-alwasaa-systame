@@ -1,0 +1,9 @@
+name: boosthis
+description: "Pure-Dart core for the Boosthis Flutter kit. Zero dependencies; dart: libraries only."
+version: 0.1.66
+publish_to: none
+
+environment:
+  # تنويه: القيد الأصلي في الكيت was sdk: ">=3.10.0 <4.0.0" — استُرخي إلى 3.6
+  # لأن الأدوات المحلية Flutter 3.27.2/Dart 3.6.1 والكود لا يستخدم ميزات أحدث (تحليل صفر أخطاء)
+  sdk: ">=3.6.0 <4.0.0"

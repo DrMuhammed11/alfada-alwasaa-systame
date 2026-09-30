@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:boosthis_flutter/boosthis_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/network/api_service.dart';
@@ -28,12 +29,14 @@ class AppScrollBehavior extends MaterialScrollBehavior {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // قياس الأداء Boosthis — الهوية ثابتة لكل هذا التثبيت ولا تتغير
+  BoosthisFlutter.start(installId: '2cabc6ef-788b-4ee7-acd3-0568812deac5');
   try {
     await ApiService().init();
   } catch (e) {
     debugPrint('ApiService init error: $e');
   }
-  runApp(const AlFadaaApp());
+  BoosthisFlutter.run(() => runApp(const AlFadaaApp()));
 }
 
 class AlFadaaApp extends StatefulWidget {

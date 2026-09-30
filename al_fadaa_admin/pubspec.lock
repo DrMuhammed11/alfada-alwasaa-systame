@@ -17,6 +17,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  boosthis:
+    dependency: "direct main"
+    description:
+      path: "packages/boosthis-flutter/boosthis"
+      relative: true
+    source: path
+    version: "0.1.66"
+  boosthis_flutter:
+    dependency: "direct main"
+    description:
+      path: "packages/boosthis-flutter/boosthis_flutter"
+      relative: true
+    source: path
+    version: "0.1.66"
   characters:
     dependency: transitive
     description:

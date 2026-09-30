@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CookieConsent } from "@/components/site/cookie-consent";
 import { SkipLink } from "@/components/site/skip-link";
+import BoosthisAnalytics from "@/components/site/boosthis-analytics";
 import { SITE_CONFIG } from "@/config/site";
 
 export const viewport: Viewport = {
@@ -287,6 +288,8 @@ export default async function RootLayout({
       >
         {/* رابط تجاوز المحتوى للوصولية — يظهر عند التركيز بلوحة المفاتيح فقط (يتبع لغة الصفحة) */}
         <SkipLink />
+        {/* قياس الأداء Boosthis — مكوّن بلا واجهة يفعّل Web Vitals في المتصفح */}
+        <BoosthisAnalytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

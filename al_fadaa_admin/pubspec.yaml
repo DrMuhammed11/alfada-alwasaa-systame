@@ -40,6 +40,11 @@ dependencies:
   shared_preferences: ^2.2.2
   file_selector: ^1.0.3
   fl_chart: ^0.69.0
+  # قياس الأداء Boosthis — حزمتان محليتان من الكيت (لا تنزيل من الإنترنت)
+  boosthis:
+    path: packages/boosthis-flutter/boosthis
+  boosthis_flutter:
+    path: packages/boosthis-flutter/boosthis_flutter
 
 dev_dependencies:
   flutter_test:

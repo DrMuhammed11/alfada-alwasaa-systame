@@ -1,3 +1,4 @@
+import 'package:boosthis_flutter/boosthis_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/network/session_manager.dart';
@@ -7,8 +8,10 @@ import 'views/dashboard/admin_main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // قياس الأداء Boosthis — الهوية ثابتة لكل هذا التثبيت ولا تتغير
+  BoosthisFlutter.start(installId: '9b2fa877-a815-4f06-b1f0-a304d217f029');
   await SessionManager().init();
-  runApp(const AlFadaaAdminApp());
+  BoosthisFlutter.run(() => runApp(const AlFadaaAdminApp()));
 }
 
 class AlFadaaAdminApp extends StatelessWidget {

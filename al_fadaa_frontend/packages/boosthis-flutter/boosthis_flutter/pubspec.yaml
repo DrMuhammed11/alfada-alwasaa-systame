@@ -1,0 +1,34 @@
+# Boosthis Flutter adapter package.
+#
+# This is the ONLY package in the Boosthis Flutter kit that is allowed to
+# import `package:flutter`. It is a thin, mechanical translation layer: it turns
+# Flutter engine callbacks (frame timings, error handlers, lifecycle, image
+# cache) into plain-Dart calls on the pure `boosthis` package, which carries all
+# meter math. No meter arithmetic lives here.
+#
+# NOTE: this package REQUIRES a Flutter SDK to compile and is deliberately NOT
+# compiled, analysed or spawned by the meter-parity harness in this workspace
+# (which has the Dart SDK only). See ../PORT_CONTRACT.md.
+name: boosthis_flutter
+description: >-
+  Flutter adapter for Boosthis — honest performance, crash and device meters for
+  Flutter apps. Thin binding layer over the pure-Dart `boosthis` package.
+version: 0.1.66
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The pure-Dart engine. All meter math, state, wire and MCP logic lives here.
+  boosthis:
+    path: ../boosthis
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
