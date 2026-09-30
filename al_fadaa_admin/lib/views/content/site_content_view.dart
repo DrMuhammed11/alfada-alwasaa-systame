@@ -23,28 +23,40 @@ class SiteContentView extends StatelessWidget {
             Container(
               color: Colors.white,
               padding: const EdgeInsets.only(top: 12),
-              child: Row(
+              // العنوان في سطر والتبويبات في سطر كامل العرض — جمعُهما في صف
+              // واحد كان يجعل العنوان الطويل يلتهم العرض فيختفي أربعة تبويبات
+              // على شاشات الهاتف
+              child: Column(
                 children: [
-                  const SizedBox(width: 16),
-                  const Icon(Icons.web_rounded, color: AdminTheme.accent, size: 22),
-                  const SizedBox(width: 8),
-                  const Text('إدارة محتويات الموقع الإلكتروني', style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg)),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: TabBar(
-                      isScrollable: true,
-                      labelColor: AdminTheme.primary,
-                      unselectedLabelColor: AdminTheme.textMuted,
-                      indicatorColor: AdminTheme.primary,
-                      labelStyle: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold),
-                      tabs: const [
-                        Tab(icon: Icon(Icons.miscellaneous_services_rounded, size: 16), text: 'الخدمات'),
-                        Tab(icon: Icon(Icons.domain_rounded, size: 16), text: 'القطاعات'),
-                        Tab(icon: Icon(Icons.emoji_events_rounded, size: 16), text: 'سابقة الأعمال'),
-                        Tab(icon: Icon(Icons.quiz_rounded, size: 16), text: 'الأسئلة الشائعة'),
-                        Tab(icon: Icon(Icons.tune_rounded, size: 16), text: 'إعدادات عامة'),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      const Icon(Icons.web_rounded, color: AdminTheme.accent, size: 22),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'إدارة محتويات الموقع الإلكتروني',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontLg),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ),
+                  TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    labelColor: AdminTheme.primary,
+                    unselectedLabelColor: AdminTheme.textMuted,
+                    indicatorColor: AdminTheme.primary,
+                    labelStyle: const TextStyle(fontSize: AdminTheme.fontBase, fontWeight: FontWeight.bold),
+                    tabs: const [
+                      Tab(icon: Icon(Icons.miscellaneous_services_rounded, size: 16), text: 'الخدمات'),
+                      Tab(icon: Icon(Icons.domain_rounded, size: 16), text: 'القطاعات'),
+                      Tab(icon: Icon(Icons.emoji_events_rounded, size: 16), text: 'سابقة الأعمال'),
+                      Tab(icon: Icon(Icons.quiz_rounded, size: 16), text: 'الأسئلة الشائعة'),
+                      Tab(icon: Icon(Icons.tune_rounded, size: 16), text: 'إعدادات عامة'),
+                    ],
                   ),
                 ],
               ),
@@ -480,6 +492,7 @@ class _ServicesTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -490,9 +503,18 @@ class _ServicesTab extends StatelessWidget {
                     child: Text(s.slug, style: const TextStyle(fontFamily: 'monospace', fontSize: AdminTheme.fontXs, fontWeight: FontWeight.bold, color: AdminTheme.textMuted)),
                   ),
                   const SizedBox(width: 8),
-                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
-                  const SizedBox(width: 6),
-                  Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted)),
+                  // العنوانان محصوران في المساحة المتبقية — كانت غير محددة
+                  // العرض فتفيضان فوق أزرار التحكم المثبتة أعلى البطاقة
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        if (s.titleEn.isNotEmpty)
+                          Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
                   const SizedBox(width: 120),
                 ],
               ),
@@ -623,10 +645,20 @@ class _SectorsTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
-                  const SizedBox(width: 6),
-                  Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted)),
+                  // العنوانان محصوران — كانا غير محددي العرض ففيضانا فوق
+                  // أزرار التحكم المثبتة أعلى البطاقة
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        if (s.titleEn.isNotEmpty)
+                          Text(s.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
                   const SizedBox(width: 120),
                 ],
               ),
@@ -728,20 +760,38 @@ class _ProjectsTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // العنوانان متراصان ومحصوران، ومساحة أزرار التحكم محفوظة يساراً
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (p.tagAr != null && p.tagAr!.isNotEmpty) ...[
-                    _metaChip(p.tagAr!),
-                    const SizedBox(width: 8),
-                  ],
                   Expanded(
-                    child: Text(p.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(p.titleAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: AdminTheme.fontMd, color: AdminTheme.textHeading), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        if (p.titleEn.isNotEmpty)
+                          Text(p.titleEn, style: const TextStyle(fontSize: AdminTheme.fontSm, color: AdminTheme.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: 100),
                 ],
               ),
+              // شارة التصنيف تحت العنوان مباشرة بلون مميز بدل طفوها وسط البطاقة
+              if (p.tagAr != null && p.tagAr!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AdminTheme.accent.withAlpha(18),
+                    borderRadius: BorderRadius.circular(AdminTheme.radiusXs),
+                    border: Border.all(color: AdminTheme.accent.withAlpha(70)),
+                  ),
+                  child: Text(p.tagAr!, style: const TextStyle(fontSize: AdminTheme.fontXs, fontWeight: FontWeight.bold, color: AdminTheme.accent)),
+                ),
+              ],
               if (p.scopeAr != null && p.scopeAr!.isNotEmpty) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(p.scopeAr!, style: const TextStyle(fontSize: AdminTheme.fontBase, color: AdminTheme.textMuted), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               const SizedBox(height: 6),
