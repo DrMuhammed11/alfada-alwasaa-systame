@@ -14,7 +14,7 @@ import {
   ReplyStatus,
   AuditAction,
 } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();

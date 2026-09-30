@@ -2,7 +2,7 @@
 // (كلمة المرور الأصلية وُلّدت عشوائيًا عند زرع القاعدة ولم تُحفظ)
 require('dotenv').config();
 const { Client } = require('pg');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 (async () => {
   const c = new Client({ connectionString: process.env.DATABASE_URL });

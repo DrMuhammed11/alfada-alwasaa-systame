@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AuditAction } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { randomBytes, createHash } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -88,18 +88,20 @@ export class AuthService {
       departmentId: user.departmentId,
     });
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    await this.audit.log({
-      action: AuditAction.LOGIN,
-      userId: user.id,
-      entityType: 'User',
-      entityId: user.id,
-      summary: `تسجيل دخول: ${user.name} (${user.email})`,
-    });
+    // الكتابتان مستقلتان عن بعضهما — بالتوازي بدل تسلسل يطيل زمن الرد
+    await Promise.all([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      }),
+      this.audit.log({
+        action: AuditAction.LOGIN,
+        userId: user.id,
+        entityType: 'User',
+        entityId: user.id,
+        summary: `تسجيل دخول: ${user.name} (${user.email})`,
+      }),
+    ]);
 
     const { passwordHash: _hash, ...safeUser } = user;
     return { accessToken, user: safeUser as SafeUser };
@@ -124,20 +126,21 @@ export class AuthService {
       { expiresIn: accessExpiresIn },
     );
 
-    const refreshToken = await this.generateRefreshToken(user.id, meta);
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    await this.audit.log({
-      action: AuditAction.LOGIN,
-      userId: user.id,
-      entityType: 'User',
-      entityId: user.id,
-      summary: `تسجيل دخول (مع رمز التحديث): ${user.name} (${user.email})`,
-    });
+    // الكتابات الثلاث مستقلة عن بعضها — بالتوازي بدل تسلسل يطيل زمن الرد
+    const [refreshToken] = await Promise.all([
+      this.generateRefreshToken(user.id, meta),
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      }),
+      this.audit.log({
+        action: AuditAction.LOGIN,
+        userId: user.id,
+        entityType: 'User',
+        entityId: user.id,
+        summary: `تسجيل دخول (مع رمز التحديث): ${user.name} (${user.email})`,
+      }),
+    ]);
 
     const { passwordHash: _hash, ...safeUser } = user;
     return { accessToken, refreshToken, user: safeUser as SafeUser };

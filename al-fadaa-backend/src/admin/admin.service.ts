@@ -263,31 +263,19 @@ export class AdminService {
       ...(dto.departmentId ? { departmentId: dto.departmentId } : {}),
     };
 
-    // 1. التلخيص العام للمراسلات والأولويات
-    const [
-      total,
-      incoming,
-      outgoing,
-      internal,
-      closed,
-      archived,
-      urgentCount,
-      highCount,
-      normalCount,
-      lowCount,
-      allCorrespondences,
-      departments,
-    ] = await Promise.all([
-      this.prisma.correspondence.count({ where: baseWhere }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.INCOMING } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.OUTGOING } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, type: CorrespondenceType.INTERNAL } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, status: CorrespondenceStatus.CLOSED } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, status: CorrespondenceStatus.ARCHIVED } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.URGENT } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.HIGH } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.NORMAL } }),
-      this.prisma.correspondence.count({ where: { ...baseWhere, priority: Priority.LOW } }),
+    // 1+2+3: دفعة استعلامات واحدة — تجميع واحد بدل عشرة عدّادات متوازية،
+    // والمهام ضمن نفس الدفعة بدل دفعة ثانية متسلسلة
+    const taskWhere: Prisma.TaskWhereInput = {
+      ...(dateFilter ? { createdAt: dateFilter } : {}),
+      ...(dto.departmentId ? { correspondence: { departmentId: dto.departmentId } } : {}),
+    };
+
+    const [corrGroups, allCorrespondences, departments, tasks] = await Promise.all([
+      this.prisma.correspondence.groupBy({
+        by: ['type', 'status', 'priority'],
+        _count: { _all: true },
+        where: baseWhere,
+      }),
       this.prisma.correspondence.findMany({
         where: baseWhere,
         select: {
@@ -301,24 +289,32 @@ export class AdminService {
       this.prisma.department.findMany({
         select: { id: true, name: true, code: true },
       }),
+      this.prisma.task.findMany({
+        where: taskWhere,
+        select: {
+          id: true,
+          status: true,
+          dueDate: true,
+          doneAt: true,
+          correspondence: { select: { departmentId: true } },
+        },
+      }),
     ]);
 
-    // 2. تحليل المهام ومؤشرات الالتزام بالـ SLA
-    const taskWhere: Prisma.TaskWhereInput = {
-      ...(dateFilter ? { createdAt: dateFilter } : {}),
-      ...(dto.departmentId ? { correspondence: { departmentId: dto.departmentId } } : {}),
-    };
+    // اشتقاق كل العدّادات من مجموعات التجميع — دلالات مطابقة للعدّادات السابقة
+    const groupTotal = (pred: (g: { type: CorrespondenceType; status: CorrespondenceStatus; priority: Priority }) => boolean) =>
+      corrGroups.filter(pred).reduce((acc, g) => acc + g._count._all, 0);
 
-    const tasks = await this.prisma.task.findMany({
-      where: taskWhere,
-      select: {
-        id: true,
-        status: true,
-        dueDate: true,
-        doneAt: true,
-        correspondence: { select: { departmentId: true } },
-      },
-    });
+    const total = corrGroups.reduce((acc, g) => acc + g._count._all, 0);
+    const incoming = groupTotal((g) => g.type === CorrespondenceType.INCOMING);
+    const outgoing = groupTotal((g) => g.type === CorrespondenceType.OUTGOING);
+    const internal = groupTotal((g) => g.type === CorrespondenceType.INTERNAL);
+    const closed = groupTotal((g) => g.status === CorrespondenceStatus.CLOSED);
+    const archived = groupTotal((g) => g.status === CorrespondenceStatus.ARCHIVED);
+    const urgentCount = groupTotal((g) => g.priority === Priority.URGENT);
+    const highCount = groupTotal((g) => g.priority === Priority.HIGH);
+    const normalCount = groupTotal((g) => g.priority === Priority.NORMAL);
+    const lowCount = groupTotal((g) => g.priority === Priority.LOW);
 
     let onTimeTasks = 0;
     let overdueTasks = 0;
