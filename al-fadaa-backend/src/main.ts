@@ -32,6 +32,9 @@ enableTelemetry({
   inviteKey: process.env.BOOSTHIS_INVITE_KEY,
   endpoint: 'https://www.boosthis.com/api',
   appName: 'al-fadaa-backend',
+  // مهلة الرفع الافتراضية 5 ثوانٍ تُفقد دفعات على الشبكات البطيئة —
+  // رفع القياسات خلفي فلا ضرر من مهلة أوسع
+  fetchOptions: { timeoutMs: 20000 },
 });
 
 async function bootstrap(): Promise<void> {
