@@ -14,6 +14,13 @@ const DEV_LOCALHOST_ORIGINS = [
   'http://localhost:5000',
   'http://localhost:5001',
   'http://localhost:5050',
+  // خوادم الاختبار المحلية لتطبيقَي Flutter ويب والموقع
+  'http://localhost:5101',
+  'http://localhost:5102',
+  'http://localhost:3200',
+  'http://127.0.0.1:5101',
+  'http://127.0.0.1:5102',
+  'http://127.0.0.1:3200',
 ];
 
 /**
