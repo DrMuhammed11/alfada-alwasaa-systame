@@ -1,56 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:al_fadaa_core/al_fadaa_core.dart';
 
-/// نظام الثيم الموحد للوحة إدارة الفضاء الواسع
-/// يدعم: الوضع الفاتح + تدرجات لونية + مؤقتات الرسوم + ظلال موحدة
+/// نظام الثيم الموحد للوحة إدارة الفضاء الواسع — متوافق 100% مع موقع الويب والسيرفر
 class AdminTheme {
-  static const String fontFamily = 'Noto Sans Arabic';
+  static const String fontFamily = 'Cairo';
 
-  // ─── الألوان الأساسية ───
-  static const Color primary      = Color(0xFF0F172A);
-  static const Color primaryDark  = Color(0xFF0B1120);
-  static const Color slate        = Color(0xFF1E293B);
-  static const Color accent       = Color(0xFF0284C7);
-  static const Color accentLight  = Color(0xFF38BDF8);
-  static const Color emerald      = Color(0xFF10B981);
-  static const Color amber        = Color(0xFFF59E0B);
-  static const Color crimson      = Color(0xFFEF4444);
-  static const Color purple       = Color(0xFF8B5CF6);
-  static const Color bgLight      = Color(0xFFF8FAFC);
+  // ─── الألوان الأساسية المعتمدة لشركة الفضاء الواسع ───
+  static const Color primary      = BrandTheme.navyPrimary; // #0A3453
+  static const Color primaryDark  = BrandTheme.navyDarker;  // #051E31
+  static const Color slate        = BrandTheme.navyDeep;    // #072A44
+  static const Color accent       = BrandTheme.goldAccent;   // #C6954A
+  static const Color accentLight  = BrandTheme.goldLight;    // #DCB26B
+  static const Color goldSoft     = BrandTheme.goldSoft;     // #F3E5CF
+  static const Color emerald      = BrandTheme.emerald;      // #059669
+  static const Color amber        = BrandTheme.amber;        // #D97706
+  static const Color crimson      = BrandTheme.crimson;      // #DC2626
+  static const Color purple       = BrandTheme.purple;       // #7C3AED
+  static const Color bgLight      = BrandTheme.mist;         // #F2F6F9
   static const Color cardBg       = Colors.white;
-  static const Color border       = Color(0xFFE2E8F0);
+  static const Color border       = BrandTheme.borderLight;
   static const Color borderDark   = Color(0xFF334155);
-  static const Color textMain     = Color(0xFF0F172A);
-  static const Color textHeading  = Color(0xFF1E293B);
-  static const Color textMuted    = Color(0xFF64748B);
-  static const Color textLight    = Color(0xFF94A3B8);
+  static const Color textMain     = BrandTheme.textDark;
+  static const Color textHeading  = BrandTheme.textHeading;
+  static const Color textMuted    = BrandTheme.textMuted;
+  static const Color textLight    = BrandTheme.textTertiary;
   static const Color surface2     = Color(0xFFF1F5F9);
 
   // ─── خلفية شاشة الدردشة (نمط المراسلات كمحادثات) ───
-  // أدكن قليلاً من bgLight لتبرز فقاعات الرسائل البيضاء والزرقاء
   static const Color chatBg       = Color(0xFFE7EDF3);
 
   // ─── أسطح وحدود الشارات الدلالية ───
-  static const Color surfaceSuccess = Color(0xFFECFDF5);
-  static const Color borderSuccess  = Color(0xFFA7F3D0);
-  static const Color surfaceDanger  = Color(0xFFFEF2F2);
-  static const Color borderDanger   = Color(0xFFFECACA);
-  static const Color surfaceInfo    = Color(0xFFE0F2FE);
-  static const Color borderInfo     = Color(0xFFBAE6FD);
-  static const Color surfaceWarning = Color(0xFFFFFBEB);
-  static const Color borderWarning  = Color(0xFFFDE68A);
+  static const Color surfaceSuccess = BrandTheme.surfaceSuccess;
+  static const Color borderSuccess  = BrandTheme.borderSuccess;
+  static const Color surfaceDanger  = BrandTheme.surfaceDanger;
+  static const Color borderDanger   = BrandTheme.borderDanger;
+  static const Color surfaceInfo    = BrandTheme.surfaceInfo;
+  static const Color borderInfo     = BrandTheme.borderInfo;
+  static const Color surfaceWarning = BrandTheme.surfaceWarning;
+  static const Color borderWarning  = BrandTheme.borderWarning;
 
-  // ─── التدرجات اللونية ───
-  static const LinearGradient accentGradient = LinearGradient(
-    colors: [Color(0xFF0284C7), Color(0xFF0EA5E9)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const LinearGradient darkGradient = LinearGradient(
-    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
+  // ─── التدرجات اللونية المؤسسية ───
+  static const LinearGradient accentGradient = BrandTheme.goldGradient;
+  static const LinearGradient darkGradient = BrandTheme.headerGradient;
 
   static const LinearGradient successGradient = LinearGradient(
     colors: [Color(0xFF059669), Color(0xFF10B981)],

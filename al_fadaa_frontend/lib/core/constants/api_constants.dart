@@ -1,7 +1,7 @@
 class ApiConstants {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'https://alfada-alwasaa-systame.onrender.com/api/v1',
+    defaultValue: 'http://72.61.108.99:3000/api/v1',
   );
 
   // وضع التطوير فقط — يتأكد من DEV_MODE قبل عرض بيانات تجريبية

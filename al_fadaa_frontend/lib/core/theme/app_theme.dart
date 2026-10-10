@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:al_fadaa_core/al_fadaa_core.dart';
 
 class AppTheme {
-  // ─── Design System: Swiss Modernism 2.0 (WCAG AA Compliant) ───
-  static const Color primary = Color(0xFF0F172A);        // Navy — Primary
-  static const Color onPrimary = Color(0xFFFFFFFF);       // White on primary
-  static const Color secondary = Color(0xFF334155);       // Slate — Secondary
-  static const Color accent = Color(0xFF0369A1);          // Corporate Blue — CTA / Accent
-  static const Color info = Color(0xFF0284C7);            // Sky — informational (توحيد 4 أزرق سابقًا)
-  static const Color emerald = Color(0xFF059669);         // Success (توحيد 3 أخضر سابقًا)
-  static const Color amber = Color(0xFFB45309);           // Warning — أغمق لتحقيق التباين
-  static const Color crimson = Color(0xFFDC2626);         // Destructive / Urgent
-  static const Color purple = Color(0xFF8B5CF6);          // Referral / Special
+  // ─── الهوية المؤسسية المعتمدة لشركة الفضاء الواسع (مطابقة 100% للموقع والسيرفر) ───
+  static const Color primary = BrandTheme.navyPrimary;        // #0A3453 — Navy Primary
+  static const Color onPrimary = BrandTheme.textOnPrimary;    // White on primary
+  static const Color secondary = BrandTheme.navyDeep;        // #072A44 — Navy Deep
+  static const Color accent = BrandTheme.goldAccent;          // #C6954A — Brand Gold
+  static const Color goldLight = BrandTheme.goldLight;        // #DCB26B
+  static const Color goldSoft = BrandTheme.goldSoft;          // #F3E5CF
+  static const Color info = BrandTheme.sky;                   // Sky — informational
+  static const Color emerald = BrandTheme.emerald;            // Success
+  static const Color amber = BrandTheme.amber;                // Warning
+  static const Color crimson = BrandTheme.crimson;            // Destructive / Urgent
+  static const Color purple = BrandTheme.purple;              // Referral / Special
 
-  static const Color backgroundLight = Color(0xFFF8FAFC); // Page background
-  static const Color cardLight = Colors.white;             // Card surface
-  static const Color borderLight = Color(0xFFE2E8F0);     // Border
-  static const Color muted = Color(0xFFE8ECF1);           // Muted background
+  static const Color backgroundLight = BrandTheme.mist;       // #F2F6F9 — Mist background
+  static const Color cardLight = Colors.white;                // Card surface
+  static const Color borderLight = BrandTheme.borderLight;    // Border
+  static const Color muted = Color(0xFFE8ECF1);               // Muted background
 
   // ✅ تباين AA: 7.4:1 على backgroundLight
   static const Color textDark = Color(0xFF020617);         // Foreground text
