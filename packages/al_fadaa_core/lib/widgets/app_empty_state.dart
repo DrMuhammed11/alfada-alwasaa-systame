@@ -7,6 +7,7 @@ class AppEmptyState extends StatelessWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
+  final Color? iconColor;
   final Widget? action;
 
   const AppEmptyState({
@@ -14,6 +15,7 @@ class AppEmptyState extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.icon = Icons.inbox_outlined,
+    this.iconColor,
     this.action,
   });
 
@@ -31,7 +33,7 @@ class AppEmptyState extends StatelessWidget {
                 color: BrandTheme.goldSoft.withAlpha(80),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 48, color: BrandTheme.navyPrimary),
+              child: Icon(icon, size: 48, color: iconColor ?? BrandTheme.navyPrimary),
             ),
             const SizedBox(height: 16),
             Text(

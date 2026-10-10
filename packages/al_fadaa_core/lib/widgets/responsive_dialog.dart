@@ -2,19 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/brand_theme.dart';
 
-/// مربع حوار متجاوب وموحد (ResponsiveDialog) مع هوية الفضاء الواسع
-class ResponsiveDialog extends StatelessWidget {
+/// حوار متجاوب — يقيّد العرض المطلوب بنسبة من نافذة الشاشة
+class ResponsiveDialog {
+  ResponsiveDialog._();
+
+  /// عرض آمن: أصغر من [preferredWidth] أو 90% من عرض الشاشة
+  static double maxWidth(BuildContext context, double preferredWidth) {
+    final screen = MediaQuery.sizeOf(context).width;
+    return preferredWidth.clamp(280.0, screen * 0.9);
+  }
+
+  /// showDialog جاهز بالقيد
+  static Future<T?> show<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    double preferredWidth = 560,
+  }) {
+    return showDialog<T>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth(dialogContext, preferredWidth)),
+          child: builder(dialogContext),
+        ),
+      ),
+    );
+  }
+}
+
+/// مربع حوار متكامل بهوية الفضاء الواسع
+class AppDialog extends StatelessWidget {
   final String title;
   final Widget child;
-  final double maxWidth;
+  final double width;
   final List<Widget>? actions;
   final IconData? icon;
 
-  const ResponsiveDialog({
+  const AppDialog({
     super.key,
     required this.title,
     required this.child,
-    this.maxWidth = 600,
+    this.width = 600,
     this.actions,
     this.icon,
   });
@@ -28,12 +57,11 @@ class ResponsiveDialog extends StatelessWidget {
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
+        constraints: BoxConstraints(maxWidth: ResponsiveDialog.maxWidth(context, width)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ترويسة الحوار
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: const BoxDecoration(
@@ -59,22 +87,16 @@ class ResponsiveDialog extends StatelessWidget {
                     icon: const Icon(Icons.close_rounded, size: 20),
                     color: BrandTheme.textTertiary,
                     onPressed: () => Navigator.of(context).pop(),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
             ),
-
-            // محتوى الحوار
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: child,
               ),
             ),
-
-            // الأزرار والإجراءات
             if (actions != null && actions!.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
