@@ -1,7 +1,7 @@
 class ApiConstants {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://72.61.108.99:3000/api/v1',
+    defaultValue: 'https://api.alfadaalwasaa.com/api/v1',
   );
 
   // Admin & Analytics

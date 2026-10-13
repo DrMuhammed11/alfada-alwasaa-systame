@@ -41,7 +41,7 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // للحصول على IP الحقيقي للعميل خلف البروكسي (nginx وغيره)
+  // للحصول على IP الحقيقي للعميل خلف البروكسي (آمن لأن المنفذ 3000 محلي loopback 127.0.0.1 خلف Nginx)
   app.set('trust proxy', 1);
 
   configureApp(app);
