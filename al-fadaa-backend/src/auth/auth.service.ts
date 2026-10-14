@@ -168,7 +168,7 @@ export class AuthService {
     return rawToken;
   }
 
-  /** تدوير الـ refresh token (rotation) — يبطل القديم ويصدر جديد */
+  /** تدوير الـ refresh token (rotation) ذرّياً وبأمان كامل */
   async refreshTokens(
     rawRefreshToken: string,
     meta?: { userAgent?: string; ipAddress?: string },
@@ -185,19 +185,63 @@ export class AuthService {
     });
 
     if (!stored) throw new UnauthorizedException('رمز التحديث غير صالح');
-    if (stored.revokedAt) throw new UnauthorizedException('تم إبطال رمز التحديث — احتمال سرقة');
+
+    // كشف إعادة استخدام توكن ملغى (Token reuse detection -> Token family revocation)
+    if (stored.revokedAt) {
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      await this.audit.log({
+        action: AuditAction.LOGIN,
+        userId: stored.userId,
+        entityType: 'RefreshToken',
+        entityId: stored.id,
+        summary: 'token-reuse-detected: تم رصد محاولة إعادة استخدام رمز تحديث ملغى — تم إبطال جميع جلسات المستخدم',
+        metadata: {
+          event: 'token-reuse-detected',
+          reusedTokenId: stored.id,
+          ipAddress: meta?.ipAddress,
+          userAgent: meta?.userAgent,
+        },
+      });
+
+      throw new UnauthorizedException('تم إبطال رمز التحديث — احتمال سرقة');
+    }
+
     if (stored.expiresAt < new Date()) throw new UnauthorizedException('انتهت صلاحية رمز التحديث');
     if (!stored.user || !stored.user.isActive) throw new UnauthorizedException('المستخدم غير متاح');
 
-    // إبطال القديم + توليد جديد (rotation)
-    const newRawToken = await this.generateRefreshToken(stored.userId, meta);
+    // توليد الرمز الجديد وحسابه بالتجزئة
+    const newRawToken = randomBytes(48).toString('hex');
+    const newHashedToken = createHash('sha256').update(newRawToken).digest('hex');
+    const days = parseInt(process.env.JWT_REFRESH_EXPIRES_IN_DAYS || '30', 10);
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
-    await this.prisma.refreshToken.update({
-      where: { id: stored.id },
-      data: {
-        revokedAt: new Date(),
-        replacedBy: newRawToken, // ربط للمراجعة
-      },
+    // تدوير ذري داخل معاملة واحدة: إبطال القديم بشرط revokedAt: null وإنشاء الجديد
+    await this.prisma.$transaction(async (tx) => {
+      const updateResult = await tx.refreshToken.updateMany({
+        where: { id: stored.id, revokedAt: null },
+        data: {
+          revokedAt: new Date(),
+          replacedBy: newHashedToken, // تخزين الهاش للرمز الجديد بدلاً من الرمز الخام
+        },
+      });
+
+      if (updateResult.count === 0) {
+        throw new UnauthorizedException('تم إبطال رمز التحديث أو استخدامه مسبقاً');
+      }
+
+      await tx.refreshToken.create({
+        data: {
+          token: newHashedToken,
+          userId: stored.userId,
+          userAgent: meta?.userAgent,
+          ipAddress: meta?.ipAddress,
+          expiresAt,
+        },
+      });
     });
 
     const accessExpiresIn = (process.env.JWT_ACCESS_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '15m') as any;

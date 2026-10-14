@@ -9,6 +9,7 @@ describe('Admin Analytics (Dashboard KPIs & SLA)', () => {
   let prisma: {
     correspondence: {
       count: jest.Mock;
+      groupBy: jest.Mock;
       findMany: jest.Mock;
     };
     department: {
@@ -34,6 +35,12 @@ describe('Admin Analytics (Dashboard KPIs & SLA)', () => {
           if (where?.priority === Priority.LOW) return Promise.resolve(2);
           return Promise.resolve(18); // total
         }),
+        groupBy: jest.fn().mockResolvedValue([
+          { type: CorrespondenceType.INCOMING, status: CorrespondenceStatus.CLOSED, priority: Priority.NORMAL, _count: { _all: 8 } },
+          { type: CorrespondenceType.INCOMING, status: CorrespondenceStatus.ARCHIVED, priority: Priority.LOW, _count: { _all: 2 } },
+          { type: CorrespondenceType.OUTGOING, status: CorrespondenceStatus.APPROVED, priority: Priority.HIGH, _count: { _all: 5 } },
+          { type: CorrespondenceType.INTERNAL, status: CorrespondenceStatus.UNDER_REVIEW, priority: Priority.URGENT, _count: { _all: 3 } },
+        ]),
         findMany: jest.fn().mockResolvedValue([
           {
             id: 'c-1',
