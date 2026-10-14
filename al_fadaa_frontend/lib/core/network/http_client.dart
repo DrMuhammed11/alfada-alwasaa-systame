@@ -65,9 +65,9 @@ class AppHttpClient {
       if (isReadOnly && res.statusCode == 503) {
         debugPrint('503 Service Unavailable on $description -> Retrying once in 1s...');
         await Future.delayed(const Duration(seconds: 1));
-        return _inspectResponse(await action(), action);
+        return await _inspectResponse(await action(), action);
       }
-      return _inspectResponse(res, action);
+      return await _inspectResponse(res, action);
     } on TimeoutException {
       if (!isReadOnly) {
         debugPrint('Timeout on $description -> NOT retrying (non-read request, could duplicate a send)');

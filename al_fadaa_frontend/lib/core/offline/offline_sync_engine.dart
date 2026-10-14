@@ -1,3 +1,4 @@
+import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -45,7 +46,12 @@ class OfflineSyncEngine extends ChangeNotifier {
   bool _isSyncing = false;
   bool _manualOfflineMode = false;
   int _pendingCount = 0;
+  int _failedCount = 0;
   DateTime? _lastSyncTime;
+  final Map<String, Future<void> Function()> _rollbackCallbacks = {};
+
+  @visibleForTesting
+  Future<http.Response> Function(Uri uri, {Map<String, String>? headers, Object? body, Duration? timeout})? mockHttpHandler;
   String? _lastSyncMessage;
   Timer? _autoSyncTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
@@ -55,12 +61,40 @@ class OfflineSyncEngine extends ChangeNotifier {
   bool get isSyncing => _isSyncing;
   bool get isManualOffline => _manualOfflineMode;
   int get pendingCount => _pendingCount;
+  int get failedCount => _failedCount;
   DateTime? get lastSyncTime => _lastSyncTime;
   String? get lastSyncMessage => _lastSyncMessage;
+
+  @visibleForTesting
+  Map<String, Future<void> Function()> get rollbackCallbacks => _rollbackCallbacks;
+
+  @visibleForTesting
+  void resetForTesting() {
+    _isOnline = true;
+    _isSyncing = false;
+    _manualOfflineMode = false;
+    _pendingCount = 0;
+    _failedCount = 0;
+    _lastSyncTime = null;
+    _lastSyncMessage = null;
+    _rollbackCallbacks.clear();
+    mockHttpHandler = null;
+  }
+
+  void registerRollback(String id, Future<void> Function() callback) {
+    _rollbackCallbacks[id] = callback;
+  }
+
+  Future<List<SyncQueueItem>> get failedItems => _storage.getFailedMutations();
+  Future<List<SyncQueueItem>> get pendingItems async {
+    final queue = await _storage.getSyncQueue();
+    return queue.where((q) => q.status == 'PENDING' || q.status == 'SYNCING').toList();
+  }
 
   Future<void> init() async {
     await _storage.init();
     _pendingCount = await _storage.getPendingMutationsCount();
+    _failedCount = await _storage.getFailedMutationsCount();
     _lastSyncTime = _storage.getLastSyncTime();
     notifyListeners();
 
@@ -125,6 +159,7 @@ class OfflineSyncEngine extends ChangeNotifier {
     required String entitySummary,
     required Future<Map<String, dynamic>> Function() onlineAction,
     required Future<void> Function() onOptimisticUpdate,
+    Future<void> Function()? onRollback,
   }) async {
     // 1. وضع الأوفلاين (يدوي أو فعلي): حفظ تفاؤلي في الطابور
     if (isOffline) {
@@ -136,6 +171,7 @@ class OfflineSyncEngine extends ChangeNotifier {
         entityId: entityId,
         entitySummary: entitySummary,
         onOptimisticUpdate: onOptimisticUpdate,
+        onRollback: onRollback,
         message: 'تم تسجيل الإجراء محلياً بنجاح وسيتم رفعه تلقائياً فور توفر الاتصال',
       );
     }
@@ -154,6 +190,7 @@ class OfflineSyncEngine extends ChangeNotifier {
         entityId: entityId,
         entitySummary: entitySummary,
         onOptimisticUpdate: onOptimisticUpdate,
+        onRollback: onRollback,
         message: 'تعذر الاتصال بالخادم، تم حفظ الإجراء محلياً وسيتم رفعه تلقائياً',
       );
     }
@@ -167,12 +204,16 @@ class OfflineSyncEngine extends ChangeNotifier {
     required String entityId,
     required String entitySummary,
     required Future<void> Function() onOptimisticUpdate,
+    Future<void> Function()? onRollback,
     required String message,
   }) async {
     await onOptimisticUpdate();
     // معرف فريد: طابع زمني + لاحقة عشوائية (الطابع وحده يتصادم في نفس المللي ثانية)
     final id =
         '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(0x7FFFFFFF)}';
+    if (onRollback != null) {
+      _rollbackCallbacks[id] = onRollback;
+    }
     final item = SyncQueueItem(
       id: id,
       actionType: actionType,
@@ -182,9 +223,11 @@ class OfflineSyncEngine extends ChangeNotifier {
       createdAt: DateTime.now(),
       entityId: entityId,
       entitySummary: entitySummary,
+      rollbackRegistered: onRollback != null,
     );
     await _storage.enqueueMutation(item);
     _pendingCount = await _storage.getPendingMutationsCount();
+    _failedCount = await _storage.getFailedMutationsCount();
     notifyListeners();
 
     return {'success': true, 'offline': true, 'message': message};
@@ -242,14 +285,17 @@ class OfflineSyncEngine extends ChangeNotifier {
           final headers = <String, String>{
             'Idempotency-Key': item.id,
           };
-          final response = item.httpMethod == 'POST'
-              ? await _http.post(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
-              : (item.httpMethod == 'PATCH'
-                  ? await _http.patch(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
-                  : await _http.put(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10)));
+          final response = mockHttpHandler != null
+              ? await mockHttpHandler!(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
+              : (item.httpMethod == 'POST'
+                  ? await _http.post(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
+                  : (item.httpMethod == 'PATCH'
+                      ? await _http.patch(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
+                      : await _http.put(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))));
 
           if (response.statusCode == 200 || response.statusCode == 201) {
             await _storage.removeMutation(item.id);
+            _rollbackCallbacks.remove(item.id);
             synced++;
             setOnlineStatus(true);
           } else if (response.statusCode >= 400 && response.statusCode < 500) {
@@ -259,6 +305,14 @@ class OfflineSyncEngine extends ChangeNotifier {
             item.nextRetryAt = null;
             await _storage.updateMutation(item);
             failed++;
+            final rollback = _rollbackCallbacks.remove(item.id);
+            if (rollback != null) {
+              try {
+                await rollback();
+              } catch (err) {
+                debugPrint('Rollback error on item ${item.id}: $err');
+              }
+            }
           } else {
             // خطأ سيرفر: سقف محاولات + تراجع أسي بدل التكرار اللانهائي
             item.retryCount++;
@@ -266,6 +320,15 @@ class OfflineSyncEngine extends ChangeNotifier {
               item.status = 'FAILED';
               item.lastError = 'استُنفدت المحاولات (${item.retryCount}) — آخر رمز: ${response.statusCode}';
               item.nextRetryAt = null;
+              failed++;
+              final rollback = _rollbackCallbacks.remove(item.id);
+              if (rollback != null) {
+                try {
+                  await rollback();
+                } catch (err) {
+                  debugPrint('Rollback error on item ${item.id}: $err');
+                }
+              }
             } else {
               item.nextRetryAt = DateTime.now().add(_backoffFor(item.retryCount));
             }
@@ -282,10 +345,19 @@ class OfflineSyncEngine extends ChangeNotifier {
       _lastSyncTime = now2;
       await _storage.setLastSyncTime(now2);
       _pendingCount = await _storage.getPendingMutationsCount();
+      _failedCount = await _storage.getFailedMutationsCount();
 
-      _lastSyncMessage = synced > 0
-          ? 'تمت مزامنة $synced إجراء بنجاح مع الخادم'
-          : (failed > 0 ? 'تعذر مزامنة $failed إجراء بسبب تعارض البيانات' : 'تم التحقق من المزامنة');
+      if (_failedCount > 0) {
+        if (synced > 0) {
+          _lastSyncMessage = 'تمت مزامنة $synced إجراء بنجاح (يوجد $_failedCount عملية فاشلة بحاجة للمراجعة)';
+        } else {
+          _lastSyncMessage = 'تعذر مزامنة $_failedCount عملية بسبب أخطاء من الخادم — يرجى مراجعة العمليات الفاشلة';
+        }
+      } else if (synced > 0) {
+        _lastSyncMessage = 'تمت مزامنة $synced إجراء بنجاح مع الخادم';
+      } else {
+        _lastSyncMessage = 'تم التحقق من المزامنة — كافة البيانات محدثة';
+      }
 
       _isSyncing = false;
       notifyListeners();
@@ -317,13 +389,23 @@ class OfflineSyncEngine extends ChangeNotifier {
     item.nextRetryAt = null;
     await _storage.updateMutation(item);
     _pendingCount = await _storage.getPendingMutationsCount();
+    _failedCount = await _storage.getFailedMutationsCount();
     notifyListeners();
     syncPendingMutations();
   }
 
   Future<void> cancelMutation(String id) async {
+    final rollback = _rollbackCallbacks.remove(id);
+    if (rollback != null) {
+      try {
+        await rollback();
+      } catch (err) {
+        debugPrint('Rollback error on cancelMutation $id: $err');
+      }
+    }
     await _storage.removeMutation(id);
     _pendingCount = await _storage.getPendingMutationsCount();
+    _failedCount = await _storage.getFailedMutationsCount();
     notifyListeners();
   }
 }

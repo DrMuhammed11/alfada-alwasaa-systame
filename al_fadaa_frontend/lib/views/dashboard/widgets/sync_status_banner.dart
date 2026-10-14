@@ -1,7 +1,9 @@
+import '../../../../core/utils/page_transitions.dart';
+import '../../offline/pending_operations_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/offline/offline_sync_engine.dart';
 import '../../../../core/theme/app_theme.dart';
-import 'sync_queue_dialog.dart';
+
 
 class SyncStatusBanner extends StatelessWidget {
   const SyncStatusBanner({super.key});
@@ -117,9 +119,8 @@ class SyncStatusBanner extends StatelessWidget {
               if (pending > 0)
                 OutlinedButton.icon(
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const SyncQueueDialog(),
+                    Navigator.of(context).push(
+                      EnterprisePageRoute(page: const PendingOperationsScreen()),
                     );
                   },
                   icon: const Icon(Icons.list_alt_rounded, size: 15),

@@ -19,6 +19,7 @@ class DashboardActionsHandler {
 
   Future<void> handleStartReview(String id) async {
     final cur = vm.selectedItem;
+    final prevCorr = cur;
     final res = await OfflineSyncEngine().executeAction(
       actionType: 'UPDATE_STATUS',
       // نفس مسار المسار الأونلاين: PATCH على {correspondences}/$id —
@@ -34,6 +35,15 @@ class DashboardActionsHandler {
           final updated = cur.copyWith(status: 'UNDER_REVIEW');
           vm.selectedItem = updated;
           await OfflineStorageService().updateCachedCorrespondence(updated);
+          vm.updateUI();
+        }
+      },
+      onRollback: () async {
+        if (prevCorr != null) {
+          if (vm.selectedItem?.id == prevCorr.id) {
+            vm.selectedItem = prevCorr;
+          }
+          await OfflineStorageService().updateCachedCorrespondence(prevCorr);
           vm.updateUI();
         }
       },
@@ -103,6 +113,7 @@ class DashboardActionsHandler {
 
     if (confirm == true) {
       final cur = vm.selectedItem;
+      final prevCorr = cur;
       final res = await OfflineSyncEngine().executeAction(
         actionType: 'CLOSE_CORRESPONDENCE',
         endpoint: '${ApiConstants.correspondences}/$id/close',
@@ -116,6 +127,15 @@ class DashboardActionsHandler {
             final updated = cur.copyWith(status: 'CLOSED', closedAt: DateTime.now());
             vm.selectedItem = updated;
             await OfflineStorageService().updateCachedCorrespondence(updated);
+            vm.updateUI();
+          }
+        },
+        onRollback: () async {
+          if (prevCorr != null) {
+            if (vm.selectedItem?.id == prevCorr.id) {
+              vm.selectedItem = prevCorr;
+            }
+            await OfflineStorageService().updateCachedCorrespondence(prevCorr);
             vm.updateUI();
           }
         },
@@ -149,6 +169,7 @@ class DashboardActionsHandler {
 
   Future<void> handleArchive(String id) async {
     final cur = vm.selectedItem;
+    final prevCorr = cur;
     final res = await OfflineSyncEngine().executeAction(
       actionType: 'ARCHIVE_CORRESPONDENCE',
       endpoint: '${ApiConstants.correspondences}/$id/archive',
@@ -162,6 +183,15 @@ class DashboardActionsHandler {
           final updated = cur.copyWith(status: 'ARCHIVED');
           vm.selectedItem = updated;
           await OfflineStorageService().updateCachedCorrespondence(updated);
+          vm.updateUI();
+        }
+      },
+      onRollback: () async {
+        if (prevCorr != null) {
+          if (vm.selectedItem?.id == prevCorr.id) {
+            vm.selectedItem = prevCorr;
+          }
+          await OfflineStorageService().updateCachedCorrespondence(prevCorr);
           vm.updateUI();
         }
       },
@@ -292,6 +322,7 @@ class DashboardActionsHandler {
 
   Future<void> approveReply(String replyId) async {
     final cur = vm.selectedItem;
+    final prevCorr = cur;
     final res = await OfflineSyncEngine().executeAction(
       actionType: 'APPROVE_REPLY',
       endpoint: '${ApiConstants.baseUrl}/replies/$replyId/approve',
@@ -311,6 +342,15 @@ class DashboardActionsHandler {
           final updatedCorr = cur.copyWith(replies: updatedReplies);
           vm.selectedItem = updatedCorr;
           await OfflineStorageService().updateCachedCorrespondence(updatedCorr);
+          vm.updateUI();
+        }
+      },
+      onRollback: () async {
+        if (prevCorr != null) {
+          if (vm.selectedItem?.id == prevCorr.id) {
+            vm.selectedItem = prevCorr;
+          }
+          await OfflineStorageService().updateCachedCorrespondence(prevCorr);
           vm.updateUI();
         }
       },
@@ -365,6 +405,7 @@ class DashboardActionsHandler {
     if (confirm == true && noteCtrl.text.trim().isNotEmpty) {
       final note = noteCtrl.text.trim();
       final cur = vm.selectedItem;
+      final prevCorr = cur;
       final res = await OfflineSyncEngine().executeAction(
         actionType: 'REJECT_REPLY',
         endpoint: '${ApiConstants.baseUrl}/replies/$replyId/reject',
@@ -384,6 +425,15 @@ class DashboardActionsHandler {
             final updatedCorr = cur.copyWith(replies: updatedReplies);
             vm.selectedItem = updatedCorr;
             await OfflineStorageService().updateCachedCorrespondence(updatedCorr);
+            vm.updateUI();
+          }
+        },
+        onRollback: () async {
+          if (prevCorr != null) {
+            if (vm.selectedItem?.id == prevCorr.id) {
+              vm.selectedItem = prevCorr;
+            }
+            await OfflineStorageService().updateCachedCorrespondence(prevCorr);
             vm.updateUI();
           }
         },

@@ -12,6 +12,7 @@ class SyncQueueItem {
   String? lastError;
   /// موعد المحاولة التالية (تراجع أسي) — null يعني جاهزة فوراً
   DateTime? nextRetryAt;
+  final bool rollbackRegistered;
 
   SyncQueueItem({
     required this.id,
@@ -26,6 +27,7 @@ class SyncQueueItem {
     this.status = 'PENDING',
     this.lastError,
     this.nextRetryAt,
+    this.rollbackRegistered = false,
   });
 
   factory SyncQueueItem.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class SyncQueueItem {
       status: json['status'] ?? 'PENDING',
       lastError: json['lastError'],
       nextRetryAt: json['nextRetryAt'] != null ? DateTime.tryParse(json['nextRetryAt']) : null,
+      rollbackRegistered: json['rollbackRegistered'] ?? false,
     );
   }
 
@@ -61,6 +64,7 @@ class SyncQueueItem {
       'status': status,
       'lastError': lastError,
       if (nextRetryAt != null) 'nextRetryAt': nextRetryAt!.toIso8601String(),
+      'rollbackRegistered': rollbackRegistered,
     };
   }
 
@@ -77,6 +81,7 @@ class SyncQueueItem {
     String? status,
     String? lastError,
     DateTime? nextRetryAt,
+    bool? rollbackRegistered,
   }) {
     return SyncQueueItem(
       id: id ?? this.id,
@@ -91,6 +96,7 @@ class SyncQueueItem {
       status: status ?? this.status,
       lastError: lastError ?? this.lastError,
       nextRetryAt: nextRetryAt ?? this.nextRetryAt,
+      rollbackRegistered: rollbackRegistered ?? this.rollbackRegistered,
     );
   }
 

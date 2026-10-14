@@ -1,3 +1,5 @@
+import '../../../core/offline/offline_sync_engine.dart';
+import '../../offline/pending_operations_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -265,6 +267,20 @@ class DashboardSidebar extends StatelessWidget {
                         currentUser: user,
                         onOpenCorrespondence: onOpenCorrespondence,
                       ),
+                    ),
+                  ),
+                ),
+                _buildTile(
+                  title: 'طابور العمليات المؤجلة',
+                  icon: Icons.sync_problem_rounded,
+                  count: OfflineSyncEngine().failedCount > 0
+                      ? OfflineSyncEngine().failedCount
+                      : (OfflineSyncEngine().pendingCount > 0 ? OfflineSyncEngine().pendingCount : null),
+                  isSelected: false,
+                  onTap: () => Navigator.push(
+                    context,
+                    EnterprisePageRoute(
+                      page: const PendingOperationsScreen(),
                     ),
                   ),
                 ),

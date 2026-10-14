@@ -23,6 +23,11 @@ class OfflineStorageService {
 
   bool _opened = false;
 
+  @visibleForTesting
+  void resetForTesting() {
+    _opened = false;
+  }
+
   Future<void> init() async {
     // الصناديق قد تُغلق خارجياً (اختبارات) — الفحص مباشر على Hive لا راية فقط
     if (_opened &&
@@ -273,6 +278,16 @@ class OfflineStorageService {
   Future<int> getPendingMutationsCount() async {
     final queue = await getSyncQueue();
     return queue.where((q) => q.status == 'PENDING' || q.status == 'SYNCING').length;
+  }
+
+  Future<int> getFailedMutationsCount() async {
+    final queue = await getSyncQueue();
+    return queue.where((q) => q.status == 'FAILED').length;
+  }
+
+  Future<List<SyncQueueItem>> getFailedMutations() async {
+    final queue = await getSyncQueue();
+    return queue.where((q) => q.status == 'FAILED').toList();
   }
 
   // ─── آخر مزامنة ───
