@@ -263,15 +263,21 @@ export class AuthService {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanupExpiredTokens(): Promise<number> {
     const now = new Date();
-    const result = await this.prisma.refreshToken.deleteMany({
-      where: {
-        OR: [
-          { expiresAt: { lt: now } },
-          { revokedAt: { not: null } },
-        ],
-      },
-    });
-    return result.count;
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const [tokenResult] = await Promise.all([
+      this.prisma.refreshToken.deleteMany({
+        where: {
+          OR: [
+            { expiresAt: { lt: now } },
+            { revokedAt: { not: null } },
+          ],
+        },
+      }),
+      this.prisma.idempotencyRecord.deleteMany({
+        where: { createdAt: { lt: sevenDaysAgo } },
+      }),
+    ]);
+    return tokenResult.count;
   }
 
   /** تسجيل خروج — إبطال refresh token محدد */

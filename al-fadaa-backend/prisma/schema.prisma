@@ -630,3 +630,16 @@ model SiteSetting {
   updatedAt   DateTime @updatedAt
   createdAt   DateTime @default(now())
 }
+
+
+/// سجلات عدم التكرار للعمليات المزامنة من الأوفلاين (Idempotency)
+model IdempotencyRecord {
+  key          String   @id
+  userId       String?
+  endpoint     String
+  responseBody Json
+  statusCode   Int
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+}

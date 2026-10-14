@@ -239,11 +239,14 @@ class OfflineSyncEngine extends ChangeNotifier {
       for (final item in pendingItems) {
         try {
           final uri = Uri.parse(item.endpoint);
+          final headers = <String, String>{
+            'Idempotency-Key': item.id,
+          };
           final response = item.httpMethod == 'POST'
-              ? await _http.post(uri, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
+              ? await _http.post(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
               : (item.httpMethod == 'PATCH'
-                  ? await _http.patch(uri, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
-                  : await _http.put(uri, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10)));
+                  ? await _http.patch(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10))
+                  : await _http.put(uri, headers: headers, body: jsonEncode(item.payload), timeout: const Duration(seconds: 10)));
 
           if (response.statusCode == 200 || response.statusCode == 201) {
             await _storage.removeMutation(item.id);

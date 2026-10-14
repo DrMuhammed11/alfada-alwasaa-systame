@@ -83,13 +83,20 @@ class AppHttpClient {
     }
   }
 
+  Map<String, String> _mergeHeaders(Map<String, String>? headers) {
+    return {
+      ...defaultHeaders,
+      if (headers != null) ...headers,
+    };
+  }
+
   Future<http.Response> get(
     Uri uri, {
     Map<String, String>? headers,
     Duration timeout = const Duration(seconds: 10),
   }) async {
     return _executeWithRetry(
-      () => http.get(uri, headers: headers ?? defaultHeaders).timeout(timeout),
+      () => http.get(uri, headers: _mergeHeaders(headers)).timeout(timeout),
       description: 'GET ${uri.path}',
       isReadOnly: true,
     );
@@ -102,7 +109,7 @@ class AppHttpClient {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     return _executeWithRetry(
-      () => http.post(uri, headers: headers ?? defaultHeaders, body: body).timeout(timeout),
+      () => http.post(uri, headers: _mergeHeaders(headers), body: body).timeout(timeout),
       description: 'POST ${uri.path}',
     );
   }
@@ -114,7 +121,7 @@ class AppHttpClient {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     return _executeWithRetry(
-      () => http.patch(uri, headers: headers ?? defaultHeaders, body: body).timeout(timeout),
+      () => http.patch(uri, headers: _mergeHeaders(headers), body: body).timeout(timeout),
       description: 'PATCH ${uri.path}',
     );
   }
@@ -126,7 +133,7 @@ class AppHttpClient {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     return _executeWithRetry(
-      () => http.put(uri, headers: headers ?? defaultHeaders, body: body).timeout(timeout),
+      () => http.put(uri, headers: _mergeHeaders(headers), body: body).timeout(timeout),
       description: 'PUT ${uri.path}',
     );
   }
@@ -137,7 +144,7 @@ class AppHttpClient {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     return _executeWithRetry(
-      () => http.delete(uri, headers: headers ?? defaultHeaders).timeout(timeout),
+      () => http.delete(uri, headers: _mergeHeaders(headers)).timeout(timeout),
       description: 'DELETE ${uri.path}',
     );
   }

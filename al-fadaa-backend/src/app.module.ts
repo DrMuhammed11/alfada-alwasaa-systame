@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { buildThrottlerOptions } from './common/throttler/throttler-config';
@@ -68,6 +69,7 @@ import { validateEnv } from './common/config/env.validation';
     // الحارسان العامان — الترتيب مهم: توثيق أولاً ثم الصلاحيات
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
   ],
 })
 export class AppModule {}

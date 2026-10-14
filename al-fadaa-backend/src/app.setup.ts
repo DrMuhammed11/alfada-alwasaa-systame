@@ -58,6 +58,6 @@ export function configureApp(app: INestApplication): void {
     origin: buildCorsOriginFunction(process.env.CORS_ORIGIN, isProduction),
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Accept,Authorization,X-Request-Id',
+    allowedHeaders: 'Content-Type,Accept,Authorization,X-Request-Id,Idempotency-Key',
   });
 }
